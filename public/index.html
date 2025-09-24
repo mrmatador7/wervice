@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wervice - Moroccan Wedding Planning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Amiri', serif;
+        }
+
+        /* Moroccan Geometric Pattern */
+        .moroccan-pattern {
+            position: relative;
+            background-image:
+                radial-gradient(circle at 25% 25%, #d9ff0a 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, #d9ff0a 2px, transparent 2px);
+            background-size: 20px 20px;
+            opacity: 0.1;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #000;
+            padding: 1rem 2rem;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            color: #d9ff0a;
+            font-size: 2rem;
+            font-weight: 700;
+            text-decoration: none;
+            font-family: 'Amiri', serif;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            background: none;
+            margin-left: 0.5rem;
+            width: 200px;
+        }
+
+        .category-select {
+            background-color: #d9ff0a;
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+
+        .btn-primary {
+            background-color: #d9ff0a;
+            color: #000;
+            border: 2px solid #d9ff0a;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background-color: #000;
+            color: #d9ff0a;
+        }
+
+        .icon-btn {
+            background: none;
+            border: 2px solid #d9ff0a;
+            color: #d9ff0a;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            background-color: #d9ff0a;
+            color: #000;
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: #000;
+            color: #fff;
+            padding: 120px 2rem 4rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #d9ff0a 0%, transparent 50%, #d9ff0a 100%);
+            opacity: 0.1;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: #d9ff0a;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-icons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-icon {
+            width: 100px;
+            height: 100px;
+            background-color: #d9ff0a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #000;
+        }
+
+        .category-chips {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background-color: #d9ff0a;
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chip:hover {
+            background-color: #000;
+            color: #d9ff0a;
+        }
+
+        .hero .btn-primary {
+            font-size: 1.2rem;
+            padding: 1rem 2rem;
+        }
+
+        /* Featured Deals */
+        .featured-deals {
+            padding: 4rem 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            color: #000;
+            margin-bottom: 1rem;
+        }
+
+        .deals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .deal-card {
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .deal-image {
+            position: relative;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #d9ff0a;
+            color: #000;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: 600;
+        }
+
+        .deal-content {
+            padding: 1.5rem;
+        }
+
+        .deal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .deal-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: #d9ff0a;
+            margin-right: 0.5rem;
+        }
+
+        .deal-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 1rem;
+        }
+
+        .deal-timer {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        /* Inspiration Grid */
+        .inspiration {
+            padding: 4rem 2rem;
+            background-color: #fff;
+        }
+
+        .inspiration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .inspiration-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .inspiration-card:hover {
+            transform: scale(1.05);
+        }
+
+        .inspiration-image {
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .inspiration-content {
+            padding: 1rem;
+        }
+
+        .inspiration-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .inspiration-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .view-details {
+            color: #d9ff0a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .filter-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ddd;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: #d9ff0a;
+        }
+
+        /* Subscription */
+        .subscription {
+            padding: 4rem 2rem;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        .subscription-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .subscription-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #000;
+        }
+
+        .subscription-text p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: #666;
+        }
+
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .benefit-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #d9ff0a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .subscription-image {
+            height: 300px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+        }
+
+        /* Console Promotion */
+        .console-promo {
+            padding: 4rem 2rem;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .promo-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .promo-left img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .promo-center h2 {
+            font-size: 2.5rem;
+            color: #d9ff0a;
+            margin-bottom: 1rem;
+        }
+
+        .promo-icons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .promo-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #d9ff0a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #000;
+        }
+
+        .promo-text {
+            margin-bottom: 2rem;
+        }
+
+        .promo-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #d9ff0a;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #000;
+            color: #fff;
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            color: #d9ff0a;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #d9ff0a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background-color: #fff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .search-bar input {
+                width: 150px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-icons {
+                gap: 1rem;
+            }
+
+            .hero-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 1.5rem;
+            }
+
+            .category-chips {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .deals-grid,
+            .inspiration-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .subscription-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .promo-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 100px 1rem 3rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .search-bar input {
+                width: 120px;
+            }
+
+            .nav-buttons {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="nav-container">
+            <a href="#" class="logo">Wervice</a>
+            <div class="nav-right">
+                <div class="search-bar">
+                    <span>🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search vendors or traditions">
+                </div>
+                <select class="category-select" id="categorySelect">
+                    <option value="all">All Categories</option>
+                    <option value="henna">Henna Artists</option>
+                    <option value="kaftans">Kaftan Designers</option>
+                    <option value="amaria">Amaria Processions</option>
+                    <option value="venues">Riad Venues</option>
+                    <option value="ceremonies">Traditional Ceremonies</option>
+                </select>
+                <div class="nav-buttons">
+                    <button class="btn-primary">Sign Up</button>
+                    <button class="btn-primary">Login</button>
+                    <button class="icon-btn" title="Wishlist">❤️</button>
+                    <button class="icon-btn" title="Registry Cart">🛒</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <h1>Best Wedding Deals on Wervice</h1>
+            <p>Over 500 Moroccan vendors & packages for your authentic celebration</p>
+            <div class="hero-icons">
+                <div class="hero-icon">🖐️</div>
+                <div class="hero-icon">🏮</div>
+                <div class="hero-icon">💍</div>
+                <div class="hero-icon">🌙</div>
+            </div>
+            <div class="category-chips">
+                <div class="chip" data-category="henna">Henna <span>(12 packages)</span></div>
+                <div class="chip" data-category="kaftans">Kaftans <span>(45)</span></div>
+                <div class="chip" data-category="amaria">Amaria <span>(23)</span></div>
+            </div>
+            <button class="btn-primary" onclick="scrollToSection('featured-deals')">View Offers</button>
+        </div>
+    </section>
+
+    <!-- Featured Deals -->
+    <section class="featured-deals moroccan-pattern" id="featured-deals">
+        <div class="section-container">
+            <div class="section-header">
+                <h2>Featured Moroccan Weddings</h2>
+                <p>Discover exclusive deals on traditional celebrations</p>
+            </div>
+            <div class="deals-grid">
+                <div class="deal-card" data-category="henna">
+                    <div class="deal-image" style="background-image: url('https://images.unsplash.com/photo-1598300042202-1b09e6c8c0e8?w=300&h=200&fit=crop&crop=center')">
+                        <div class="discount-badge">75% OFF</div>
+                    </div>
+                    <div class="deal-content">
+                        <h3 class="deal-title">Luxury Henna Ceremony in Marrakech</h3>
+                        <div class="deal-rating">
+                            <div class="stars">★★★★★</div>
+                            <span>(4.9)</span>
+                        </div>
+                        <div class="deal-price">25,000 MAD</div>
+                        <div class="deal-timer" id="timer1">Ends in: 2d 14h 32m</div>
+                        <button class="btn-primary" onclick="addToRegistry('Henna Ceremony')">Add to Registry</button>
+                    </div>
+                </div>
+                <div class="deal-card" data-category="kaftans">
+                    <div class="deal-image" style="background-image: url('https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=300&h=200&fit=crop&crop=center')">
+                        <div class="discount-badge">60% OFF</div>
+                    </div>
+                    <div class="deal-content">
+                        <h3 class="deal-title">Designer Kaftan Collection</h3>
+                        <div class="deal-rating">
+                            <div class="stars">★★★★★</div>
+                            <span>(4.8)</span>
+                        </div>
+                        <div class="deal-price">45,000 MAD</div>
+                        <div class="deal-timer" id="timer2">Ends in: 1d 8h 15m</div>
+                        <button class="btn-primary" onclick="addToRegistry('Designer Kaftans')">Add to Registry</button>
+                    </div>
+                </div>
+                <div class="deal-card" data-category="amaria">
+                    <div class="deal-image" style="background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?w=300&h=200&fit=crop&crop=center')">
+                        <div class="discount-badge">50% OFF</div>
+                    </div>
+                    <div class="deal-content">
+                        <h3 class="deal-title">Traditional Amaria Procession</h3>
+                        <div class="deal-rating">
+                            <div class="stars">★★★★☆</div>
+                            <span>(4.7)</span>
+                        </div>
+                        <div class="deal-price">85,000 MAD</div>
+                        <div class="deal-timer" id="timer3">Ends in: 3d 22h 45m</div>
+                        <button class="btn-primary" onclick="addToRegistry('Amaria Procession')">Add to Registry</button>
+                    </div>
+                </div>
+                <div class="deal-card" data-category="venues">
+                    <div class="deal-image" style="background-image: url('https://images.unsplash.com/photo-1464207687429-7505649dae38?w=300&h=200&fit=crop&crop=center')">
+                        <div class="discount-badge">40% OFF</div>
+                    </div>
+                    <div class="deal-content">
+                        <h3 class="deal-title">Historic Riad Wedding Venue</h3>
+                        <div class="deal-rating">
+                            <div class="stars">★★★★★</div>
+                            <span>(4.9)</span>
+                        </div>
+                        <div class="deal-price">120,000 MAD</div>
+                        <div class="deal-timer" id="timer4">Ends in: 5d 12h 20m</div>
+                        <button class="btn-primary" onclick="addToRegistry('Riad Venue')">Add to Registry</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inspiration Grid -->
+    <section class="inspiration" id="inspiration">
+        <div class="section-container">
+            <div class="section-header">
+                <h2>New Moroccan Inspirations</h2>
+                <p>Discover trending wedding traditions and styles</p>
+                <div class="filter-dots">
+                    <div class="dot active" data-filter="all"></div>
+                    <div class="dot" data-filter="traditional"></div>
+                    <div class="dot" data-filter="modern"></div>
+                    <div class="dot" data-filter="luxury"></div>
+                </div>
+            </div>
+            <div class="inspiration-grid" id="inspirationGrid">
+                <div class="inspiration-card" data-category="henna">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1598300042202-1b09e6c8c0e8?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Fes Traditional Henna</h3>
+                        <p class="inspiration-desc">Intricate henna designs for your special day</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+                <div class="inspiration-card" data-category="kaftans">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Silk Kaftan Elegance</h3>
+                        <p class="inspiration-desc">Luxurious kaftans in traditional patterns</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+                <div class="inspiration-card" data-category="amaria">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1519741497674-611481863552?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Amaria Procession</h3>
+                        <p class="inspiration-desc">Majestic entrance with traditional music</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+                <div class="inspiration-card" data-category="venues">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1464207687429-7505649dae38?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Marrakech Riad</h3>
+                        <p class="inspiration-desc">Stunning venues with Moroccan architecture</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+                <div class="inspiration-card" data-category="ceremonies">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Hammam Ceremony</h3>
+                        <p class="inspiration-desc">Traditional pre-wedding purification ritual</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+                <div class="inspiration-card" data-category="henna">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Modern Henna Art</h3>
+                        <p class="inspiration-desc">Contemporary twists on traditional designs</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+                <div class="inspiration-card" data-category="kaftans">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Embroidered Kaftans</h3>
+                        <p class="inspiration-desc">Hand-crafted embroidery from Rabat artisans</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+                <div class="inspiration-card" data-category="amaria">
+                    <div class="inspiration-image" style="background-image: url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=250&h=150&fit=crop&crop=center')"></div>
+                    <div class="inspiration-content">
+                        <h3 class="inspiration-title">Royal Procession</h3>
+                        <p class="inspiration-desc">Grand entrance with traditional fanfare</p>
+                        <a href="#" class="view-details">View Details →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Section -->
+    <section class="subscription moroccan-pattern" id="subscription">
+        <div class="section-content">
+            <div class="subscription-content">
+                <div class="subscription-text">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⭐</div>
+                    <h2>+ Wervice Premium</h2>
+                    <p>Unlimited planning tools, exclusive vendor discounts, and tradition timelines – starting at 500 MAD/month.</p>
+                    <div class="benefits">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">📅</div>
+                            <span>Priority Bookings</span>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">👗</div>
+                            <span>Custom Kaftan Consults</span>
+                        </div>
+                        <div class="benefit-item">
+                            <div class="benefit-icon">🛁</div>
+                            <span>Hammam Experience Funds</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="subscribePremium()">Subscribe Now</button>
+                </div>
+                <div class="subscription-image" style="background-image: url('https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop&crop=center')"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Console-Style Promotion -->
+    <section class="console-promo" id="console-promo">
+        <div class="promo-content">
+            <div class="promo-left">
+                <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop&crop=center" alt="Moroccan Wedding Couple">
+            </div>
+            <div class="promo-center">
+                <h2>Ultimate Moroccan Wedding Package</h2>
+                <div class="promo-icons">
+                    <div class="promo-icon">🎊</div>
+                    <div class="promo-icon">👑</div>
+                    <div class="promo-icon">🏰</div>
+                </div>
+                <p class="promo-text">From Casablanca to Fes – save big on your dream Moroccan celebration with our comprehensive wedding packages.</p>
+                <div class="promo-price">Starting from 150,000 MAD</div>
+                <button class="btn-primary" onclick="bookPackage()">Book Now</button>
+            </div>
+            <div class="promo-right">
+                <div class="promo-icon" style="margin-bottom: 1rem;">🏮</div>
+                <div class="promo-icon">🖐️</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 Wervice. Dedicated to Moroccan Weddings.</p>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="social-icons">
+                <a href="#" class="social-icon">📘</a>
+                <a href="#" class="social-icon">📷</a>
+                <a href="#" class="social-icon">🐦</a>
+                <a href="#" class="social-icon">💼</a>
+            </div>
+            <p style="font-size: 0.9rem; color: #ccc; margin-top: 1rem;">Serving couples from Rabat to Agadir</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const inspirationGrid = document.getElementById('inspirationGrid');
+        const dealCards = document.querySelectorAll('.deal-card');
+        const inspirationCards = document.querySelectorAll('.inspiration-card');
+
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            filterCards(searchTerm);
+        });
+
+        function filterCards(searchTerm) {
+            dealCards.forEach(card => {
+                const title = card.querySelector('.deal-title').textContent.toLowerCase();
+                const category = card.dataset.category.toLowerCase();
+                if (title.includes(searchTerm) || category.includes(searchTerm) || searchTerm === '') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            inspirationCards.forEach(card => {
+                const title = card.querySelector('.inspiration-title').textContent.toLowerCase();
+                const desc = card.querySelector('.inspiration-desc').textContent.toLowerCase();
+                const category = card.dataset.category.toLowerCase();
+                if (title.includes(searchTerm) || desc.includes(searchTerm) || category.includes(searchTerm) || searchTerm === '') {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Category filtering
+        const categorySelect = document.getElementById('categorySelect');
+        categorySelect.addEventListener('change', function() {
+            const selectedCategory = this.value;
+            filterByCategory(selectedCategory);
+        });
+
+        function filterByCategory(category) {
+            const allCards = document.querySelectorAll('.deal-card, .inspiration-card');
+            allCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Category chips
+        const categoryChips = document.querySelectorAll('.chip');
+        categoryChips.forEach(chip => {
+            chip.addEventListener('click', function() {
+                const category = this.dataset.category;
+                filterByCategory(category);
+                categorySelect.value = category;
+            });
+        });
+
+        // Mock functions
+        function addToRegistry(item) {
+            alert(`${item} added to your wedding registry!`);
+        }
+
+        function subscribePremium() {
+            alert('Premium subscription activated! Enjoy exclusive Moroccan wedding planning tools.');
+        }
+
+        function bookPackage() {
+            alert('Ultimate Moroccan Wedding Package booked! Our team will contact you within 24 hours.');
+        }
+
+        // Countdown timers (mock implementation)
+        function updateTimers() {
+            // Mock timer updates - in real implementation, you'd calculate actual time remaining
+            const timers = document.querySelectorAll('.deal-timer');
+            timers.forEach(timer => {
+                // This is just a visual update - real implementation would track actual time
+                const currentText = timer.textContent;
+                timer.textContent = currentText; // Keep static for demo
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTimers();
+            // Update timers every minute
+            setInterval(updateTimers, 60000);
+        });
+
+        // Sticky header
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 100) {
+                header.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+            } else {
+                header.style.backgroundColor = '#000';
+            }
+        });
+
+        // Filter dots (for inspiration section)
+        const filterDots = document.querySelectorAll('.dot');
+        filterDots.forEach((dot, index) => {
+            dot.addEventListener('click', function() {
+                filterDots.forEach(d => d.classList.remove('active'));
+                this.classList.add('active');
+
+                // Mock filtering - in real implementation, you'd have categories for each dot
+                const categories = ['all', 'traditional', 'modern', 'luxury'];
+                filterByCategory(categories[index]);
+            });
+        });
+    </script>
+</body>
+</html>

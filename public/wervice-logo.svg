@@ -1,0 +1,35 @@
+<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="120" height="32" rx="4" fill="#d9ff0a"/>
+
+  <!-- W letter -->
+  <path d="M8 8 L12 20 L16 14 L20 20 L24 8" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M16 14 L16 8" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- E -->
+  <path d="M30 8 L30 20 L38 20" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 12 L35 12" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 16 L35 16" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- R -->
+  <path d="M44 8 L44 20" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M44 8 L52 8 L52 12 L44 12" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M48 12 L52 16 L52 20" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M44 14 L48 20" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- V -->
+  <path d="M58 8 L63 20 L68 8" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- I -->
+  <path d="M74 8 L74 20" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M72 8 L76 8" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M72 20 L76 20" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- C -->
+  <path d="M82 12 L80 10 L80 18 L82 20 L88 20 L90 18 L90 10 L88 8 L82 8" stroke="#000000" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+  <!-- E -->
+  <path d="M96 8 L96 20 L104 20" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M96 12 L101 12" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+  <path d="M96 16 L101 16" stroke="#000000" stroke-width="2" stroke-linecap="round"/>
+</svg>
