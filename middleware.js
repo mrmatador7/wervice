@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function middleware(request) {
   console.log('Middleware executed for:', request.url);
 
   // Check if the pathname starts with a locale

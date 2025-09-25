@@ -7,68 +7,193 @@
 
 @layer base {
   html {
-    font-family: var(--font-open-sans);
+    font-family: Rubik, system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-amiri);
+  html[dir="rtl"] {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] h5,
+  html[dir="rtl"] h6 {
+    font-family: 'Readex Pro', system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] h1,
+  html[dir="ltr"] h2,
+  html[dir="ltr"] h3,
+  html[dir="ltr"] h4,
+  html[dir="ltr"] h5,
+  html[dir="ltr"] h6 {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  /* RTL Support */
+  html[dir="rtl"] {
+    text-align: right;
+    direction: rtl;
+  }
+
+  html[dir="ltr"] {
+    text-align: left;
+    direction: ltr;
+  }
+
+  /* Arabic text alignment */
+  html[dir="rtl"] p,
+  html[dir="rtl"] div,
+  html[dir="rtl"] span,
+  html[dir="rtl"] li {
+    text-align: right;
+  }
+
+  /* Left align specific elements that should stay left-aligned in RTL */
+  html[dir="rtl"] .text-left {
+    text-align: left !important;
+  }
+
+  html[dir="rtl"] .space-x-8 > * + * {
+    margin-left: 0;
+    margin-right: 2rem;
+  }
+
+  html[dir="rtl"] .space-x-3 > * + * {
+    margin-left: 0;
+    margin-right: 0.75rem;
+  }
+
+  html[dir="rtl"] .space-x-6 > * + * {
+    margin-left: 0;
+    margin-right: 1.5rem;
+  }
+
+  html[dir="rtl"] .gap-8 {
+    gap: 2rem;
+  }
+
+  html[dir="rtl"] .gap-4 {
+    gap: 1rem;
   }
 }
 
 @layer utilities {
   /* Typography Utility Classes */
 
-  /* Main Headings - Elegant Arabic Serif */
+  /* Main Headings */
   .font-heading-primary {
-    font-family: var(--font-amiri);
     font-weight: 700;
     letter-spacing: -0.02em;
   }
 
-  /* Sub Headings - Clean Serif */
+  html[dir="rtl"] .font-heading-primary {
+    font-family: 'Readex Pro', system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] .font-heading-primary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  /* Sub Headings */
   .font-heading-secondary {
-    font-family: var(--font-amiri);
     font-weight: 600;
     letter-spacing: -0.01em;
   }
 
+  html[dir="rtl"] .font-heading-secondary {
+    font-family: 'Readex Pro', system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] .font-heading-secondary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
   /* Body Text - Clean and Readable */
   .font-body-primary {
-    font-family: var(--font-open-sans);
     font-weight: 400;
     line-height: 1.6;
   }
 
+  html[dir="rtl"] .font-body-primary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] .font-body-primary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
   .font-body-secondary {
-    font-family: var(--font-open-sans);
     font-weight: 300;
     line-height: 1.5;
   }
 
+  html[dir="rtl"] .font-body-secondary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] .font-body-secondary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
   /* UI Text - Sans Serif for Interface */
   .font-ui-primary {
-    font-family: var(--font-open-sans);
     font-weight: 600;
     letter-spacing: 0.01em;
   }
 
+  html[dir="rtl"] .font-ui-primary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] .font-ui-primary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
   .font-ui-secondary {
-    font-family: var(--font-open-sans);
     font-weight: 500;
     letter-spacing: 0.005em;
   }
 
+  html[dir="rtl"] .font-ui-secondary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] .font-ui-secondary {
+    font-family: Rubik, system-ui, sans-serif;
+  }
+
   /* Decorative/Accent Text */
   .font-decorative {
-    font-family: var(--font-amiri);
     font-weight: 400;
+  }
+
+  html[dir="rtl"] .font-decorative {
+    font-family: 'Readex Pro', system-ui, sans-serif;
     font-style: italic;
+  }
+
+  html[dir="ltr"] .font-decorative {
+    font-family: Rubik, system-ui, sans-serif;
   }
 
   /* Arabic/Moroccan Cultural Text */
   .font-cultural {
-    font-family: var(--font-amiri);
     font-weight: 500;
+  }
+
+  html[dir="rtl"] .font-cultural {
+    font-family: 'Readex Pro', system-ui, sans-serif;
+  }
+
+  html[dir="ltr"] .font-cultural {
+    font-family: Rubik, system-ui, sans-serif;
   }
 }
 
@@ -78,6 +203,11 @@
       radial-gradient(circle at 25% 25%, rgba(217, 255, 10, 0.1) 2px, transparent 2px),
       radial-gradient(circle at 75% 75%, rgba(217, 255, 10, 0.1) 2px, transparent 2px);
     background-size: 20px 20px;
+  }
+
+  /* Interactive elements cursor */
+  button {
+    cursor: pointer;
   }
 
   .btn-primary {
@@ -90,6 +220,42 @@
     border: 2px solid #d9ff0a;
     min-width: 120px;
     white-space: nowrap;
+    cursor: pointer;
+  }
+
+  /* Auth links - keep background, larger width */
+  .btn-auth {
+    background-color: #d9ff0a;
+    color: #000000;
+    padding: 0.5rem 2rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid #d9ff0a;
+    min-width: 180px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .btn-auth:hover {
+    background-color: #000000;
+    color: #d9ff0a;
+  }
+
+  /* Arabic auth buttons - wider for better appearance */
+  html[dir="rtl"] .btn-auth {
+    min-width: 180px;
+    padding: 0.5rem 2.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* Arabic buttons - wider for better appearance */
+  html[dir="rtl"] .btn-primary {
+    min-width: 140px;
+    padding: 0.75rem 2.5rem;
   }
 
   .btn-primary:hover {

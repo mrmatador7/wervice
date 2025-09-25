@@ -2,13 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { HeaderProps } from '@/models/types';
 import WerviceSearchBar from '../ui/WerviceSearchBar';
+import LanguageSwitcher from '../ui/LanguageSwitcher';
 
 
 
 export default function Header({}: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const t = useTranslations('header');
 
   return (
     <header className="sticky top-0 z-50 bg-black text-lime-400 shadow-lg">
@@ -38,10 +42,11 @@ export default function Header({}: HeaderProps) {
               />
             </div>
 
-            {/* Action Buttons - Right side */}
+            {/* Action Links - Right side */}
             <div className="flex items-center space-x-3 w-40 justify-end">
-              <button className="btn-primary font-ui-primary text-sm md:text-base uppercase tracking-wide">Sign Up</button>
-              <button className="btn-primary font-ui-primary text-sm md:text-base uppercase tracking-wide">Login</button>
+              <LanguageSwitcher />
+              <Link href="/signup" className="btn-auth font-ui-primary uppercase tracking-wide">{t('signUp')}</Link>
+              <Link href="/login" className="btn-auth font-ui-primary uppercase tracking-wide">{t('login')}</Link>
             </div>
           </div>
 
@@ -69,10 +74,11 @@ export default function Header({}: HeaderProps) {
               </div>
 
 
-              {/* Action Buttons */}
+              {/* Action Links */}
               <div className="flex flex-col space-y-3 pt-2">
-                <button className="btn-primary w-full">Sign Up</button>
-                <button className="btn-primary w-full">Login</button>
+                <LanguageSwitcher />
+                <Link href="/signup" className="btn-auth w-full text-center">{t('signUp')}</Link>
+                <Link href="/login" className="btn-auth w-full text-center">{t('login')}</Link>
               </div>
             </div>
           </div>

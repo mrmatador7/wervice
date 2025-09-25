@@ -189,13 +189,13 @@ export const PREMIUM_BENEFITS = [
   }
 ];
 
-// Footer Links
+// Footer Links (translation keys)
 export const FOOTER_LINKS = [
-  { name: 'About Us', href: '#about' },
-  { name: 'Services', href: '#services' },
-  { name: 'Contact', href: '#contact' },
-  { name: 'Privacy Policy', href: '#privacy' },
-  { name: 'Terms of Service', href: '#terms' }
+  { key: 'about', href: '#about' },
+  { key: 'services', href: '#services' },
+  { key: 'contact', href: '#contact' },
+  { key: 'privacy', href: '#privacy' },
+  { key: 'terms', href: '#terms' }
 ];
 
 // Current Year

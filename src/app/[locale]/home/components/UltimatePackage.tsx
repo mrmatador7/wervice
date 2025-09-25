@@ -1,8 +1,10 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { PACKAGE_BUNDLES } from '@/lib/constants';
 
 export default function UltimatePackage() {
+  const t = useTranslations('ultimate');
   const handleBookPackage = () => {
     alert('Ultimate Moroccan Wedding Package booked! Our team will contact you within 24 hours.');
   };
@@ -13,7 +15,7 @@ export default function UltimatePackage() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
           {/* Left - Image */}
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left rtl:lg:text-right">
             <img
               src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=400&h=300&fit=crop&crop=center"
               alt="Moroccan Bridal Couple"
@@ -24,7 +26,7 @@ export default function UltimatePackage() {
           {/* Center - Main Content */}
           <div className="text-center">
             <h2 className="font-cultural text-3xl md:text-4xl leading-tight text-lime-400 mb-6">
-              Ultimate Moroccan Wedding Package
+              {t('title')}
             </h2>
 
             {/* Package Bundles */}
@@ -40,18 +42,18 @@ export default function UltimatePackage() {
             </div>
 
             <p className="text-body-large text-white/90 mb-6 leading-relaxed font-body-primary">
-              From Casablanca to Fes – save big on your dream Moroccan celebration with our comprehensive wedding packages.
+              {t('description')}
             </p>
 
             <div className="mb-6">
-              <span className="text-2xl font-bold text-lime-400">Starting from 150,000 MAD</span>
+              <span className="text-2xl font-bold text-lime-400">{t('startingFrom')} 150,000 MAD</span>
             </div>
 
             <button
               onClick={handleBookPackage}
               className="btn-primary font-ui-primary text-sm md:text-base uppercase tracking-wide px-8 py-4"
             >
-              Book Now
+              {t('bookNow')}
             </button>
           </div>
 

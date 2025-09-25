@@ -1,8 +1,10 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { PREMIUM_BENEFITS } from '@/lib/constants';
 
 export default function PremiumSection() {
+  const t = useTranslations('premium');
   const handleSubscribe = () => {
     alert('Premium subscription activated! Enjoy exclusive Moroccan wedding planning tools.');
   };
@@ -13,13 +15,13 @@ export default function PremiumSection() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left rtl:lg:text-right">
             <div className="text-6xl mb-6">⭐</div>
             <h2 className="font-decorative text-3xl md:text-4xl leading-tight text-black mb-6">
-              + Wervice Premium
+              {t('title')}
             </h2>
             <p className="text-body-large text-gray-700 mb-8 leading-relaxed font-body-primary">
-              Unlimited planning tools, exclusive vendor discounts across all categories, and tradition timelines – starting at 500 MAD/month.
+              {t('description')}
             </p>
 
             {/* Benefits Grid */}
@@ -39,7 +41,7 @@ export default function PremiumSection() {
               onClick={handleSubscribe}
               className="btn-primary font-ui-primary text-sm md:text-base uppercase tracking-wide px-8 py-4"
             >
-              Subscribe Now
+              {t('subscribe')}
             </button>
           </div>
 

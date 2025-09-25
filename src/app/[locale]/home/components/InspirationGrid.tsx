@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { InspirationGridProps } from '@/models/types';
 import { INSPIRATION_ITEMS, FILTER_CATEGORIES } from '@/lib/constants';
 
 
 export default function InspirationGrid({}: InspirationGridProps) {
+  const t = useTranslations('inspiration');
   const [activeFilter, setActiveFilter] = useState('all');
 
   const filteredInspirations = INSPIRATION_ITEMS.filter(item => {
@@ -30,11 +32,11 @@ export default function InspirationGrid({}: InspirationGridProps) {
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-black mb-4">
-            New Moroccan Inspirations
+          <h2 className="font-heading-primary text-3xl md:text-4xl text-black mb-4">
+            {t('title')}
           </h2>
           <p className="text-gray-600 text-lg mb-8">
-            Discover trending wedding traditions and styles
+            {t('subtitle')}
           </p>
 
           {/* Filter Dots */}
@@ -75,7 +77,7 @@ export default function InspirationGrid({}: InspirationGridProps) {
                   className="text-lime-400 hover:text-black transition-colors text-sm font-medium"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  View Details →
+                  {t('viewDetails')}
                 </a>
               </div>
             </div>
@@ -84,7 +86,7 @@ export default function InspirationGrid({}: InspirationGridProps) {
 
         {filteredInspirations.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No inspirations found matching your criteria.</p>
+            <p className="text-gray-600 text-lg">{t('noInspirations')}</p>
           </div>
         )}
       </div>

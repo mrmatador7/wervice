@@ -1,36 +1,38 @@
 import type { Metadata } from "next";
-import { Amiri, Open_Sans } from "next/font/google";
+import { Rubik, Allan, Readex_Pro } from "next/font/google";
 import "./globals.css";
 
-const amiri = Amiri({
+const rubik = Rubik({
   subsets: ["latin", "arabic"],
-  weight: ["400", "700"],
-  variable: "--font-amiri",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-rubik",
 });
 
-const openSans = Open_Sans({
-  subsets: ["latin"],
+const readexPro = Readex_Pro({
+  subsets: ["latin", "arabic"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-open-sans",
+  variable: "--font-readex-pro",
+});
+
+const allan = Allan({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-allan",
 });
 
 export const metadata: Metadata = {
   title: "Wervice - Moroccan Wedding Planning",
-  description: "Authentic Moroccan weddings made easy with categories like Venues, Dresses, and Decor. Plan your perfect celebration with traditional henna, kaftans, and Amaria processions.",
-  keywords: "Moroccan weddings, henna ceremonies, kaftans, Amaria processions, Riad venues, traditional catering, wedding planning Morocco",
+  description: "Authentic Moroccan weddings made easy",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={`${amiri.variable} ${openSans.variable}`}>
-        <head>
-        <meta name="apple-mobile-web-app-title" content="Wervice" />
-        </head>
-      <body className="font-sans">
+    <html className={`${rubik.variable} ${readexPro.variable} ${allan.variable}`}>
+      <body>
         {children}
       </body>
     </html>

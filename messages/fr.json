@@ -1,0 +1,185 @@
+{
+  "metadata": {
+    "title": "Wervice - Planification de Mariages Marocains",
+    "description": "Mariages marocains authentiques simplifiés avec des catégories comme Lieux, Robes, et Décoration. Planifiez votre célébration parfaite avec du henné traditionnel, des caftans, et des processions Amaria.",
+    "keywords": "mariages marocains, cérémonies de henné, caftans, processions Amaria, lieux riad, restauration traditionnelle, planification mariage Maroc"
+  },
+  "header": {
+    "signUp": "S'inscrire",
+    "login": "Se connecter"
+  },
+  "hero": {
+    "title": "Votre Mariage de Rêve Vous Attend",
+    "subtitle": "Créez des souvenirs inoubliables avec notre collection organisée de vendeurs marocains et de forfaits de célébration authentiques.",
+    "services": {
+      "dj": "Services DJ",
+      "photography": "Photographie",
+      "catering": "Restauration"
+    },
+    "cta": "Planifiez Votre Mariage",
+    "stats": {
+      "vendors": "Vendeurs",
+      "authentic": "Authentique",
+      "support": "Support"
+    }
+  },
+  "categories": {
+    "all": "Toutes les Catégories",
+    "venues": "Lieux",
+    "catering": "Restauration",
+    "photoVideo": "Photo & Vidéo",
+    "planningBeauty": "Planification & Beauté",
+    "decor": "Décoration",
+    "music": "Musique",
+    "dresses": "Robes"
+  },
+  "navbar": {
+    "venues": "Lieux",
+    "dresses": "Robes",
+    "henna": "Henné",
+    "catering": "Restauration",
+    "decor": "Décoration",
+    "music": "Musique",
+    "photoVideo": "Photo/Vidéo"
+  },
+  "deals": {
+    "traditionalRiad": {
+      "title": "Lieu de Mariage Riad Traditionnel",
+      "description": "Beau riad marocain traditionnel au cœur de Marrakech"
+    },
+    "authenticCatering": {
+      "title": "Restauration Marocaine Authentique",
+      "description": "Cuisine marocaine traditionnelle avec présentation moderne"
+    },
+    "professionalPhotography": {
+      "title": "Photographie de Mariage Professionnelle",
+      "description": "Capturez vos moments spéciaux avec des photographes expérimentés"
+    },
+    "hennaCeremony": {
+      "title": "Forfait Cérémonie Henné",
+      "description": "Cérémonie de henné traditionnel avec des artistes qualifiés"
+    }
+  },
+  "packages": {
+    "essential": {
+      "name": "Essentiel",
+      "price": "25 000 MAD",
+      "originalPrice": "35 000 MAD",
+      "discount": "Économisez 10 000 MAD",
+      "features": [
+        "Assistance à la sélection du lieu",
+        "Coordination de restauration de base",
+        "Forfait photographie",
+        "Calendrier de planification de mariage"
+      ]
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "45 000 MAD",
+      "originalPrice": "65 000 MAD",
+      "discount": "Économisez 20 000 MAD",
+      "features": [
+        "Toutes les fonctionnalités Essentielles",
+        "Planification de cérémonie de henné",
+        "Décoration et style",
+        "Priorité vendeur VIP",
+        "Support de planification 24/7"
+      ]
+    },
+    "luxury": {
+      "name": "Luxe",
+      "price": "75 000 MAD",
+      "originalPrice": "110 000 MAD",
+      "discount": "Économisez 35 000 MAD",
+      "features": [
+        "Toutes les fonctionnalités Premium",
+        "Procession Amaria",
+        "Musique et divertissement en direct",
+        "Transport de luxe",
+        "Coordinateur de mariage personnel",
+        "Édition photo post-mariage"
+      ]
+    }
+  },
+  "benefits": {
+    "exclusiveDiscounts": {
+      "title": "Remises Exclusives",
+      "description": "Jusqu'à 30% de réduction sur les vendeurs premium"
+    },
+    "planningTimeline": {
+      "title": "Calendrier de Planification",
+      "description": "Programme personnalisé de planification de mariage"
+    },
+    "vipSupport": {
+      "title": "Support VIP",
+      "description": "Support client prioritaire"
+    }
+  },
+  "footer": {
+    "title": "Wervice",
+    "subtitle": "Dédié aux Mariages Marocains",
+    "links": {
+      "about": "À Propos",
+      "services": "Services",
+      "contact": "Contact",
+      "privacy": "Politique de Confidentialité",
+      "terms": "Conditions d'Utilisation"
+    },
+    "copyright": "Tous droits réservés.",
+    "description": "Servir les couples de Rabat à Agadir, avec les meilleures catégories en Lieux, Restauration, et plus."
+  },
+  "common": {
+    "off": "DE RÉDUCTION"
+  },
+  "language": {
+    "switch": "Langue",
+    "english": "English",
+    "french": "Français",
+    "arabic": "العربية"
+  },
+  "search": {
+    "where": "Où ?",
+    "category": "Catégorie",
+    "locations": {
+      "marrakech": "Marrakech",
+      "casablanca": "Casablanca",
+      "agadir": "Agadir",
+      "tangier": "Tanger",
+      "rabat": "Rabat",
+      "fes": "Fès"
+    },
+    "categories": {
+      "venues": "Lieux",
+      "catering": "Restauration",
+      "photoVideo": "Photo & Vidéo",
+      "planningBeauty": "Planification & Beauté",
+      "decor": "Décoration",
+      "music": "Musique",
+      "dresses": "Robes"
+    }
+  },
+  "featuredDeals": {
+    "title": "Mariages Marocains en Vedette",
+    "subtitle": "Découvrez des offres exclusives sur les célébrations traditionnelles",
+    "endsIn": "Se termine dans :",
+    "addToRegistry": "Ajouter au Registre",
+    "noDeals": "Aucune offre trouvée correspondant à vos critères."
+  },
+  "inspiration": {
+    "title": "Nouvelles Inspirations Marocaines",
+    "subtitle": "Découvrez les traditions et styles de mariage tendance",
+    "viewDetails": "Voir les Détails →",
+    "noInspirations": "Aucune inspiration trouvée correspondant à vos critères."
+  },
+  "premium": {
+    "title": "+ Wervice Premium",
+    "description": "Outils de planification illimités, remises exclusives sur les vendeurs dans toutes les catégories, et calendriers traditionnels – à partir de 500 MAD/mois.",
+    "subscribe": "S'abonner Maintenant"
+  },
+  "ultimate": {
+    "title": "Forfait Mariage Marocain Ultime",
+    "description": "De Casablanca à Fès – économisez gros sur votre célébration marocaine de rêve avec nos forfaits de mariage complets.",
+    "startingFrom": "À partir de",
+    "bookNow": "Réserver Maintenant"
+  }
+}

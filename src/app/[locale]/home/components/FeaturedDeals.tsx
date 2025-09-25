@@ -1,11 +1,13 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { FeaturedDealsProps } from '@/models/types';
 import { FEATURED_DEALS } from '@/lib/constants';
 import { generateStars, useCountdown } from '@/lib';
 
 
 export default function FeaturedDeals({}: FeaturedDealsProps) {
+  const t = useTranslations('featuredDeals');
   const timeLeft = useCountdown({ days: 2, hours: 14, minutes: 32, seconds: 45 });
 
   // Show all deals on homepage
@@ -21,10 +23,10 @@ export default function FeaturedDeals({}: FeaturedDealsProps) {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="font-heading-secondary text-3xl md:text-4xl leading-tight text-black mb-4">
-            Featured Moroccan Weddings
+            {t('title')}
           </h2>
           <p className="text-body-large text-gray-600 font-body-primary">
-            Discover exclusive deals on traditional celebrations
+            {t('subtitle')}
           </p>
         </div>
 
@@ -60,14 +62,14 @@ export default function FeaturedDeals({}: FeaturedDealsProps) {
                 </div>
 
                 <div className="font-ui-secondary text-sm text-gray-600 mb-4">
-                  <span className="font-semibold">Ends in:</span> {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
+                  <span className="font-semibold">{t('endsIn')}</span> {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
                 </div>
 
                 <button
                   onClick={() => handleAddToRegistry(deal.title)}
                   className="btn-primary w-full font-ui-primary text-sm md:text-base uppercase tracking-wide"
                 >
-                  Add to Registry
+                  {t('addToRegistry')}
                 </button>
               </div>
             </div>
@@ -76,7 +78,7 @@ export default function FeaturedDeals({}: FeaturedDealsProps) {
 
         {filteredDeals.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No deals found matching your criteria.</p>
+            <p className="text-gray-600 text-lg">{t('noDeals')}</p>
           </div>
         )}
       </div>

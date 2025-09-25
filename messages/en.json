@@ -1,0 +1,185 @@
+{
+  "metadata": {
+    "title": "Wervice - Moroccan Wedding Planning",
+    "description": "Authentic Moroccan weddings made easy with categories like Venues, Dresses, and Decor. Plan your perfect celebration with traditional henna, kaftans, and Amaria processions.",
+    "keywords": "Moroccan weddings, henna ceremonies, kaftans, Amaria processions, Riad venues, traditional catering, wedding planning Morocco"
+  },
+  "header": {
+    "signUp": "Sign Up",
+    "login": "Login"
+  },
+  "hero": {
+    "title": "Your Dream Wedding Awaits",
+    "subtitle": "Create unforgettable memories with our curated collection of Moroccan vendors and authentic celebration packages.",
+    "services": {
+      "dj": "DJ Services",
+      "photography": "Photography",
+      "catering": "Catering"
+    },
+    "cta": "Plan Your Wedding",
+    "stats": {
+      "vendors": "Vendors",
+      "authentic": "Authentic",
+      "support": "Support"
+    }
+  },
+  "categories": {
+    "all": "All Categories",
+    "venues": "Venues",
+    "catering": "Catering",
+    "photoVideo": "Photo & Video",
+    "planningBeauty": "Planning & Beauty",
+    "decor": "Decor",
+    "music": "Music",
+    "dresses": "Dresses"
+  },
+  "navbar": {
+    "venues": "Venues",
+    "dresses": "Dresses",
+    "henna": "Henna",
+    "catering": "Catering",
+    "decor": "Decor",
+    "music": "Music",
+    "photoVideo": "Photo/Video"
+  },
+  "deals": {
+    "traditionalRiad": {
+      "title": "Traditional Riad Wedding Venue",
+      "description": "Beautiful traditional Moroccan riad in the heart of Marrakech"
+    },
+    "authenticCatering": {
+      "title": "Authentic Moroccan Catering",
+      "description": "Traditional Moroccan cuisine with modern presentation"
+    },
+    "professionalPhotography": {
+      "title": "Professional Wedding Photography",
+      "description": "Capture your special moments with experienced photographers"
+    },
+    "hennaCeremony": {
+      "title": "Henna Ceremony Package",
+      "description": "Traditional henna ceremony with skilled artists"
+    }
+  },
+  "packages": {
+    "essential": {
+      "name": "Essential",
+      "price": "25,000 MAD",
+      "originalPrice": "35,000 MAD",
+      "discount": "Save 10,000 MAD",
+      "features": [
+        "Venue selection assistance",
+        "Basic catering coordination",
+        "Photography package",
+        "Wedding planning timeline"
+      ]
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "45,000 MAD",
+      "originalPrice": "65,000 MAD",
+      "discount": "Save 20,000 MAD",
+      "features": [
+        "All Essential features",
+        "Henna ceremony planning",
+        "Decor and styling",
+        "VIP vendor priority",
+        "24/7 planning support"
+      ]
+    },
+    "luxury": {
+      "name": "Luxury",
+      "price": "75,000 MAD",
+      "originalPrice": "110,000 MAD",
+      "discount": "Save 35,000 MAD",
+      "features": [
+        "All Premium features",
+        "Amaria procession",
+        "Live music and entertainment",
+        "Luxury transportation",
+        "Personal wedding coordinator",
+        "Post-wedding photo editing"
+      ]
+    }
+  },
+  "benefits": {
+    "exclusiveDiscounts": {
+      "title": "Exclusive Discounts",
+      "description": "Up to 30% off on premium vendors"
+    },
+    "planningTimeline": {
+      "title": "Planning Timeline",
+      "description": "Custom wedding planning schedule"
+    },
+    "vipSupport": {
+      "title": "VIP Support",
+      "description": "Priority customer support"
+    }
+  },
+  "footer": {
+    "title": "Wervice",
+    "subtitle": "Dedicated to Moroccan Weddings",
+    "links": {
+      "about": "About Us",
+      "services": "Services",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    },
+    "copyright": "All rights reserved.",
+    "description": "Serving couples from Rabat to Agadir, with top categories in Venues, Catering, and more."
+  },
+  "common": {
+    "off": "OFF"
+  },
+  "language": {
+    "switch": "Language",
+    "english": "English",
+    "french": "Français",
+    "arabic": "العربية"
+  },
+  "search": {
+    "where": "Where?",
+    "category": "Category",
+    "locations": {
+      "marrakech": "Marrakech",
+      "casablanca": "Casablanca",
+      "agadir": "Agadir",
+      "tangier": "Tangier",
+      "rabat": "Rabat",
+      "fes": "Fes"
+    },
+    "categories": {
+      "venues": "Venues",
+      "catering": "Catering",
+      "photoVideo": "Photo & Video",
+      "planningBeauty": "Planning Beauty",
+      "decor": "Decor",
+      "music": "Music",
+      "dresses": "Dresses"
+    }
+  },
+  "featuredDeals": {
+    "title": "Featured Moroccan Weddings",
+    "subtitle": "Discover exclusive deals on traditional celebrations",
+    "endsIn": "Ends in:",
+    "addToRegistry": "Add to Registry",
+    "noDeals": "No deals found matching your criteria."
+  },
+  "inspiration": {
+    "title": "New Moroccan Inspirations",
+    "subtitle": "Discover trending wedding traditions and styles",
+    "viewDetails": "View Details →",
+    "noInspirations": "No inspirations found matching your criteria."
+  },
+  "premium": {
+    "title": "+ Wervice Premium",
+    "description": "Unlimited planning tools, exclusive vendor discounts across all categories, and tradition timelines – starting at 500 MAD/month.",
+    "subscribe": "Subscribe Now"
+  },
+  "ultimate": {
+    "title": "Ultimate Moroccan Wedding Package",
+    "description": "From Casablanca to Fes – save big on your dream Moroccan celebration with our comprehensive wedding packages.",
+    "startingFrom": "Starting from",
+    "bookNow": "Book Now"
+  }
+}

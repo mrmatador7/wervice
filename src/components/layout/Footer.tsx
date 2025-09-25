@@ -1,21 +1,23 @@
+import { useTranslations } from 'next-intl';
 import { FOOTER_LINKS, CURRENT_YEAR } from '@/lib/constants';
 
 export default function Footer() {
+  const t = useTranslations('footer');
 
   return (
     <footer className="bg-black text-white py-12">
       <div className="container mx-auto px-4 text-center">
         <div className="mb-8">
-          <h3 className="text-2xl font-serif font-bold text-lime-400 mb-2">Wervice</h3>
+          <h3 className="text-2xl font-serif font-bold text-lime-400 mb-2">{t('title')}</h3>
           <p className="text-white/80 mb-6">
-            Dedicated to Moroccan Weddings
+            {t('subtitle')}
           </p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-8 mb-8">
           {FOOTER_LINKS.map((link, index) => (
             <a key={index} href={link.href} className="text-lime-400 hover:text-white transition-colors">
-              {link.name}
+              {t(`links.${link.key}`)}
             </a>
           ))}
         </div>
@@ -37,10 +39,10 @@ export default function Footer() {
 
         <div className="border-t border-lime-400/20 pt-6">
           <p className="text-white/60 text-sm mb-2">
-            &copy; {CURRENT_YEAR} Wervice. All rights reserved.
+            &copy; {CURRENT_YEAR} Wervice. {t('copyright')}
           </p>
           <p className="text-white/40 text-xs">
-            Serving couples from Rabat to Agadir, with top categories in Venues, Catering, and more.
+            {t('description')}
           </p>
         </div>
       </div>
