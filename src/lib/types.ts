@@ -21,28 +21,23 @@ export interface Deal {
   description?: string;
 }
 
-// Inspiration Item
+// Inspiration Item Types
+export type InspirationCategory = WeddingCategory | 'traditional' | 'modern' | 'luxury';
+
 export interface InspirationItem {
   id: number;
   title: string;
   description: string;
   image: string;
-  category: WeddingCategory;
+  category: InspirationCategory;
   link: string;
 }
 
 // Category Configuration
 export interface CategoryConfig {
-  key: WeddingCategory;
+  key: WeddingCategory | 'all';
   label: string;
   count?: number;
-}
-
-// Filter Types
-export interface FilterState {
-  searchTerm: string;
-  selectedCategory: WeddingCategory;
-  activeFilter?: string;
 }
 
 // Component Props Types
@@ -69,17 +64,4 @@ export interface TimerState {
   hours: number;
   minutes: number;
   seconds: number;
-}
-
-// Benefit Item for Premium Section
-export interface BenefitItem {
-  icon: string;
-  title: string;
-  description: string;
-}
-
-// Package Bundle for Ultimate Package
-export interface PackageBundle {
-  name: string;
-  icon: string;
 }

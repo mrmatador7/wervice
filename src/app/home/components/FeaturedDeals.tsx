@@ -1,9 +1,8 @@
 'use client';
 
-import { FeaturedDealsProps } from '@/types';
-import { FEATURED_DEALS } from '@/data/deals';
-import { generateStars } from '@/utils';
-import { useCountdown } from '@/hooks/useCountdown';
+import { FeaturedDealsProps } from '@/models/types';
+import { FEATURED_DEALS } from '@/lib/constants';
+import { generateStars, useCountdown } from '@/lib';
 
 
 export default function FeaturedDeals({}: FeaturedDealsProps) {
@@ -21,10 +20,10 @@ export default function FeaturedDeals({}: FeaturedDealsProps) {
     <section className="py-16 bg-gray-50 moroccan-pattern">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-black mb-4">
+          <h2 className="font-heading-secondary text-3xl md:text-4xl leading-tight text-black mb-4">
             Featured Moroccan Weddings
           </h2>
-          <p className="text-gray-600 text-lg">
+          <p className="text-body-large text-gray-600 font-body-primary">
             Discover exclusive deals on traditional celebrations
           </p>
         </div>
@@ -33,9 +32,10 @@ export default function FeaturedDeals({}: FeaturedDealsProps) {
           {filteredDeals.map((deal) => (
             <div key={deal.id} className="deal-card">
               <div className="relative">
-                <div
-                  className="w-full h-48 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${deal.image})` }}
+                <img
+                  src={deal.image}
+                  alt={deal.title}
+                  className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-3 right-3 bg-lime-400 text-black px-2 py-1 rounded-lg font-bold text-sm">
                   {deal.discount}
@@ -43,13 +43,13 @@ export default function FeaturedDeals({}: FeaturedDealsProps) {
               </div>
 
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-black mb-2 line-clamp-2">
+                <h3 className="font-heading-secondary text-lg md:text-xl leading-snug text-black mb-2 line-clamp-2">
                   {deal.title}
                 </h3>
 
                 <div className="flex items-center mb-3">
-                  <span className="text-lime-400 mr-2">{generateStars(deal.rating)}</span>
-                  <span className="text-gray-600 text-sm">({deal.rating})</span>
+                  <span className="text-lime-400 mr-2 font-cultural">{generateStars(deal.rating)}</span>
+                  <span className="text-gray-600 font-body-secondary text-sm">({deal.rating})</span>
                 </div>
 
                 <div className="mb-4">
@@ -59,13 +59,13 @@ export default function FeaturedDeals({}: FeaturedDealsProps) {
                   )}
                 </div>
 
-                <div className="text-sm text-gray-600 mb-4">
+                <div className="font-ui-secondary text-sm text-gray-600 mb-4">
                   <span className="font-semibold">Ends in:</span> {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
                 </div>
 
                 <button
                   onClick={() => handleAddToRegistry(deal.title)}
-                  className="btn-primary w-full"
+                  className="btn-primary w-full font-ui-primary text-sm md:text-base uppercase tracking-wide"
                 >
                   Add to Registry
                 </button>

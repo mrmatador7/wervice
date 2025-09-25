@@ -1,6 +1,6 @@
 'use client';
 
-import { PACKAGE_BUNDLES } from '@/constants';
+import { PACKAGE_BUNDLES } from '@/lib/constants';
 
 export default function UltimatePackage() {
   const handleBookPackage = () => {
@@ -23,7 +23,7 @@ export default function UltimatePackage() {
 
           {/* Center - Main Content */}
           <div className="text-center">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-lime-400 mb-6">
+            <h2 className="font-cultural text-3xl md:text-4xl leading-tight text-lime-400 mb-6">
               Ultimate Moroccan Wedding Package
             </h2>
 
@@ -34,12 +34,12 @@ export default function UltimatePackage() {
                   <div className="w-16 h-16 bg-lime-400 text-black rounded-full flex items-center justify-center text-2xl mx-auto mb-2">
                     {bundle.icon}
                   </div>
-                  <p className="text-sm font-medium">{bundle.name}</p>
+                  <p className="font-ui-primary text-sm">{bundle.name}</p>
                 </div>
               ))}
             </div>
 
-            <p className="text-white/90 text-lg mb-6 leading-relaxed">
+            <p className="text-body-large text-white/90 mb-6 leading-relaxed font-body-primary">
               From Casablanca to Fes – save big on your dream Moroccan celebration with our comprehensive wedding packages.
             </p>
 
@@ -49,7 +49,7 @@ export default function UltimatePackage() {
 
             <button
               onClick={handleBookPackage}
-              className="btn-primary text-lg px-8 py-4"
+              className="btn-primary font-ui-primary text-sm md:text-base uppercase tracking-wide px-8 py-4"
             >
               Book Now
             </button>

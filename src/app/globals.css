@@ -15,23 +15,81 @@
   }
 }
 
+@layer utilities {
+  /* Typography Utility Classes */
+
+  /* Main Headings - Elegant Arabic Serif */
+  .font-heading-primary {
+    font-family: var(--font-amiri);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Sub Headings - Clean Serif */
+  .font-heading-secondary {
+    font-family: var(--font-amiri);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  /* Body Text - Clean and Readable */
+  .font-body-primary {
+    font-family: var(--font-open-sans);
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .font-body-secondary {
+    font-family: var(--font-open-sans);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* UI Text - Sans Serif for Interface */
+  .font-ui-primary {
+    font-family: var(--font-open-sans);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .font-ui-secondary {
+    font-family: var(--font-open-sans);
+    font-weight: 500;
+    letter-spacing: 0.005em;
+  }
+
+  /* Decorative/Accent Text */
+  .font-decorative {
+    font-family: var(--font-amiri);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  /* Arabic/Moroccan Cultural Text */
+  .font-cultural {
+    font-family: var(--font-amiri);
+    font-weight: 500;
+  }
+}
+
 @layer components {
   .moroccan-pattern {
     background-image:
-      radial-gradient(circle at 25% 25%, #d9ff0a 2px, transparent 2px),
-      radial-gradient(circle at 75% 75%, #d9ff0a 2px, transparent 2px);
+      radial-gradient(circle at 25% 25%, rgba(217, 255, 10, 0.1) 2px, transparent 2px),
+      radial-gradient(circle at 75% 75%, rgba(217, 255, 10, 0.1) 2px, transparent 2px);
     background-size: 20px 20px;
-    opacity: 0.1;
   }
 
   .btn-primary {
     background-color: #d9ff0a;
     color: #000000;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
+    padding: 0.75rem 2rem;
+    border-radius: 2rem;
     font-weight: 600;
     transition: all 0.3s ease;
     border: 2px solid #d9ff0a;
+    min-width: 120px;
+    white-space: nowrap;
   }
 
   .btn-primary:hover {

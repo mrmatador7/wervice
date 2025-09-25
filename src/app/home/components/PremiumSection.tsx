@@ -1,6 +1,6 @@
 'use client';
 
-import { PREMIUM_BENEFITS } from '@/constants';
+import { PREMIUM_BENEFITS } from '@/lib/constants';
 
 export default function PremiumSection() {
   const handleSubscribe = () => {
@@ -15,10 +15,10 @@ export default function PremiumSection() {
           {/* Left Content */}
           <div className="text-center lg:text-left">
             <div className="text-6xl mb-6">⭐</div>
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-black mb-6">
+            <h2 className="font-decorative text-3xl md:text-4xl leading-tight text-black mb-6">
               + Wervice Premium
             </h2>
-            <p className="text-gray-700 text-lg mb-8 leading-relaxed">
+            <p className="text-body-large text-gray-700 mb-8 leading-relaxed font-body-primary">
               Unlimited planning tools, exclusive vendor discounts across all categories, and tradition timelines – starting at 500 MAD/month.
             </p>
 
@@ -29,15 +29,15 @@ export default function PremiumSection() {
                   <div className="w-16 h-16 bg-lime-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4">
                     {benefit.icon}
                   </div>
-                  <h3 className="font-semibold text-black mb-2">{benefit.title}</h3>
-                  <p className="text-gray-600 text-sm">{benefit.description}</p>
+                  <h3 className="font-ui-secondary text-black mb-2">{benefit.title}</h3>
+                  <p className="font-body-secondary text-sm text-gray-600">{benefit.description}</p>
                 </div>
               ))}
             </div>
 
             <button
               onClick={handleSubscribe}
-              className="btn-primary text-lg px-8 py-4"
+              className="btn-primary font-ui-primary text-sm md:text-base uppercase tracking-wide px-8 py-4"
             >
               Subscribe Now
             </button>

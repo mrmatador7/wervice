@@ -1,4 +1,4 @@
-import { WeddingCategory } from '@/types';
+import { WeddingCategory } from '@/models/types';
 
 /**
  * Formats a price string with MAD currency
@@ -88,3 +88,6 @@ export const getCategoryLabel = (category: WeddingCategory): string => {
   };
   return labels[category] || category;
 };
+
+// Re-export hooks
+export { useCountdown } from '../hooks/useCountdown';

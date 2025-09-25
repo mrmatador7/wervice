@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { HeroProps } from '@/types';
-import { NAVBAR_CATEGORIES } from '@/constants';
+import { HeroProps } from '@/models/types';
+import { NAVBAR_CATEGORIES } from '@/lib/constants';
 
 
 export default function Hero({ onViewOffers }: HeroProps) {
@@ -17,10 +17,10 @@ export default function Hero({ onViewOffers }: HeroProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
           {/* Left Content */}
           <div className="lg:col-span-1 text-center lg:text-left">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-lime-400 mb-6 leading-tight">
+            <h1 className="font-heading-primary text-4xl md:text-5xl lg:text-6xl leading-tight text-lime-400 mb-6">
               Best Wedding Deals on Wervice
             </h1>
-            <p className="text-lg md:text-xl mb-8 text-white/90">
+            <p className="text-body-large mb-8 text-white/90 font-body-primary">
               Over 500 Moroccan vendors & packages for your authentic celebration
             </p>
 

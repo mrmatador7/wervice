@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { InspirationGridProps } from '@/types';
-import { INSPIRATION_ITEMS } from '@/data/inspirations';
-import { FILTER_CATEGORIES } from '@/constants';
+import { InspirationGridProps } from '@/models/types';
+import { INSPIRATION_ITEMS, FILTER_CATEGORIES } from '@/lib/constants';
 
 
 export default function InspirationGrid({}: InspirationGridProps) {

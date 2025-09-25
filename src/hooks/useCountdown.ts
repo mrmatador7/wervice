@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TimerState } from '@/types';
+import { TimerState } from '@/models/types';
 
 export const useCountdown = (initialTime: TimerState) => {
   const [timeLeft, setTimeLeft] = useState<TimerState>(initialTime);

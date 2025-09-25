@@ -1,4 +1,4 @@
-import { FOOTER_LINKS, CURRENT_YEAR } from '@/constants';
+import { FOOTER_LINKS, CURRENT_YEAR } from '@/lib/constants';
 
 export default function Footer() {
 
@@ -14,8 +14,8 @@ export default function Footer() {
 
         <div className="flex flex-wrap justify-center gap-8 mb-8">
           {FOOTER_LINKS.map((link, index) => (
-            <a key={index} href={link.url} className="text-lime-400 hover:text-white transition-colors">
-              {link.label}
+            <a key={index} href={link.href} className="text-lime-400 hover:text-white transition-colors">
+              {link.name}
             </a>
           ))}
         </div>

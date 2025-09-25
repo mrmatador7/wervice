@@ -1,5 +1,5 @@
 // Re-export utilities for better organization
-export * from '@/utils';
+export * from './index';
 
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
