@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { HeaderProps } from '@/models/types';
@@ -20,9 +21,11 @@ export default function Header({}: HeaderProps) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <img
+            <Image
               src="/wervice-logo.png"
               alt="Wervice Logo"
+              width={120}
+              height={32}
               className="h-8 w-auto"
             />
           </Link>
