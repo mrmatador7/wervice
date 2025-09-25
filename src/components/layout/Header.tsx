@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { HeaderProps } from '@/models/types';
 import WerviceSearchBar from '../ui/WerviceSearchBar';
 import LanguageSwitcher from '../ui/LanguageSwitcher';
@@ -14,19 +13,20 @@ import LanguageSwitcher from '../ui/LanguageSwitcher';
 export default function Header({}: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const t = useTranslations('header');
+  const locale = useLocale();
 
   return (
     <header className="sticky top-0 z-50 bg-black text-lime-400 shadow-lg">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Image
+          <Link href={`/${locale === 'en' ? '' : locale}`} className="flex items-center hover:opacity-80 transition-opacity">
+            <img
               src="/wervice-logo.png"
               alt="Wervice Logo"
-              width={120}
-              height={32}
               className="h-8 w-auto"
+              width="120"
+              height="32"
             />
           </Link>
 
