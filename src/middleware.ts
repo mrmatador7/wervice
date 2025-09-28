@@ -71,6 +71,13 @@ export async function middleware(req: NextRequest) {
         '/help'
     ]
 
+    // Define routes that require onboarding completion
+    const onboardingRequiredRoutes = [
+        '/dashboard',
+        '/profile',
+        '/reservations'
+    ]
+
     // Define auth routes that authenticated users shouldn't access
     const authRoutes = [
         '/auth/signin',
@@ -97,12 +104,37 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(redirectUrl)
     }
 
-    // If user is authenticated and trying to access auth routes, redirect to dashboard
-    if (isAuthRoute && session) {
-        // Extract locale from pathname (e.g., /en/auth/signin -> /en)
-        const locale = pathname.split('/')[1] || 'en'
-        return NextResponse.redirect(new URL(`/${locale}/dashboard`, req.url))
+    // Check if user is authenticated and trying to access routes that require onboarding
+    const isOnboardingRequiredRoute = onboardingRequiredRoutes.some(route =>
+        pathname.includes(route) && (pathname.startsWith('/en') || pathname.startsWith('/fr') || pathname.startsWith('/ar'))
+    )
+
+    if (isOnboardingRequiredRoute && session) {
+        try {
+            // Check if user is onboarded by querying their profile
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('is_onboarded')
+                .eq('id', session.user.id)
+                .single()
+
+            if (!error && profile && !profile.is_onboarded) {
+                // User is authenticated but not onboarded, redirect to onboarding
+                const locale = pathname.split('/')[1] || 'en'
+                const onboardingUrl = new URL(`/${locale}/onboarding`, req.url)
+                // Store the original URL to redirect back after onboarding
+                onboardingUrl.searchParams.set('redirectTo', pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''))
+                return NextResponse.redirect(onboardingUrl)
+            }
+        } catch (error) {
+            console.error('Error checking onboarding status in middleware:', error)
+            // If there's an error, allow access (fail open)
+        }
     }
+
+    // Note: Authenticated users can access auth routes now because the signin page
+    // handles proper redirection based on onboarding status. Users who are not
+    // onboarded will be redirected to onboarding from the signin component.
 
     // Continue with the request
     return response

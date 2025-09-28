@@ -23,6 +23,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [redirectTo, setRedirectTo] = useState<string>('');
 
   const [formData, setFormData] = useState<OnboardingData>({
     first_name: '',
@@ -46,10 +47,19 @@ export default function OnboardingPage() {
 
       setUser(session.user);
 
+      // Get redirectTo parameter from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectParam = urlParams.get('redirectTo');
+      if (redirectParam) {
+        setRedirectTo(redirectParam);
+      }
+
       // Check if already onboarded
       const { data: profile } = await ProfileService.getProfile(session.user.id);
       if (profile?.is_onboarded) {
-        router.push(`/${locale}/dashboard`);
+        // If already onboarded, redirect to the intended destination or dashboard
+        const destination = redirectParam || `/${locale}/dashboard`;
+        router.push(destination);
         return;
       }
     };
@@ -91,7 +101,10 @@ export default function OnboardingPage() {
       }
 
       console.log('✅ Onboarding completed successfully');
-      router.push(`/${locale}/dashboard`);
+
+      // Redirect to the intended destination or dashboard
+      const destination = redirectTo || `/${locale}/dashboard`;
+      router.push(destination);
     } catch (error) {
       console.error('Error completing onboarding:', error);
     } finally {
