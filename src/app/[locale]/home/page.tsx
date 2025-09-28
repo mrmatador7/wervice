@@ -2,12 +2,14 @@
 
 import Header from '@/components/layout/Header';
 import Hero from './components/Hero';
-import FeaturedDeals from './components/FeaturedDeals';
 import CategoriesSection from '@/components/CategoriesSection';
-import InspirationGrid from './components/InspirationGrid';
-import PremiumSection from './components/PremiumSection';
-import UltimatePackage from './components/UltimatePackage';
+import CitiesCarousel from '@/components/CitiesCarousel';
+import CategoryRails from '@/components/CategoryRails';
+import ListingsRail from '@/components/ListingsRail';
+import BlogArticles from '@/components/BlogArticles';
+import BecomeVendorSection from './components/BecomeVendorSection';
 import Footer from '@/components/layout/Footer';
+import { homepageListings } from '@/lib/mockListings';
 
 export default function HomePage() {
   const handleViewOffers = () => {
@@ -24,15 +26,23 @@ export default function HomePage() {
       {/* Categories Section */}
       <CategoriesSection />
 
-      {/* Featured Deals - showing all categories */}
-      <FeaturedDeals />
+      {/* Cities Carousel */}
+      <CitiesCarousel variant="small" />
 
-      {/* Inspiration Grid - showing all categories */}
-      <InspirationGrid />
+      {/* Category Rails */}
+      <CategoryRails />
 
-      <PremiumSection />
+      {/* New Vendors */}
+      <ListingsRail
+        title="New Vendors"
+        items={homepageListings}
+        variant="carousel"
+      />
 
-      <UltimatePackage />
+      {/* Blog Articles */}
+      <BlogArticles />
+
+        <BecomeVendorSection />
 
       <Footer />
     </div>

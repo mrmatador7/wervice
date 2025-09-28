@@ -2,12 +2,14 @@
 
 import GlassmorphismHeader from '@/components/GlassmorphismHeader';
 import Hero from './home/components/Hero';
-import FeaturedDeals from './home/components/FeaturedDeals';
 import CategoriesSection from '@/components/CategoriesSection';
-import InspirationGrid from './home/components/InspirationGrid';
-import PremiumSection from './home/components/PremiumSection';
-import UltimatePackage from './home/components/UltimatePackage';
+import CitiesCarousel from '@/components/CitiesCarousel';
+import CategoryRails from '@/components/CategoryRails';
+import ListingsRail from '@/components/ListingsRail';
+import BlogArticles from '@/components/BlogArticles';
+import BecomeVendorSection from './home/components/BecomeVendorSection';
 import Footer from '@/components/layout/Footer';
+import { homepageListings } from '@/lib/mockListings';
 
 export default function HomePage() {
   const handleViewOffers = () => {
@@ -39,15 +41,23 @@ export default function HomePage() {
         {/* Categories Section - Standalone */}
         <CategoriesSection />
 
-        {/* Featured Deals - showing all categories */}
-        <FeaturedDeals />
+        {/* Cities Carousel */}
+        <CitiesCarousel variant="small" />
 
-        {/* Inspiration Grid - showing all categories */}
-        <InspirationGrid />
+        {/* Category Rails */}
+        <CategoryRails />
 
-        <PremiumSection />
+        {/* New Vendors */}
+        <ListingsRail
+          title="New Vendors"
+          items={homepageListings}
+          variant="carousel"
+        />
 
-        <UltimatePackage />
+        {/* Blog Articles */}
+        <BlogArticles />
+
+        <BecomeVendorSection />
 
         <Footer />
       </div>
