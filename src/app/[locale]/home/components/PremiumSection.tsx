@@ -11,7 +11,7 @@ export default function PremiumSection() {
 
 
   return (
-    <section className="py-16 bg-gray-100 moroccan-pattern">
+    <section className="py-16 bg-[#F7F8FB] moroccan-pattern">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
