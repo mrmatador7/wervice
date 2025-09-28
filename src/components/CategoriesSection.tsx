@@ -7,6 +7,7 @@ interface Category {
     count: number;
     image: string;
     href: string;
+    gradient: string;
 }
 
 const categories: Category[] = [
@@ -15,48 +16,56 @@ const categories: Category[] = [
         count: 124,
         image: '/categories/venues.png',
         href: '/categories/venues',
+        gradient: 'bg-gradient-to-br from-purple-400 to-blue-600',
     },
     {
         name: 'Catering',
         count: 87,
         image: '/categories/Catering.png',
         href: '/categories/catering',
+        gradient: 'bg-gradient-to-br from-orange-400 to-yellow-500',
     },
     {
         name: 'Photo & Video',
         count: 156,
         image: '/categories/Photo & Video.png',
         href: '/categories/photo-video',
+        gradient: 'bg-gradient-to-br from-pink-400 to-purple-600',
     },
     {
         name: 'Event Planner',
         count: 92,
         image: '/categories/Event Planner.png',
         href: '/categories/planning',
+        gradient: 'bg-gradient-to-br from-blue-500 to-indigo-700',
     },
     {
         name: 'Beauty',
         count: 78,
         image: '/categories/beauty.png',
         href: '/categories/beauty',
+        gradient: 'bg-gradient-to-br from-pink-400 to-rose-500',
     },
     {
         name: 'Decor',
         count: 134,
         image: '/categories/decor.png',
         href: '/categories/decor',
+        gradient: 'bg-gradient-to-br from-green-400 to-teal-600',
     },
     {
         name: 'Music',
         count: 67,
         image: '/categories/music.png',
         href: '/categories/music',
+        gradient: 'bg-gradient-to-br from-red-400 to-orange-500',
     },
     {
         name: 'Dresses',
         count: 189,
         image: '/categories/Dresses.png',
         href: '/categories/dresses',
+        gradient: 'bg-gradient-to-br from-rose-400 to-pink-600',
     },
 ];
 
@@ -79,7 +88,7 @@ export default function CategoriesSection() {
                             <Link
                                 key={category.name}
                                 href={category.href}
-                                className="group flex flex-col items-center justify-center p-4 rounded-2xl hover:bg-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                className={`group flex flex-col items-center justify-center p-4 rounded-2xl ${category.gradient} transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 hover:scale-105`}
                                 aria-label={`View ${category.name} category`}
                             >
                                 {/* Image Container */}
@@ -94,7 +103,7 @@ export default function CategoriesSection() {
                                 </div>
 
                                 {/* Category Name */}
-                                <span className="mt-3 text-sm md:text-base font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-300 text-center">
+                                <span className="mt-3 text-sm md:text-base font-medium text-white transition-colors duration-300 text-center">
                                     {category.name}
                                 </span>
                             </Link>
