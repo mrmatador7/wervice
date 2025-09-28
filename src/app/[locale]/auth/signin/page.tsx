@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import { ProfileService } from '@/lib/profile';
 
 export default function SignInPage() {
     const router = useRouter();
@@ -17,13 +18,35 @@ export default function SignInPage() {
     useEffect(() => {
         console.log('👤 Signin page mounted, locale:', locale)
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('🔄 Auth state changed:', { event, hasSession: !!session, userEmail: session?.user?.email })
 
             if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-                console.log('✅ User authenticated, redirecting to dashboard')
-                // User is authenticated (either just signed in or already had a session), redirect to dashboard
-                router.push(`/${locale}/dashboard`);
+                console.log('✅ User authenticated, checking onboarding status')
+
+                try {
+                    // Check if user is onboarded
+                    const { data: profile, error } = await ProfileService.getProfile(session.user.id);
+
+                    if (error) {
+                        console.error('❌ Error fetching profile:', error);
+                        // If there's an error, redirect to dashboard as fallback
+                        router.push(`/${locale}/dashboard`);
+                        return;
+                    }
+
+                    if (profile?.is_onboarded) {
+                        console.log('✅ User is onboarded, redirecting to dashboard')
+                        router.push(`/${locale}/dashboard`);
+                    } else {
+                        console.log('📝 User not onboarded, redirecting to onboarding')
+                        router.push(`/${locale}/onboarding`);
+                    }
+                } catch (error) {
+                    console.error('❌ Error checking onboarding status:', error);
+                    // Fallback to dashboard if there's an error
+                    router.push(`/${locale}/dashboard`);
+                }
             }
         });
 

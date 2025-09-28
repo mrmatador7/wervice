@@ -42,9 +42,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     avatar_url TEXT,
     birth_date DATE,
     gender TEXT,
-    nationality TEXT,
     user_type user_type,
     user_status user_status,
+    is_onboarded BOOLEAN DEFAULT FALSE,
 
     -- Contact information
     phone TEXT,
@@ -55,9 +55,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     latitude DECIMAL(10,8),
     longitude DECIMAL(11,8),
     postal_code TEXT,
-
-    -- locale 
-
 
     -- Preferences and settings
     locale TEXT DEFAULT 'en',
@@ -75,33 +72,26 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     business_website TEXT,
     business_phone TEXT,
     business_email TEXT,
-
-    -- Social media and additional links
     ig_username TEXT,
-    facebook_username TEXT,
-    pinterest_username TEXT,
-    twitter_username TEXT,
-    linkedin_username TEXT,
-    youtube_username TEXT,
+    fb_username TEXT,
+    ln_username TEXT,
+    yt_username TEXT,
     tiktok_username TEXT,
-    twitch_username TEXT,
-    discord_username TEXT,
-    telegram_username TEXT,
 
     -- Bio and additional information
     bio TEXT,
-    special_requirements TEXT, -- Dietary restrictions, accessibility needs, etc.
+
+    -- Moderation
+    is_banned BOOLEAN DEFAULT FALSE,
+    banned_reason TEXT,
+    banned_at TIMESTAMPTZ DEFAULT NULL,
+    banned_by UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+
 
     -- Metadata
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-    -- Constraints
-    CONSTRAINT valid_budget CHECK (wedding_budget >= 0),
-    CONSTRAINT valid_guest_count CHECK (wedding_guest_count >= 0 AND wedding_guest_count <= 1000),
-    CONSTRAINT valid_phone CHECK (phone ~ '^[\+]?[0-9\s\-\(\)]{10,20}$'),
-    CONSTRAINT valid_partner_phone CHECK (partner_phone IS NULL OR partner_phone ~ '^[\+]?[0-9\s\-\(\)]{10,20}$'),
-    CONSTRAINT valid_business_phone CHECK (business_phone IS NULL OR business_phone ~ '^[\+]?[0-9\s\-\(\)]{10,20}$')
+    deleted_at TIMESTAMPTZ DEFAULT NULL
 );
 
 -- Create indexes for better performance
@@ -123,32 +113,6 @@ WHERE user_type = 'vendor';
 CREATE INDEX IF NOT EXISTS idx_profiles_location ON public.profiles(city, country);
 CREATE INDEX IF NOT EXISTS idx_profiles_business_search ON public.profiles(business_name, city);
 
--- Row Level Security (RLS) policies
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
--- Policy: Users can view their own profile
-CREATE POLICY "Users can view own profile" ON public.profiles
-    FOR SELECT USING (auth.uid() = id);
-
--- Policy: Users can insert their own profile
-CREATE POLICY "Users can insert own profile" ON public.profiles
-    FOR INSERT WITH CHECK (auth.uid() = id);
-
--- Policy: Users can update their own profile
-CREATE POLICY "Users can update own profile" ON public.profiles
-    FOR UPDATE USING (auth.uid() = id);
-
--- Policy: Vendors can view profiles of potential clients in their area
-CREATE POLICY "Vendors can view client profiles" ON public.profiles
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM public.profiles p
-            WHERE p.id = auth.uid()
-            AND p.user_type = 'vendor'
-        )
-        AND user_type = 'user'
-    );
-
 -- Function to handle automatic profile creation on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -165,11 +129,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger to automatically create profile on user signup
-CREATE OR REPLACE TRIGGER on_auth_user_created
-    AFTER INSERT ON auth.users
-    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
 -- Function to update the updated_at timestamp
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -183,17 +142,3 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON public.profiles
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
-
--- Grant necessary permissions
-GRANT ALL ON public.profiles TO authenticated;
-GRANT ALL ON public.profiles TO service_role;
-GRANT ALL ON public.categories TO authenticated;
-GRANT ALL ON public.categories TO service_role;
-GRANT ALL ON public.businesse_types TO authenticated;
-GRANT ALL ON public.businesse_types TO service_role;
-
--- Comments for documentation
-COMMENT ON TABLE public.profiles IS 'Extended user profiles for Wervice wedding planning platform';
-COMMENT ON COLUMN public.profiles.id IS 'References auth.users.id - the Supabase auth user ID';
-COMMENT ON COLUMN public.profiles.user_type IS 'Type of user: user, vendor, admin, super_admin';
-COMMENT ON COLUMN public.profiles.user_status IS 'Status of user account: active, inactive, pending, banned';
