@@ -25,10 +25,10 @@ export default function SignInPage() {
                 console.log('✅ User authenticated, checking onboarding status')
 
                 try {
-                    // Check if user has a profile
-                    let { data: profile, error } = await ProfileService.getProfile(session.user.id);
+                    // Middleware ensures profile exists, just check onboarding status
+                    const { data: profile, error } = await ProfileService.getProfile(session.user.id);
 
-                    console.log('🔍 Profile check result:', {
+                    console.log('🔍 Signin onboarding check:', {
                         profile: profile ? {
                             id: profile.id,
                             is_onboarded: profile.is_onboarded,
@@ -38,64 +38,15 @@ export default function SignInPage() {
                         error
                     });
 
-                    // If profile doesn't exist, create one
-                    if (!profile && !error) {
-                        console.log('👤 No profile found, creating profile for user...');
-
-                        const profileData = {
-                            id: session.user.id,
-                            first_name: session.user.user_metadata?.first_name || '',
-                            last_name: session.user.user_metadata?.last_name || '',
-                            email: session.user.email || '',
-                            user_type: 'user' as const,
-                            user_status: 'active' as const,
-                            is_onboarded: false
-                        };
-
-                        const { data: newProfile, error: createError } = await ProfileService.upsertProfile(profileData);
-
-                        if (createError) {
-                            console.error('❌ Error creating profile:', createError);
-                            // If profile creation fails, still redirect to onboarding
-                            router.push(`/${locale}/onboarding`);
-                            return;
-                        }
-
-                        console.log('✅ Profile created successfully:', newProfile);
-                        profile = newProfile;
-                    }
-
-                    if (error && !profile) {
+                    if (error) {
                         console.error('❌ Error fetching profile:', error);
-                        // If there's an error and no profile, try to create one
-                        console.log('🔄 Attempting to create profile due to fetch error...');
-
-                        const profileData = {
-                            id: session.user.id,
-                            first_name: session.user.user_metadata?.first_name || '',
-                            last_name: session.user.user_metadata?.last_name || '',
-                            email: session.user.email || '',
-                            user_type: 'user' as const,
-                            user_status: 'active' as const,
-                            is_onboarded: false
-                        };
-
-                        const { data: newProfile, error: createError } = await ProfileService.upsertProfile(profileData);
-
-                        if (createError) {
-                            console.error('❌ Error creating profile as fallback:', createError);
-                            // If profile creation also fails, redirect to dashboard as last resort
-                            router.push(`/${locale}/dashboard`);
-                            return;
-                        }
-
-                        console.log('✅ Profile created as fallback:', newProfile);
-                        profile = newProfile;
+                        // Middleware should have created profile, fallback to onboarding
+                        router.push(`/${locale}/onboarding`);
+                        return;
                     }
 
-                    // Now check onboarding status
                     if (!profile) {
-                        console.log('❌ Still no profile after creation attempts, redirecting to onboarding');
+                        console.log('❌ No profile found after middleware check, redirecting to onboarding');
                         router.push(`/${locale}/onboarding`);
                         return;
                     }

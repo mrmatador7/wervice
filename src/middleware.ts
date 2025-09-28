@@ -109,27 +109,60 @@ export async function middleware(req: NextRequest) {
         pathname.includes(route) && (pathname.startsWith('/en') || pathname.startsWith('/fr') || pathname.startsWith('/ar'))
     )
 
-    if (isOnboardingRequiredRoute && session) {
+    if (session) {
         try {
-            // Check if user is onboarded by querying their profile
-            const { data: profile, error } = await supabase
+            // First, ensure user has a profile
+            let { data: profile, error } = await supabase
                 .from('profiles')
-                .select('is_onboarded, user_type, user_status')
+                .select('is_onboarded, user_type, user_status, first_name, last_name')
                 .eq('id', session.user.id)
                 .single()
 
-            console.log('🛡️ Middleware onboarding check:', {
+            console.log('🛡️ Middleware profile check:', {
                 pathname,
                 userId: session.user.id,
+                hasProfile: !!profile,
                 profile: profile ? {
                     is_onboarded: profile.is_onboarded,
                     user_type: profile.user_type,
-                    user_status: profile.user_status
+                    user_status: profile.user_status,
+                    first_name: profile.first_name,
+                    last_name: profile.last_name
                 } : null,
                 error: error?.message
             });
 
-            if (!error && profile && profile.is_onboarded === false) {
+            // If profile doesn't exist, create one
+            if (!profile && !error) {
+                console.log('🛡️ No profile found, creating profile in middleware...');
+
+                const profileData = {
+                    id: session.user.id,
+                    first_name: session.user.user_metadata?.first_name || '',
+                    last_name: session.user.user_metadata?.last_name || '',
+                    email: session.user.email || '',
+                    user_type: 'user',
+                    user_status: 'active',
+                    is_onboarded: false
+                };
+
+                const { data: newProfile, error: createError } = await supabase
+                    .from('profiles')
+                    .upsert(profileData, { onConflict: 'id' })
+                    .select('is_onboarded, user_type, user_status, first_name, last_name')
+                    .single();
+
+                if (createError) {
+                    console.error('🛡️ Error creating profile in middleware:', createError);
+                    // Continue with onboarding redirect even if profile creation fails
+                } else {
+                    console.log('🛡️ Profile created in middleware:', newProfile);
+                    profile = newProfile;
+                }
+            }
+
+            // Now check if user needs onboarding (for protected routes)
+            if (isOnboardingRequiredRoute && profile && profile.is_onboarded === false) {
                 // User is authenticated but not onboarded, redirect to onboarding
                 const locale = pathname.split('/')[1] || 'en'
                 const onboardingUrl = new URL(`/${locale}/onboarding`, req.url)
@@ -139,7 +172,7 @@ export async function middleware(req: NextRequest) {
                 return NextResponse.redirect(onboardingUrl)
             }
         } catch (error) {
-            console.error('Error checking onboarding status in middleware:', error)
+            console.error('🛡️ Error in middleware profile/onboarding check:', error)
             // If there's an error, allow access (fail open)
         }
     }
