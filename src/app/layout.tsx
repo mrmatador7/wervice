@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans, Lora } from "next/font/google";
+import ClientHtml from "@/components/ClientHtml";
 import "./globals.css";
 
 const rubik = Rubik({
@@ -61,10 +62,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className={`${rubik.variable} ${readexPro.variable} ${allan.variable} ${poppins.variable} ${inter.variable} ${montserrat.variable} ${openSans.variable} ${lora.variable}`}>
+    <ClientHtml
+      className={`${rubik.variable} ${readexPro.variable} ${allan.variable} ${poppins.variable} ${inter.variable} ${montserrat.variable} ${openSans.variable} ${lora.variable}`}
+    >
       <body>
         {children}
       </body>
-    </html>
+    </ClientHtml>
   );
 }
