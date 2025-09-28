@@ -12,6 +12,7 @@ module.exports = {
         'rubik': ['Rubik', 'system-ui', 'sans-serif'],
         'readex-pro': ['Readex Pro', 'system-ui', 'sans-serif'],
         'allan': ['Allan', 'system-ui', 'sans-serif'],
+        'inter': ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

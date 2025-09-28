@@ -1,8 +1,9 @@
 'use client';
 
-import Header from '@/components/layout/Header';
+import GlassmorphismHeader from '@/components/GlassmorphismHeader';
 import Hero from './home/components/Hero';
 import FeaturedDeals from './home/components/FeaturedDeals';
+import CategoriesSection from '@/components/CategoriesSection';
 import InspirationGrid from './home/components/InspirationGrid';
 import PremiumSection from './home/components/PremiumSection';
 import UltimatePackage from './home/components/UltimatePackage';
@@ -15,22 +16,41 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div className="fixed inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+          alt="Beautiful Moroccan wedding scene with traditional elements"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
 
-      <Hero onViewOffers={handleViewOffers} />
+      {/* Content */}
+      <div className="relative z-10">
+        <GlassmorphismHeader />
 
-      {/* Featured Deals - showing all categories */}
-      <FeaturedDeals />
+        {/* Add top padding to account for fixed header */}
+        <div className="pt-16">
+          <Hero onViewOffers={handleViewOffers} />
+        </div>
 
-      {/* Inspiration Grid - showing all categories */}
-      <InspirationGrid />
+        {/* Categories Section - Standalone */}
+        <CategoriesSection />
 
-      <PremiumSection />
+        {/* Featured Deals - showing all categories */}
+        <FeaturedDeals />
 
-      <UltimatePackage />
+        {/* Inspiration Grid - showing all categories */}
+        <InspirationGrid />
 
-      <Footer />
+        <PremiumSection />
+
+        <UltimatePackage />
+
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -6,11 +6,16 @@
   },
   "header": {
     "signUp": "Sign Up",
-    "login": "Login"
+    "login": "Login",
+    "signIn": "Sign In",
+    "becomeVendor": "Become a Vendor",
+    "language": "Language",
+    "currency": "Currency",
+    "menu": "Menu"
   },
   "hero": {
-    "title": "Your Dream Wedding Awaits",
-    "subtitle": "Create unforgettable memories with our curated collection of Moroccan vendors and authentic celebration packages.",
+    "title": "Plan your Moroccan wedding, your way.",
+    "subtitle": "Find trusted vendors across Morocco.",
     "services": {
       "dj": "DJ Services",
       "photography": "Photography",
@@ -21,6 +26,11 @@
       "vendors": "Vendors",
       "authentic": "Authentic",
       "support": "Support"
+    },
+    "trustRow": {
+      "vendors": "500+ vendors",
+      "cities": "10+ cities",
+      "contact": "WhatsApp contact"
     }
   },
   "categories": {

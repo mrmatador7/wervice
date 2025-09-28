@@ -1,18 +1,24 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function LanguageSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const t = useTranslations('language');
   const router = useRouter();
-  const currentLocale = useLocale();
+  const pathname = usePathname();
+
+  // Extract current locale from pathname
+  const currentLocale = pathname.split('/')[1] || 'en';
 
   const switchLocale = (locale: string) => {
-    router.push(`/${locale}`);
-    setIsOpen(false);
+    startTransition(() => {
+      router.push(`/${locale}`);
+      setIsOpen(false);
+    });
   };
 
   const languages = [
@@ -25,7 +31,8 @@ export default function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1 text-lime-400 hover:text-white transition-colors px-2 py-1 rounded"
+        disabled={isPending}
+        className="flex items-center space-x-1 text-lime-400 hover:text-white transition-colors px-2 py-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <span className="text-lg">
           {languages.find(lang => lang.code === currentLocale)?.flag}
@@ -49,9 +56,8 @@ export default function LanguageSwitcher() {
             <button
               key={lang.code}
               onClick={() => switchLocale(lang.code)}
-              className={`w-full flex items-center space-x-2 px-3 py-2 text-left hover:bg-lime-400/10 transition-colors ${
-                currentLocale === lang.code ? 'text-lime-400' : 'text-white'
-              }`}
+              className={`w-full flex items-center space-x-2 px-3 py-2 text-left hover:bg-lime-400/10 transition-colors ${currentLocale === lang.code ? 'text-lime-400' : 'text-white'
+                }`}
             >
               <span>{lang.flag}</span>
               <span className="text-sm">{lang.name}</span>

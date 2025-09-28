@@ -54,8 +54,11 @@ export default function WerviceSearchBar({ onSearch, className = '' }: WerviceSe
 
   return (
     <div className={`max-w-xl mx-auto ${className}`}>
-      {/* Main Search Container - Compact Shape */}
-      <div className="bg-white rounded-full p-2 shadow-lg border border-gray-700 flex items-center">
+      {/* Main Search Container - Pill Shape */}
+      <div
+        className="bg-white rounded-full p-2 shadow-2xl border border-white/20 backdrop-blur-sm flex items-center"
+        style={{ boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)' }}
+      >
         {/* Where? Chip */}
         <div className="relative flex-1 mx-1.5">
           <button
@@ -146,12 +149,23 @@ export default function WerviceSearchBar({ onSearch, className = '' }: WerviceSe
         {/* Search Button */}
         <button
           onClick={handleSearch}
-          className="bg-black hover:bg-lime-500 text-white rounded-full p-3 ml-1.5 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+          className="rounded-full p-3 ml-1.5 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2"
+          style={{
+            backgroundColor: '#d9ff0a',
+            color: 'black'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#c4e600';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#d9ff0a';
+          }}
+          aria-label="Search for wedding vendors"
         >
           <svg
             className="w-5 h-5"
             fill="none"
-            stroke="#d9ff0a"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

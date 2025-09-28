@@ -2,15 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { HeaderProps } from '@/models/types';
-import WerviceSearchBar from '../ui/WerviceSearchBar';
 import LanguageSwitcher from '../ui/LanguageSwitcher';
 
 
 
-export default function Header({}: HeaderProps) {
+export default function Header({ }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const t = useTranslations('header');
   const locale = useLocale();
@@ -31,20 +29,7 @@ export default function Header({}: HeaderProps) {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-between flex-1">
-            {/* Left spacer for centering */}
-            <div className="w-40"></div>
-
-            {/* Search Bar - Centered */}
-            <div className="max-w-lg w-full flex justify-center">
-              <WerviceSearchBar
-                onSearch={(location, category) => {
-                  console.log('Search:', { location, category });
-                  // Handle search logic here
-                }}
-              />
-            </div>
-
+          <div className="hidden md:flex items-center justify-end flex-1">
             {/* Action Links - Right side */}
             <div className="flex items-center space-x-3 w-40 justify-end">
               <LanguageSwitcher />
@@ -66,17 +51,6 @@ export default function Header({}: HeaderProps) {
         {isMenuOpen && (
           <div className="md:hidden mt-6 pb-6 border-t border-lime-400/20 pt-4">
             <div className="flex flex-col space-y-4">
-              {/* Search Bar - Mobile */}
-              <div className="px-2">
-                <WerviceSearchBar
-                  onSearch={(location, category) => {
-                    console.log('Mobile Search:', { location, category });
-                    // Handle search logic here
-                  }}
-                />
-              </div>
-
-
               {/* Action Links */}
               <div className="flex flex-col space-y-3 pt-2">
                 <LanguageSwitcher />

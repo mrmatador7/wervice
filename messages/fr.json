@@ -6,11 +6,16 @@
   },
   "header": {
     "signUp": "S'inscrire",
-    "login": "Se connecter"
+    "login": "Se connecter",
+    "signIn": "Se connecter",
+    "becomeVendor": "Devenir vendeur",
+    "language": "Langue",
+    "currency": "Devise",
+    "menu": "Menu"
   },
   "hero": {
-    "title": "Votre Mariage de Rêve Vous Attend",
-    "subtitle": "Créez des souvenirs inoubliables avec notre collection organisée de vendeurs marocains et de forfaits de célébration authentiques.",
+    "title": "Planifiez votre mariage marocain, à votre façon.",
+    "subtitle": "Trouvez des prestataires de confiance à travers le Maroc.",
     "services": {
       "dj": "Services DJ",
       "photography": "Photographie",
@@ -21,6 +26,11 @@
       "vendors": "Vendeurs",
       "authentic": "Authentique",
       "support": "Support"
+    },
+    "trustRow": {
+      "vendors": "500+ prestataires",
+      "cities": "10+ villes",
+      "contact": "Contact WhatsApp"
     }
   },
   "categories": {

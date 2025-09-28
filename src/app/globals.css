@@ -3,6 +3,10 @@
 @theme {
   --color-lime-400: #d9ff0a;
   --color-black: #000000;
+  --color-gold: #D4A017;
+  --color-moroccan-red: #C8102E;
+  --color-sapphire-blue: #0A3D62;
+  --color-emerald: #2A9D8F;
 }
 
 @layer base {
@@ -16,6 +20,18 @@
 
   html[dir="ltr"] {
     font-family: Rubik, system-ui, sans-serif;
+  }
+
+  body {
+    background-color: #fcfcfc;
+  }
+
+  :root {
+    --font-poppins: var(--font-poppins);
+    --font-inter: var(--font-inter);
+    --font-montserrat: var(--font-montserrat);
+    --font-open-sans: var(--font-open-sans);
+    --font-lora: var(--font-lora);
   }
 
   html[dir="rtl"] h1,
@@ -60,17 +76,17 @@
     text-align: left !important;
   }
 
-  html[dir="rtl"] .space-x-8 > * + * {
+  html[dir="rtl"] .space-x-8>*+* {
     margin-left: 0;
     margin-right: 2rem;
   }
 
-  html[dir="rtl"] .space-x-3 > * + * {
+  html[dir="rtl"] .space-x-3>*+* {
     margin-left: 0;
     margin-right: 0.75rem;
   }
 
-  html[dir="rtl"] .space-x-6 > * + * {
+  html[dir="rtl"] .space-x-6>*+* {
     margin-left: 0;
     margin-right: 1.5rem;
   }
