@@ -71,24 +71,24 @@ const categories: Category[] = [
 
 export default function CategoriesSection() {
     return (
-        <section className="px-4 py-16 md:px-8 lg:px-12 bg-white">
+        <section className="px-4 py-8 md:px-8 lg:px-12 bg-white">
             <div className="max-w-7xl mx-auto">
                 {/* Section Title */}
-                <div className="text-center mb-12">
+                <div className="text-center mb-6">
                     <h2 className="font-inter font-bold text-2xl md:text-3xl text-gray-900 mb-4">
                         Browse by Category
                     </h2>
                 </div>
 
                 {/* Categories Container */}
-                <div className="rounded-3xl p-8 md:p-12">
+                <div className="rounded-3xl p-4 md:p-6">
                     {/* Categories Grid - Images */}
-                    <div className="flex justify-center gap-4 md:gap-6 lg:gap-8 mb-8 overflow-x-auto">
+                    <div className="flex justify-center gap-4 md:gap-6 lg:gap-8 mb-4 overflow-x-auto">
                         {categories.map((category) => (
                             <Link
                                 key={category.name}
                                 href={category.href}
-                                className="group flex flex-col items-center justify-center p-4 rounded-2xl hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                className="group flex flex-col items-center justify-center p-2 rounded-2xl hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 aria-label={`View ${category.name} category`}
                             >
                                 {/* Image Container */}
@@ -103,7 +103,7 @@ export default function CategoriesSection() {
                                 </div>
 
                                 {/* Category Name */}
-                                <span className="mt-3 text-sm md:text-base font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-300 text-center">
+                                <span className="mt-2 text-sm md:text-base font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-300 text-center">
                                     {category.name}
                                 </span>
                             </Link>
