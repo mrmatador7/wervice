@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 
 interface Category {
     name: string;
@@ -10,66 +11,68 @@ interface Category {
     gradient: string;
 }
 
-const categories: Category[] = [
-    {
-        name: 'Venues',
-        count: 124,
-        image: '/categories/venues.png',
-        href: '/categories/venues',
-        gradient: 'bg-gradient-to-br from-purple-400 to-blue-600',
-    },
-    {
-        name: 'Catering',
-        count: 87,
-        image: '/categories/Catering.png',
-        href: '/categories/catering',
-        gradient: 'bg-gradient-to-br from-orange-400 to-yellow-500',
-    },
-    {
-        name: 'Photo & Video',
-        count: 156,
-        image: '/categories/Photo & Video.png',
-        href: '/categories/photo-video',
-        gradient: 'bg-gradient-to-br from-pink-400 to-purple-600',
-    },
-    {
-        name: 'Event Planner',
-        count: 92,
-        image: '/categories/Event Planner.png',
-        href: '/categories/planning',
-        gradient: 'bg-gradient-to-br from-blue-500 to-indigo-700',
-    },
-    {
-        name: 'Beauty',
-        count: 78,
-        image: '/categories/beauty.png',
-        href: '/categories/beauty',
-        gradient: 'bg-gradient-to-br from-pink-400 to-rose-500',
-    },
-    {
-        name: 'Decor',
-        count: 134,
-        image: '/categories/decor.png',
-        href: '/categories/decor',
-        gradient: 'bg-gradient-to-br from-green-400 to-teal-600',
-    },
-    {
-        name: 'Music',
-        count: 67,
-        image: '/categories/music.png',
-        href: '/categories/music',
-        gradient: 'bg-gradient-to-br from-red-400 to-orange-500',
-    },
-    {
-        name: 'Dresses',
-        count: 189,
-        image: '/categories/Dresses.png',
-        href: '/categories/dresses',
-        gradient: 'bg-gradient-to-br from-rose-400 to-pink-600',
-    },
-];
-
 export default function CategoriesSection() {
+    const locale = useLocale();
+
+    const categories: Category[] = [
+        {
+            name: 'Venues',
+            count: 124,
+            image: '/categories/venues.png',
+            href: `/${locale}/categories/venues`,
+            gradient: 'bg-gradient-to-br from-purple-400 to-blue-600',
+        },
+        {
+            name: 'Catering',
+            count: 87,
+            image: '/categories/Catering.png',
+            href: `/${locale}/categories/catering`,
+            gradient: 'bg-gradient-to-br from-orange-400 to-yellow-500',
+        },
+        {
+            name: 'Photo & Video',
+            count: 156,
+            image: '/categories/Photo & Video.png',
+            href: `/${locale}/categories/photo-video`,
+            gradient: 'bg-gradient-to-br from-pink-400 to-purple-600',
+        },
+        {
+            name: 'Event Planner',
+            count: 92,
+            image: '/categories/Event Planner.png',
+            href: `/${locale}/categories/planning`,
+            gradient: 'bg-gradient-to-br from-blue-500 to-indigo-700',
+        },
+        {
+            name: 'Beauty',
+            count: 78,
+            image: '/categories/beauty.png',
+            href: `/${locale}/categories/beauty`,
+            gradient: 'bg-gradient-to-br from-pink-400 to-rose-500',
+        },
+        {
+            name: 'Decor',
+            count: 134,
+            image: '/categories/decor.png',
+            href: `/${locale}/categories/decor`,
+            gradient: 'bg-gradient-to-br from-green-400 to-teal-600',
+        },
+        {
+            name: 'Music',
+            count: 67,
+            image: '/categories/music.png',
+            href: `/${locale}/categories/music`,
+            gradient: 'bg-gradient-to-br from-red-400 to-orange-500',
+        },
+        {
+            name: 'Dresses',
+            count: 189,
+            image: '/categories/Dresses.png',
+            href: `/${locale}/categories/dresses`,
+            gradient: 'bg-gradient-to-br from-rose-400 to-pink-600',
+        },
+    ];
+
     return (
         <section className="px-4 py-16 md:px-8 lg:px-12 bg-white">
             <div className="max-w-7xl mx-auto">
@@ -113,7 +116,7 @@ export default function CategoriesSection() {
                     {/* See All Categories Link */}
                     <div className="text-center">
                         <Link
-                            href="/categories"
+                            href={`/${locale}/categories`}
                             className="inline-flex items-center gap-2 font-inter font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-6 py-3 hover:bg-blue-50"
                             aria-label="View all categories"
                         >
