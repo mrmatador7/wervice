@@ -43,7 +43,7 @@ const categories: Category[] = [
     {
         name: 'Decor',
         count: 134,
-        image: '/categories/Decor.png',
+        image: '/categories/decor.png',
         href: '/categories/decor',
     },
     {
