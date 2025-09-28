@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { FiMenu, FiX, FiChevronDown, FiUser, FiBriefcase } from 'react-icons/fi';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 interface LanguageCurrency {
     language: string;
@@ -26,10 +28,13 @@ const currencies = [
 export default function GlassmorphismHeader() {
     const router = useRouter();
     const pathname = usePathname();
+    const locale = useLocale();
     const t = useTranslations('header');
     const tc = useTranslations('categories');
+    const { user, isLoading: isLoadingAuth } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLangCurrOpen, setIsLangCurrOpen] = useState(false);
+    const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const [selectedLangCurr, setSelectedLangCurr] = useState<LanguageCurrency>({
         language: 'en',
@@ -73,8 +78,14 @@ export default function GlassmorphismHeader() {
         const pathWithoutLocale = pathname.replace(`/${currentLocale}`, '');
         const newPath = `/${newLanguage}${pathWithoutLocale || '/'}`;
 
-        router.push(newPath);
+
+        // Close menus before navigation to prevent state issues
         closeAllMenus();
+
+        // Small delay to ensure menu closes before navigation
+        setTimeout(() => {
+            router.push(newPath);
+        }, 100);
     };
 
     // Save currency preferences to localStorage (no navigation needed)
@@ -87,11 +98,36 @@ export default function GlassmorphismHeader() {
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
         setIsLangCurrOpen(false);
+        setIsUserDropdownOpen(false);
+    };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (isUserDropdownOpen && !(event.target as Element).closest('.user-dropdown')) {
+                setIsUserDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isUserDropdownOpen]);
+
+    const handleLogout = async () => {
+        console.log('🚪 Signing out user...');
+        try {
+            await supabase.auth.signOut();
+            console.log('✅ User signed out successfully');
+        } catch (error) {
+            console.error('❌ Error signing out:', error);
+        }
+        setIsUserDropdownOpen(false);
     };
 
     const closeAllMenus = () => {
         setIsMobileMenuOpen(false);
         setIsLangCurrOpen(false);
+        setIsUserDropdownOpen(false);
     };
 
     const currentLanguage = languages.find(lang => lang.code === selectedLangCurr.language);
@@ -106,7 +142,7 @@ export default function GlassmorphismHeader() {
                         {/* Logo */}
                         <div className="flex-shrink-0">
                             <Link
-                                href="/"
+                                href={`/${locale}`}
                                 className="flex items-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent rounded-lg"
                                 aria-label="Go to homepage"
                             >
@@ -123,8 +159,10 @@ export default function GlassmorphismHeader() {
                             {/* Language & Currency Selector */}
                             <div className="relative">
                                 <button
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                        e.stopPropagation();
                                         setIsLangCurrOpen(!isLangCurrOpen);
+                                        setIsUserDropdownOpen(false); // Close user dropdown if open
                                     }}
                                     className="flex items-center space-x-2 px-3 py-2 bg-white text-black border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent"
                                     aria-label="Select language and currency"
@@ -174,25 +212,90 @@ export default function GlassmorphismHeader() {
                                 )}
                             </div>
 
-                            {/* Sign In Button */}
-                            <Link
-                                href="/sign-in"
-                                className="flex items-center space-x-2 px-4 py-2 bg-[#d9ff0a] hover:bg-[#c4e600] text-black font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 focus:ring-offset-transparent shadow-lg"
-                                aria-label="Sign in to your account"
-                            >
-                                <FiUser className="w-4 h-4" />
-                                <span>{t('signIn')}</span>
-                            </Link>
+                            {/* Authentication Section */}
+                            {isLoadingAuth ? (
+                                // Loading auth state
+                                <div className="w-8 h-8 bg-[#d9ff0a]/20 rounded-full animate-pulse"></div>
+                            ) : user ? (
+                                // User is authenticated - show user dropdown
+                                <div className="relative user-dropdown">
+                                    <button
+                                        onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                                        className="flex items-center space-x-2 text-[#d9ff0a] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 focus:ring-offset-transparent"
+                                        aria-label="User menu"
+                                    >
+                                        <div className="w-8 h-8 bg-[#d9ff0a] rounded-full flex items-center justify-center text-black font-semibold">
+                                            {user.email?.charAt(0).toUpperCase() || 'U'}
+                                        </div>
+                                        <FiChevronDown className="w-4 h-4" />
+                                    </button>
 
-                            {/* Become a Vendor Button */}
-                            <Link
-                                href="/vendor-signup"
-                                className="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-gray-900 text-[#d9ff0a] font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 focus:ring-offset-transparent shadow-lg"
-                                aria-label="Become a vendor and start offering services"
-                            >
-                                <FiBriefcase className="w-4 h-4" />
-                                <span>{t('becomeVendor')}</span>
-                            </Link>
+                                    {/* User Dropdown */}
+                                    {isUserDropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md border border-gray-200 rounded-lg shadow-lg z-50">
+                                            <div className="py-1">
+                                                <Link
+                                                    href={`/${locale}/profile`}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                                    onClick={() => setIsUserDropdownOpen(false)}
+                                                >
+                                                    Profile
+                                                </Link>
+                                                <Link
+                                                    href={`/${locale}/dashboard`}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                                    onClick={() => setIsUserDropdownOpen(false)}
+                                                >
+                                                    Dashboard
+                                                </Link>
+                                                <Link
+                                                    href={`/${locale}/reservations`}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                                    onClick={() => setIsUserDropdownOpen(false)}
+                                                >
+                                                    Reservations
+                                                </Link>
+                                                <Link
+                                                    href={`/${locale}/help`}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                                    onClick={() => setIsUserDropdownOpen(false)}
+                                                >
+                                                    Help Center
+                                                </Link>
+                                                <div className="border-t border-gray-200 my-1"></div>
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                                >
+                                                    Logout
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                // User is not authenticated - show sign in button
+                                <Link
+                                    href={`/${pathname.split('/')[1] || 'en'}/auth/signin`}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-[#d9ff0a] hover:bg-[#c4e600] text-black font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 focus:ring-offset-transparent shadow-lg"
+                                    aria-label="Sign in to your account"
+                                >
+                                    <FiUser className="w-4 h-4" />
+                                    <span>{t('signIn')}</span>
+                                </Link>
+                            )}
+
+                            {/* Become a Vendor Button - Only show for non-authenticated users */}
+                            {!user && (
+                                <Link
+                                    href={`/${locale}/vendor-signup`}
+                                    className="flex items-center space-x-2 px-4 py-2 bg-black hover:bg-gray-900 text-[#d9ff0a] font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 focus:ring-offset-transparent shadow-lg"
+                                    aria-label="Become a vendor and start offering services"
+                                >
+                                    <FiBriefcase className="w-4 h-4" />
+                                    <span>{t('becomeVendor')}</span>
+                                </Link>
+                            )}
 
                         </div>
 
@@ -218,43 +321,43 @@ export default function GlassmorphismHeader() {
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <nav className="flex items-center justify-center space-x-8 py-3">
                                 <Link
-                                    href="/categories/venues"
+                                    href={`/${locale}/categories/venues`}
                                     className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-200 hover:scale-105 transform"
                                 >
                                     {tc('venues')}
                                 </Link>
                                 <Link
-                                    href="/categories/dresses"
+                                    href={`/${locale}/categories/dresses`}
                                     className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-200 hover:scale-105 transform"
                                 >
                                     {tc('dresses')}
                                 </Link>
                                 <Link
-                                    href="/categories/catering"
+                                    href={`/${locale}/categories/catering`}
                                     className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-200 hover:scale-105 transform"
                                 >
                                     {tc('catering')}
                                 </Link>
                                 <Link
-                                    href="/categories/photoVideo"
+                                    href={`/${locale}/categories/photoVideo`}
                                     className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-200 hover:scale-105 transform"
                                 >
                                     {tc('photoVideo')}
                                 </Link>
                                 <Link
-                                    href="/categories/planningBeauty"
+                                    href={`/${locale}/categories/planningBeauty`}
                                     className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-200 hover:scale-105 transform"
                                 >
                                     {tc('planningBeauty')}
                                 </Link>
                                 <Link
-                                    href="/categories/decor"
+                                    href={`/${locale}/categories/decor`}
                                     className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-200 hover:scale-105 transform"
                                 >
                                     {tc('decor')}
                                 </Link>
                                 <Link
-                                    href="/categories/music"
+                                    href={`/${locale}/categories/music`}
                                     className="text-white/80 hover:text-white font-medium text-sm transition-colors duration-200 hover:scale-105 transform"
                                 >
                                     {tc('music')}
@@ -320,73 +423,129 @@ export default function GlassmorphismHeader() {
                                     </div>
                                 </div>
 
-                                {/* Mobile Menu Links */}
+                                {/* Mobile Menu Authentication */}
                                 <div className="space-y-2">
-                                    <Link
-                                        href="/sign-in"
-                                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-[#d9ff0a] hover:bg-[#c4e600] text-black font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 shadow-lg"
-                                        onClick={closeAllMenus}
-                                    >
-                                        <FiUser className="w-5 h-5" />
-                                        <span>{t('signIn')}</span>
-                                    </Link>
-                                    <Link
-                                        href="/vendor-signup"
-                                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-black hover:bg-gray-900 text-[#d9ff0a] font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 shadow-lg"
-                                        onClick={closeAllMenus}
-                                    >
-                                        <FiBriefcase className="w-5 h-5" />
-                                        <span>{t('becomeVendor')}</span>
-                                    </Link>
+                                    {isLoadingAuth ? (
+                                        // Loading auth state for mobile
+                                        <div className="flex justify-center py-4">
+                                            <div className="w-8 h-8 bg-[#d9ff0a]/20 rounded-full animate-pulse"></div>
+                                        </div>
+                                    ) : user ? (
+                                        // User is authenticated - show user menu items
+                                        <div className="space-y-2">
+                                            <div className="flex items-center space-x-3 p-3 bg-[#d9ff0a]/10 rounded-lg">
+                                                <div className="w-10 h-10 bg-[#d9ff0a] rounded-full flex items-center justify-center text-black font-semibold">
+                                                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                                                </div>
+                                                <span className="text-gray-900 text-sm font-medium">{user.email}</span>
+                                            </div>
+                                            <Link
+                                                href={`/${locale}/profile`}
+                                                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200"
+                                                onClick={closeAllMenus}
+                                            >
+                                                Profile
+                                            </Link>
+                                            <Link
+                                                href={`/${locale}/dashboard`}
+                                                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200"
+                                                onClick={closeAllMenus}
+                                            >
+                                                Dashboard
+                                            </Link>
+                                            <Link
+                                                href={`/${locale}/reservations`}
+                                                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200"
+                                                onClick={closeAllMenus}
+                                            >
+                                                Reservations
+                                            </Link>
+                                            <Link
+                                                href={`/${locale}/help`}
+                                                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200"
+                                                onClick={closeAllMenus}
+                                            >
+                                                Help Center
+                                            </Link>
+                                            <button
+                                                onClick={handleLogout}
+                                                className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-red-50 hover:bg-red-100 text-red-700 font-medium rounded-lg transition-all duration-200"
+                                            >
+                                                Logout
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        // User is not authenticated - show sign in button
+                                        <Link
+                                            href={`/${pathname.split('/')[1] || 'en'}/auth/signin`}
+                                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-[#d9ff0a] hover:bg-[#c4e600] text-black font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 shadow-lg"
+                                            onClick={closeAllMenus}
+                                        >
+                                            <FiUser className="w-5 h-5" />
+                                            <span>{t('signIn')}</span>
+                                        </Link>
+                                    )}
+
+                                    {/* Become a Vendor Button - Only show for non-authenticated users */}
+                                    {!user && (
+                                        <Link
+                                            href={`/${locale}/vendor-signup`}
+                                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-black hover:bg-gray-900 text-[#d9ff0a] font-medium rounded-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:ring-offset-2 shadow-lg"
+                                            onClick={closeAllMenus}
+                                        >
+                                            <FiBriefcase className="w-5 h-5" />
+                                            <span>{t('becomeVendor')}</span>
+                                        </Link>
+                                    )}
                                 </div>
 
                                 {/* Mobile Categories */}
                                 <div className="border-t border-gray-200 pt-4">
                                     <div className="space-y-2">
                                         <Link
-                                            href="/categories/venues"
+                                            href={`/${locale}/categories/venues`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100/50 rounded-lg transition-colors duration-200"
                                             onClick={closeAllMenus}
                                         >
                                             {tc('venues')}
                                         </Link>
                                         <Link
-                                            href="/categories/dresses"
+                                            href={`/${locale}/categories/dresses`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100/50 rounded-lg transition-colors duration-200"
                                             onClick={closeAllMenus}
                                         >
                                             {tc('dresses')}
                                         </Link>
                                         <Link
-                                            href="/categories/catering"
+                                            href={`/${locale}/categories/catering`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100/50 rounded-lg transition-colors duration-200"
                                             onClick={closeAllMenus}
                                         >
                                             {tc('catering')}
                                         </Link>
                                         <Link
-                                            href="/categories/photoVideo"
+                                            href={`/${locale}/categories/photoVideo`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100/50 rounded-lg transition-colors duration-200"
                                             onClick={closeAllMenus}
                                         >
                                             {tc('photoVideo')}
                                         </Link>
                                         <Link
-                                            href="/categories/planningBeauty"
+                                            href={`/${locale}/categories/planningBeauty`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100/50 rounded-lg transition-colors duration-200"
                                             onClick={closeAllMenus}
                                         >
                                             {tc('planningBeauty')}
                                         </Link>
                                         <Link
-                                            href="/categories/decor"
+                                            href={`/${locale}/categories/decor`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100/50 rounded-lg transition-colors duration-200"
                                             onClick={closeAllMenus}
                                         >
                                             {tc('decor')}
                                         </Link>
                                         <Link
-                                            href="/categories/music"
+                                            href={`/${locale}/categories/music`}
                                             className="block px-4 py-2 text-gray-700 hover:bg-gray-100/50 rounded-lg transition-colors duration-200"
                                             onClick={closeAllMenus}
                                         >

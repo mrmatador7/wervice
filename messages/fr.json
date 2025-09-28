@@ -191,5 +191,78 @@
     "description": "De Casablanca à Fès – économisez gros sur votre célébration marocaine de rêve avec nos forfaits de mariage complets.",
     "startingFrom": "À partir de",
     "bookNow": "Réserver Maintenant"
+  },
+  "auth": {
+    "signup": {
+      "title": "Créez votre compte",
+      "subtitle": "Rejoignez Wervice pour planifier votre mariage marocain parfait",
+      "email": "Adresse e-mail",
+      "password": "Créez un mot de passe",
+      "button": "Créer un compte",
+      "loading": "Création du compte...",
+      "haveAccount": "Vous avez déjà un compte ? Se connecter",
+      "agreement": "En créant un compte, vous acceptez nos Conditions d'utilisation et Politique de confidentialité"
+    },
+    "verify": {
+      "title": "Vérifiez votre e-mail",
+      "description": "Nous avons envoyé un lien de vérification à votre adresse e-mail. Cliquez sur le lien pour activer votre compte.",
+      "sentTo": "Envoyé à :",
+      "resend": "Renvoyer l'e-mail de vérification",
+      "resending": "Renvoi en cours...",
+      "resent": "E-mail de vérification envoyé ! Vérifiez votre boîte de réception.",
+      "error": "Échec de l'envoi de l'e-mail de vérification. Veuillez réessayer.",
+      "spam": "Vous ne trouvez pas l'e-mail ? Vérifiez votre dossier spam.",
+      "support": "Besoin d'aide ? Contactez notre équipe de support.",
+      "backToSignIn": "Retour à la connexion",
+      "footer": "En vérifiant votre e-mail, vous acceptez nos Conditions d'utilisation et Politique de confidentialité"
+    },
+    "error": {
+      "title": "Erreur d'authentification",
+      "description": "Il y a eu un problème avec votre authentification. Veuillez réessayer.",
+      "details": "Détails de l'erreur :",
+      "tryAgain": "Essayer de s'inscrire à nouveau",
+      "support": "Besoin d'aide ? Contactez notre équipe de support.",
+      "footer": "Retournez à notre page d'accueil pour découvrir les services de mariage."
+    },
+    "signin": {
+      "title": "Bienvenue de retour",
+      "subtitle": "Connectez-vous à votre compte Wervice",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "button": "Se connecter",
+      "loading": "Connexion...",
+      "noAccount": "Pas de compte ? S'inscrire",
+      "forgotPassword": "Mot de passe oublié ?",
+      "agreement": "En vous connectant, vous acceptez nos Conditions d'utilisation et Politique de confidentialité"
+    },
+    "reset": {
+      "title": "Réinitialiser votre mot de passe",
+      "subtitle": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+      "emailPlaceholder": "Entrez votre e-mail",
+      "sendResetLink": "Envoyer le lien de réinitialisation",
+      "sending": "Envoi...",
+      "successTitle": "Vérifiez votre e-mail",
+      "successMessage": "Nous avons envoyé les instructions de réinitialisation du mot de passe à votre adresse e-mail.",
+      "sentTo": "Envoyé à :",
+      "spamNote": "Vous ne trouvez pas l'e-mail ? Vérifiez votre dossier spam.",
+      "backToSignIn": "Retour à la connexion",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
+    },
+    "update": {
+      "title": "Mettre à jour votre mot de passe",
+      "subtitle": "Entrez votre nouveau mot de passe ci-dessous.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "newPasswordPlaceholder": "Entrez un nouveau mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez le mot de passe",
+      "updatePassword": "Mettre à jour le mot de passe",
+      "updating": "Mise à jour...",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+      "successTitle": "Mot de passe mis à jour !",
+      "successMessage": "Votre mot de passe a été mis à jour avec succès. Vous serez redirigé vers votre tableau de bord sous peu.",
+      "redirecting": "Redirection...",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
+    }
   }
 }

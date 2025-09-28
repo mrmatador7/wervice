@@ -54,6 +54,11 @@ const lora = Lora({
 export const metadata: Metadata = {
   title: "Wervice - Moroccan Wedding Planning",
   description: "Authentic Moroccan weddings made easy",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
