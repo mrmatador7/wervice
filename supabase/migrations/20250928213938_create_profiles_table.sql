@@ -105,16 +105,23 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_profiles_wedding_date ON public.profiles(wedding_date);
-CREATE INDEX IF NOT EXISTS idx_profiles_location ON public.profiles(location);
-CREATE INDEX IF NOT EXISTS idx_profiles_planning_stage ON public.profiles(planning_stage);
-CREATE INDEX IF NOT EXISTS idx_profiles_is_vendor ON public.profiles(is_vendor);
-CREATE INDEX IF NOT EXISTS idx_profiles_vendor_category ON public.profiles(vendor_category);
+CREATE INDEX IF NOT EXISTS idx_profiles_city ON public.profiles(city);
+CREATE INDEX IF NOT EXISTS idx_profiles_country ON public.profiles(country);
+CREATE INDEX IF NOT EXISTS idx_profiles_user_type ON public.profiles(user_type);
+CREATE INDEX IF NOT EXISTS idx_profiles_user_status ON public.profiles(user_status);
 CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON public.profiles(created_at);
+CREATE INDEX IF NOT EXISTS idx_profiles_updated_at ON public.profiles(updated_at);
 
--- Create a partial index for active wedding dates (future dates)
-CREATE INDEX IF NOT EXISTS idx_profiles_upcoming_weddings ON public.profiles(wedding_date)
-WHERE wedding_date > CURRENT_DATE;
+-- Create partial indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_profiles_active_users ON public.profiles(user_status)
+WHERE user_status = 'active';
+
+CREATE INDEX IF NOT EXISTS idx_profiles_vendors ON public.profiles(user_type)
+WHERE user_type = 'vendor';
+
+-- Create composite indexes for common queries
+CREATE INDEX IF NOT EXISTS idx_profiles_location ON public.profiles(city, country);
+CREATE INDEX IF NOT EXISTS idx_profiles_business_search ON public.profiles(business_name, city);
 
 -- Row Level Security (RLS) policies
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -131,28 +138,28 @@ CREATE POLICY "Users can insert own profile" ON public.profiles
 CREATE POLICY "Users can update own profile" ON public.profiles
     FOR UPDATE USING (auth.uid() = id);
 
--- Policy: Vendors can view profiles of potential clients (users planning weddings)
--- This allows vendors to see basic info of users in planning/booked stages
+-- Policy: Vendors can view profiles of potential clients in their area
 CREATE POLICY "Vendors can view client profiles" ON public.profiles
     FOR SELECT USING (
         EXISTS (
             SELECT 1 FROM public.profiles p
             WHERE p.id = auth.uid()
-            AND p.is_vendor = true
+            AND p.user_type = 'vendor'
         )
-        AND planning_stage IN ('planning', 'booked')
+        AND user_type = 'user'
     );
 
 -- Function to handle automatic profile creation on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.profiles (id, first_name, last_name, display_name)
+    INSERT INTO public.profiles (id, first_name, last_name, user_type, user_status)
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
         COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
-        COALESCE(NEW.raw_user_meta_data->>'full_name', '')
+        'user'::user_type,
+        'active'::user_status
     );
     RETURN NEW;
 END;
@@ -180,11 +187,13 @@ CREATE TRIGGER update_profiles_updated_at
 -- Grant necessary permissions
 GRANT ALL ON public.profiles TO authenticated;
 GRANT ALL ON public.profiles TO service_role;
+GRANT ALL ON public.categories TO authenticated;
+GRANT ALL ON public.categories TO service_role;
+GRANT ALL ON public.businesse_types TO authenticated;
+GRANT ALL ON public.businesse_types TO service_role;
 
 -- Comments for documentation
 COMMENT ON TABLE public.profiles IS 'Extended user profiles for Wervice wedding planning platform';
 COMMENT ON COLUMN public.profiles.id IS 'References auth.users.id - the Supabase auth user ID';
-COMMENT ON COLUMN public.profiles.wedding_date IS 'The planned wedding date';
-COMMENT ON COLUMN public.profiles.wedding_budget IS 'Wedding budget amount in specified currency';
-COMMENT ON COLUMN public.profiles.planning_stage IS 'Current stage of wedding planning';
-COMMENT ON COLUMN public.profiles.is_vendor IS 'Whether this user is a wedding vendor/service provider';
+COMMENT ON COLUMN public.profiles.user_type IS 'Type of user: user, vendor, admin, super_admin';
+COMMENT ON COLUMN public.profiles.user_status IS 'Status of user account: active, inactive, pending, banned';
