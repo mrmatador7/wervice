@@ -114,16 +114,28 @@ export async function middleware(req: NextRequest) {
             // Check if user is onboarded by querying their profile
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('is_onboarded')
+                .select('is_onboarded, user_type, user_status')
                 .eq('id', session.user.id)
                 .single()
 
-            if (!error && profile && !profile.is_onboarded) {
+            console.log('🛡️ Middleware onboarding check:', {
+                pathname,
+                userId: session.user.id,
+                profile: profile ? {
+                    is_onboarded: profile.is_onboarded,
+                    user_type: profile.user_type,
+                    user_status: profile.user_status
+                } : null,
+                error: error?.message
+            });
+
+            if (!error && profile && profile.is_onboarded === false) {
                 // User is authenticated but not onboarded, redirect to onboarding
                 const locale = pathname.split('/')[1] || 'en'
                 const onboardingUrl = new URL(`/${locale}/onboarding`, req.url)
                 // Store the original URL to redirect back after onboarding
                 onboardingUrl.searchParams.set('redirectTo', pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''))
+                console.log('🛡️ Redirecting to onboarding:', onboardingUrl.toString());
                 return NextResponse.redirect(onboardingUrl)
             }
         } catch (error) {

@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     avatar_url TEXT,
     birth_date DATE,
     gender TEXT,
-    user_type user_type,
+    user_type user_type ,
     user_status user_status,
     is_onboarded BOOLEAN DEFAULT FALSE,
 
@@ -117,13 +117,14 @@ CREATE INDEX IF NOT EXISTS idx_profiles_business_search ON public.profiles(busin
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.profiles (id, first_name, last_name, user_type, user_status)
+    INSERT INTO public.profiles (id, first_name, last_name, user_type, user_status, is_onboarded)
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
         COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
         'user'::user_type,
-        'active'::user_status
+        'active'::user_status,
+        FALSE
     );
     RETURN NEW;
 END;

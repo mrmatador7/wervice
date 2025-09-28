@@ -28,6 +28,16 @@ export default function SignInPage() {
                     // Check if user is onboarded
                     const { data: profile, error } = await ProfileService.getProfile(session.user.id);
 
+                    console.log('🔍 Profile check result:', {
+                        profile: profile ? {
+                            id: profile.id,
+                            is_onboarded: profile.is_onboarded,
+                            user_type: profile.user_type,
+                            user_status: profile.user_status
+                        } : null,
+                        error
+                    });
+
                     if (error) {
                         console.error('❌ Error fetching profile:', error);
                         // If there's an error, redirect to dashboard as fallback
@@ -35,11 +45,17 @@ export default function SignInPage() {
                         return;
                     }
 
-                    if (profile?.is_onboarded) {
+                    if (!profile) {
+                        console.log('❌ No profile found, redirecting to onboarding');
+                        router.push(`/${locale}/onboarding`);
+                        return;
+                    }
+
+                    if (profile.is_onboarded === true) {
                         console.log('✅ User is onboarded, redirecting to dashboard')
                         router.push(`/${locale}/dashboard`);
                     } else {
-                        console.log('📝 User not onboarded, redirecting to onboarding')
+                        console.log('📝 User not onboarded (is_onboarded:', profile.is_onboarded, '), redirecting to onboarding')
                         router.push(`/${locale}/onboarding`);
                     }
                 } catch (error) {

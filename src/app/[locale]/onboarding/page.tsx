@@ -40,7 +40,14 @@ export default function OnboardingPage() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
 
+      console.log('📝 Onboarding page loaded:', {
+        hasSession: !!session,
+        userId: session?.user?.id,
+        locale
+      });
+
       if (!session) {
+        console.log('❌ No session, redirecting to signin');
         router.push(`/${locale}/auth/signin`);
         return;
       }
@@ -52,16 +59,30 @@ export default function OnboardingPage() {
       const redirectParam = urlParams.get('redirectTo');
       if (redirectParam) {
         setRedirectTo(redirectParam);
+        console.log('🔄 Will redirect to after onboarding:', redirectParam);
       }
 
       // Check if already onboarded
-      const { data: profile } = await ProfileService.getProfile(session.user.id);
+      const { data: profile, error } = await ProfileService.getProfile(session.user.id);
+      console.log('🔍 Onboarding page profile check:', {
+        profile: profile ? {
+          id: profile.id,
+          is_onboarded: profile.is_onboarded,
+          user_type: profile.user_type,
+          user_status: profile.user_status
+        } : null,
+        error: error?.message
+      });
+
       if (profile?.is_onboarded) {
         // If already onboarded, redirect to the intended destination or dashboard
         const destination = redirectParam || `/${locale}/dashboard`;
+        console.log('✅ Already onboarded, redirecting to:', destination);
         router.push(destination);
         return;
       }
+
+      console.log('📝 User needs onboarding, showing form');
     };
 
     checkAuth();
@@ -263,11 +284,10 @@ export default function OnboardingPage() {
               {[1, 2, 3].map((step) => (
                 <div
                   key={step}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                    step <= currentStep
-                      ? 'bg-lime-500 text-white'
-                      : 'bg-gray-200 text-gray-500'
-                  }`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${step <= currentStep
+                    ? 'bg-lime-500 text-white'
+                    : 'bg-gray-200 text-gray-500'
+                    }`}
                 >
                   {step}
                 </div>
