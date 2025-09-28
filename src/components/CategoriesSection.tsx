@@ -88,11 +88,11 @@ export default function CategoriesSection() {
                             <Link
                                 key={category.name}
                                 href={category.href}
-                                className={`group flex flex-col items-center justify-center p-4 rounded-2xl ${category.gradient} transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 hover:scale-105`}
+                                className="group flex flex-col items-center justify-center p-4 rounded-2xl hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                 aria-label={`View ${category.name} category`}
                             >
                                 {/* Image Container */}
-                                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-xl">
+                                <div className={`relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden ${category.gradient} group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-xl`}>
                                     <img
                                         src={category.image}
                                         alt={category.name}
@@ -103,7 +103,7 @@ export default function CategoriesSection() {
                                 </div>
 
                                 {/* Category Name */}
-                                <span className="mt-3 text-sm md:text-base font-medium text-white transition-colors duration-300 text-center">
+                                <span className="mt-3 text-sm md:text-base font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-300 text-center">
                                     {category.name}
                                 </span>
                             </Link>
