@@ -83,7 +83,7 @@ export default function CategoriesSection() {
                 {/* Categories Container */}
                 <div className="rounded-3xl p-8 md:p-12">
                     {/* Categories Grid - Images */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+                    <div className="flex justify-center gap-4 md:gap-6 lg:gap-8 mb-8 overflow-x-auto">
                         {categories.map((category) => (
                             <Link
                                 key={category.name}
