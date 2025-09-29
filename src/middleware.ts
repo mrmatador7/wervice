@@ -110,62 +110,37 @@ export async function middleware(req: NextRequest) {
         pathname.includes(route) && (pathname.startsWith('/en') || pathname.startsWith('/fr') || pathname.startsWith('/ar'))
     )
 
-    if (session) {
-        const middlewareTimestamp = new Date().toISOString();
-        console.log(`[${middlewareTimestamp}] 🛡️ Middleware processing request:`, {
-            pathname,
-            method: req.method,
-            userAgent: req.headers.get('user-agent')?.substring(0, 50) + '...',
-            userId: session.user.id,
-            userEmail: session.user.email,
-            sessionExpiry: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
-        });
-
+    // Check if authenticated user needs profile (for protected routes)
+    if (isOnboardingRequiredRoute && session) {
         try {
-            // Ensure user has a profile (create if missing)
-            const profileStartTime = Date.now();
-            const { profile, created, error: profileError } = await ensureUserProfile(session);
-            const profileDuration = Date.now() - profileStartTime;
+            // Check if user has a profile for protected routes
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name')
+                .eq('id', session.user.id)
+                .single();
 
-            console.log(`[${new Date().toISOString()}] 🛡️ Profile operation completed in ${profileDuration}ms:`, {
-                pathname,
-                userId: session.user.id,
-                hasProfile: !!profile,
-                profileCreated: created,
-                operation: created ? 'CREATED' : 'VERIFIED',
-                profile: profile ? {
-                    id: profile.id,
-                    first_name: profile.first_name,
-                    last_name: profile.last_name,
-                    email: profile.email,
-                    user_type: profile.user_type,
-                    user_status: profile.user_status,
-                    created_at: profile.created_at,
-                    updated_at: profile.updated_at
-                } : null,
-                error: profileError ? {
-                    message: profileError.message,
-                    code: profileError.code,
-                    details: profileError.details
-                } : null
-            });
+            if (error && error.code === 'PGRST116') { // No profile found
+                console.log(`[${new Date().toISOString()}] 🛡️ User has no profile, redirecting to onboarding:`, {
+                    userId: session.user.id,
+                    route: pathname,
+                    redirectTo: `/${pathname.split('/')[1] || 'en'}/onboarding?redirectTo=${encodeURIComponent(pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''))}`
+                });
 
-            if (profileError && !profile) {
-                console.error('🛡️ Profile creation failed, continuing with limited functionality');
-                // Continue without profile - some features may not work
+                // Redirect to onboarding if trying to access protected routes without profile
+                const locale = pathname.split('/')[1] || 'en';
+                const onboardingUrl = new URL(`/${locale}/onboarding`, req.url);
+                onboardingUrl.searchParams.set('redirectTo', pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''));
+                return NextResponse.redirect(onboardingUrl);
             }
-
-            // Profile existence is guaranteed by this point
-            // Onboarding redirects are handled by the signin page, not middleware
         } catch (error) {
-            console.error('🛡️ Error in middleware profile/onboarding check:', error)
-            // If there's an error, allow access (fail open)
+            console.error('🛡️ Error checking profile in middleware:', error);
+            // Allow access if there's an error (fail open)
         }
     }
 
-    // Note: Authenticated users can access auth routes now because the signin page
-    // handles proper redirection based on onboarding status. Users who are not
-    // onboarded will be redirected to onboarding from the signin component.
+    // Note: Profile creation is now handled by the onboarding flow
+    // Authenticated users can access auth routes - signin page handles redirects
 
     // Continue with the request
     return response
