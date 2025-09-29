@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion } from 'framer-motion';
 import { HeroProps } from '@/models/types';
-import { NAVBAR_CATEGORIES } from '@/lib/constants';
+import { NAVBAR_CATEGORIES } from '@/lib/config';
 import WerviceSearchBar from '@/components/ui/WerviceSearchBar';
 
 

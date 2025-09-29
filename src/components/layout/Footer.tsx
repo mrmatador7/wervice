@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { CURRENT_YEAR } from '@/lib/constants';
+import { CURRENT_YEAR } from '@/lib/config';
 
 export default function Footer() {
   const t = useTranslations('footer');
