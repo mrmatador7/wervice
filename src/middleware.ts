@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import type { CookieOptions } from '@supabase/ssr'
-import { ensureUserProfile } from '@/lib/profile'
 
 export async function middleware(req: NextRequest) {
     let response = NextResponse.next({
@@ -85,7 +84,8 @@ export async function middleware(req: NextRequest) {
         '/auth/signup',
         '/auth/reset-password',
         '/auth/update-password'
-    ]
+    ];
+
 
     // Check if the current path is a protected route
     const isProtectedRoute = protectedRoutes.some(route =>
@@ -110,41 +110,60 @@ export async function middleware(req: NextRequest) {
         pathname.includes(route) && (pathname.startsWith('/en') || pathname.startsWith('/fr') || pathname.startsWith('/ar'))
     )
 
-    // Check if authenticated user needs profile (for protected routes)
-    if (isOnboardingRequiredRoute && session) {
+    // Check if authenticated user has profile - sign out if not
+    if (session) {
         try {
-            // Check if user has a profile for protected routes
+            // Check if user has a profile
             const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('id, first_name, last_name')
                 .eq('id', session.user.id)
                 .single();
 
-            if (error && error.code === 'PGRST116') { // No profile found
-                console.log(`[${new Date().toISOString()}] 🛡️ User has no profile, redirecting to onboarding:`, {
+            const hasProfile = !!profile && !error;
+
+            console.log(`[${new Date().toISOString()}] 🛡️ User profile verification:`, {
+                userId: session.user.id,
+                hasProfile,
+                route: pathname,
+                profileError: error ? {
+                    message: error.message,
+                    code: error.code
+                } : null
+            });
+
+            // If user has no profile, sign them out completely
+            if (!hasProfile) {
+                console.log(`[${new Date().toISOString()}] 🚪 User has no profile, signing out:`, {
                     userId: session.user.id,
-                    route: pathname,
-                    userAgent: req.headers.get('user-agent')?.substring(0, 50),
-                    redirectTo: `/${pathname.split('/')[1] || 'en'}/onboarding?redirectTo=${encodeURIComponent(pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''))}`
+                    reason: 'No profile found - user must complete onboarding first',
+                    action: 'Sign out and redirect to signin'
                 });
 
-                // Redirect to onboarding if trying to access protected routes without profile
+                // Sign out the user by clearing the session
+                await supabase.auth.signOut();
+
+                // Redirect to signin page
                 const locale = pathname.split('/')[1] || 'en';
-                const onboardingUrl = new URL(`/${locale}/onboarding`, req.url);
-                onboardingUrl.searchParams.set('redirectTo', pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''));
-                console.log(`[${new Date().toISOString()}] 🛡️ Executing redirect to:`, onboardingUrl.toString());
-                return NextResponse.redirect(onboardingUrl);
+                const signinUrl = new URL(`/${locale}/auth/signin`, req.url);
+                console.log(`[${new Date().toISOString()}] 🔄 Redirecting to signin:`, signinUrl.toString());
+                return NextResponse.redirect(signinUrl);
             }
 
-            // Log successful profile verification for protected routes
-            console.log(`[${new Date().toISOString()}] ✅ User has profile, allowing access to:`, {
+            // User has profile, allow access
+            console.log(`[${new Date().toISOString()}] ✅ User authenticated with profile, allowing access:`, {
                 userId: session.user.id,
                 route: pathname,
-                hasProfile: !!profile
+                profileId: profile.id
             });
+
         } catch (error) {
-            console.error('🛡️ Error checking profile in middleware:', error);
-            // Allow access if there's an error (fail open)
+            const errorObj = error as any;
+            console.error(`[${new Date().toISOString()}] 💥 Error in middleware profile check:`, {
+                error: errorObj?.message || errorObj || 'Unknown error',
+                userId: session.user.id
+            });
+            // If there's an error, allow access (fail open)
         }
     }
 

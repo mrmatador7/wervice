@@ -32,70 +32,17 @@ export default function SignInPage() {
             })
 
             if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-                console.log(`[${eventTimestamp}] ✅ User authenticated, starting profile check process`)
+                console.log(`[${eventTimestamp}] ✅ User authenticated successfully:`, {
+                    userId: session.user.id,
+                    email: session.user.email,
+                    provider: session.user.app_metadata?.provider
+                });
 
-                try {
-                    // Check if user has a profile
-                    console.log(`[${eventTimestamp}] 🔍 Checking profile for user:`, session.user.id);
-                    const profileStartTime = Date.now();
-
-                    const { data: profile, error } = await ProfileService.getProfile(session.user.id);
-                    const profileCheckDuration = Date.now() - profileStartTime;
-
-                    console.log(`[${new Date().toISOString()}] 🔍 Profile check completed in ${profileCheckDuration}ms:`, {
-                        profileExists: !!profile,
-                        profile: profile ? {
-                            id: profile.id,
-                            first_name: profile.first_name,
-                            last_name: profile.last_name,
-                            email: profile.email,
-                            user_type: profile.user_type,
-                            user_status: profile.user_status,
-                            created_at: profile.created_at,
-                            updated_at: profile.updated_at
-                        } : null,
-                        error: error ? {
-                            message: error.message,
-                            details: error.details,
-                            hint: error.hint
-                        } : null
-                    });
-
-                    if (error) {
-                        console.error(`[${new Date().toISOString()}] ❌ Error fetching profile:`, {
-                            error: error.message,
-                            code: error.code,
-                            details: error.details,
-                            userId: session.user.id
-                        });
-                        // If there's an error fetching profile, redirect to onboarding to create one
-                        console.log(`[${new Date().toISOString()}] 🚨 Error occurred, redirecting to onboarding for profile creation`);
-                        router.push(`/${locale}/onboarding`);
-                        return;
-                    }
-
-                    if (profile) {
-                        // User has a profile, redirect to dashboard
-                        console.log(`[${new Date().toISOString()}] ✅ User has profile, redirecting to dashboard:`, {
-                            userId: profile.id,
-                            destination: `/${locale}/dashboard`,
-                            profileAge: profile.created_at ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 1000 / 60) + ' minutes old' : 'unknown'
-                        });
-                        router.push(`/${locale}/dashboard`);
-                    } else {
-                        // User doesn't have a profile, redirect to onboarding
-                        console.log(`[${new Date().toISOString()}] 📝 User has no profile, redirecting to onboarding:`, {
-                            userId: session.user.id,
-                            destination: `/${locale}/onboarding`,
-                            reason: 'Profile not found in database'
-                        });
-                        router.push(`/${locale}/onboarding`);
-                    }
-                } catch (error) {
-                    console.error('❌ Error checking onboarding status:', error);
-                    // Fallback to dashboard if there's an error
-                    router.push(`/${locale}/dashboard`);
-                }
+                // Redirect all authenticated users to onboarding
+                // Middleware will sign out users without profiles on subsequent requests
+                // Users with profiles will be allowed to access dashboard
+                console.log(`[${eventTimestamp}] 📝 Redirecting authenticated user to onboarding`);
+                router.push(`/${locale}/onboarding`);
             }
         });
 
