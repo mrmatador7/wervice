@@ -124,6 +124,7 @@ export async function middleware(req: NextRequest) {
                 console.log(`[${new Date().toISOString()}] 🛡️ User has no profile, redirecting to onboarding:`, {
                     userId: session.user.id,
                     route: pathname,
+                    userAgent: req.headers.get('user-agent')?.substring(0, 50),
                     redirectTo: `/${pathname.split('/')[1] || 'en'}/onboarding?redirectTo=${encodeURIComponent(pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''))}`
                 });
 
@@ -131,8 +132,16 @@ export async function middleware(req: NextRequest) {
                 const locale = pathname.split('/')[1] || 'en';
                 const onboardingUrl = new URL(`/${locale}/onboarding`, req.url);
                 onboardingUrl.searchParams.set('redirectTo', pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''));
+                console.log(`[${new Date().toISOString()}] 🛡️ Executing redirect to:`, onboardingUrl.toString());
                 return NextResponse.redirect(onboardingUrl);
             }
+
+            // Log successful profile verification for protected routes
+            console.log(`[${new Date().toISOString()}] ✅ User has profile, allowing access to:`, {
+                userId: session.user.id,
+                route: pathname,
+                hasProfile: !!profile
+            });
         } catch (error) {
             console.error('🛡️ Error checking profile in middleware:', error);
             // Allow access if there's an error (fail open)

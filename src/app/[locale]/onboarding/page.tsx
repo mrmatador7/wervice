@@ -188,11 +188,13 @@ export default function OnboardingPage() {
       const destination = `/${locale}/dashboard`;
       console.log(`[${new Date().toISOString()}] 🎯 Onboarding completed, redirecting to:`, {
         destination,
+        currentPath: window.location.pathname,
         completionTime: new Date().toISOString(),
         totalProcessTime: Date.now() - new Date(completionTimestamp).getTime() + 'ms'
       });
 
-      router.push(destination);
+      // Use window.location for more reliable redirect
+      window.location.href = destination;
     } catch (error) {
       console.error(`[${new Date().toISOString()}] 💥 Unexpected error during onboarding completion:`, error);
     } finally {
