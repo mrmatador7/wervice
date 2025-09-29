@@ -135,16 +135,8 @@ export async function middleware(req: NextRequest) {
                 // Continue without profile - some features may not work
             }
 
-            // Now check if user needs onboarding (for protected routes)
-            if (isOnboardingRequiredRoute && profile && profile.is_onboarded === false) {
-                // User is authenticated but not onboarded, redirect to onboarding
-                const locale = pathname.split('/')[1] || 'en'
-                const onboardingUrl = new URL(`/${locale}/onboarding`, req.url)
-                // Store the original URL to redirect back after onboarding
-                onboardingUrl.searchParams.set('redirectTo', pathname + (searchParams.toString() ? `?${searchParams.toString()}` : ''))
-                console.log('🛡️ Redirecting to onboarding:', onboardingUrl.toString());
-                return NextResponse.redirect(onboardingUrl)
-            }
+            // Profile existence is guaranteed by this point
+            // Onboarding redirects are handled by the signin page, not middleware
         } catch (error) {
             console.error('🛡️ Error in middleware profile/onboarding check:', error)
             // If there's an error, allow access (fail open)

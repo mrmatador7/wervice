@@ -62,7 +62,7 @@ export default function OnboardingPage() {
         console.log('🔄 Will redirect to after onboarding:', redirectParam);
       }
 
-      // Check if already onboarded
+      // Check if user already has a profile
       const { data: profile, error } = await ProfileService.getProfile(session.user.id);
       console.log('🔍 Onboarding page profile check:', {
         profile: profile ? {
@@ -74,10 +74,10 @@ export default function OnboardingPage() {
         error: error?.message
       });
 
-      if (profile?.is_onboarded) {
-        // If already onboarded, redirect to the intended destination or dashboard
+      if (profile) {
+        // User already has a profile, redirect to dashboard
         const destination = redirectParam || `/${locale}/dashboard`;
-        console.log('✅ Already onboarded, redirecting to:', destination);
+        console.log('✅ User has profile, redirecting to:', destination);
         router.push(destination);
         return;
       }
@@ -110,10 +110,10 @@ export default function OnboardingPage() {
     setIsLoading(true);
 
     try {
-      // Update profile with onboarding data
-      const { error } = await ProfileService.updateProfile(user.id, {
-        ...formData,
-        is_onboarded: true
+      // Create/update profile with onboarding data
+      const { error } = await ProfileService.upsertProfile({
+        id: user.id,
+        ...formData
       });
 
       if (error) {
@@ -121,11 +121,10 @@ export default function OnboardingPage() {
         return;
       }
 
-      console.log('✅ Onboarding completed successfully');
+      console.log('✅ Profile created successfully');
 
-      // Redirect to the intended destination or dashboard
-      const destination = redirectTo || `/${locale}/dashboard`;
-      router.push(destination);
+      // Redirect to dashboard (onboarding is complete)
+      router.push(`/${locale}/dashboard`);
     } catch (error) {
       console.error('Error completing onboarding:', error);
     } finally {

@@ -25,10 +25,10 @@ export default function SignInPage() {
                 console.log('✅ User authenticated, checking onboarding status')
 
                 try {
-                    // Middleware ensures profile exists, just check onboarding status
+                    // Check if user has a profile
                     const { data: profile, error } = await ProfileService.getProfile(session.user.id);
 
-                    console.log('🔍 Signin onboarding check:', {
+                    console.log('🔍 Signin profile check:', {
                         profile: profile ? {
                             id: profile.id,
                             is_onboarded: profile.is_onboarded,
@@ -40,22 +40,18 @@ export default function SignInPage() {
 
                     if (error) {
                         console.error('❌ Error fetching profile:', error);
-                        // Middleware should have created profile, fallback to onboarding
+                        // If there's an error fetching profile, redirect to onboarding to create one
                         router.push(`/${locale}/onboarding`);
                         return;
                     }
 
-                    if (!profile) {
-                        console.log('❌ No profile found after middleware check, redirecting to onboarding');
-                        router.push(`/${locale}/onboarding`);
-                        return;
-                    }
-
-                    if (profile.is_onboarded === true) {
-                        console.log('✅ User is onboarded, redirecting to dashboard')
+                    if (profile) {
+                        // User has a profile, redirect to dashboard
+                        console.log('✅ User has profile, redirecting to dashboard');
                         router.push(`/${locale}/dashboard`);
                     } else {
-                        console.log('📝 User not onboarded (is_onboarded:', profile.is_onboarded, '), redirecting to onboarding')
+                        // User doesn't have a profile, redirect to onboarding
+                        console.log('📝 User has no profile, redirecting to onboarding');
                         router.push(`/${locale}/onboarding`);
                     }
                 } catch (error) {
