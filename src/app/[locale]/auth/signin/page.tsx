@@ -16,42 +16,79 @@ export default function SignInPage() {
     const locale = useLocale();
 
     useEffect(() => {
-        console.log('👤 Signin page mounted, locale:', locale)
+        const timestamp = new Date().toISOString();
+        console.log(`[${timestamp}] 👤 Signin page mounted, locale:`, locale)
+        console.log(`[${timestamp}] 🔗 Current URL:`, window.location.href)
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('🔄 Auth state changed:', { event, hasSession: !!session, userEmail: session?.user?.email })
+            const eventTimestamp = new Date().toISOString();
+            console.log(`[${eventTimestamp}] 🔄 Auth state changed:`, {
+                event,
+                hasSession: !!session,
+                userId: session?.user?.id,
+                userEmail: session?.user?.email,
+                userProvider: session?.user?.app_metadata?.provider,
+                sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+            })
 
             if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-                console.log('✅ User authenticated, checking onboarding status')
+                console.log(`[${eventTimestamp}] ✅ User authenticated, starting profile check process`)
 
                 try {
                     // Check if user has a profile
-                    const { data: profile, error } = await ProfileService.getProfile(session.user.id);
+                    console.log(`[${eventTimestamp}] 🔍 Checking profile for user:`, session.user.id);
+                    const profileStartTime = Date.now();
 
-                    console.log('🔍 Signin profile check:', {
+                    const { data: profile, error } = await ProfileService.getProfile(session.user.id);
+                    const profileCheckDuration = Date.now() - profileStartTime;
+
+                    console.log(`[${new Date().toISOString()}] 🔍 Profile check completed in ${profileCheckDuration}ms:`, {
+                        profileExists: !!profile,
                         profile: profile ? {
                             id: profile.id,
-                            is_onboarded: profile.is_onboarded,
+                            first_name: profile.first_name,
+                            last_name: profile.last_name,
+                            email: profile.email,
                             user_type: profile.user_type,
-                            user_status: profile.user_status
+                            user_status: profile.user_status,
+                            created_at: profile.created_at,
+                            updated_at: profile.updated_at
                         } : null,
-                        error
+                        error: error ? {
+                            message: error.message,
+                            details: error.details,
+                            hint: error.hint
+                        } : null
                     });
 
                     if (error) {
-                        console.error('❌ Error fetching profile:', error);
+                        console.error(`[${new Date().toISOString()}] ❌ Error fetching profile:`, {
+                            error: error.message,
+                            code: error.code,
+                            details: error.details,
+                            userId: session.user.id
+                        });
                         // If there's an error fetching profile, redirect to onboarding to create one
+                        console.log(`[${new Date().toISOString()}] 🚨 Error occurred, redirecting to onboarding for profile creation`);
                         router.push(`/${locale}/onboarding`);
                         return;
                     }
 
                     if (profile) {
                         // User has a profile, redirect to dashboard
-                        console.log('✅ User has profile, redirecting to dashboard');
+                        console.log(`[${new Date().toISOString()}] ✅ User has profile, redirecting to dashboard:`, {
+                            userId: profile.id,
+                            destination: `/${locale}/dashboard`,
+                            profileAge: profile.created_at ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 1000 / 60) + ' minutes old' : 'unknown'
+                        });
                         router.push(`/${locale}/dashboard`);
                     } else {
                         // User doesn't have a profile, redirect to onboarding
-                        console.log('📝 User has no profile, redirecting to onboarding');
+                        console.log(`[${new Date().toISOString()}] 📝 User has no profile, redirecting to onboarding:`, {
+                            userId: session.user.id,
+                            destination: `/${locale}/onboarding`,
+                            reason: 'Profile not found in database'
+                        });
                         router.push(`/${locale}/onboarding`);
                     }
                 } catch (error) {

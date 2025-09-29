@@ -111,23 +111,43 @@ export async function middleware(req: NextRequest) {
     )
 
     if (session) {
+        const middlewareTimestamp = new Date().toISOString();
+        console.log(`[${middlewareTimestamp}] 🛡️ Middleware processing request:`, {
+            pathname,
+            method: req.method,
+            userAgent: req.headers.get('user-agent')?.substring(0, 50) + '...',
+            userId: session.user.id,
+            userEmail: session.user.email,
+            sessionExpiry: session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+        });
+
         try {
             // Ensure user has a profile (create if missing)
+            const profileStartTime = Date.now();
             const { profile, created, error: profileError } = await ensureUserProfile(session);
+            const profileDuration = Date.now() - profileStartTime;
 
-            console.log('🛡️ Middleware profile check:', {
+            console.log(`[${new Date().toISOString()}] 🛡️ Profile operation completed in ${profileDuration}ms:`, {
                 pathname,
                 userId: session.user.id,
                 hasProfile: !!profile,
                 profileCreated: created,
+                operation: created ? 'CREATED' : 'VERIFIED',
                 profile: profile ? {
-                    is_onboarded: profile.is_onboarded,
+                    id: profile.id,
+                    first_name: profile.first_name,
+                    last_name: profile.last_name,
+                    email: profile.email,
                     user_type: profile.user_type,
                     user_status: profile.user_status,
-                    first_name: profile.first_name,
-                    last_name: profile.last_name
+                    created_at: profile.created_at,
+                    updated_at: profile.updated_at
                 } : null,
-                error: profileError?.message
+                error: profileError ? {
+                    message: profileError.message,
+                    code: profileError.code,
+                    details: profileError.details
+                } : null
             });
 
             if (profileError && !profile) {

@@ -36,18 +36,29 @@ export default function OnboardingPage() {
   });
 
   useEffect(() => {
+    const onboardingTimestamp = new Date().toISOString();
+    console.log(`[${onboardingTimestamp}] 📝 Onboarding page loaded:`, {
+      hasSession: 'checking...',
+      locale,
+      url: window.location.href,
+      searchParams: window.location.search
+    });
+
     // Check if user is authenticated and not onboarded
     const checkAuth = async () => {
+      const authStartTime = Date.now();
       const { data: { session } } = await supabase.auth.getSession();
+      const authDuration = Date.now() - authStartTime;
 
-      console.log('📝 Onboarding page loaded:', {
+      console.log(`[${new Date().toISOString()}] 🔐 Auth check completed in ${authDuration}ms:`, {
         hasSession: !!session,
         userId: session?.user?.id,
-        locale
+        userEmail: session?.user?.email,
+        sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
       });
 
       if (!session) {
-        console.log('❌ No session, redirecting to signin');
+        console.log(`[${new Date().toISOString()}] ❌ No session found, redirecting to signin`);
         router.push(`/${locale}/auth/signin`);
         return;
       }
@@ -59,30 +70,47 @@ export default function OnboardingPage() {
       const redirectParam = urlParams.get('redirectTo');
       if (redirectParam) {
         setRedirectTo(redirectParam);
-        console.log('🔄 Will redirect to after onboarding:', redirectParam);
+        console.log(`[${new Date().toISOString()}] 🔄 Will redirect to after onboarding:`, redirectParam);
       }
 
       // Check if user already has a profile
+      console.log(`[${new Date().toISOString()}] 🔍 Checking existing profile for user:`, session.user.id);
+      const profileStartTime = Date.now();
       const { data: profile, error } = await ProfileService.getProfile(session.user.id);
-      console.log('🔍 Onboarding page profile check:', {
+      const profileDuration = Date.now() - profileStartTime;
+
+      console.log(`[${new Date().toISOString()}] 🔍 Profile check completed in ${profileDuration}ms:`, {
+        profileExists: !!profile,
         profile: profile ? {
           id: profile.id,
-          is_onboarded: profile.is_onboarded,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email: profile.email,
           user_type: profile.user_type,
-          user_status: profile.user_status
+          user_status: profile.user_status,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at
         } : null,
-        error: error?.message
+        error: error ? {
+          message: error.message,
+          code: error.code,
+          details: error.details
+        } : null
       });
 
       if (profile) {
         // User already has a profile, redirect to dashboard
         const destination = redirectParam || `/${locale}/dashboard`;
-        console.log('✅ User has profile, redirecting to:', destination);
+        console.log(`[${new Date().toISOString()}] ✅ User already has profile, redirecting to:`, {
+          destination,
+          redirectReason: 'Profile already exists',
+          profileAge: profile.created_at ? Math.floor((Date.now() - new Date(profile.created_at).getTime()) / 1000 / 60) + ' minutes old' : 'unknown'
+        });
         router.push(destination);
         return;
       }
 
-      console.log('📝 User needs onboarding, showing form');
+      console.log(`[${new Date().toISOString()}] 📝 User needs profile creation, showing onboarding form`);
     };
 
     checkAuth();
@@ -107,26 +135,66 @@ export default function OnboardingPage() {
   const handleComplete = async () => {
     if (!user) return;
 
+    const completionTimestamp = new Date().toISOString();
+    console.log(`[${completionTimestamp}] 🚀 Starting onboarding completion process:`, {
+      userId: user.id,
+      formData: {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone: formData.phone,
+        city: formData.city,
+        country: formData.country,
+        bio: formData.bio ? formData.bio.substring(0, 50) + '...' : null
+      }
+    });
+
     setIsLoading(true);
 
     try {
       // Create/update profile with onboarding data
-      const { error } = await ProfileService.upsertProfile({
+      console.log(`[${new Date().toISOString()}] 💾 Creating/updating profile...`);
+      const profileStartTime = Date.now();
+
+      const { data: newProfile, error } = await ProfileService.upsertProfile({
         id: user.id,
         ...formData
       });
 
+      const profileDuration = Date.now() - profileStartTime;
+
       if (error) {
-        console.error('Error updating profile:', error);
+        console.error(`[${new Date().toISOString()}] ❌ Error creating profile:`, {
+          error: error.message,
+          code: error.code,
+          details: error.details,
+          duration: profileDuration + 'ms'
+        });
         return;
       }
 
-      console.log('✅ Profile created successfully');
+      console.log(`[${new Date().toISOString()}] ✅ Profile created/updated successfully in ${profileDuration}ms:`, {
+        profileId: newProfile?.id,
+        operation: newProfile?.created_at === newProfile?.updated_at ? 'CREATED' : 'UPDATED',
+        profile: newProfile ? {
+          first_name: newProfile.first_name,
+          last_name: newProfile.last_name,
+          email: newProfile.email,
+          user_type: newProfile.user_type,
+          user_status: newProfile.user_status
+        } : null
+      });
 
       // Redirect to dashboard (onboarding is complete)
-      router.push(`/${locale}/dashboard`);
+      const destination = `/${locale}/dashboard`;
+      console.log(`[${new Date().toISOString()}] 🎯 Onboarding completed, redirecting to:`, {
+        destination,
+        completionTime: new Date().toISOString(),
+        totalProcessTime: Date.now() - new Date(completionTimestamp).getTime() + 'ms'
+      });
+
+      router.push(destination);
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      console.error(`[${new Date().toISOString()}] 💥 Unexpected error during onboarding completion:`, error);
     } finally {
       setIsLoading(false);
     }

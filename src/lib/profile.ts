@@ -146,11 +146,11 @@ export class ProfileService {
      */
     static getProfileCompletion(profile: Profile): number {
         const requiredFields = [
-            'first_name', 'last_name', 'phone', 'location'
+            'first_name', 'last_name', 'phone', 'city'
         ] as const
 
-        const weddingFields = [
-            'wedding_date', 'wedding_budget', 'wedding_location', 'wedding_guest_count'
+        const optionalFields = [
+            'country', 'bio', 'business_name'
         ] as const
 
         let completed = 0
@@ -161,8 +161,8 @@ export class ProfileService {
             if (profile[field] && profile[field] !== '') completed++
         }
 
-        // Check wedding planning fields (optional but encouraged)
-        for (const field of weddingFields) {
+        // Check optional fields
+        for (const field of optionalFields) {
             if (profile[field]) completed++
             total++
         }
@@ -185,10 +185,6 @@ export class ProfileService {
             id: userId,
             first_name: userMetadata?.first_name || null,
             last_name: userMetadata?.last_name || null,
-            display_name: userMetadata?.full_name || null,
-            preferred_language: 'en',
-            planning_stage: 'exploring',
-            is_vendor: false,
             notification_preferences: {
                 email_marketing: true,
                 email_updates: true,
@@ -204,21 +200,39 @@ export class ProfileService {
  * Used in middleware to ensure all authenticated users have profiles
  */
 export async function ensureUserProfile(session: any): Promise<{ profile: any; created: boolean; error?: any }> {
+    const functionTimestamp = new Date().toISOString();
+
     try {
         // First check if profile exists
+        console.log(`[${functionTimestamp}] 🔍 Checking if profile exists for user:`, session.user.id);
+        const checkStartTime = Date.now();
+
         const { data: existingProfile, error: fetchError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
 
+        const checkDuration = Date.now() - checkStartTime;
+
         if (existingProfile && !fetchError) {
-            console.log('✅ Profile already exists for user:', session.user.id);
+            console.log(`[${new Date().toISOString()}] ✅ Profile already exists (${checkDuration}ms check):`, {
+                userId: session.user.id,
+                profileId: existingProfile.id,
+                profileAge: existingProfile.created_at ? Math.floor((Date.now() - new Date(existingProfile.created_at).getTime()) / 1000 / 60) + ' minutes old' : 'unknown'
+            });
             return { profile: existingProfile, created: false };
         }
 
+        if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = not found
+            console.log(`[${new Date().toISOString()}] ⚠️ Profile check error (${checkDuration}ms):`, {
+                error: fetchError.message,
+                code: fetchError.code
+            });
+        }
+
         // Profile doesn't exist, create it
-        console.log('👤 Creating new profile for user:', session.user.id);
+        console.log(`[${new Date().toISOString()}] 👤 Profile not found, creating new profile for user:`, session.user.id);
 
         const profileData = {
             id: session.user.id,
@@ -233,23 +247,55 @@ export async function ensureUserProfile(session: any): Promise<{ profile: any; c
             currency: 'MAD'
         };
 
+        console.log(`[${new Date().toISOString()}] 📝 Creating profile with data:`, {
+            userId: profileData.id,
+            first_name: profileData.first_name,
+            last_name: profileData.last_name,
+            email: profileData.email,
+            user_type: profileData.user_type,
+            user_status: profileData.user_status
+        });
+
+        const createStartTime = Date.now();
         const { data: newProfile, error: createError } = await supabase
             .from('profiles')
             .upsert(profileData, { onConflict: 'id' })
             .select('*')
             .single();
 
+        const createDuration = Date.now() - createStartTime;
+
         if (createError) {
-            console.error('❌ Error creating profile:', createError);
+            console.error(`[${new Date().toISOString()}] ❌ Error creating profile (${createDuration}ms):`, {
+                error: createError.message,
+                code: createError.code,
+                details: createError.details,
+                userId: session.user.id
+            });
             return { profile: null, created: false, error: createError };
         }
 
-        console.log('✅ Profile created successfully:', newProfile);
+        console.log(`[${new Date().toISOString()}] ✅ Profile created successfully (${createDuration}ms):`, {
+            profileId: newProfile.id,
+            userId: newProfile.id,
+            first_name: newProfile.first_name,
+            last_name: newProfile.last_name,
+            email: newProfile.email,
+            user_type: newProfile.user_type,
+            user_status: newProfile.user_status,
+            created_at: newProfile.created_at
+        });
+
         return { profile: newProfile, created: true };
 
     } catch (error) {
-        console.error('❌ Unexpected error in ensureUserProfile:', error);
-        return { profile: null, created: false, error };
+        const errorObj = error as any;
+        console.error(`[${new Date().toISOString()}] 💥 Unexpected error in ensureUserProfile:`, {
+            error: errorObj?.message || errorObj || 'Unknown error',
+            userId: session.user.id,
+            stack: errorObj?.stack
+        });
+        return { profile: null, created: false, error: errorObj };
     }
 }
 
