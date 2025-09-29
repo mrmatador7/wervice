@@ -12,6 +12,83 @@ export type Json =
 export interface Database {
     public: {
         Tables: {
+            categories: {
+                Row: {
+                    id: string
+                    name: string
+                    image: string
+                    description: string | null
+                    slug: string
+                    parent_id: string | null
+                    is_active: boolean
+                    is_featured: boolean
+                    created_at: string
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    name: string
+                    image: string
+                    description?: string | null
+                    slug: string
+                    parent_id?: string | null
+                    is_active?: boolean
+                    is_featured?: boolean
+                    created_at?: string
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    image?: string
+                    description?: string | null
+                    slug?: string
+                    parent_id?: string | null
+                    is_active?: boolean
+                    is_featured?: boolean
+                    created_at?: string
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "categories_parent_id_fkey"
+                        columns: ["parent_id"]
+                        isOneToOne: false
+                        referencedRelation: "categories"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            businesse_types: {
+                Row: {
+                    id: string
+                    name: string
+                    description: string | null
+                    created_at: string
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    name: string
+                    description?: string | null
+                    created_at?: string
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    name?: string
+                    description?: string | null
+                    created_at?: string
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
             profiles: {
                 Row: {
                     id: string
