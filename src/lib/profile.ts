@@ -200,6 +200,60 @@ export class ProfileService {
 }
 
 /**
+ * Create a profile for a user if it doesn't exist
+ * Used in middleware to ensure all authenticated users have profiles
+ */
+export async function ensureUserProfile(session: any): Promise<{ profile: any; created: boolean; error?: any }> {
+    try {
+        // First check if profile exists
+        const { data: existingProfile, error: fetchError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+        if (existingProfile && !fetchError) {
+            console.log('✅ Profile already exists for user:', session.user.id);
+            return { profile: existingProfile, created: false };
+        }
+
+        // Profile doesn't exist, create it
+        console.log('👤 Creating new profile for user:', session.user.id);
+
+        const profileData = {
+            id: session.user.id,
+            first_name: session.user.user_metadata?.first_name || session.user.user_metadata?.name?.split(' ')[0] || '',
+            last_name: session.user.user_metadata?.last_name || session.user.user_metadata?.name?.split(' ').slice(1).join(' ') || '',
+            email: session.user.email || '',
+            user_type: 'user' as const,
+            user_status: 'active' as const,
+            is_onboarded: false,
+            // Set additional default values
+            locale: 'en',
+            currency: 'MAD'
+        };
+
+        const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .upsert(profileData, { onConflict: 'id' })
+            .select('*')
+            .single();
+
+        if (createError) {
+            console.error('❌ Error creating profile:', createError);
+            return { profile: null, created: false, error: createError };
+        }
+
+        console.log('✅ Profile created successfully:', newProfile);
+        return { profile: newProfile, created: true };
+
+    } catch (error) {
+        console.error('❌ Unexpected error in ensureUserProfile:', error);
+        return { profile: null, created: false, error };
+    }
+}
+
+/**
  * React hook for profile management
  * Usage:
  * const { profile, loading, updateProfile } = useProfile(user?.id)
@@ -211,6 +265,7 @@ export function useProfile(userId?: string) {
         getProfile: (id: string) => ProfileService.getProfile(id),
         updateProfile: (id: string, updates: ProfileUpdate) => ProfileService.updateProfile(id, updates),
         upsertProfile: (profile: ProfileInsert) => ProfileService.upsertProfile(profile),
+        ensureUserProfile,
         userId
     }
 }

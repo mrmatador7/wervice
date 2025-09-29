@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import type { CookieOptions } from '@supabase/ssr'
+import { ensureUserProfile } from '@/lib/profile'
 
 export async function middleware(req: NextRequest) {
     let response = NextResponse.next({
@@ -111,17 +112,14 @@ export async function middleware(req: NextRequest) {
 
     if (session) {
         try {
-            // First, ensure user has a profile
-            let { data: profile, error } = await supabase
-                .from('profiles')
-                .select('is_onboarded, user_type, user_status, first_name, last_name')
-                .eq('id', session.user.id)
-                .single()
+            // Ensure user has a profile (create if missing)
+            const { profile, created, error: profileError } = await ensureUserProfile(session);
 
             console.log('🛡️ Middleware profile check:', {
                 pathname,
                 userId: session.user.id,
                 hasProfile: !!profile,
+                profileCreated: created,
                 profile: profile ? {
                     is_onboarded: profile.is_onboarded,
                     user_type: profile.user_type,
@@ -129,36 +127,12 @@ export async function middleware(req: NextRequest) {
                     first_name: profile.first_name,
                     last_name: profile.last_name
                 } : null,
-                error: error?.message
+                error: profileError?.message
             });
 
-            // If profile doesn't exist, create one
-            if (!profile && !error) {
-                console.log('🛡️ No profile found, creating profile in middleware...');
-
-                const profileData = {
-                    id: session.user.id,
-                    first_name: session.user.user_metadata?.first_name || '',
-                    last_name: session.user.user_metadata?.last_name || '',
-                    email: session.user.email || '',
-                    user_type: 'user',
-                    user_status: 'active',
-                    is_onboarded: false
-                };
-
-                const { data: newProfile, error: createError } = await supabase
-                    .from('profiles')
-                    .upsert(profileData, { onConflict: 'id' })
-                    .select('is_onboarded, user_type, user_status, first_name, last_name')
-                    .single();
-
-                if (createError) {
-                    console.error('🛡️ Error creating profile in middleware:', createError);
-                    // Continue with onboarding redirect even if profile creation fails
-                } else {
-                    console.log('🛡️ Profile created in middleware:', newProfile);
-                    profile = newProfile;
-                }
+            if (profileError && !profile) {
+                console.error('🛡️ Profile creation failed, continuing with limited functionality');
+                // Continue without profile - some features may not work
             }
 
             // Now check if user needs onboarding (for protected routes)
