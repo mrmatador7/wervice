@@ -41,7 +41,7 @@ export default function SmallCityCard({
       <div
         className="absolute inset-0 rounded-xl"
         style={{
-          background: `linear-gradient(to top, rgb(123 127 8 / 60%) 0%, rgb(123 127 8 / 40%) 25%, rgb(123 127 8 / 0%) 50%, rgb(123 127 8 / 0) 100%);`,
+          background: `linear-gradient(to top, rgb(123 127 8 / 60%) 0%, rgb(123 127 8 / 40%) 25%, rgb(123 127 8 / 0%) 50%, rgb(123 127 8 / 0) 100%)`,
           clipPath: 'polygon(0% 50%, 100% 50%, 100% 100%, 0% 100%)'
         }}
       ></div>

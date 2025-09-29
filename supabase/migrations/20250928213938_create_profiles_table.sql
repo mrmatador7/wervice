@@ -113,22 +113,6 @@ WHERE user_type = 'vendor';
 CREATE INDEX IF NOT EXISTS idx_profiles_location ON public.profiles(city, country);
 CREATE INDEX IF NOT EXISTS idx_profiles_business_search ON public.profiles(business_name, city);
 
--- Function to handle automatic profile creation on user signup
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO public.profiles (id, first_name, last_name, user_type, user_status, is_onboarded)
-    VALUES (
-        NEW.id,
-        COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
-        COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
-        'user'::user_type,
-        'active'::user_status,
-        FALSE
-    );
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to update the updated_at timestamp
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()

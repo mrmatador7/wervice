@@ -115,7 +115,7 @@ export async function middleware(req: NextRequest) {
         try {
             // Check if user has a profile
             const { data: profile, error } = await supabase
-                .from('profiles')
+                .from('public.profiles')
                 .select('id, first_name, last_name')
                 .eq('id', session.user.id)
                 .single();

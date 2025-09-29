@@ -17,7 +17,7 @@ type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 export async function getProfile(id: string): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .select('*')
       .eq('id', id)
       .single();
@@ -35,7 +35,7 @@ export async function getProfile(id: string): Promise<QueryResult<Profile>> {
 export async function getProfileByEmail(email: string): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .select('*')
       .eq('email', email)
       .single();
@@ -54,7 +54,7 @@ export async function getProfiles(
   filters: ProfileFilters = {}
 ): Promise<PaginatedQueryResult<Profile>> {
   try {
-    let query = supabase.from('profiles').select('*', { count: 'exact' });
+    let query = supabase.from('public.profiles').select('*', { count: 'exact' });
 
     // Apply filters
     if (filters.search) {
@@ -119,7 +119,7 @@ export async function getProfiles(
 export async function createProfile(profile: ProfileInsert): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .insert(profile)
       .select()
       .single();
@@ -141,7 +141,7 @@ export async function createProfile(profile: ProfileInsert): Promise<QueryResult
 export async function updateProfile(id: string, updates: ProfileUpdate): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .update({
         ...updates,
         updated_at: new Date().toISOString()
@@ -167,7 +167,7 @@ export async function updateProfile(id: string, updates: ProfileUpdate): Promise
 export async function upsertProfile(profile: ProfileInsert): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .upsert(profile, { onConflict: 'id' })
       .select()
       .single();
@@ -189,7 +189,7 @@ export async function upsertProfile(profile: ProfileInsert): Promise<QueryResult
 export async function deleteProfile(id: string): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .update({
         deleted_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -215,7 +215,7 @@ export async function deleteProfile(id: string): Promise<QueryResult<Profile>> {
 export async function hardDeleteProfile(id: string): Promise<QueryResult<null>> {
   try {
     const { error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .delete()
       .eq('id', id);
 
@@ -250,7 +250,7 @@ export async function getActiveUsers(filters: Omit<ProfileFilters, 'user_status'
 export async function searchProfilesByLocation(city?: string, country?: string, limit = 20): Promise<QueryResult<Profile[]>> {
   try {
     let query = supabase
-      .from('profiles')
+      .from('public.profiles')
       .select('*')
       .eq('user_status', 'active')
       .limit(limit);
@@ -285,7 +285,7 @@ export async function getProfileStats(): Promise<QueryResult<{
 }>> {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from('public.profiles')
       .select('user_type, user_status');
 
     if (error) {
