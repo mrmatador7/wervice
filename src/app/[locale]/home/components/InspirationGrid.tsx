@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { InspirationGridProps } from '@/models/types';
-import { INSPIRATION_ITEMS, FILTER_CATEGORIES } from '@/lib/constants';
+import { INSPIRATION_ITEMS, FILTER_CATEGORIES } from '@/lib/config';
 
 
 export default function InspirationGrid({}: InspirationGridProps) {

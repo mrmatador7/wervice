@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { supabase } from '@/lib/supabase';
-import { ProfileService } from '@/lib/profile';
+import { getProfile, upsertProfile } from '@/queries';
 import GlassmorphismHeader from '@/components/GlassmorphismHeader';
 
 interface OnboardingData {
@@ -76,7 +76,7 @@ export default function OnboardingPage() {
       // Check if user already has a profile
       console.log(`[${new Date().toISOString()}] 🔍 Checking existing profile for user:`, session.user.id);
       const profileStartTime = Date.now();
-      const { data: profile, error } = await ProfileService.getProfile(session.user.id);
+      const { data: profile, error } = await getProfile(session.user.id);
       const profileDuration = Date.now() - profileStartTime;
 
       console.log(`[${new Date().toISOString()}] 🔍 Profile check completed in ${profileDuration}ms:`, {
@@ -155,7 +155,7 @@ export default function OnboardingPage() {
       console.log(`[${new Date().toISOString()}] 💾 Creating/updating profile...`);
       const profileStartTime = Date.now();
 
-      const { data: newProfile, error } = await ProfileService.upsertProfile({
+      const { data: newProfile, error } = await upsertProfile({
         id: user.id,
         ...formData
       });

@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import GlassmorphismHeader from '@/components/GlassmorphismHeader';
-import { ProfileService } from '@/lib/profile';
+import { getProfile } from '@/queries';
 
 export default function SignInPage() {
     const router = useRouter();

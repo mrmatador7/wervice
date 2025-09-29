@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { FeaturedDealsProps } from '@/models/types';
-import { FEATURED_DEALS } from '@/lib/constants';
+import { FEATURED_DEALS } from '@/lib/config';
 import { generateStars, useCountdown } from '@/lib';
 
 
