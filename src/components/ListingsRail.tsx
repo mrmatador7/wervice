@@ -31,7 +31,7 @@ export default function ListingsRail({
 }: ListingsRailProps) {
   if (variant === "grid") {
     return (
-      <section className={`px-4 md:px-6 lg:px-8 py-8 bg-[#F7F8FB] ${className}`}>
+      <section className={`px-4 md:px-6 lg:px-8 py-8 ${className}`}>
         <div className="max-w-7xl mx-auto">
           {/* Section Title */}
           <div className="text-center mb-8">
@@ -60,7 +60,7 @@ export default function ListingsRail({
 
   // Carousel Layout (default)
   return (
-    <section className={`px-4 md:px-6 lg:px-8 py-8 bg-[#F7F8FB] ${className}`}>
+    <section className={`px-4 md:px-6 lg:px-8 py-8 ${className}`}>
       <div className="max-w-7xl mx-auto">
         {/* Section Title */}
         <div className="text-center mb-8">

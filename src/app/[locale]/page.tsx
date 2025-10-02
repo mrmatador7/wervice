@@ -1,66 +1,69 @@
-'use client';
-
-import GlassmorphismHeader from '@/components/GlassmorphismHeader';
-import Hero from './home/components/Hero';
-import CategoriesSection from '@/components/CategoriesSection';
-import CitiesCarousel from '@/components/CitiesCarousel';
-import CategoryRails from '@/components/CategoryRails';
-import ListingsRail from '@/components/ListingsRail';
-import BlogArticles from '@/components/BlogArticles';
-import BecomeVendorSection from './home/components/BecomeVendorSection';
+import dynamic from 'next/dynamic';
+import SearchBarSimple from '@/components/hero/SearchBarSimple';
+import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { homepageListings } from '@/lib/mockListings';
+import Section from '@/components/layout/Section';
 
-export default function HomePage() {
-  const handleViewOffers = () => {
-    // Smooth scroll to featured deals section
-    document.getElementById('featured-deals')?.scrollIntoView({ behavior: 'smooth' });
-  };
+// Try to load real sections; if not present, fall back to placeholders
+const PopularCities = dynamic(() => import('@/components/sections/PopularCities').catch(() => import('@/components/placeholders/PopularCities')));
+const CategoryBlocks = dynamic(() => import('@/components/sections/CategoryBlocks').catch(() => import('@/components/placeholders/CategoryBlocks')));
+const NewVendors = dynamic(() => import('@/components/sections/NewVendors').catch(() => import('@/components/placeholders/NewVendors')));
+const PlanWithConfidence = dynamic(() => import('@/components/sections/PlanWithConfidence').catch(() => import('@/components/placeholders/PlanWithConfidence')));
+const WeddingInsights = dynamic(() => import('@/components/sections/WeddingInsights').catch(() => import('@/components/placeholders/WeddingInsights')));
+const VendorCTA = dynamic(() => import('@/components/sections/VendorCTA').catch(() => import('@/components/placeholders/VendorCTA')));
+const Newsletter = dynamic(() => import('@/components/sections/Newsletter').catch(() => import('@/components/placeholders/Newsletter')));
 
+export default function Page() {
+  console.log("[HOME_FILE]", __filename);
   return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      <div className="fixed inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-          alt="Beautiful Moroccan wedding scene with traditional elements"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/40"></div>
-      </div>
+    <main data-testid="home-entry" className="min-h-screen">
+      {/* Header */}
+      <Header />
 
-      {/* Content */}
-      <div className="relative z-10">
-        <GlassmorphismHeader />
+      {/* Hero */}
+      <section className="pt-[calc(var(--header-h,64px)+40px)] pb-8 px-4 text-center">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-[#11190C]">Plan your wedding, your way.</h1>
+        <p className="mt-2 text-base sm:text-lg text-[#787664]">Compare trusted vendors, read reviews, and book fast — all in one place.</p>
+        <div className="mt-4"><SearchBarSimple /></div>
+      </section>
 
-        {/* Add top padding to account for fixed header */}
-        <div className="pt-16">
-          <Hero onViewOffers={handleViewOffers} />
-        </div>
+      {/* 1) Popular Cities */}
+      <Section variant="tinted">
+        <PopularCities />
+      </Section>
 
-        {/* Categories Section - Standalone */}
-        <CategoriesSection />
+      {/* 2) Categories (Venues / Catering / Photo & Video) */}
+      <Section variant="default">
+        <CategoryBlocks />
+      </Section>
 
-        {/* Cities Carousel */}
-        <CitiesCarousel variant="small" />
+      {/* 3) New Vendors */}
+      <Section variant="lime">
+        <NewVendors />
+      </Section>
 
-        {/* Category Rails */}
-        <CategoryRails />
+      {/* 4) Plan With Confidence */}
+      <Section variant="default">
+        <PlanWithConfidence />
+      </Section>
 
-        {/* New Vendors */}
-        <ListingsRail
-          title="New Vendors"
-          items={homepageListings}
-          variant="carousel"
-        />
+      {/* 5) Wedding Insights & Stories */}
+      <Section variant="tinted">
+        <WeddingInsights />
+      </Section>
 
-        {/* Blog Articles */}
-        <BlogArticles />
+      {/* 6) Vendor CTA */}
+      <Section variant="lime">
+        <VendorCTA />
+      </Section>
 
-        <BecomeVendorSection />
+      {/* 7) Newsletter */}
+      <Section variant="default">
+        <Newsletter />
+      </Section>
 
-        <Footer />
-      </div>
-    </div>
+      {/* Footer */}
+      <Footer />
+    </main>
   );
 }

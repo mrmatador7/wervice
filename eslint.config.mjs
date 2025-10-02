@@ -20,6 +20,16 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [
+          { name: '@/components/Hero', message: 'Use "@/components/hero/HeroSearch" instead.' },
+          { name: '@/components/hero/Hero', message: 'Use "@/components/hero/HeroSearch" instead.' },
+        ],
+      }],
+    },
+  },
 ];
 
 export default eslintConfig;

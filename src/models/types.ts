@@ -47,7 +47,7 @@ export interface HeaderProps {
 }
 
 export interface HeroProps {
-  onViewOffers: () => void;
+  readonly _brand?: 'HeroProps';
 }
 
 export interface FeaturedDealsProps {

@@ -16,17 +16,17 @@ interface GuidesListProps {
 const defaultGuides: Guide[] = [
   {
     title: 'Best wedding venues in Marrakech',
-    href: '/blog/best-venues-marrakech',
+    href: '/blog',
     tag: 'Guide'
   },
   {
     title: 'How to choose a photographer in Casablanca',
-    href: '/blog/choose-photographer-casablanca',
+    href: '/blog',
     tag: 'Guide'
   },
   {
     title: 'Henna night checklist',
-    href: '/blog/henna-night-checklist',
+    href: '/blog',
     tag: 'Guide'
   }
 ];
@@ -46,7 +46,7 @@ export default function GuidesList({
         {items.map((guide, index) => (
           <Link
             key={index}
-            href={guide.href}
+            href="/blog"
             className="group block rounded-xl border border-[#ECEEF4] bg-white hover:shadow-md transition-all duration-200 p-4"
             aria-label={`Read guide: ${guide.title}`}
           >

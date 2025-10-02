@@ -7,6 +7,13 @@
   --color-moroccan-red: #C8102E;
   --color-sapphire-blue: #0A3D62;
   --color-emerald: #2A9D8F;
+
+  /* Wervice Brand Colors */
+  --w-lime: #D9FF0A;
+  --w-ink: #11190C;
+  --w-taupe: #787664;
+  --w-sand: #CAC4B7;
+  --w-shell: #F3F1EE;
 }
 
 @layer base {
@@ -24,6 +31,7 @@
 
   body {
     background-color: #fcfcfc;
+    padding-top: env(safe-area-inset-top);
   }
 
   :root {
@@ -32,6 +40,25 @@
     --font-montserrat: var(--font-montserrat);
     --font-open-sans: var(--font-open-sans);
     --font-lora: var(--font-lora);
+
+    /* Wervice brand colors */
+    --w-lime: #D9FF0A;
+    --w-ink: #11190C;
+    --w-taupe: #787664;
+    --w-sand: #CAC4B7;
+    --w-shell: #F3F1EE;
+
+    /* Alias for easier use */
+    --sand: var(--w-sand);
+
+    /* Header height for consistent spacing */
+    --header-h: 64px;
+  }
+
+  @media (max-width: 640px) {
+    :root {
+      --header-h: 60px;
+    }
   }
 
   html[dir="rtl"] h1,
@@ -307,17 +334,13 @@
 
   /* Floating animation for decorative icons */
   @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-8px);
-    }
+    0%,100% { transform: translateY(0) }
+    50% { transform: translateY(-6px) }
   }
+  .animate-float { animation: float 6s ease-in-out infinite; }
 
-  .animate-float {
-    animation: float 8s ease-in-out infinite;
-  }
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
   /* Respect prefers-reduced-motion */
   @media (prefers-reduced-motion: reduce) {
@@ -325,4 +348,164 @@
       animation: none;
     }
   }
+
+  /* Smooth connecting line animation */
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -12;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out;
+  }
+
+  /* hide horizontal scrollbar on carousels */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Print Styles for Checklist */
+@media print {
+  /* Hide navigation and interactive elements */
+  header,
+  nav,
+  .sticky,
+  button:not([data-print-visible]),
+  input[type="checkbox"]:not(:checked)::before,
+  .opacity-0 {
+    display: none !important;
+  }
+
+  /* Expand all sections */
+  [data-section-content] {
+    display: block !important;
+  }
+
+  /* Show all checklist content */
+  details {
+    display: block !important;
+  }
+
+  details summary {
+    display: block !important;
+    cursor: default !important;
+  }
+
+  details summary::marker,
+  details summary::-webkit-details-marker {
+    display: none !important;
+  }
+
+  /* Make checkboxes visible */
+  input[type="checkbox"] {
+    -webkit-appearance: checkbox !important;
+    -moz-appearance: checkbox !important;
+    appearance: checkbox !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 8px !important;
+    border: 2px solid #000 !important;
+    background: white !important;
+  }
+
+  input[type="checkbox"]:checked {
+    background: #000 !important;
+  }
+
+  input[type="checkbox"]:checked::after {
+    content: "✓" !important;
+    color: white !important;
+    font-size: 12px !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  /* Page layout */
+  body {
+    font-size: 12pt !important;
+    line-height: 1.4 !important;
+    background: white !important;
+  }
+
+  .max-w-7xl {
+    max-width: none !important;
+  }
+
+  /* Cards and sections */
+  .bg-white {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+
+  .rounded-2xl {
+    border-radius: 4px !important;
+  }
+
+  /* Progress bars */
+  .bg-gray-200 {
+    background: #e5e5e5 !important;
+  }
+
+  /* Text colors */
+  .text-gray-900 {
+    color: #000 !important;
+  }
+
+  .text-gray-600,
+  .text-gray-500 {
+    color: #666 !important;
+  }
+
+  /* Headings */
+  h1 {
+    font-size: 24pt !important;
+    font-weight: bold !important;
+    margin-bottom: 16pt !important;
+  }
+
+  h2 {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    margin: 12pt 0 8pt 0 !important;
+  }
+
+  /* Checklist items */
+  .group {
+    margin-bottom: 8pt !important;
+  }
+
+  /* Page breaks */
+
+  /* Hide unnecessary elements */
+  .hidden,
+  [hidden] {
+    display: none !important;
+  }
+
+  /* Wervice Brand Color Utilities */
+  .text-ink { color: var(--w-ink); }
+  .text-taupe { color: var(--w-taupe); }
+  .bg-shell { background-color: var(--w-shell); }
+  .border-sand { border-color: var(--w-sand); }
+
 }

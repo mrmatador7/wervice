@@ -1,9 +1,17 @@
+'use client';
+
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'next/navigation';
 import { CURRENT_YEAR } from '@/lib/constants';
 
 export default function Footer() {
+  const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations('footer');
+
+  // Extract current locale from pathname
+  const currentLocale = pathname.split('/')[1] || 'en';
 
   const footerSections = [
     {
@@ -23,7 +31,7 @@ export default function Footer() {
       title: 'Planning Resources',
       links: [
         { name: 'Wedding Blog', href: '/blog' },
-        { name: 'Planning Guide', href: '/planning-guide' },
+        { name: 'Planning Guide', href: '/guides/planning' },
         { name: 'Vendor Directory', href: '/vendors' },
         { name: 'Wedding Checklist', href: '/checklist' },
         { name: 'Budget Calculator', href: '/budget-calculator' },
@@ -120,12 +128,25 @@ export default function Footer() {
                 <ul className="space-y-2">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <Link
-                        href={link.href}
-                        className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm"
-                      >
-                        {link.name}
-                      </Link>
+                      {link.name === 'Planning Guide' || link.name === 'Vendor Directory' ? (
+                        <button
+                          onClick={() => {
+                            const path = link.name === 'Planning Guide' ? 'guides/planning' :
+                                        link.name === 'Vendor Directory' ? 'vendors' : '';
+                            router.push(`/${currentLocale}/${path}`);
+                          }}
+                          className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm text-left"
+                        >
+                          {link.name}
+                        </button>
+                      ) : (
+                        <Link
+                          href={link.name === 'Wedding Checklist' ? `/${currentLocale}/checklist` : `/${currentLocale}${link.href}`}
+                          className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>

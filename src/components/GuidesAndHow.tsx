@@ -40,17 +40,17 @@ const defaultHowSteps: Step[] = [
 const defaultGuides: Guide[] = [
   {
     title: 'Best wedding venues in Marrakech',
-    href: '/blog/best-venues-marrakech',
+    href: '/blog',
     tag: 'Guide'
   },
   {
     title: 'How to choose a photographer in Casablanca',
-    href: '/blog/choose-photographer-casablanca',
+    href: '/blog',
     tag: 'Guide'
   },
   {
     title: 'Henna night checklist',
-    href: '/blog/henna-night-checklist',
+    href: '/blog',
     tag: 'Guide'
   }
 ];

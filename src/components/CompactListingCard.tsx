@@ -50,13 +50,14 @@ export default function CompactListingCard({
       }}
       aria-label={`Open ${name} in ${city} – ${category}`}
     >
-      {/* Image Section - 4:3 aspect ratio */}
-      <div className="aspect-[4/3] relative overflow-hidden rounded-t-2xl">
+      {/* Image Section - Fixed height */}
+      <div className="relative overflow-hidden rounded-t-2xl">
         <Image
           src={coverImage}
           alt={`${name} cover photo`}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          width={300}
+          height={210}
+          className="w-full h-[180px] md:h-[200px] lg:h-[210px] object-cover group-hover:scale-105 transition-transform duration-300"
           sizes="(max-width: 640px) 220px, (max-width: 768px) 240px, 260px"
           loading="lazy"
         />

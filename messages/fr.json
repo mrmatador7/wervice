@@ -264,5 +264,196 @@
       "redirecting": "Redirection...",
       "error": "Une erreur s'est produite. Veuillez réessayer."
     }
+  },
+  "vendor": {
+    "hero": {
+      "title": "Devenez un vendeur Wervice",
+      "subtitle": "Rejoignez la première marketplace de mariage au Maroc et connectez-vous avec les couples qui planifient leur grand jour.",
+      "primaryCTA": "Commencer l'abonnement",
+      "secondaryCTA": "Connexion vendeur"
+    },
+    "whyChoose": {
+      "title": "Pourquoi choisir Wervice ?",
+      "subtitle": "Rejoignez la plateforme de mariage leader au Maroc et développez votre entreprise",
+      "growBusiness": {
+        "title": "Développez votre entreprise",
+        "description": "Atteignez des milliers de couples fiancés qui planifient activement au Maroc."
+      },
+      "showcaseWork": {
+        "title": "Présentez votre travail",
+        "description": "Publiez des photos, forfaits et détails qui mettent en valeur vos meilleurs projets."
+      },
+      "increaseRevenue": {
+        "title": "Augmentez vos revenus",
+        "description": "Obtenez des demandes directes via WhatsApp ou formulaire sécurisé—sans frais intermédiaires."
+      },
+      "buildReputation": {
+        "title": "Construisez votre réputation",
+        "description": "Collectez des avis et établissez votre crédibilité dans votre catégorie et ville."
+      }
+    },
+    "benefits": {
+      "title": "Pourquoi choisir Wervice ?",
+      "subtitle": "Rejoignez la plateforme de mariage leader au Maroc et développez votre entreprise",
+      "growBusiness": "Développez votre entreprise",
+      "growBusinessDesc": "Atteignez des milliers de couples fiancés au Maroc qui planifient activement leurs mariages.",
+      "increaseRevenue": "Augmentez vos revenus",
+      "increaseRevenueDesc": "Obtenez des réservations directes via votre profil vendeur sans frais intermédiaires.",
+      "buildReputation": "Construisez votre réputation",
+      "buildReputationDesc": "Présentez votre travail, collectez des avis, et établissez votre crédibilité dans l'industrie du mariage."
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "subtitle": "Commencez en 3 étapes simples",
+      "createProfile": "Créez votre profil",
+      "createProfileDesc": "Ajoutez des photos, sélectionnez votre ville et catégorie, et dites aux couples qui vous êtes.",
+      "listServices": "Listez vos services",
+      "listServicesDesc": "Publiez vos forfaits, prix de départ, et présentez votre meilleur travail.",
+      "getContacted": "Soyez contacté",
+      "getContactedDesc": "Les couples vous contactent directement via WhatsApp ou notre formulaire de demande sécurisé."
+    },
+    "pricing": {
+      "title": "Un Plan Simple pour Toutes les Catégories",
+      "subtitle": "Choisissez votre catégorie : Salles, Restauration, Photo & Vidéo, Organisation, Beauté, Décoration, Musique, ou Robes.",
+      "monthly": "Mensuel",
+      "annual": "🔥 Annuel – Économisez 10%",
+      "monthlyPrice": "179 DHS",
+      "annualPrice": "1 930 DHS",
+      "annualSavings": "au lieu de 2 148 DHS",
+      "perMonth": "/ mois",
+      "perYear": "/ an",
+      "features": {
+        "profile": "Liste de profil avec photos et description",
+        "search": "Apparaître dans les recherches par ville et catégorie",
+        "contact": "Contact WhatsApp et formulaire",
+        "dashboard": "Accès au tableau de bord vendeur",
+        "cancel": "Annuler à tout moment",
+        "noCommissions": "Pas de commissions"
+      },
+      "subscribeMonthly": "S'abonner — 179 DHS / mois",
+      "subscribeAnnual": "S'abonner — 1 930 DHS / an",
+      "invoices": "Factures en DHS (MAD)",
+      "securePayment": "Paiement sécurisé",
+      "cancelAnytime": "Annuler à tout moment",
+      "vendorOnly": "Abonnement réservé aux vendeurs",
+      "trust": {
+        "secureCheckout": "Paiement sécurisé",
+        "cancelAnytime": "Annuler à tout moment",
+        "noCommissions": "Pas de commissions"
+      }
+    },
+    "categories": {
+      "title": "Rejoignez n'importe quelle catégorie",
+      "subtitle": "Quelle que soit votre spécialité de mariage, il y a une place pour vous sur Wervice",
+      "venues": "Salles de mariage, riads, jardins",
+      "catering": "Cuisine marocaine traditionnelle",
+      "photoVideo": "Photographie et vidéographie",
+      "planningBeauty": "Planification de mariage et henna",
+      "decor": "Arrangements floraux et décoration",
+      "music": "Musique live et divertissement",
+      "dresses": "Robes de mariage et tenues",
+      "eventPlanner": "Coordination complète de mariage"
+    },
+    "signup": {
+      "title": "Commencez votre parcours de vendeur",
+      "subtitle": "Remplissez le formulaire ci-dessous pour créer votre profil vendeur",
+      "businessName": "Nom de l'entreprise",
+      "category": "Catégorie",
+      "city": "Ville",
+      "whatsapp": "Numéro WhatsApp",
+      "email": "Email",
+      "startingPrice": "Prix de départ (MAD)",
+      "description": "Courte description",
+      "photos": "Photos (couverture + galerie)",
+      "photoHelp": "Téléchargez au moins une photo de couverture. Maximum 10 photos.",
+      "plan": "Choisissez votre plan",
+      "submit": "Créer un compte vendeur",
+      "agreement": "En soumettant, vous acceptez de commencer votre abonnement immédiatement.",
+      "cities": {
+        "casablanca": "Casablanca",
+        "marrakech": "Marrakech",
+        "rabat": "Rabat",
+        "tanger": "Tanger",
+        "agadir": "Agadir",
+        "fes": "Fès",
+        "meknes": "Meknès",
+        "elJadida": "El Jadida",
+        "kenitra": "Kénitra"
+      },
+      "plans": {
+        "small": "Petit vendeur (100–150 MAD/mois)",
+        "mid": "Vendeur intermédiaire (150–200 MAD/mois)",
+        "big": "Grand vendeur (250–350 MAD/mois)"
+      }
+    },
+    "subscribe": {
+      "title": "Commencez votre parcours de vendeur Wervice",
+      "subtitle": "Remplissez le formulaire ci-dessous pour créer votre profil vendeur.",
+      "step1": "Informations de base",
+      "step2": "Profil et plan",
+      "next": "Suivant",
+      "previous": "Précédent",
+      "submit": "Soumettre la demande",
+      "submitting": "Soumission...",
+      "businessName": "Nom de l'entreprise",
+      "category": "Catégorie",
+      "city": "Ville",
+      "whatsapp": "Numéro WhatsApp",
+      "email": "Adresse e-mail",
+      "website": "Site web (optionnel)",
+      "instagram": "Instagram (optionnel)",
+      "startingPrice": "Prix de départ (MAD)",
+      "description": "Description courte",
+      "images": "Images (couverture + galerie)",
+      "imageHelp": "Téléchargez au moins une photo de couverture. Maximum 7 photos au total, 3MB chacune (JPG/PNG seulement).",
+      "plan": "Cadence du plan",
+      "monthly": "Mensuel — 179 DHS / mois",
+      "annual": "Annuel — 1 930 DHS / an",
+      "annualSavings": "au lieu de 2 148 DHS",
+      "consent": "J'accepte les Conditions générales et la Politique de confidentialité et consens à être contacté par Wervice.",
+      "validation": {
+        "businessNameRequired": "Le nom de l'entreprise est requis",
+        "categoryRequired": "Veuillez sélectionner une catégorie",
+        "cityRequired": "Veuillez sélectionner une ville",
+        "whatsappRequired": "Le numéro WhatsApp est requis",
+        "whatsappInvalid": "Veuillez entrer un numéro WhatsApp marocain valide (+212 6XX XXX XXX)",
+        "emailRequired": "L'adresse e-mail est requise",
+        "emailInvalid": "Veuillez entrer une adresse e-mail valide",
+        "startingPriceRequired": "Le prix de départ est requis",
+        "startingPriceInvalid": "Veuillez entrer un prix valide",
+        "descriptionRequired": "La description est requise",
+        "descriptionTooLong": "La description doit contenir 300 caractères maximum",
+        "imagesRequired": "Veuillez télécharger au moins une image",
+        "consentRequired": "Vous devez accepter les conditions et consentir à être contacté"
+      }
+    },
+    "faq": {
+      "title": "Questions fréquemment posées",
+      "subtitle": "Tout ce que vous devez savoir pour devenir un vendeur Wervice",
+      "couplesPay": "Les couples paient-ils pour Wervice ?",
+      "couplesPayAnswer": "Non, Wervice est complètement gratuit pour les couples. Seuls les vendeurs s'abonnent pour accéder à la plateforme et se connecter avec des clients potentiels.",
+      "cost": "Combien coûte-t-il d'être vendeur ?",
+      "costAnswer": "Les plans commencent à 100 MAD/mois pour les petits vendeurs. Les prix varient de 100–350 MAD/mois selon la taille de votre plan et ses fonctionnalités.",
+      "commissions": "Y a-t-il des commissions sur les réservations ?",
+      "commissionsAnswer": "Pas de commissions du tout. Vous gardez 100% de vos gains des réservations faites via votre profil vendeur.",
+      "cancel": "Puis-je annuler mon abonnement à tout moment ?",
+      "cancelAnswer": "Oui, vous pouvez annuler votre abonnement à tout moment. Il n'y a pas de contrats à long terme ni de frais d'annulation.",
+      "requirements": "Que faut-il pour s'inscrire en tant que vendeur ?",
+      "requirementsAnswer": "Fournissez simplement des photos de votre travail, vos tarifs, vos coordonnées, et une brève description de vos services."
+    },
+    "finalCTA": {
+      "title": "Prêt à développer votre entreprise ?",
+      "subtitle": "Rejoignez des centaines de vendeurs de mariage réussis au Maroc et commencez à vous connecter avec des couples aujourd'hui.",
+      "button": "Commencer l'abonnement"
+    },
+    "success": {
+      "title": "Bienvenue sur Wervice !",
+      "message": "Votre abonnement vendeur a commencé avec succès. Complétez votre profil pour apparaître dans les résultats de recherche et commencer à vous connecter avec des couples.",
+      "dashboard": "Aller au tableau de bord",
+      "nextSteps": "Prochaines étapes :",
+      "completeProfile": "Complétez votre profil vendeur avec plus de photos",
+      "setPrices": "Configurez vos forfaits tarifaires",
+      "receiveInquiries": "Commencez à recevoir des demandes de couples"
+    }
   }
 }

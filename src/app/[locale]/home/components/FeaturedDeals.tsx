@@ -3,7 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { FeaturedDealsProps } from '@/models/types';
 import { FEATURED_DEALS } from '@/lib/constants';
-import { generateStars, useCountdown } from '@/lib';
+import { generateStars } from '@/lib';
+import { useCountdown } from '@/hooks/useCountdown';
 
 
 export default function FeaturedDeals({}: FeaturedDealsProps) {
