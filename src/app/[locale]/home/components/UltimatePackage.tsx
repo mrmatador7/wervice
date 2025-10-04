@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { PACKAGE_BUNDLES } from '@/lib/constants';
+import { PACKAGE_BUNDLES } from '@/lib/config';
 
 export default function UltimatePackage() {
   const t = useTranslations('ultimate');

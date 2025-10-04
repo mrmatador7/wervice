@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { PREMIUM_BENEFITS } from '@/lib/constants';
+import { PREMIUM_BENEFITS } from '@/lib/config';
 
 export default function PremiumSection() {
   const t = useTranslations('premium');

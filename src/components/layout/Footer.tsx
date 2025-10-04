@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
-import { CURRENT_YEAR } from '@/lib/constants';
+import { CURRENT_YEAR } from '@/lib/config';
 
 export default function Footer() {
   const router = useRouter();

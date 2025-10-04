@@ -13,9 +13,20 @@ export default function DashboardPage() {
     const locale = useLocale();
 
     useEffect(() => {
+        console.log(`[${new Date().toISOString()}] 📊 Dashboard page loaded:`, {
+            userId: user?.id,
+            isLoading,
+            isAuthenticated: !!user,
+            currentPath: window.location.pathname,
+            locale
+        });
+
         if (!isLoading && !user) {
+            console.log(`[${new Date().toISOString()}] ❌ No user session, redirecting to signin`);
             // Redirect to sign in if not authenticated
             router.push(`/${locale}/auth/signin`);
+        } else if (!isLoading && user) {
+            console.log(`[${new Date().toISOString()}] ✅ User authenticated, showing dashboard`);
         }
     }, [user, isLoading, router, locale]);
 

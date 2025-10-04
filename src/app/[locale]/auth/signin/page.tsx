@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import Header from '@/components/layout/Header';
+import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import { getProfile, createProfile } from '@/queries';
 
 export default function SignInPage() {
     const router = useRouter();
@@ -15,15 +16,83 @@ export default function SignInPage() {
     const locale = useLocale();
 
     useEffect(() => {
-        console.log('👤 Signin page mounted, locale:', locale)
+        const timestamp = new Date().toISOString();
+        console.log(`[${timestamp}] 👤 Signin page mounted, locale:`, locale)
+        console.log(`[${timestamp}] 🔗 Current URL:`, window.location.href)
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log('🔄 Auth state changed:', { event, hasSession: !!session, userEmail: session?.user?.email })
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            const eventTimestamp = new Date().toISOString();
+            console.log(`[${eventTimestamp}] 🔄 Auth state changed:`, {
+                event,
+                hasSession: !!session,
+                userId: session?.user?.id,
+                userEmail: session?.user?.email,
+                userProvider: session?.user?.app_metadata?.provider,
+                sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+            })
 
             if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-                console.log('✅ User authenticated, redirecting to dashboard')
-                // User is authenticated (either just signed in or already had a session), redirect to dashboard
-                router.push(`/${locale}/dashboard`);
+                console.log(`[${eventTimestamp}] ✅ User authenticated successfully:`, {
+                    userId: session.user.id,
+                    email: session.user.email,
+                    provider: session.user.app_metadata?.provider
+                });
+
+                // Check if user has a profile
+                const profileStartTime = Date.now();
+                const { data: existingProfile, error: profileError } = await getProfile(session.user.id);
+                const profileDuration = Date.now() - profileStartTime;
+
+                console.log(`[${new Date().toISOString()}] 🔍 Profile check completed in ${profileDuration}ms:`, {
+                    userId: session.user.id,
+                    profileExists: !!existingProfile,
+                    error: profileError?.message
+                });
+
+                // If user doesn't have a profile, create one automatically
+                if (!existingProfile && !profileError) {
+                    console.log(`[${new Date().toISOString()}] 🆕 Creating profile for new user:`, session.user.id);
+
+                    // Extract user information from Google OAuth
+                    const userMetadata = session.user.user_metadata;
+                    const firstName = userMetadata?.full_name?.split(' ')[0] ||
+                        userMetadata?.name?.split(' ')[0] ||
+                        session.user.email?.split('@')[0] ||
+                        'User';
+                    const lastName = userMetadata?.full_name?.split(' ').slice(1).join(' ') ||
+                        userMetadata?.name?.split(' ').slice(1).join(' ') ||
+                        '';
+
+                    // Create basic profile
+                    const profileData = {
+                        id: session.user.id,
+                        email: session.user.email || '',
+                        first_name: firstName,
+                        last_name: lastName,
+                        user_type: 'user', // Default to regular user
+                        user_status: 'active',
+                        is_onboarded: false, // Will be updated during onboarding
+                        locale: locale,
+                        avatar_url: userMetadata?.avatar_url || null,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                    };
+
+                    const { data: newProfile, error: createError } = await createProfile(profileData);
+
+                    if (createError) {
+                        console.error(`[${new Date().toISOString()}] ❌ Failed to create profile:`, createError);
+                        // Continue with onboarding even if profile creation fails
+                        // The middleware will handle this case
+                    } else {
+                        console.log(`[${new Date().toISOString()}] ✅ Profile created successfully:`, newProfile?.id);
+                    }
+                }
+
+                // Redirect all authenticated users to onboarding
+                // Users with profiles will be allowed to access dashboard after completing onboarding
+                console.log(`[${eventTimestamp}] 📝 Redirecting authenticated user to onboarding`);
+                router.push(`/${locale}/onboarding`);
             }
         });
 
@@ -43,7 +112,7 @@ export default function SignInPage() {
 
             {/* Content */}
             <div className="relative z-10">
-                <Header />
+                <GlassmorphismHeader />
 
                 {/* Add top padding to account for fixed header */}
                 <div className="pt-16 min-h-screen bg-gradient-to-br from-white/20 via-purple-50/30 to-pink-50/40 flex items-center justify-center px-4">
