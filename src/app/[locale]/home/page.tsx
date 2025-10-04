@@ -13,6 +13,7 @@ import { homepageListings } from '@/lib/mockListings';
 import CategoriesShowcase, {
   CategoryItem,
 } from "@/components/sections/CategoriesShowcase";
+import { Suspense } from 'react';
 
 // Feature flag to control Browse by Category section
 export const SHOW_BROWSE_BY_CATEGORY = false;
@@ -53,7 +54,9 @@ export default function HomePage() {
     <div className="min-h-screen">
       <Header />
 
-      <HeroSearch />
+      <Suspense fallback={<div className="h-screen bg-gray-50"></div>}>
+        <HeroSearch />
+      </Suspense>
 
       {/* Categories Section */}
       {SHOW_BROWSE_BY_CATEGORY && (

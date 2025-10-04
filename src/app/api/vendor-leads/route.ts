@@ -7,8 +7,32 @@ interface VendorLead {
   city: string;
   whatsapp: string;
   email: string;
-  mappedMonthlyPrice?: number;
+  website: string;
+  instagram: string;
+  profileStartingPrice: string;
+  profileDescription: string;
+  subscriptionCadence: string;
   subscriptionPriceDhs?: number;
+  source: string;
+  images: string[];
+  submittedAt: string;
+  status: string;
+}
+
+interface VendorLeadRequest {
+  businessName: string;
+  category: string;
+  city: string;
+  whatsapp: string;
+  email: string;
+  website: string;
+  instagram: string;
+  profileStartingPrice: string;
+  profileDescription: string;
+  subscriptionCadence: string;
+  subscriptionPriceDhs: string;
+  source: string;
+  honeypot: string;
 }
 
 // Mock storage for development - in production, this would be a database
@@ -20,7 +44,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
 
     // Extract text fields
-    const body = {
+    const body: VendorLeadRequest = {
       businessName: formData.get('businessName') as string,
       category: formData.get('category') as string,
       city: formData.get('city') as string,
@@ -59,7 +83,7 @@ export async function POST(request: NextRequest) {
     ];
 
     for (const field of requiredFields) {
-      if (!(body as any)[field]) {
+      if (!(body as unknown as Record<string, string>)[field]) {
         return NextResponse.json(
           { error: `Missing required field: ${field}` },
           { status: 400 }
@@ -84,9 +108,20 @@ export async function POST(request: NextRequest) {
     // }
 
     // Create vendor lead object
-    const vendorLead = {
+    const vendorLead: VendorLead = {
       id: Date.now().toString(),
-      ...body,
+      businessName: body.businessName,
+      category: body.category,
+      city: body.city,
+      whatsapp: body.whatsapp,
+      email: body.email,
+      website: body.website,
+      instagram: body.instagram,
+      profileStartingPrice: body.profileStartingPrice,
+      profileDescription: body.profileDescription,
+      subscriptionCadence: body.subscriptionCadence,
+      subscriptionPriceDhs: parseFloat(body.subscriptionPriceDhs) || 0,
+      source: body.source,
       images: images,
       submittedAt: new Date().toISOString(),
       status: 'pending_review'

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CityHero from '@/components/city/CityHero';
@@ -105,10 +106,14 @@ export default function CityPage({ params }: { params: { city: string } }) {
       <Header />
       <main className="min-h-screen">
         {/* Hero Section */}
-        <CityHero city={cityData} />
+        <Suspense fallback={<div className="h-96 bg-gradient-to-r from-[#11190C] to-[#2A3B1A] animate-pulse"></div>}>
+          <CityHero city={cityData} />
+        </Suspense>
 
       {/* Category Filters & Vendor Grid */}
-      <VendorGridWithFilters city={cityData} />
+      <Suspense fallback={<div className="h-96 bg-gray-50 animate-pulse"></div>}>
+        <VendorGridWithFilters city={cityData} />
+      </Suspense>
 
       {/* City Highlights */}
       <section className="py-12 sm:py-16 bg-white">

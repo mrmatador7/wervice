@@ -180,12 +180,12 @@ export class ProfileService {
     /**
      * Initialize a new profile with default values
      */
-    static createDefaultProfile(userId: string, userMetadata?: unknown): ProfileInsert {
+    static createDefaultProfile(userId: string, userMetadata?: Record<string, unknown>): ProfileInsert {
         return {
             id: userId,
-            first_name: userMetadata?.first_name || null,
-            last_name: userMetadata?.last_name || null,
-            display_name: userMetadata?.full_name || null,
+            first_name: (userMetadata?.first_name as string) || null,
+            last_name: (userMetadata?.last_name as string) || null,
+            display_name: (userMetadata?.full_name as string) || null,
             preferred_language: 'en',
             planning_stage: 'exploring',
             is_vendor: false,

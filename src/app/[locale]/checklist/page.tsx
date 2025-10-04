@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import ChecklistClient from './client';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,5 +26,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function ChecklistPage() {
-  return <ChecklistClient />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9FF0A]"></div></div>}>
+      <ChecklistClient />
+    </Suspense>
+  );
 }
