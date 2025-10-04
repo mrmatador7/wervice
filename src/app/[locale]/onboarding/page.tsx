@@ -94,8 +94,8 @@ export default function OnboardingPage() {
         } : null,
         error: error ? {
           message: error.message,
-          code: error.code,
-          details: error.details
+          code: (error as any)?.code,
+          details: (error as any)?.details
         } : null
       });
 
@@ -210,7 +210,7 @@ export default function OnboardingPage() {
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Wervice! 🎉</h2>
-              <p className="text-gray-600">Let's set up your profile to get started</p>
+              <p className="text-gray-600">Let&apos;s set up your profile to get started</p>
             </div>
 
             <div className="space-y-4">
@@ -316,7 +316,7 @@ export default function OnboardingPage() {
             </div>
 
             <div className="bg-lime-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">🎯 What's next?</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">🎯 What&apos;s next?</h3>
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Discover amazing wedding vendors in Morocco</li>
                 <li>• Get personalized recommendations</li>

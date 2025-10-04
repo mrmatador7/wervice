@@ -8,6 +8,10 @@ import CityHighlights from '@/components/city/CityHighlights';
 import ReviewsCarousel from '@/components/city/ReviewsCarousel';
 import CityCTA from '@/components/city/CityCTA';
 
+interface PageProps {
+  params: Promise<{ city: string }>;
+}
+
 // City data and validation
 const VALID_CITIES = {
   casablanca: {
@@ -68,8 +72,9 @@ const VALID_CITIES = {
 
 type CityKey = keyof typeof VALID_CITIES;
 
-export async function generateMetadata({ params }: { params: { city: string } }): Promise<Metadata> {
-  const citySlug = params.city.toLowerCase() as CityKey;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { city } = await params;
+  const citySlug = city.toLowerCase() as CityKey;
   const cityData = VALID_CITIES[citySlug];
 
   if (!cityData) {
@@ -93,8 +98,9 @@ export async function generateMetadata({ params }: { params: { city: string } })
 // Import the client component
 import VendorGridWithFilters from './VendorGridWithFilters';
 
-export default function CityPage({ params }: { params: { city: string } }) {
-  const citySlug = params.city.toLowerCase() as CityKey;
+export default async function CityPage({ params }: PageProps) {
+  const { city } = await params;
+  const citySlug = city.toLowerCase() as CityKey;
   const cityData = VALID_CITIES[citySlug];
 
   if (!cityData) {

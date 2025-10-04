@@ -34,7 +34,7 @@ export default function Header(){
 
             {/* Sign In */}
             <Link
-              href="/auth/sign-in"
+              href={`/${currentLocale}/auth/signin`}
               className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
             >
               Sign In

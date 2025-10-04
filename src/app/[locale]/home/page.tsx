@@ -16,7 +16,7 @@ import CategoriesShowcase, {
 import { Suspense } from 'react';
 
 // Feature flag to control Browse by Category section
-export const SHOW_BROWSE_BY_CATEGORY = false;
+const SHOW_BROWSE_BY_CATEGORY = false;
 
 const DRESS_ITEMS: CategoryItem[] = [
   {

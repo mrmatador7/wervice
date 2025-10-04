@@ -14,8 +14,13 @@ const VALID_CITIES = {
   },
 };
 
-export default function CityPage({ params }: { params: { city: string } }) {
-  const citySlug = params.city.toLowerCase();
+interface PageProps {
+  params: Promise<{ city: string }>;
+}
+
+export default async function CityPage({ params }: PageProps) {
+  const { city } = await params;
+  const citySlug = city.toLowerCase();
   const cityData = VALID_CITIES[citySlug as keyof typeof VALID_CITIES];
 
   if (!cityData) {

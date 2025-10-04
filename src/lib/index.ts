@@ -1,4 +1,5 @@
 import { WeddingCategory } from '@/models/types';
+export { useCountdown } from '@/hooks/useCountdown';
 
 /**
  * Formats a price string with MAD currency
