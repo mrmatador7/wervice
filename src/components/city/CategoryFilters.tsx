@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 // Mock analytics - replace with your actual analytics implementation
 const analytics = {
-  track: (event: string, data: any) => {
+  track: (event: string, data: Record<string, unknown>) => {
     console.log('Analytics:', event, data);
     // In real app: analytics.track(event, data);
   }
@@ -37,10 +37,10 @@ const categories = [
     slug: 'photo-video',
   },
   {
-    id: 'planning',
+    id: 'event-planner',
     name: 'Planning',
     icon: '/categories/event planner.png',
-    slug: 'planning',
+    slug: 'event-planner',
   },
   {
     id: 'beauty',

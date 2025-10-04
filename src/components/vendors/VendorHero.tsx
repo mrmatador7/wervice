@@ -55,7 +55,7 @@ export default function VendorHero() {
 
           {/* Subtitle */}
           <p className="text-[clamp(14px,2.2vw,18px)] text-gray-600 mb-6 md:mb-8 max-w-[58ch] mx-auto leading-relaxed">
-            Join Morocco's premier wedding marketplace and connect with couples planning their big day.
+            Join Morocco&apos;s premier wedding marketplace and connect with couples planning their big day.
           </p>
 
           {/* CTAs */}

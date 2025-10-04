@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiSearch, FiFilter, FiHeart, FiMessageCircle, FiChevronLeft, FiChevronRight, FiStar } from 'react-icons/fi';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { Vendor, VendorFilters, VENDOR_CATEGORIES, VENDOR_CITIES, SORT_OPTIONS } from '@/lib/vendors';
+import { Vendor, VendorFilters, VendorCity, VendorCategory, VENDOR_CATEGORIES, VENDOR_CITIES, SORT_OPTIONS, getAllVendors, filterVendors, sortVendors, paginateVendors } from '@/lib/vendors';
 
 interface VendorDirectoryClientProps {
   initialVendors: Vendor[];
@@ -20,6 +20,8 @@ interface VendorDirectoryClientProps {
 // Vendor Card Component
 function VendorCard({ vendor }: { vendor: Vendor }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const pathname = usePathname();
+  const currentLocale = pathname.split('/')[1] || 'en';
 
   const whatsappUrl = vendor.whatsapp ? `https://wa.me/${vendor.whatsapp}` : null;
 
@@ -100,7 +102,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
         {/* Actions */}
         <div className="flex gap-2">
           <Link
-            href={`/vendors/${vendor.slug}`}
+            href={`/${currentLocale}/vendors/${vendor.slug}`}
             className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-[var(--stroke)] text-[var(--ink)] font-medium rounded-xl hover:bg-slate-50 transition-colors"
           >
             View Profile
@@ -195,7 +197,7 @@ function SearchAndFilters({
           {/* Quick Filters */}
           <select
             value={localFilters.city || ''}
-            onChange={(e) => updateFilters({ city: e.target.value as any || undefined })}
+            onChange={(e) => updateFilters({ city: (e.target.value as VendorCity) || undefined })}
             className="px-4 py-3 border border-[var(--stroke)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D7FF1F] bg-white"
           >
             <option value="">All Cities</option>
@@ -206,7 +208,7 @@ function SearchAndFilters({
 
           <select
             value={localFilters.category || ''}
-            onChange={(e) => updateFilters({ category: e.target.value as any || undefined })}
+            onChange={(e) => updateFilters({ category: (e.target.value as VendorCategory) || undefined })}
             className="px-4 py-3 border border-[var(--stroke)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D7FF1F] bg-white"
           >
             <option value="">All Categories</option>
@@ -217,7 +219,7 @@ function SearchAndFilters({
 
           <select
             value={localFilters.sort || 'recommended'}
-            onChange={(e) => updateFilters({ sort: e.target.value as any })}
+            onChange={(e) => updateFilters({ sort: e.target.value as VendorFilters['sort'] })}
             className="px-4 py-3 border border-[var(--stroke)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D7FF1F] bg-white"
           >
             {SORT_OPTIONS.map(option => (
@@ -243,7 +245,7 @@ function SearchAndFilters({
           {(filters.q || filters.city || filters.category || filters.minPrice || filters.maxPrice) && (
             <button
               onClick={clearFilters}
-              className="text-sm text-[#D7FF1F] hover:text-[#D7FF1F]/80 font-medium"
+              className="text-sm text-black hover:text-gray-700 font-medium"
             >
               Clear filters
             </button>
@@ -308,7 +310,7 @@ function Pagination({ currentPage, totalPages, onPageChange }: {
   const showPages = 5;
 
   let startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
-  let endPage = Math.min(totalPages, startPage + showPages - 1);
+  const endPage = Math.min(totalPages, startPage + showPages - 1);
 
   if (endPage - startPage + 1 < showPages) {
     startPage = Math.max(1, endPage - showPages + 1);
@@ -432,6 +434,48 @@ export default function VendorDirectoryClient({
   const [vendors, setVendors] = useState(initialVendors);
   const [filters, setFilters] = useState(initialFilters);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasHandledSearchNavigation, setHasHandledSearchNavigation] = useState(false);
+
+  // Sync filters with URL parameters and refetch data
+  useEffect(() => {
+    const category = searchParams.get('category') || undefined;
+    const city = searchParams.get('city') || undefined;
+    const q = searchParams.get('q') || undefined;
+    const minPrice = searchParams.get('min') ? parseInt(searchParams.get('min')!) : undefined;
+    const maxPrice = searchParams.get('max') ? parseInt(searchParams.get('max')!) : undefined;
+    const sort = (searchParams.get('sort') as VendorFilters['sort']) || 'recommended';
+    const pageParam = searchParams.get('page');
+    const page = pageParam ? parseInt(pageParam) : 1;
+
+    const urlFilters: VendorFilters = {
+      category: category as VendorCategory,
+      city: city as VendorCity,
+      q,
+      minPrice,
+      maxPrice,
+      sort,
+      page
+    };
+
+    // Only update if filters have actually changed and we're not in the middle of a programmatic navigation
+    const hasChanged = JSON.stringify(filters) !== JSON.stringify(urlFilters);
+    if (hasChanged && !isLoading) {
+      setFilters(urlFilters);
+      setIsLoading(true);
+
+      // Simulate API call - in real app this would fetch from server
+      setTimeout(() => {
+        // Apply client-side filtering to mock data
+        const allVendors = getAllVendors();
+        const filtered = filterVendors(allVendors, urlFilters);
+        const sorted = sortVendors(filtered, urlFilters.sort);
+        const paginated = paginateVendors(sorted, urlFilters.page);
+
+        setVendors(paginated.vendors);
+        setIsLoading(false);
+      }, 300);
+    }
+  }, [searchParams, isLoading, filters]);
 
   // Update URL when filters change
   const updateUrl = useCallback((newFilters: VendorFilters) => {
@@ -443,10 +487,13 @@ export default function VendorDirectoryClient({
     if (newFilters.minPrice) params.set('min', newFilters.minPrice.toString());
     if (newFilters.maxPrice) params.set('max', newFilters.maxPrice.toString());
     if (newFilters.sort && newFilters.sort !== 'recommended') params.set('sort', newFilters.sort);
-    if (newFilters.page && newFilters.page > 1) params.set('page', newFilters.page.toString());
+    if (newFilters.page && newFilters.page !== 1) {
+      params.set('page', newFilters.page.toString());
+    }
 
     const queryString = params.toString();
-    router.push(queryString ? `/vendors?${queryString}` : '/vendors', { scroll: false });
+    // Use relative path to maintain locale context
+    router.push(queryString ? `?${queryString}` : '', { scroll: false });
   }, [router]);
 
   // Handle filter changes
@@ -455,26 +502,79 @@ export default function VendorDirectoryClient({
     setFilters(newFilters);
     updateUrl(newFilters);
 
-    // In a real app, this would be an API call
-    // For now, we'll simulate the filtering on the client side
+    // Apply client-side filtering to mock data
     setTimeout(() => {
+      const allVendors = getAllVendors();
+      const filtered = filterVendors(allVendors, newFilters);
+      const sorted = sortVendors(filtered, newFilters.sort);
+      const paginated = paginateVendors(sorted, newFilters.page);
+
+      setVendors(paginated.vendors);
       setIsLoading(false);
     }, 300);
   }, [updateUrl]);
 
   // Handle page changes
   const handlePageChange = useCallback((page: number) => {
-    handleFiltersChange({ ...filters, page });
-  }, [filters, handleFiltersChange]);
+    const newFilters = { ...filters, page };
+    setFilters(newFilters);
+    setIsLoading(true);
+    updateUrl(newFilters);
+
+    // Immediately update the vendors for the new page
+    setTimeout(() => {
+      const allVendors = getAllVendors();
+      const filtered = filterVendors(allVendors, newFilters);
+      const sorted = sortVendors(filtered, newFilters.sort);
+      const paginated = paginateVendors(sorted, newFilters.page);
+
+      setVendors(paginated.vendors);
+      setIsLoading(false);
+    }, 300);
+  }, [filters, updateUrl]);
+
+  // Handle search navigation from homepage
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+
+    // Check if this is a search navigation (has category param and we haven't handled it yet)
+    if (categoryParam && !hasHandledSearchNavigation && !isLoading) {
+      setHasHandledSearchNavigation(true);
+
+      // Track analytics for search navigation
+      const analytics = {
+        track: (event: string, data: Record<string, unknown>) => {
+          console.log('Analytics:', event, data);
+          // In real app: analytics.track(event, data);
+        }
+      };
+
+      analytics.track('search_submitted', {
+        source: 'home',
+        category: categoryParam,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Focus the vendors grid heading for accessibility
+      setTimeout(() => {
+        const heading = document.querySelector('h1, h2') as HTMLElement;
+        if (heading) {
+          heading.focus();
+          // Scroll to make sure it's visible
+          heading.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 500);
+    }
+  }, [searchParams, hasHandledSearchNavigation, isLoading]);
 
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
 
-      <main className="pt-16">
+      <main>
         {/* Hero Section */}
         <section className="bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-16 md:py-20">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pb-16 md:pb-20 pt-8 md:pt-12">
             <div className="text-center">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--ink)] mb-4">
                 Find Wedding Vendors in Morocco

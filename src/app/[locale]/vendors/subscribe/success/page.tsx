@@ -41,7 +41,7 @@ export default function VendorSubscribeSuccessPage({
 
   useEffect(() => {
     async function loadLeadData() {
-      let data: any = null;
+      let data: unknown = null;
 
       // Try to fetch lead by ID first
       if (leadId) {
@@ -65,12 +65,13 @@ export default function VendorSubscribeSuccessPage({
 
       // If we have data, compute the price from category
       if (data) {
+        const typedData = data as VendorLead;
         // Find category slug from category name
         const categorySlug = Object.keys(categoryPricing).find(
-          slug => categoryPricing[slug].name === data.category
+          slug => categoryPricing[slug].name === typedData.category
         );
-        data.mappedMonthlyPrice = categorySlug ? getPriceFromCategory(categorySlug) : data.mappedMonthlyPrice || 0;
-        setLeadData(data);
+        typedData.mappedMonthlyPrice = categorySlug ? getPriceFromCategory(categorySlug) : typedData.mappedMonthlyPrice || 0;
+        setLeadData(typedData);
       }
     }
 
@@ -99,7 +100,7 @@ export default function VendorSubscribeSuccessPage({
         className="text-3xl md:text-4xl font-bold text-gray-900 mb-4"
         tabIndex={-1}
       >
-        Thanks! We'll contact you to activate your subscription.
+        Thanks! We&apos;ll contact you to activate your subscription.
       </h1>
 
       {/* Subtext */}
@@ -158,7 +159,7 @@ export default function VendorSubscribeSuccessPage({
           <li className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0">📋</span>
             <div className="text-left">
-              <p className="text-gray-900">We'll publish your profile once verified.</p>
+              <p className="text-gray-900">We&apos;ll publish your profile once verified.</p>
             </div>
           </li>
         </ul>

@@ -134,7 +134,7 @@ export default function CitiesCarousel({
                     {title}
                 </h2>
                 <p className="text-gray-600 text-sm md:text-base">
-                    Discover wedding vendors in Morocco's most beautiful cities
+                    Discover wedding vendors in Morocco&apos;s most beautiful cities
                 </p>
             </div>
 

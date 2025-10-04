@@ -46,11 +46,7 @@ const categoryOptions = [
   }
 ];
 
-interface CategoryDropdownProps extends Omit<DropdownProps, 'options'> {
-  // Inherits all DropdownProps except options
-}
-
-export default function CategoryDropdown(props: CategoryDropdownProps) {
+export default function CategoryDropdown(props: Omit<DropdownProps, 'options'>) {
   return (
     <Dropdown
       {...props}

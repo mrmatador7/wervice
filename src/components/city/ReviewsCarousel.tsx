@@ -153,7 +153,7 @@ export default function ReviewsCarousel({ city }: ReviewsCarouselProps) {
                 </div>
 
                 <blockquote className="text-gray-700 mb-4 leading-relaxed">
-                  "{review.quote}"
+                  &ldquo;{review.quote}&rdquo;
                 </blockquote>
 
                 <div className="flex items-center gap-3">

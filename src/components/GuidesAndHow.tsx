@@ -37,23 +37,7 @@ const defaultHowSteps: Step[] = [
   }
 ];
 
-const defaultGuides: Guide[] = [
-  {
-    title: 'Best wedding venues in Marrakech',
-    href: '/blog',
-    tag: 'Guide'
-  },
-  {
-    title: 'How to choose a photographer in Casablanca',
-    href: '/blog',
-    tag: 'Guide'
-  },
-  {
-    title: 'Henna night checklist',
-    href: '/blog',
-    tag: 'Guide'
-  }
-];
+const defaultGuides: Guide[] = [];
 
 export default function GuidesAndHow({
   howSteps = defaultHowSteps,

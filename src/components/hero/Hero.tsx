@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import SearchBarSimple from './SearchBarSimple';
+import CategoryChips from './CategoryChips';
 
 export default function Hero() {
   return (
@@ -61,6 +62,16 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto max-w-7xl
                   pt-[calc(var(--header-h)+6px)] pb-5 px-4 sm:pt-[calc(var(--header-h)+12px)] sm:pb-8">
+        {/* DEBUG: Simple visible element */}
+        <div className="bg-red-500 text-white p-4 mb-4 text-center font-bold">
+          HERO COMPONENT IS RENDERING - CATEGORY CHIPS SHOULD BE BELOW
+        </div>
+
+        {/* Category Chips */}
+        <div className="mb-6 sm:mb-8">
+          <CategoryChips />
+        </div>
+
         <h1 className="text-3xl leading-tight sm:text-5xl sm:leading-[1.05] font-extrabold text-wervice-ink text-center">
           Plan your wedding, your way.
         </h1>

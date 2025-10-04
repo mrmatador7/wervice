@@ -5,7 +5,7 @@ export default function CategoryBlocks() {
         <h3 className="text-lg font-semibold text-gray-900">Placeholder: Category Blocks</h3>
         <span className="text-xs text-gray-400">Replace with real component</span>
       </div>
-      <p className="mt-2">This is a lightweight stub so the homepage doesn't appear blank while real sections load.</p>
+      <p className="mt-2">This is a lightweight stub so the homepage doesn&apos;t appear blank while real sections load.</p>
     </div>
   );
 }

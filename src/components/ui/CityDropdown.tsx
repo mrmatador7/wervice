@@ -15,11 +15,7 @@ const cityOptions = [
   { value: 'kenitra', label: 'Kenitra' }
 ];
 
-interface CityDropdownProps extends Omit<DropdownProps, 'options'> {
-  // Inherits all DropdownProps except options
-}
-
-export default function CityDropdown(props: CityDropdownProps) {
+export default function CityDropdown(props: Omit<DropdownProps, 'options'>) {
   return (
     <Dropdown
       {...props}

@@ -6,7 +6,6 @@ import CategoriesSection from '@/components/CategoriesSection';
 import CitiesCarousel from '@/components/CitiesCarousel';
 import ListingsRail from '@/components/ListingsRail';
 import ConfidenceMosaic from '@/components/sections/ConfidenceMosaic';
-import BlogArticles from '@/components/BlogArticles';
 import BecomeVendorSection from './components/BecomeVendorSection';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/layout/Container';
@@ -50,12 +49,6 @@ const DRESS_ITEMS: CategoryItem[] = [
 ];
 
 export default function HomePage() {
-  const handleViewOffers = () => {
-    // Smooth scroll to featured deals section
-    document.getElementById('featured-deals')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -99,9 +92,6 @@ export default function HomePage() {
 
       {/* Confidence Mosaic */}
       <ConfidenceMosaic />
-
-      {/* Blog Articles */}
-      <BlogArticles />
 
         <BecomeVendorSection />
 

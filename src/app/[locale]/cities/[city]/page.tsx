@@ -3,11 +3,8 @@ import { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import CityHero from '@/components/city/CityHero';
-import CategoryFilters from '@/components/city/CategoryFilters';
-import VendorGrid from '@/components/city/VendorGrid';
 import CityHighlights from '@/components/city/CityHighlights';
 import ReviewsCarousel from '@/components/city/ReviewsCarousel';
-import CityGuides from '@/components/city/CityGuides';
 import CityCTA from '@/components/city/CityCTA';
 
 // City data and validation
@@ -124,13 +121,6 @@ export default function CityPage({ params }: { params: { city: string } }) {
       <section className="py-12 sm:py-16 bg-wervice-shell/80">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <ReviewsCarousel city={cityData} />
-        </div>
-      </section>
-
-      {/* Guides/Blog */}
-      <section className="py-12 sm:py-16 bg-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <CityGuides city={cityData} />
         </div>
       </section>
 

@@ -173,7 +173,7 @@ export default function ChecklistClient() {
   };
 
   // Filter controls
-  const updateFilter = (key: keyof FilterState, value: any) => {
+  const updateFilter = (key: keyof FilterState, value: unknown) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 

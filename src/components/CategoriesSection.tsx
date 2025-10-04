@@ -186,7 +186,7 @@ export default function CategoriesSection() {
                     >
                         See all categories →
                     </Link>
-                </div >
+                    </div >
             </div >
         </section >
     );

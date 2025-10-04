@@ -129,7 +129,7 @@ export default function VendorSignupForm() {
                   </label>
                   <CategoryDropdown
                     value={formData.category}
-                    onChange={(value) => handleInputChange({ target: { name: 'category', value } } as any)}
+                    onChange={(value) => handleInputChange({ target: { name: 'category', value } })}
                     disabled={false}
                   />
 
@@ -149,7 +149,7 @@ export default function VendorSignupForm() {
                   </label>
                   <CityDropdown
                     value={formData.city}
-                    onChange={(value) => handleInputChange({ target: { name: 'city', value } } as any)}
+                    onChange={(value) => handleInputChange({ target: { name: 'city', value } })}
                     disabled={false}
                   />
                 </div>

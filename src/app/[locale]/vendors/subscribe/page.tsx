@@ -18,7 +18,6 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function VendorSubscribePage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const defaultCategory = params.category as string;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -30,12 +29,12 @@ export default async function VendorSubscribePage({ searchParams }: PageProps) {
               Start your Wervice Vendor Subscription
             </h1>
             <p className="text-gray-600">
-              Fill out your business details. We'll review and contact you to activate your subscription.
+              Fill out your business details. We&apos;ll review and contact you to activate your subscription.
             </p>
           </div>
 
           {/* Form */}
-          <VendorSubscribeForm defaultCategory={defaultCategory} />
+          <VendorSubscribeForm defaultCategory={undefined} />
         </div>
       </div>
     </div>

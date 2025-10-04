@@ -58,7 +58,7 @@ export default function VendorCategories() {
               Join Any Category
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Whatever your wedding specialty, there's a place for you on Wervice
+              Whatever your wedding specialty, there&apos;s a place for you on Wervice
             </p>
           </div>
 

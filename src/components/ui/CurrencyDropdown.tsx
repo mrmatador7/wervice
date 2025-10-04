@@ -9,11 +9,7 @@ const currencyOptions = [
   { value: 'EUR', label: '€ EUR' }
 ];
 
-interface CurrencyDropdownProps extends Omit<DropdownProps, 'options'> {
-  // Inherits all DropdownProps except options
-}
-
-export default function CurrencyDropdown(props: CurrencyDropdownProps) {
+export default function CurrencyDropdown(props: Omit<DropdownProps, 'options'>) {
   return (
     <Dropdown
       {...props}

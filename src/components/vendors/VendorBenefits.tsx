@@ -32,7 +32,7 @@ export default function VendorBenefits() {
             Why Choose Wervice?
           </h2>
           <p className="text-lg text-slate-600 max-w-[60ch] mx-auto mb-6 md:mb-8">
-            Join Morocco's leading wedding platform and grow your business
+            Join Morocco&apos;s leading wedding platform and grow your business
           </p>
         </div>
 

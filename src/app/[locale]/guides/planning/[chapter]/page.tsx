@@ -6,6 +6,7 @@ import { FiClock, FiChevronLeft, FiChevronRight, FiArrowLeft, FiUser } from 'rea
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { getChapterBySlug, getNextChapter, getPreviousChapter, getAllChapters } from '@/lib/planningChapters';
+import { Chapter } from '@/models/chapter';
 
 interface ChapterPageProps {
   params: Promise<{ locale: string; chapter: string }>;
@@ -133,7 +134,7 @@ function ChapterContent({ slug }: { slug: string }) {
             </div>
           )}
 
-          {section.cta && (
+          {'cta' in section && section.cta && (
             <div className="bg-[#D7FF1F]/10 border border-[#D7FF1F]/20 rounded-xl p-6">
               <Link
                 href={section.cta.href}
@@ -197,7 +198,7 @@ function ChapterNavigation({ currentSlug }: { currentSlug: string }) {
   );
 }
 
-function StickyTOC({ chapter }: { chapter: any }) {
+function StickyTOC({ chapter }: { chapter: Chapter }) {
   // Simple TOC - in a real implementation, this would parse headings from MDX
   const tocItems = [
     { id: 'vision', title: 'Define Your Vision', level: 2 },
@@ -264,7 +265,7 @@ function StickyTOC({ chapter }: { chapter: any }) {
   );
 }
 
-function AuthorCard({ chapter }: { chapter: any }) {
+function AuthorCard({ chapter }: { chapter: Record<string, unknown> }) {
   return (
     <div className="bg-slate-50 rounded-2xl p-6 md:p-8 mt-12">
       <div className="flex items-center gap-4">
@@ -323,11 +324,14 @@ export async function generateMetadata({ params }: ChapterPageProps): Promise<Me
 
 export default async function ChapterPage({ params }: ChapterPageProps) {
   const { chapter: chapterSlug } = await params;
-  const chapter = getChapterBySlug(chapterSlug);
+  const chapter: Chapter | undefined = getChapterBySlug(chapterSlug);
 
   if (!chapter) {
     notFound();
   }
+
+  // Type assertion after null check
+  const safeChapter = chapter as Chapter;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -404,13 +408,13 @@ export default async function ChapterPage({ params }: ChapterPageProps) {
             <div className="flex gap-12">
               {/* Content */}
               <div className="flex-1 max-w-3xl">
-                <ChapterContent slug={chapter.slug} />
-                <ChapterNavigation currentSlug={chapter.slug} />
-                <AuthorCard chapter={chapter} />
+                <ChapterContent slug={safeChapter.slug} />
+                <ChapterNavigation currentSlug={safeChapter.slug} />
+                <AuthorCard chapter={safeChapter} />
               </div>
 
               {/* Sticky TOC */}
-              <StickyTOC chapter={chapter} />
+              <StickyTOC chapter={safeChapter} />
             </div>
           </div>
         </section>

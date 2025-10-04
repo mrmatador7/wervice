@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { FiLock, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi';
-import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import Header from '@/components/layout/Header';
 
 export default function UpdatePasswordPage() {
     const router = useRouter();
@@ -80,7 +80,7 @@ export default function UpdatePasswordPage() {
 
             {/* Content */}
             <div className="relative z-10">
-                <GlassmorphismHeader />
+                <Header />
 
                 {/* Add top padding to account for fixed header */}
                 <div className="pt-16 min-h-screen bg-gradient-to-br from-white/20 via-purple-50/30 to-pink-50/40 flex items-center justify-center px-4">

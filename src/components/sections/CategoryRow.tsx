@@ -10,6 +10,7 @@ type CategoryRowProps = {
   ctaHref: string;
   seeMoreHref: string;
   items: VendorCardProps[]; // must include city + rating (+ price)
+  colorVariant?: 'light' | 'dark'; // for background color adaptation
 };
 
 export default function CategoryRow({
@@ -18,6 +19,7 @@ export default function CategoryRow({
   ctaHref,
   seeMoreHref,
   items,
+  colorVariant = 'light',
 }: CategoryRowProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -48,10 +50,14 @@ export default function CategoryRow({
     <div className="mx-auto max-w-[1200px] px-4 md:px-6 lg:px-8 py-8">
       <div className="flex items-start justify-between gap-4 px-5 pt-5 md:px-6 md:pt-6">
         <div>
-          <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+          <h3 className={`text-lg md:text-xl font-semibold ${
+            colorVariant === 'dark' ? 'text-white' : 'text-gray-900'
+          }`}>
             {title}
           </h3>
-          <p className="mt-1 text-sm text-gray-600">{subtitle}</p>
+          <p className={`mt-1 text-sm ${
+            colorVariant === 'dark' ? 'text-white/80' : 'text-gray-600'
+          }`}>{subtitle}</p>
         </div>
         <Link
           href={ctaHref}
@@ -98,7 +104,7 @@ export default function CategoryRow({
           >
             <div className="flex pb-4 pr-4 space-x-4 md:space-x-6">
               {items.map((v, i) => (
-                <div key={v.href ?? i} className="flex-shrink-0 w-80">
+                <div key={i} className="flex-shrink-0 w-80">
                   <VendorCard {...v} />
                 </div>
               ))}

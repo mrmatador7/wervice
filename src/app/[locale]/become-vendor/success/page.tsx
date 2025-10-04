@@ -30,11 +30,11 @@ export default function VendorSignupSuccessPage() {
 
         {/* What's Next */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
-          <h3 className="font-semibold text-gray-900 mb-3">What's Next?</h3>
+          <h3 className="font-semibold text-gray-900 mb-3">What&apos;s Next?</h3>
           <ul className="text-left space-y-2 text-gray-600">
             <li className="flex items-start gap-3">
               <span className="w-2 h-2 bg-[#D7FF1F] rounded-full mt-2 flex-shrink-0"></span>
-              <span>We'll review your business details and photos</span>
+              <span>We&apos;ll review your business details and photos</span>
             </li>
             <li className="flex items-start gap-3">
               <span className="w-2 h-2 bg-[#D7FF1F] rounded-full mt-2 flex-shrink-0"></span>

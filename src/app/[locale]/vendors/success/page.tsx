@@ -43,7 +43,7 @@ export default function VendorSuccessPage() {
         {/* Additional Info */}
         <div className="mt-12 p-6 bg-white rounded-xl shadow-sm">
           <h3 className="font-ui-secondary text-lg text-gray-900 mb-4">
-            What's next?
+            What&apos;s next?
           </h3>
           <ul className="text-left space-y-2 text-gray-600">
             <li className="flex items-center gap-3">

@@ -78,7 +78,7 @@ export default function BlogArticles() {
             key={article.id}
             className="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1"
           >
-            <Link href="/blog" className="block">
+            <Link href="/articles" className="block">
               {/* Article Image */}
               <div className="relative aspect-[4/3] overflow-hidden">
                 <Image
@@ -145,7 +145,7 @@ export default function BlogArticles() {
       {/* View All Articles CTA */}
       <div className="text-center">
         <Link
-          href="/blog"
+          href="/articles"
           className="inline-flex items-center justify-center px-8 py-3 bg-gray-900 text-white font-medium rounded-full hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2"
         >
           View All Articles

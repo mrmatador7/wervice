@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface VendorLead {
+  id: string;
+  businessName: string;
+  category: string;
+  city: string;
+  whatsapp: string;
+  email: string;
+  mappedMonthlyPrice?: number;
+  subscriptionPriceDhs?: number;
+}
+
 // Mock storage for development - in production, this would be a database
-let vendorLeads: any[] = [];
+const vendorLeads: VendorLead[] = [];
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,7 +59,7 @@ export async function POST(request: NextRequest) {
     ];
 
     for (const field of requiredFields) {
-      if (!body[field]) {
+      if (!(body as any)[field]) {
         return NextResponse.json(
           { error: `Missing required field: ${field}` },
           { status: 400 }
@@ -143,7 +154,7 @@ export async function GET(request: NextRequest) {
 
   // If we have a lead ID in the path, return that specific lead
   if (leadId && leadId !== 'route') {
-    const lead = vendorLeads.find(l => l.id === leadId);
+    const lead = vendorLeads.find((l) => l.id === leadId);
     if (lead) {
       // Return only safe fields for the success page
       const safeLead = {

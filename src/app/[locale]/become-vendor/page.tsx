@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import VendorHero from '@/components/vendors/VendorHero';
 import WhyChooseWervice from '@/components/vendors/WhyChooseWervice';
 import VendorHowItWorks from '@/components/vendors/VendorHowItWorks';
@@ -23,12 +25,16 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function VendorSignupPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <VendorHero />
-      <WhyChooseWervice />
-      <VendorHowItWorks />
-      <VendorPricing />
-      <VendorSignupForm />
+    <div className="min-h-screen">
+      <Header />
+      <main className="-mt-8 md:-mt-12">
+        <VendorHero />
+        <WhyChooseWervice />
+        <VendorHowItWorks />
+        <VendorPricing />
+        <VendorSignupForm />
+      </main>
+      <Footer />
     </div>
   );
 }

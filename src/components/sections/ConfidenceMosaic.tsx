@@ -1,6 +1,7 @@
 'use client';
 
 import { FiShield, FiClock, FiCheck } from 'react-icons/fi';
+import Link from 'next/link';
 
 /**
  * Wervice "Plan With Confidence" Mosaic
@@ -27,7 +28,7 @@ export default function ConfidenceMosaic() {
           Plan With Confidence
         </h2>
         <p className="text-slate-600 mt-2">
-          We take care of the details so you can move forward with confidence—knowing you're fully supported.
+          We take care of the details so you can move forward with confidence—knowing you&apos;re fully supported.
         </p>
       </header>
 
@@ -62,7 +63,7 @@ export default function ConfidenceMosaic() {
           <p className="mt-3 text-sm md:text-[15px] leading-relaxed text-gray-700">
             Your data and messages are encrypted end-to-end. Contact vendors directly with verified profiles and no hidden fees.
           </p>
-          <a
+          <Link
             href="/safety"
             className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-gray-900 hover:opacity-90"
           >
@@ -79,7 +80,7 @@ export default function ConfidenceMosaic() {
               />
               <path d="M3 10a1 1 0 011-1h9a1 1 0 110 2H4a1 1 0 01-1-1z" />
             </svg>
-          </a>
+          </Link>
         </div>
 
         {/* Save Time & Energy */}

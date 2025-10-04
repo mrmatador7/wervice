@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import VendorDirectoryClient from './client';
-import { getAllVendors, filterVendors, sortVendors, paginateVendors } from '@/lib/vendors';
+import { getAllVendors, filterVendors, sortVendors, paginateVendors, VendorCity, VendorCategory } from '@/lib/vendors';
 import { VendorFilters } from '@/models/vendor';
 
 interface VendorDirectoryPageProps {
@@ -24,16 +24,16 @@ function parseSearchParams(searchParams: { [key: string]: string | string[] | un
 
   return {
     q: params.get('q') || undefined,
-    city: params.get('city') as any || undefined,
-    category: params.get('category') as any || undefined,
+    city: (params.get('city') as VendorCity) || undefined,
+    category: (params.get('category') as VendorCategory) || undefined,
     minPrice: params.get('min') ? parseInt(params.get('min')!) : undefined,
     maxPrice: params.get('max') ? parseInt(params.get('max')!) : undefined,
-    sort: params.get('sort') as any || 'recommended',
+    sort: (params.get('sort') as VendorFilters['sort']) || 'recommended',
     page: params.get('page') ? parseInt(params.get('page')!) : 1,
   };
 }
 
-function generateJsonLd(vendors: any[]) {
+function generateJsonLd(vendors: Record<string, unknown>[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'ItemList',

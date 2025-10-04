@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic';
 import SearchBarSimple from '@/components/hero/SearchBarSimple';
+import CategoryChips from '@/components/hero/CategoryChips';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Section from '@/components/layout/Section';
@@ -11,10 +12,8 @@ const NewVendors = dynamic(() => import('@/components/sections/NewVendors').catc
 const PlanWithConfidence = dynamic(() => import('@/components/sections/PlanWithConfidence').catch(() => import('@/components/placeholders/PlanWithConfidence')));
 const WeddingInsights = dynamic(() => import('@/components/sections/WeddingInsights').catch(() => import('@/components/placeholders/WeddingInsights')));
 const VendorCTA = dynamic(() => import('@/components/sections/VendorCTA').catch(() => import('@/components/placeholders/VendorCTA')));
-const Newsletter = dynamic(() => import('@/components/sections/Newsletter').catch(() => import('@/components/placeholders/Newsletter')));
 
 export default function Page() {
-  console.log("[HOME_FILE]", __filename);
   return (
     <main data-testid="home-entry" className="min-h-screen">
       {/* Header */}
@@ -22,13 +21,18 @@ export default function Page() {
 
       {/* Hero */}
       <section className="pt-[calc(var(--header-h,64px)+40px)] pb-8 px-4 text-center">
+        {/* Category Chips */}
+        <div className="mb-6 sm:mb-8">
+          <CategoryChips />
+        </div>
+
         <h1 className="text-4xl sm:text-5xl font-extrabold text-[#11190C]">Plan your wedding, your way.</h1>
         <p className="mt-2 text-base sm:text-lg text-[#787664]">Compare trusted vendors, read reviews, and book fast — all in one place.</p>
         <div className="mt-4"><SearchBarSimple /></div>
       </section>
 
       {/* 1) Popular Cities */}
-      <Section variant="tinted">
+      <Section variant="default">
         <PopularCities />
       </Section>
 
@@ -38,7 +42,7 @@ export default function Page() {
       </Section>
 
       {/* 3) New Vendors */}
-      <Section variant="lime">
+      <Section variant="default">
         <NewVendors />
       </Section>
 
@@ -48,18 +52,13 @@ export default function Page() {
       </Section>
 
       {/* 5) Wedding Insights & Stories */}
-      <Section variant="tinted">
+      <Section variant="default">
         <WeddingInsights />
       </Section>
 
       {/* 6) Vendor CTA */}
-      <Section variant="lime">
-        <VendorCTA />
-      </Section>
-
-      {/* 7) Newsletter */}
       <Section variant="default">
-        <Newsletter />
+        <VendorCTA />
       </Section>
 
       {/* Footer */}

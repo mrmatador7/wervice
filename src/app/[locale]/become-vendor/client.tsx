@@ -95,7 +95,7 @@ export default function VendorSignupClient() {
             Start Your Wedding Business on Wervice
           </h1>
           <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-            Join Morocco's premier wedding marketplace and connect with engaged couples looking for your services.
+            Join Morocco&apos;s premier wedding marketplace and connect with engaged couples looking for your services.
           </p>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function VendorSignupClient() {
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <h3 className="font-semibold text-gray-900 mb-4">Ready to get started?</h3>
               <p className="text-slate-600 text-sm mb-4">
-                Fill out the form to begin your journey as a Wervice vendor. We'll help you set up your profile and start attracting clients.
+                Fill out the form to begin your journey as a Wervice vendor. We&apos;ll help you set up your profile and start attracting clients.
               </p>
               <div className="text-sm text-slate-500">
                 <strong>Free to join • No monthly fees • Success-based pricing</strong>

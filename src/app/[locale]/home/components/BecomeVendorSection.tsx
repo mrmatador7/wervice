@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 const vendorBenefits = [
@@ -36,6 +37,9 @@ const decorativeIcons = [
 ];
 
 export default function BecomeVendorSection() {
+  const pathname = usePathname();
+  const currentLocale = pathname.split('/')[1] || 'en';
+
   return (
     <section className="relative py-20 overflow-hidden">
       {/* Background Decorative Icons */}
@@ -76,7 +80,7 @@ export default function BecomeVendorSection() {
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-black text-[#d9ff0a] px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <span className="w-2 h-2 bg-[#d9ff0a] rounded-full"></span>
-                Join Morocco's Leading Wedding Marketplace
+                Join Morocco&apos;s Leading Wedding Marketplace
               </div>
 
               <h2 className="font-inter font-bold text-4xl md:text-5xl leading-tight text-gray-900 mb-6">
@@ -86,7 +90,7 @@ export default function BecomeVendorSection() {
               </h2>
 
               <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-lg">
-                Join Morocco's premier wedding marketplace with flexible pricing starting from 150 DHS/month.
+                Join Morocco&apos;s premier wedding marketplace with flexible pricing starting from 150 DHS/month.
                 Choose your category, set your pricing tier, and start connecting with couples immediately.
               </p>
 
@@ -94,7 +98,7 @@ export default function BecomeVendorSection() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
                 {vendorBenefits.map((benefit, index) => (
                   <div key={index} className="text-center group">
-                    <div className="relative mb-4">
+                    <div className="relative mb-6">
                       <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto ring-4 ring-[#d9ff0a]/20 group-hover:ring-[#d9ff0a]/40 transition-all duration-300">
                         <span className="text-3xl" role="img" aria-label={benefit.alt}>
                           {benefit.icon}
@@ -104,7 +108,7 @@ export default function BecomeVendorSection() {
                         <span className="text-xs font-bold text-black">{index + 1}</span>
                       </div>
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-sm">{benefit.title}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-3 text-sm">{benefit.title}</h3>
                     <p className="text-sm text-gray-600 leading-relaxed">{benefit.description}</p>
                   </div>
                 ))}
@@ -113,8 +117,8 @@ export default function BecomeVendorSection() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
-                  href="/vendors"
-                  className="group inline-flex items-center justify-center px-8 py-4 bg-[#d9ff0a] text-black font-bold rounded-2xl hover:bg-black hover:text-[#d9ff0a] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  href={`/${currentLocale}/become-vendor`}
+                  className="group inline-flex items-center justify-center px-8 py-4 bg-[#11190C] text-white font-bold rounded-2xl hover:bg-[#0a0f0a] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                   Start Your Vendor Journey
                   <svg

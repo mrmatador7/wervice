@@ -14,6 +14,7 @@ interface VendorGridProps {
   category?: string;
   subcategory?: string;
   onClearFilters?: () => void;
+  isLoading?: boolean;
 }
 
 // Mock vendor data - in real app this would come from API
@@ -138,9 +139,11 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function VendorGrid({ city, category = 'all', subcategory = 'all', onClearFilters }: VendorGridProps) {
+export default function VendorGrid({ city, category = 'all', subcategory = 'all', onClearFilters, isLoading: externalLoading = false }: VendorGridProps) {
   const [visibleVendors, setVisibleVendors] = useState(6);
-  const [isLoading, setIsLoading] = useState(false);
+  const [internalLoading, setInternalLoading] = useState(false);
+
+  const isLoading = externalLoading || internalLoading;
 
   // Filter vendors by city, category, and subcategory (in real app this would be dynamic)
   const filteredVendors = mockVendors.filter(vendor => {
@@ -181,10 +184,10 @@ export default function VendorGrid({ city, category = 'all', subcategory = 'all'
   }
 
   const loadMore = () => {
-    setIsLoading(true);
+    setInternalLoading(true);
     setTimeout(() => {
       setVisibleVendors(prev => Math.min(prev + 6, filteredVendors.length));
-      setIsLoading(false);
+      setInternalLoading(false);
     }, 500);
   };
 
@@ -205,8 +208,24 @@ export default function VendorGrid({ city, category = 'all', subcategory = 'all'
         </p>
       </div>
 
-      {/* Vendor Grid */}
-      {filteredVendors.length > 0 ? (
+      {/* Loading Skeletons */}
+      {externalLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 animate-pulse">
+              <div className="aspect-[3/2] bg-gray-200" />
+              <div className="p-4">
+                <div className="h-4 bg-gray-200 rounded mb-2" />
+                <div className="h-3 bg-gray-200 rounded w-2/3 mb-3" />
+                <div className="flex justify-between items-center">
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                  <div className="h-3 bg-gray-200 rounded w-1/4" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : /* Vendor Grid */ !externalLoading && filteredVendors.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
             {filteredVendors.slice(0, visibleVendors).map((vendor) => (
@@ -287,7 +306,7 @@ export default function VendorGrid({ city, category = 'all', subcategory = 'all'
             </div>
           )}
         </>
-      ) : (
+      ) : !externalLoading && (
         /* Empty State */
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-wervice-sand/20 rounded-full flex items-center justify-center mx-auto mb-4">

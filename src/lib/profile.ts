@@ -12,7 +12,7 @@ export class ProfileService {
     /**
      * Get a user's profile by their auth ID
      */
-    static async getProfile(userId: string): Promise<{ data: Profile | null; error: any }> {
+    static async getProfile(userId: string): Promise<{ data: Profile | null; error: unknown }> {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
@@ -25,7 +25,7 @@ export class ProfileService {
     /**
      * Create or update a user profile
      */
-    static async upsertProfile(profile: ProfileInsert): Promise<{ data: Profile | null; error: any }> {
+    static async upsertProfile(profile: ProfileInsert): Promise<{ data: Profile | null; error: unknown }> {
         const { data, error } = await supabase
             .from('profiles')
             .upsert(profile, { onConflict: 'id' })
@@ -38,7 +38,7 @@ export class ProfileService {
     /**
      * Update an existing profile
      */
-    static async updateProfile(userId: string, updates: ProfileUpdate): Promise<{ data: Profile | null; error: any }> {
+    static async updateProfile(userId: string, updates: ProfileUpdate): Promise<{ data: Profile | null; error: unknown }> {
         const { data, error } = await supabase
             .from('profiles')
             .update(updates)
@@ -52,7 +52,7 @@ export class ProfileService {
     /**
      * Get profiles for users in planning/booked stages (for vendors)
      */
-    static async getPotentialClients(): Promise<{ data: Profile[] | null; error: any }> {
+    static async getPotentialClients(): Promise<{ data: Profile[] | null; error: unknown }> {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
@@ -65,7 +65,7 @@ export class ProfileService {
     /**
      * Get vendor profiles by category
      */
-    static async getVendorsByCategory(category: string): Promise<{ data: Profile[] | null; error: any }> {
+    static async getVendorsByCategory(category: string): Promise<{ data: Profile[] | null; error: unknown }> {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
@@ -78,7 +78,7 @@ export class ProfileService {
     /**
      * Get upcoming weddings (for vendors to see potential business)
      */
-    static async getUpcomingWeddings(limit = 50): Promise<{ data: Profile[] | null; error: any }> {
+    static async getUpcomingWeddings(limit = 50): Promise<{ data: Profile[] | null; error: unknown }> {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
@@ -93,7 +93,7 @@ export class ProfileService {
     /**
      * Update wedding planning stage
      */
-    static async updatePlanningStage(userId: string, stage: 'exploring' | 'planning' | 'booked' | 'completed'): Promise<{ error: any }> {
+    static async updatePlanningStage(userId: string, stage: 'exploring' | 'planning' | 'booked' | 'completed'): Promise<{ error: unknown }> {
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -116,7 +116,7 @@ export class ProfileService {
             sms_reminders?: boolean
             push_notifications?: boolean
         }
-    ): Promise<{ error: any }> {
+    ): Promise<{ error: unknown }> {
         const { error } = await supabase
             .from('profiles')
             .update({
@@ -131,7 +131,7 @@ export class ProfileService {
     /**
      * Search profiles by location (useful for vendors finding local clients)
      */
-    static async searchByLocation(location: string): Promise<{ data: Profile[] | null; error: any }> {
+    static async searchByLocation(location: string): Promise<{ data: Profile[] | null; error: unknown }> {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
@@ -180,7 +180,7 @@ export class ProfileService {
     /**
      * Initialize a new profile with default values
      */
-    static createDefaultProfile(userId: string, userMetadata?: any): ProfileInsert {
+    static createDefaultProfile(userId: string, userMetadata?: unknown): ProfileInsert {
         return {
             id: userId,
             first_name: userMetadata?.first_name || null,

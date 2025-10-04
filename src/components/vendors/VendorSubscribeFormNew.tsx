@@ -800,7 +800,7 @@ export default function VendorSubscribeForm({
 
               <div>
                 <div className="text-sm text-gray-600 mb-1">Billing</div>
-                <div className="text-sm text-gray-700">We'll contact you to activate</div>
+                <div className="text-sm text-gray-700">We&apos;ll contact you to activate</div>
               </div>
             </div>
 

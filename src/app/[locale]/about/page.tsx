@@ -51,7 +51,7 @@ export default function AboutPage() {
               We make planning your Moroccan wedding simple, joyful, and stress-free.
             </h1>
             <p className="mt-4 text-gray-600 max-w-prose">
-              Wervice is Morocco's modern wedding marketplace. Discover trusted vendors,
+              Wervice is Morocco&apos;s modern wedding marketplace. Discover trusted vendors,
               compare offers, and book everything in one place—with support at every step.
             </p>
 

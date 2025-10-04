@@ -1,5 +1,20 @@
 export type MainCategory = 'venues' | 'catering' | 'dresses' | 'photo-video' | 'event-planner' | 'beauty' | 'decor' | 'music';
 
+export const MAIN_CATEGORIES: readonly MainCategory[] = [
+  'venues',
+  'catering',
+  'dresses',
+  'photo-video',
+  'event-planner',
+  'beauty',
+  'decor',
+  'music'
+] as const;
+
+export function isMainCategory(category: string): category is MainCategory {
+  return MAIN_CATEGORIES.includes(category as MainCategory);
+}
+
 export interface Subcategory {
   label: string;
   slug: string;

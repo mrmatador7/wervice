@@ -1,5 +1,7 @@
 import { Vendor, VendorCategory, VendorCity, VendorFilters, VendorSortOption } from '@/models/vendor';
 
+export type { Vendor, VendorFilters, VendorCity, VendorCategory };
+
 export const VENDOR_CATEGORIES: VendorCategory[] = [
   'Venues', 'Catering', 'Photo & Video', 'Planning', 'Beauty', 'Decor', 'Music', 'Dresses'
 ];
@@ -477,10 +479,10 @@ export function filterVendors(vendors: Vendor[], filters: VendorFilters): Vendor
     }
 
     // City filter
-    if (filters.city && vendor.city !== filters.city) return false;
+    if (filters.city && vendor.city.toLowerCase() !== filters.city.toLowerCase()) return false;
 
     // Category filter
-    if (filters.category && vendor.category !== filters.category) return false;
+    if (filters.category && vendor.category.toLowerCase() !== filters.category.toLowerCase()) return false;
 
     // Price range filter
     if (filters.minPrice && (!vendor.startingPrice || vendor.startingPrice < filters.minPrice)) return false;

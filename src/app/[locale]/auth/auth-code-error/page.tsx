@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { FiAlertCircle, FiHome } from 'react-icons/fi';
 import Link from 'next/link';
-import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import Header from '@/components/layout/Header';
 
 function AuthCodeErrorContent() {
     const searchParams = useSearchParams();
@@ -26,7 +26,7 @@ function AuthCodeErrorContent() {
 
             {/* Content */}
             <div className="relative z-10">
-                <GlassmorphismHeader />
+                <Header />
 
                 {/* Add top padding to account for fixed header */}
                 <div className="pt-16 min-h-screen bg-gradient-to-br from-white/20 via-red-50/30 to-pink-50/40 flex items-center justify-center px-4">

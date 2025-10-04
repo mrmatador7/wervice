@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   description: "Authentic Moroccan weddings made easy",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.png",
     apple: "/apple-icon.png",
   },
 };

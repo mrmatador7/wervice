@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface VendorLead {
+  id: string;
+  businessName: string;
+  category: string;
+  city: string;
+  whatsapp: string;
+  email: string;
+  mappedMonthlyPrice?: number;
+  subscriptionPriceDhs?: number;
+}
+
 // Mock storage for development - in production, this would be a database
-let vendorLeads: any[] = [];
+const vendorLeads: VendorLead[] = [];
 
 export async function GET(
   request: NextRequest,
