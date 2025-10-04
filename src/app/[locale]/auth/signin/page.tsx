@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
-import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import Header from '@/components/layout/Header';
 import { getProfile, createProfile } from '@/queries';
 
 export default function SignInPage() {
@@ -112,7 +112,7 @@ export default function SignInPage() {
 
             {/* Content */}
             <div className="relative z-10">
-                <GlassmorphismHeader />
+                <Header />
 
                 {/* Add top padding to account for fixed header */}
                 <div className="pt-16 min-h-screen bg-gradient-to-br from-white/20 via-purple-50/30 to-pink-50/40 flex items-center justify-center px-4">

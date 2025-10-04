@@ -115,7 +115,7 @@ export async function getCategories(
 export async function getMainCategories(filters: Omit<CategoryFilters, 'parent_id'> = {}): Promise<PaginatedQueryResult<Category>> {
   return getCategories({
     ...filters,
-    parent_id: null as any // Categories with no parent
+    parent_id: undefined // Categories with no parent
   });
 }
 
