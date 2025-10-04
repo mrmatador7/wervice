@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTranslations, useLocale } from 'next-intl';
-import { FiMail, FiCheckCircle, FiArrowLeft } from 'react-icons/fi';
-import Link from 'next/link';
-import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import { FiMail } from 'react-icons/fi';
+import Header from '@/components/layout/Header';
 
 export default function ResetPasswordPage() {
     const t = useTranslations('auth');
@@ -30,7 +29,7 @@ export default function ResetPasswordPage() {
             } else {
                 setIsSuccess(true);
             }
-        } catch (err) {
+        } catch {
             setError(t('reset.error', { defaultValue: 'An error occurred. Please try again.' }));
         } finally {
             setIsLoading(false);
@@ -52,7 +51,7 @@ export default function ResetPasswordPage() {
 
             {/* Content */}
             <div className="relative z-10">
-                <GlassmorphismHeader />
+                <Header />
 
                 {/* Add top padding to account for fixed header */}
                 <div className="pt-16 min-h-screen bg-gradient-to-br from-white/20 via-purple-50/30 to-pink-50/40 flex items-center justify-center px-4">

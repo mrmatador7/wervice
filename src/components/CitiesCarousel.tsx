@@ -127,20 +127,19 @@ export default function CitiesCarousel({
     };
 
     return (
-        <section className={`px-4 md:px-6 lg:px-8 py-8 bg-[#F7F8FB] ${className}`}>
-            <div className="max-w-7xl mx-auto">
-                {/* Section Title */}
-                <div className="text-center mb-8">
-                    <h2 className="font-inter font-bold text-2xl md:text-3xl text-gray-900 mb-2">
-                        {title}
-                    </h2>
-                    <p className="text-gray-600 text-sm md:text-base">
-                        Discover wedding vendors in Morocco's most beautiful cities
-                    </p>
-                </div>
+        <div className={className}>
+            {/* Section Title */}
+            <div className="text-center mb-8">
+                <h2 className="font-inter font-bold text-2xl md:text-3xl text-gray-900 mb-2">
+                    {title}
+                </h2>
+                <p className="text-gray-600 text-sm md:text-base">
+                    Discover wedding vendors in Morocco&apos;s most beautiful cities
+                </p>
+            </div>
 
-                {/* Carousel Track with Navigation */}
-                <div className="relative">
+            {/* Carousel Track with Navigation */}
+            <div className="relative">
                     {/* Left Navigation Arrow */}
                     {canScrollLeft && (
                         <button
@@ -197,7 +196,6 @@ export default function CitiesCarousel({
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
+        </div>
     );
 }

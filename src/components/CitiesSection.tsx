@@ -86,7 +86,7 @@ export default function CitiesSection() {
                         Explore Cities
                     </h2>
                     <p className="text-gray-600 max-w-2xl mx-auto">
-                        Discover wedding vendors in Morocco's most beautiful cities
+                        Discover wedding vendors in Morocco&apos;s most beautiful cities
                     </p>
                 </div>
 

@@ -65,3 +65,50 @@ export interface TimerState {
   minutes: number;
   seconds: number;
 }
+
+// Vendor Types
+export type VendorCategory =
+  | 'venues'
+  | 'catering'
+  | 'photo-video'
+  | 'planning'
+  | 'beauty'
+  | 'decor'
+  | 'music'
+  | 'dresses';
+
+export interface Vendor {
+  slug: string;
+  name: string;
+  category: VendorCategory;
+  city: string;
+  address?: string;
+  location?: { lat: number; lng: number };
+  coverImage: string;
+  gallery: string[];
+  // Common
+  priceRange?: { from?: number; to?: number; currency?: "MAD" };
+  description?: string;
+  amenities?: string[];
+  services?: string[];
+  phone?: string;
+  email?: string;
+  website?: string;
+  whatsapp?: string;
+  rating?: number;
+  reviewsCount?: number;
+  openingHours?: string[];
+  verified?: boolean;
+  // Category-specific fields
+  capacity?: number;                         // venues
+  indoor?: boolean; outdoor?: boolean;       // venues
+  pricePerPerson?: number;                   // catering
+  cuisines?: string[];                       // catering
+  minOrder?: number;                         // catering
+  packages?: string[];                       // photo-video, planning
+  hoursCoverage?: number;                    // photo-video
+  rental?: boolean; sizes?: string[];        // dresses
+  alterations?: boolean; fittings?: boolean; // dresses
+  ensembleSize?: string; setDuration?: string; soundSystem?: boolean; // music
+  deliverySetup?: boolean;                   // decor
+}

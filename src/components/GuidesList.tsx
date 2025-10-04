@@ -13,23 +13,7 @@ interface GuidesListProps {
   className?: string;
 }
 
-const defaultGuides: Guide[] = [
-  {
-    title: 'Best wedding venues in Marrakech',
-    href: '/blog/best-venues-marrakech',
-    tag: 'Guide'
-  },
-  {
-    title: 'How to choose a photographer in Casablanca',
-    href: '/blog/choose-photographer-casablanca',
-    tag: 'Guide'
-  },
-  {
-    title: 'Henna night checklist',
-    href: '/blog/henna-night-checklist',
-    tag: 'Guide'
-  }
-];
+const defaultGuides: Guide[] = [];
 
 export default function GuidesList({
   title = "Wedding Guides",
@@ -46,7 +30,7 @@ export default function GuidesList({
         {items.map((guide, index) => (
           <Link
             key={index}
-            href={guide.href}
+            href="/articles"
             className="group block rounded-xl border border-[#ECEEF4] bg-white hover:shadow-md transition-all duration-200 p-4"
             aria-label={`Read guide: ${guide.title}`}
           >
@@ -79,7 +63,7 @@ export default function GuidesList({
 
       <div className="mt-6 text-center">
         <Link
-          href="/blog"
+          href="/guides/planning"
           className="inline-flex items-center gap-2 font-inter font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200"
         >
           Explore all guides

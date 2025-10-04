@@ -1,26 +1,27 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 const vendorBenefits = [
   {
-    icon: '👥',
-    alt: 'Network icon representing reaching more couples',
-    title: 'Reach More Couples',
-    description: 'Connect with engaged couples actively searching for wedding vendors in Morocco'
+    icon: '💰',
+    alt: 'Money icon representing flexible pricing',
+    title: 'Flexible Pricing',
+    description: 'Choose from three pricing tiers (150-250 DHS/month) based on your wedding category'
   },
   {
-    icon: '📅',
-    alt: 'Calendar icon representing booking management',
-    title: 'Increase Bookings',
-    description: 'Access premium client leads and direct booking opportunities through our platform'
+    icon: '📊',
+    alt: 'Chart icon representing category selection',
+    title: 'Category-Based Plans',
+    description: 'Venues, catering, and planning vendors enjoy premium pricing at 250 DHS/month'
   },
   {
-    icon: '🎨',
-    alt: 'Palette icon representing showcasing creative work',
-    title: 'Showcase Your Work',
-    description: 'Display your portfolio, receive reviews, and build credibility in the wedding industry'
+    icon: '⚡',
+    alt: 'Lightning icon representing quick setup',
+    title: 'Quick Setup',
+    description: 'Select your category, upload photos, and start receiving inquiries within 24 hours'
   }
 ];
 
@@ -30,14 +31,17 @@ const decorativeIcons = [
   { src: '/categories/music.png', x: 15, y: 60, size: 44, rotation: -4 },
   { src: '/categories/decor.png', x: 80, y: 65, size: 46, rotation: 1 },
   { src: '/categories/Dresses.png', x: 90, y: 40, size: 42, rotation: -2 },
-  { src: '/categories/Photo & Video.png', x: 5, y: 80, size: 50, rotation: 3 },
-  { src: '/categories/Event Planner.png', x: 70, y: 85, size: 48, rotation: -1 },
+  { src: '/categories/photo.png', x: 5, y: 80, size: 50, rotation: 3 },
+  { src: '/categories/event planner.png', x: 70, y: 85, size: 48, rotation: -1 },
   { src: '/categories/beauty.png', x: 25, y: 35, size: 45, rotation: 2 }
 ];
 
 export default function BecomeVendorSection() {
+  const pathname = usePathname();
+  const currentLocale = pathname.split('/')[1] || 'en';
+
   return (
-    <section className="relative py-20 bg-[#F7F8FB] overflow-hidden">
+    <section className="relative py-20 overflow-hidden">
       {/* Background Decorative Icons */}
       <div className="absolute inset-0 pointer-events-none opacity-60">
         {decorativeIcons.map((icon, index) => (
@@ -76,7 +80,7 @@ export default function BecomeVendorSection() {
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-black text-[#d9ff0a] px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <span className="w-2 h-2 bg-[#d9ff0a] rounded-full"></span>
-                Join Morocco's Leading Wedding Marketplace
+                Join Morocco&apos;s Leading Wedding Marketplace
               </div>
 
               <h2 className="font-inter font-bold text-4xl md:text-5xl leading-tight text-gray-900 mb-6">
@@ -86,15 +90,15 @@ export default function BecomeVendorSection() {
               </h2>
 
               <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-lg">
-                Transform your wedding business by joining Morocco's premier marketplace.
-                Connect with couples, showcase your expertise, and grow your revenue.
+                Join Morocco&apos;s premier wedding marketplace with flexible pricing starting from 150 DHS/month.
+                Choose your category, set your pricing tier, and start connecting with couples immediately.
               </p>
 
               {/* Benefits */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
                 {vendorBenefits.map((benefit, index) => (
                   <div key={index} className="text-center group">
-                    <div className="relative mb-4">
+                    <div className="relative mb-6">
                       <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center mx-auto ring-4 ring-[#d9ff0a]/20 group-hover:ring-[#d9ff0a]/40 transition-all duration-300">
                         <span className="text-3xl" role="img" aria-label={benefit.alt}>
                           {benefit.icon}
@@ -104,7 +108,7 @@ export default function BecomeVendorSection() {
                         <span className="text-xs font-bold text-black">{index + 1}</span>
                       </div>
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-sm">{benefit.title}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-3 text-sm">{benefit.title}</h3>
                     <p className="text-sm text-gray-600 leading-relaxed">{benefit.description}</p>
                   </div>
                 ))}
@@ -113,8 +117,8 @@ export default function BecomeVendorSection() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
-                  href="/become-vendor"
-                  className="group inline-flex items-center justify-center px-8 py-4 bg-[#d9ff0a] text-black font-bold rounded-2xl hover:bg-black hover:text-[#d9ff0a] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  href={`/${currentLocale}/become-vendor`}
+                  className="group inline-flex items-center justify-center px-8 py-4 bg-[#11190C] text-white font-bold rounded-2xl hover:bg-[#0a0f0a] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                   Start Your Vendor Journey
                   <svg
@@ -136,7 +140,7 @@ export default function BecomeVendorSection() {
               </div>
 
               <p className="text-sm text-gray-500 mt-6">
-                Join 500+ verified vendors already growing their business with Wervice
+                Join 500+ verified vendors across 8 categories, from 150 DHS/month
               </p>
             </div>
 
@@ -154,11 +158,11 @@ export default function BecomeVendorSection() {
                 <div className="absolute -top-6 -left-6 bg-white rounded-2xl p-4 shadow-xl">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-[#d9ff0a] rounded-xl flex items-center justify-center">
-                      <span className="text-2xl">📈</span>
+                      <span className="text-2xl">💰</span>
                     </div>
                     <div>
-                      <div className="font-bold text-gray-900">300%</div>
-                      <div className="text-sm text-gray-600">Avg. Growth</div>
+                      <div className="font-bold text-gray-900">150-250</div>
+                      <div className="text-sm text-gray-600">DHS/month</div>
                     </div>
                   </div>
                 </div>
@@ -166,11 +170,11 @@ export default function BecomeVendorSection() {
                 <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl p-4 shadow-xl">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center">
-                      <span className="text-2xl text-white">⭐</span>
+                      <span className="text-2xl text-white">🏷️</span>
                     </div>
                     <div>
-                      <div className="font-bold text-gray-900">4.9/5</div>
-                      <div className="text-sm text-gray-600">Client Rating</div>
+                      <div className="font-bold text-gray-900">8</div>
+                      <div className="text-sm text-gray-600">Categories</div>
                     </div>
                   </div>
                 </div>

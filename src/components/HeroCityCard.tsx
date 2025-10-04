@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 type HeroCityCardProps = {
@@ -20,9 +20,15 @@ export default function HeroCityCard({
   tint = '#0B0D2E',
   className = ''
 }: HeroCityCardProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    window.location.href = `/en/cities/${slug}`;
+  };
+
   return (
-    <Link
-      href={`/city/${slug}`}
+    <button
+      onClick={handleClick}
       className={`group relative flex-shrink-0 shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-white/20 active:opacity-92 overflow-hidden snap-start ${className}`}
       style={{
         width: 'clamp(240px, 28vw, 360px)',
@@ -68,6 +74,6 @@ export default function HeroCityCard({
           )}
         </div>
       </div>
-    </Link>
+    </button>
   );
 }

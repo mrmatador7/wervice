@@ -89,5 +89,3 @@ export const getCategoryLabel = (category: WeddingCategory): string => {
   return labels[category] || category;
 };
 
-// Re-export hooks
-export { useCountdown } from '../hooks/useCountdown';

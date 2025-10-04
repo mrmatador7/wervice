@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 
+
 interface Category {
     name: string;
     count: number;
@@ -26,13 +27,13 @@ const categories: Category[] = [
     {
         name: 'Photo & Video',
         count: 156,
-        image: '/categories/Photo & Video.png',
+        image: '/categories/photo.png',
         href: '/categories/photo-video',
     },
     {
         name: 'Event Planner',
         count: 92,
-        image: '/categories/Event Planner.png',
+        image: '/categories/event planner.png',
         href: '/categories/planning',
     },
     {
@@ -70,56 +71,48 @@ export default function CategoriesSection() {
             count: 124,
             image: '/categories/venues.png',
             href: `/${locale}/categories/venues`,
-            gradient: 'bg-gradient-to-br from-purple-400 to-blue-600',
         },
         {
             name: 'Catering',
             count: 87,
             image: '/categories/Catering.png',
             href: `/${locale}/categories/catering`,
-            gradient: 'bg-gradient-to-br from-orange-400 to-yellow-500',
         },
         {
             name: 'Photo & Video',
             count: 156,
-            image: '/categories/Photo & Video.png',
+            image: '/categories/photo.png',
             href: `/${locale}/categories/photo-video`,
-            gradient: 'bg-gradient-to-br from-pink-400 to-purple-600',
         },
         {
             name: 'Event Planner',
             count: 92,
-            image: '/categories/Event Planner.png',
+            image: '/categories/event planner.png',
             href: `/${locale}/categories/planning`,
-            gradient: 'bg-gradient-to-br from-blue-500 to-indigo-700',
         },
         {
             name: 'Beauty',
             count: 78,
             image: '/categories/beauty.png',
             href: `/${locale}/categories/beauty`,
-            gradient: 'bg-gradient-to-br from-pink-400 to-rose-500',
         },
         {
             name: 'Decor',
             count: 134,
             image: '/categories/decor.png',
             href: `/${locale}/categories/decor`,
-            gradient: 'bg-gradient-to-br from-green-400 to-teal-600',
         },
         {
             name: 'Music',
             count: 67,
             image: '/categories/music.png',
             href: `/${locale}/categories/music`,
-            gradient: 'bg-gradient-to-br from-red-400 to-orange-500',
         },
         {
             name: 'Dresses',
             count: 189,
             image: '/categories/Dresses.png',
             href: `/${locale}/categories/dresses`,
-            gradient: 'bg-gradient-to-br from-rose-400 to-pink-600',
         },
     ];
 
@@ -193,7 +186,7 @@ export default function CategoriesSection() {
                     >
                         See all categories →
                     </Link>
-                </div >
+                    </div >
             </div >
         </section >
     );

@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useLocale } from 'next-intl';
-import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import Header from '@/components/layout/Header';
 import Link from 'next/link';
 
 export default function DashboardPage() {
@@ -56,7 +56,7 @@ export default function DashboardPage() {
 
             {/* Content */}
             <div className="relative z-10">
-                <GlassmorphismHeader />
+                <Header />
 
                 {/* Add top padding to account for fixed header */}
                 <div className="pt-16 min-h-screen">

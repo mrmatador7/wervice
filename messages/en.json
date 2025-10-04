@@ -4,6 +4,10 @@
     "description": "Authentic Moroccan weddings made easy with categories like Venues, Dresses, and Decor. Plan your perfect celebration with traditional henna, kaftans, and Amaria processions.",
     "keywords": "Moroccan weddings, henna ceremonies, kaftans, Amaria processions, Riad venues, traditional catering, wedding planning Morocco"
   },
+  "how-it-works": {
+    "title": "How Wervice Works - Plan Your Moroccan Wedding",
+    "description": "Discover how Wervice makes planning your Moroccan wedding easy. Browse vendors, compare options, and contact them directly."
+  },
   "header": {
     "signUp": "Sign Up",
     "login": "Login",
@@ -263,6 +267,199 @@
       "successMessage": "Your password has been successfully updated. You will be redirected to your dashboard shortly.",
       "redirecting": "Redirecting...",
       "error": "An error occurred. Please try again."
+    }
+  },
+  "vendor": {
+    "hero": {
+      "title": "Become a Wervice Vendor",
+      "subtitle": "Join Morocco's premier wedding marketplace and connect with couples planning their big day.",
+      "primaryCTA": "Start Subscription",
+      "secondaryCTA": "Vendor Login"
+    },
+    "whyChoose": {
+      "title": "Why Choose Wervice?",
+      "subtitle": "Join Morocco's leading wedding platform and grow your business",
+      "growBusiness": {
+        "title": "Grow Your Business",
+        "description": "Reach thousands of engaged couples actively planning in Morocco."
+      },
+      "showcaseWork": {
+        "title": "Showcase Your Work",
+        "description": "Publish photos, packages, and details that highlight your best projects."
+      },
+      "increaseRevenue": {
+        "title": "Increase Revenue",
+        "description": "Get direct inquiries via WhatsApp or secure form—no middleman fees."
+      },
+      "buildReputation": {
+        "title": "Build Reputation",
+        "description": "Collect reviews and establish credibility in your category & city."
+      }
+    },
+    "benefits": {
+      "title": "Why Choose Wervice?",
+      "subtitle": "Join Morocco's leading wedding platform and grow your business",
+      "growBusiness": "Grow Your Business",
+      "growBusinessDesc": "Reach thousands of engaged couples in Morocco actively planning their weddings.",
+      "increaseRevenue": "Increase Revenue",
+      "increaseRevenueDesc": "Get direct bookings through your vendor profile without middleman fees.",
+      "buildReputation": "Build Reputation",
+      "buildReputationDesc": "Showcase your work, collect reviews, and establish credibility in the wedding industry."
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Get started in just 3 simple steps",
+      "createProfile": "Create Your Profile",
+      "createProfileDesc": "Add photos, select your city and category, and tell couples about your business.",
+      "listServices": "List Your Services",
+      "listServicesDesc": "Publish your packages, starting prices, and showcase your best work.",
+      "getContacted": "Get Contacted",
+      "getContactedDesc": "Couples reach you directly via WhatsApp or our secure inquiry form."
+    },
+    "pricing": {
+      "title": "One Simple Plan for All Categories",
+      "subtitle": "Choose your category: Venues, Catering, Photo & Video, Planning, Beauty, Decor, Music, or Dresses.",
+      "monthly": "Monthly",
+      "annual": "🔥 Annual – Save 10%",
+      "monthlyPrice": "179 DHS",
+      "annualPrice": "1,930 DHS",
+      "annualSavings": "instead of 2,148 DHS",
+      "perMonth": "/ month",
+      "perYear": "/ year",
+      "features": {
+        "profile": "Profile listing with photos & description",
+        "search": "Appear in city & category searches",
+        "contact": "WhatsApp & form contact",
+        "dashboard": "Vendor dashboard access",
+        "cancel": "Cancel anytime",
+        "noCommissions": "No commissions"
+      },
+      "subscribeMonthly": "Subscribe — 179 DHS / month",
+      "subscribeAnnual": "Subscribe — 1,930 DHS / year",
+      "invoices": "Invoices in DHS (MAD)",
+      "securePayment": "Secure payment",
+      "cancelAnytime": "Cancel anytime",
+      "vendorOnly": "Vendor-only subscription",
+      "trust": {
+        "secureCheckout": "Secure checkout",
+        "cancelAnytime": "Cancel anytime",
+        "noCommissions": "No commissions"
+      }
+    },
+    "categories": {
+      "title": "Join Any Category",
+      "subtitle": "Whatever your wedding specialty, there's a place for you on Wervice",
+      "venues": "Wedding halls, riads, gardens",
+      "catering": "Traditional Moroccan cuisine",
+      "photoVideo": "Photography and videography",
+      "planningBeauty": "Wedding planning and henna",
+      "decor": "Floral arrangements and styling",
+      "music": "Live music and entertainment",
+      "dresses": "Wedding dresses and attire",
+      "eventPlanner": "Full wedding coordination"
+    },
+    "signup": {
+      "title": "Start Your Vendor Journey",
+      "subtitle": "Fill out the form below to create your vendor profile",
+      "businessName": "Business Name",
+      "category": "Category",
+      "city": "City",
+      "whatsapp": "WhatsApp Number",
+      "email": "Email",
+      "startingPrice": "Starting Price (MAD)",
+      "description": "Short Description",
+      "photos": "Photos (Cover + Gallery)",
+      "photoHelp": "Upload at least one cover photo. Max 10 photos.",
+      "plan": "Choose Your Plan",
+      "submit": "Create Vendor Account",
+      "agreement": "By submitting, you agree to start your subscription immediately.",
+      "cities": {
+        "casablanca": "Casablanca",
+        "marrakech": "Marrakech",
+        "rabat": "Rabat",
+        "tanger": "Tangier",
+        "agadir": "Agadir",
+        "fes": "Fes",
+        "meknes": "Meknes",
+        "elJadida": "El Jadida",
+        "kenitra": "Kenitra"
+      },
+      "plans": {
+        "small": "Small Vendor (100–150 MAD/month)",
+        "mid": "Mid Vendor (150–200 MAD/month)",
+        "big": "Big Vendor (250–350 MAD/month)"
+      }
+    },
+    "subscribe": {
+      "title": "Start your Wervice Vendor Subscription",
+      "subtitle": "Fill out your business details — we'll review and contact you to activate your subscription.",
+      "step1": "Business Basics",
+      "step2": "Profile & Plan",
+      "next": "Next",
+      "previous": "Previous",
+      "submit": "Submit Application",
+      "submitting": "Submitting...",
+      "businessName": "Business Name",
+      "category": "Category",
+      "city": "City",
+      "whatsapp": "WhatsApp Number",
+      "email": "Email Address",
+      "website": "Website (Optional)",
+      "instagram": "Instagram (Optional)",
+      "startingPrice": "Starting Price (MAD)",
+      "description": "Short Description",
+      "images": "Images (Cover + Gallery)",
+      "imageHelp": "Upload at least one cover photo. Max 7 photos total, 3MB each (JPG/PNG only).",
+      "plan": "Plan Cadence",
+      "monthly": "Monthly — 179 DHS / month",
+      "annual": "Annual — 1,930 DHS / year",
+      "annualSavings": "instead of 2,148 DHS",
+      "consent": "I agree to the Terms and Privacy Policy and consent to being contacted by Wervice.",
+      "validation": {
+        "businessNameRequired": "Business name is required",
+        "categoryRequired": "Please select a category",
+        "cityRequired": "Please select a city",
+        "whatsappRequired": "WhatsApp number is required",
+        "whatsappInvalid": "Please enter a valid Moroccan WhatsApp number (+212 6XX XXX XXX)",
+        "emailRequired": "Email address is required",
+        "emailInvalid": "Please enter a valid email address",
+        "startingPriceRequired": "Starting price is required",
+        "startingPriceInvalid": "Please enter a valid price",
+        "descriptionRequired": "Description is required",
+        "descriptionTooLong": "Description must be 300 characters or less",
+        "imagesRequired": "Please upload at least one image",
+        "consentRequired": "You must agree to the terms and consent to being contacted"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about becoming a Wervice vendor",
+      "couplesPay": "Do couples pay for Wervice?",
+      "couplesPayAnswer": "No, Wervice is completely free for couples. Only vendors subscribe to access the platform and get connected with potential clients.",
+      "cost": "How much does it cost to be a vendor?",
+      "costAnswer": "Plans start from 100 MAD/month for small vendors. Prices range from 100–350 MAD/month depending on your plan size and features.",
+      "commissions": "Are there any commissions on bookings?",
+      "commissionsAnswer": "No commissions whatsoever. You keep 100% of your earnings from bookings made through your vendor profile.",
+      "cancel": "Can I cancel my subscription anytime?",
+      "cancelAnswer": "Yes, you can cancel your subscription at any time. There are no long-term contracts or cancellation fees.",
+      "requirements": "What do I need to join as a vendor?",
+      "requirementsAnswer": "Just provide photos of your work, your pricing, contact information, and a brief description of your services."
+    },
+    "finalCTA": {
+      "title": "Ready to grow your business?",
+      "subtitle": "Join hundreds of successful wedding vendors in Morocco and start connecting with couples today.",
+      "button": "Start Subscription"
+    },
+    "success": {
+      "title": "Thanks! We'll contact you to activate your subscription",
+      "message": "Your application has been submitted successfully. We'll review your details and contact you within 24-48 hours to activate your subscription.",
+      "summary": "Application Summary",
+      "dashboard": "Go to Home",
+      "tips": "Visit Vendor Tips",
+      "nextSteps": "What's Next?",
+      "contact": "We'll reach out shortly on WhatsApp or email.",
+      "prepare": "Prepare 5–10 photos and your package details to go live.",
+      "inquiries": "Start receiving inquiries from couples."
     }
   }
 }

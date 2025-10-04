@@ -158,7 +158,7 @@ export async function middleware(req: NextRequest) {
             });
 
         } catch (error) {
-            const errorObj = error as any;
+            const errorObj = error as Error;
             console.error(`[${new Date().toISOString()}] 💥 Error in middleware profile check:`, {
                 error: errorObj?.message || errorObj || 'Unknown error',
                 userId: session.user.id

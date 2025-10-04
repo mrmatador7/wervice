@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { supabase } from '@/lib/supabase';
 import { getProfile, upsertProfile } from '@/queries';
-import GlassmorphismHeader from '@/components/GlassmorphismHeader';
+import { User } from '@supabase/supabase-js';
+import Header from '@/components/layout/Header';
 
 interface OnboardingData {
   first_name: string;
@@ -22,7 +23,7 @@ export default function OnboardingPage() {
   const locale = useLocale();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [redirectTo, setRedirectTo] = useState<string>('');
 
   const [formData, setFormData] = useState<OnboardingData>({
@@ -344,7 +345,7 @@ export default function OnboardingPage() {
 
       {/* Content */}
       <div className="relative z-10">
-        <GlassmorphismHeader />
+        <Header />
 
         {/* Progress Indicator */}
         <div className="pt-16 pb-8">

@@ -2,7 +2,7 @@
 
 export interface QueryResult<T> {
   data: T | null;
-  error: any;
+  error: Error | null;
   count?: number;
 }
 
@@ -39,6 +39,4 @@ export interface CategoryFilters extends QueryFilters {
   parent_id?: string;
 }
 
-export interface BusinessTypeFilters extends QueryFilters {
-  // Add specific filters for business types if needed
-}
+export type BusinessTypeFilters = QueryFilters;

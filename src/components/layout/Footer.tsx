@@ -1,29 +1,37 @@
+'use client';
+
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'next/navigation';
 import { CURRENT_YEAR } from '@/lib/config';
 
 export default function Footer() {
+  const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations('footer');
+
+  // Extract current locale from pathname
+  const currentLocale = pathname.split('/')[1] || 'en';
 
   const footerSections = [
     {
       title: 'Wedding Services',
       links: [
-        { name: 'Wedding Venues', href: '/categories/venues' },
-        { name: 'Catering Services', href: '/categories/catering' },
-        { name: 'Photography & Video', href: '/categories/photo-video' },
-        { name: 'Wedding Planning', href: '/categories/planning' },
-        { name: 'Beauty & Henna', href: '/categories/beauty' },
-        { name: 'Decor & Styling', href: '/categories/decor' },
-        { name: 'Music & Entertainment', href: '/categories/music' },
-        { name: 'Wedding Dresses', href: '/categories/dresses' }
+        { name: 'Wedding Venues', href: '/vendors?category=venues' },
+        { name: 'Catering Services', href: '/vendors?category=catering' },
+        { name: 'Photography & Video', href: '/vendors?category=photo-video' },
+        { name: 'Wedding Planning', href: '/vendors?category=planning' },
+        { name: 'Beauty & Henna', href: '/vendors?category=beauty' },
+        { name: 'Decor & Styling', href: '/vendors?category=decor' },
+        { name: 'Music & Entertainment', href: '/vendors?category=music' },
+        { name: 'Wedding Dresses', href: '/vendors?category=dresses' }
       ]
     },
     {
       title: 'Planning Resources',
       links: [
-        { name: 'Wedding Blog', href: '/blog' },
-        { name: 'Planning Guide', href: '/planning-guide' },
+        { name: 'Wedding Articles', href: '/blog' },
+        { name: 'Planning Guide', href: '/guides/planning' },
         { name: 'Vendor Directory', href: '/vendors' },
         { name: 'Wedding Checklist', href: '/checklist' },
         { name: 'Budget Calculator', href: '/budget-calculator' },
@@ -36,10 +44,7 @@ export default function Footer() {
       links: [
         { name: 'Become a Vendor', href: '/become-vendor' },
         { name: 'Vendor Login', href: '/vendor-login' },
-        { name: 'Vendor Dashboard', href: '/vendor-dashboard' },
-        { name: 'Pricing Plans', href: '/vendor-pricing' },
-        { name: 'Vendor Support', href: '/vendor-support' },
-        { name: 'Marketing Tools', href: '/vendor-tools' }
+        { name: 'Vendor Dashboard', href: '/vendor-dashboard' }
       ]
     },
     {
@@ -47,9 +52,6 @@ export default function Footer() {
       links: [
         { name: 'About Wervice', href: '/about' },
         { name: 'How It Works', href: '/how-it-works' },
-        { name: 'Success Stories', href: '/success-stories' },
-        { name: 'Press & Media', href: '/press' },
-        { name: 'Careers', href: '/careers' },
         { name: 'Contact Us', href: '/contact' }
       ]
     }
@@ -57,30 +59,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-black text-white">
-      {/* Newsletter Signup */}
-      <div className="bg-[#d9ff0a] py-12">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-2xl md:text-3xl font-bold text-black mb-4">
-              Stay Updated with Moroccan Wedding Trends
-            </h3>
-            <p className="text-black/80 mb-6 max-w-2xl mx-auto">
-              Get exclusive access to wedding inspiration, vendor deals, and planning tips delivered to your inbox.
-            </p>
-            <div className="max-w-md mx-auto flex gap-3">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-full border-2 border-black text-black placeholder-black/60 focus:outline-none focus:ring-2 focus:ring-black"
-              />
-              <button className="px-6 py-3 bg-black text-[#d9ff0a] font-semibold rounded-full hover:bg-gray-900 transition-colors duration-200">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Content */}
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
@@ -89,10 +67,10 @@ export default function Footer() {
             <div className="lg:col-span-1">
               <Link href="/" className="inline-block mb-6">
                 <div className="text-3xl font-bold text-[#d9ff0a] mb-2">Wervice</div>
-                <div className="text-sm text-white/60">Morocco's Wedding Marketplace</div>
+                <div className="text-sm text-white/60">Morocco&apos;s Wedding Marketplace</div>
               </Link>
               <p className="text-white/80 text-sm leading-relaxed mb-6">
-                Connecting couples with Morocco's finest wedding vendors. From traditional riads to modern celebrations,
+                Connecting couples with Morocco&apos;s finest wedding vendors. From traditional riads to modern celebrations,
                 find everything you need for your perfect Moroccan wedding.
               </p>
 
@@ -106,10 +84,6 @@ export default function Footer() {
                   <span>📞</span>
                   <span>+212 6XX XXX XXX</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>📍</span>
-                  <span>Marrakech, Morocco</span>
-                </div>
               </div>
             </div>
 
@@ -120,17 +94,57 @@ export default function Footer() {
                 <ul className="space-y-2">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      <Link
-                        href={link.href}
-                        className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm"
-                      >
-                        {link.name}
-                      </Link>
+                      {link.name === 'Planning Guide' || link.name === 'Vendor Directory' ? (
+                        <button
+                          onClick={() => {
+                            const path = link.name === 'Planning Guide' ? 'guides/planning' :
+                                        link.name === 'Vendor Directory' ? 'vendors' : '';
+                            router.push(`/${currentLocale}/${path}`);
+                          }}
+                          className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm text-left"
+                        >
+                          {link.name}
+                        </button>
+                      ) : (
+                        <Link
+                          href={
+                            link.name === 'Wedding Checklist' ? `/${currentLocale}/checklist` :
+                            link.name === 'How It Works' ? `/${currentLocale}/how-it-works` :
+                            link.href.startsWith('/vendors?') ? `/${currentLocale}${link.href}` :
+                            `/${currentLocale}${link.href}`
+                          }
+                          className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm"
+                        >
+                          {link.name}
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>
               </div>
             ))}
+          </div>
+
+          {/* Newsletter Signup */}
+          <div className="border-t border-white/10 pt-12 pb-8">
+            <div className="text-center">
+              <h3 className="text-xl md:text-2xl font-bold text-[#d9ff0a] mb-3">
+                Stay Updated with Moroccan Wedding Trends
+              </h3>
+              <p className="text-white/70 text-sm mb-6 max-w-xl mx-auto">
+                Get exclusive access to wedding inspiration, vendor deals, and planning tips delivered to your inbox.
+              </p>
+              <div className="max-w-md mx-auto flex gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-3 rounded-full border-2 border-white/20 bg-white/5 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#d9ff0a] focus:border-[#d9ff0a] transition-all duration-200"
+                />
+                <button className="px-6 py-3 bg-[#d9ff0a] text-black font-semibold rounded-full hover:bg-[#c4e600] hover:scale-105 transition-all duration-200">
+                  Subscribe
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Bottom Section */}
@@ -181,13 +195,13 @@ export default function Footer() {
 
               {/* Legal Links */}
               <div className="flex flex-wrap gap-6 text-sm text-white/60">
-                <Link href="/privacy" className="hover:text-[#d9ff0a] transition-colors duration-200">
+                <Link href={`/${currentLocale}/privacy`} className="hover:text-[#d9ff0a] transition-colors duration-200">
                   Privacy Policy
                 </Link>
-                <Link href="/terms" className="hover:text-[#d9ff0a] transition-colors duration-200">
+                <Link href={`/${currentLocale}/terms`} className="hover:text-[#d9ff0a] transition-colors duration-200">
                   Terms of Service
                 </Link>
-                <Link href="/cookies" className="hover:text-[#d9ff0a] transition-colors duration-200">
+                <Link href={`/${currentLocale}/cookies`} className="hover:text-[#d9ff0a] transition-colors duration-200">
                   Cookie Policy
                 </Link>
                 <Link href="/sitemap" className="hover:text-[#d9ff0a] transition-colors duration-200">

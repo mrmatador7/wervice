@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 type SmallCityCardProps = {
@@ -16,9 +16,15 @@ export default function SmallCityCard({
   image,
   vendors
 }: SmallCityCardProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    window.location.href = `/en/cities/${slug}`;
+  };
+
   return (
-    <Link
-      href={`/city/${slug}`}
+    <button
+      onClick={handleClick}
       className="group relative flex-shrink-0 shadow-sm hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/30 active:opacity-92 overflow-hidden snap-start rounded-xl cursor-pointer"
       style={{
         width: 'clamp(140px, 18vw, 180px)',
@@ -59,6 +65,6 @@ export default function SmallCityCard({
           </p>
         )}
       </div>
-    </Link>
+    </button>
   );
 }
