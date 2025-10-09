@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import VendorSubscribeForm from '@/components/vendors/VendorSubscribeForm';
 
 interface PageProps {
-  searchParams: Promise<{ cadence?: string }>;
+  searchParams: Promise<{ category?: string; cadence?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
@@ -18,6 +18,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
 
 export default async function VendorSubscribePage({ searchParams }: PageProps) {
   const params = await searchParams;
+  const { category, cadence } = params;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -34,7 +35,7 @@ export default async function VendorSubscribePage({ searchParams }: PageProps) {
           </div>
 
           {/* Form */}
-          <VendorSubscribeForm defaultCategory={undefined} />
+          <VendorSubscribeForm defaultCategory={category} defaultCadence={cadence} />
         </div>
       </div>
     </div>

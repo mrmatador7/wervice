@@ -24,7 +24,7 @@ export default function VendorBenefits() {
   const t = useTranslations('vendor');
 
   return (
-    <section id="why-choose" className="max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-10 pb-10 md:pb-12 bg-slate-50/70">
+    <section id="why-choose" className="max-w-7xl mx-auto px-4 md:px-6 mt-12 pb-10 md:pb-12 bg-slate-50/70">
       <div className="max-w-6xl mx-auto">
         {/* Section Title */}
         <div className="text-center">

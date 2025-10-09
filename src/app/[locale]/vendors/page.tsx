@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import VendorDirectoryClient from './client';
-import { getAllVendors, filterVendors, sortVendors, paginateVendors, VendorCity, VendorCategory } from '@/lib/vendors';
+import { getAllVendors, filterVendors, sortVendors, VendorCity, VendorCategory } from '@/lib/vendors';
 import { VendorFilters } from '@/models/vendor';
 
 interface VendorDirectoryPageProps {
@@ -102,16 +102,12 @@ export default async function VendorDirectoryPage({ searchParams }: VendorDirect
   // Apply filters and sorting server-side for initial load
   const filteredVendors = filterVendors(allVendors, filters);
   const sortedVendors = sortVendors(filteredVendors, filters.sort);
-  const paginatedResult = paginateVendors(sortedVendors, filters.page);
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <VendorDirectoryClient
-        initialVendors={paginatedResult.vendors}
+        initialVendors={sortedVendors}
         initialFilters={filters}
-        totalCount={paginatedResult.totalCount}
-        totalPages={paginatedResult.totalPages}
-        currentPage={paginatedResult.currentPage}
       />
     </Suspense>
   );

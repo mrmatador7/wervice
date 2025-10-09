@@ -17,15 +17,15 @@ type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 export async function getProfile(id: string): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .select('*')
       .eq('id', id)
       .single();
 
-    return { data, error };
+    return { data, error: error as Error };
   } catch (error) {
     console.error('Error fetching profile:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -35,15 +35,15 @@ export async function getProfile(id: string): Promise<QueryResult<Profile>> {
 export async function getProfileByEmail(email: string): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .select('*')
       .eq('email', email)
       .single();
 
-    return { data, error };
+    return { data, error: error as Error };
   } catch (error) {
     console.error('Error fetching profile by email:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -54,7 +54,7 @@ export async function getProfiles(
   filters: ProfileFilters = {}
 ): Promise<PaginatedQueryResult<Profile>> {
   try {
-    let query = supabase.from('public.profiles').select('*', { count: 'exact' });
+    let query = supabase.from('profiles').select('*', { count: 'exact' });
 
     // Apply filters
     if (filters.search) {
@@ -107,7 +107,7 @@ export async function getProfiles(
     console.error('Error fetching profiles:', error);
     return {
       data: [],
-      error,
+      error: error as Error,
       pagination: { page: 1, limit: 50, total: 0, totalPages: 1 }
     };
   }
@@ -119,7 +119,7 @@ export async function getProfiles(
 export async function createProfile(profile: ProfileInsert): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .insert(profile)
       .select()
       .single();
@@ -128,10 +128,10 @@ export async function createProfile(profile: ProfileInsert): Promise<QueryResult
       console.log('Profile created successfully:', data.id);
     }
 
-    return { data, error };
+    return { data, error: error as Error };
   } catch (error) {
     console.error('Error creating profile:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -141,7 +141,7 @@ export async function createProfile(profile: ProfileInsert): Promise<QueryResult
 export async function updateProfile(id: string, updates: ProfileUpdate): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .update({
         ...updates,
         updated_at: new Date().toISOString()
@@ -154,10 +154,10 @@ export async function updateProfile(id: string, updates: ProfileUpdate): Promise
       console.log('Profile updated successfully:', data.id);
     }
 
-    return { data, error };
+    return { data, error: error as Error };
   } catch (error) {
     console.error('Error updating profile:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -167,7 +167,7 @@ export async function updateProfile(id: string, updates: ProfileUpdate): Promise
 export async function upsertProfile(profile: ProfileInsert): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .upsert(profile, { onConflict: 'id' })
       .select()
       .single();
@@ -176,10 +176,10 @@ export async function upsertProfile(profile: ProfileInsert): Promise<QueryResult
       console.log('Profile upserted successfully:', data.id);
     }
 
-    return { data, error };
+    return { data, error: error as Error };
   } catch (error) {
     console.error('Error upserting profile:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -189,7 +189,7 @@ export async function upsertProfile(profile: ProfileInsert): Promise<QueryResult
 export async function deleteProfile(id: string): Promise<QueryResult<Profile>> {
   try {
     const { data, error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .update({
         deleted_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -202,10 +202,10 @@ export async function deleteProfile(id: string): Promise<QueryResult<Profile>> {
       console.log('Profile soft deleted successfully:', data.id);
     }
 
-    return { data, error };
+    return { data, error: error as Error };
   } catch (error) {
     console.error('Error deleting profile:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -215,7 +215,7 @@ export async function deleteProfile(id: string): Promise<QueryResult<Profile>> {
 export async function hardDeleteProfile(id: string): Promise<QueryResult<null>> {
   try {
     const { error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .delete()
       .eq('id', id);
 
@@ -223,10 +223,10 @@ export async function hardDeleteProfile(id: string): Promise<QueryResult<null>> 
       console.log('Profile hard deleted successfully:', id);
     }
 
-    return { data: null, error };
+    return { data: null, error: error as Error };
   } catch (error) {
     console.error('Error hard deleting profile:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -250,7 +250,7 @@ export async function getActiveUsers(filters: Omit<ProfileFilters, 'user_status'
 export async function searchProfilesByLocation(city?: string, country?: string, limit = 20): Promise<QueryResult<Profile[]>> {
   try {
     let query = supabase
-      .from('public.profiles')
+      .from('profiles')
       .select('*')
       .eq('user_status', 'active')
       .limit(limit);
@@ -265,10 +265,10 @@ export async function searchProfilesByLocation(city?: string, country?: string, 
 
     const { data, error } = await query;
 
-    return { data, error };
+    return { data, error: error as Error };
   } catch (error) {
     console.error('Error searching profiles by location:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -285,11 +285,11 @@ export async function getProfileStats(): Promise<QueryResult<{
 }>> {
   try {
     const { data, error } = await supabase
-      .from('public.profiles')
+      .from('profiles')
       .select('user_type, user_status');
 
     if (error) {
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
 
     const stats = {
@@ -304,6 +304,6 @@ export async function getProfileStats(): Promise<QueryResult<{
     return { data: stats, error: null };
   } catch (error) {
     console.error('Error getting profile stats:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }

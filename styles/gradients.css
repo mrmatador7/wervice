@@ -1,0 +1,24 @@
+.hero-bg {
+  position: relative;
+  isolation: isolate;
+}
+.hero-bg::before,
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: 9999px;
+  filter: blur(20px);
+}
+.hero-bg::before {
+  inset: -28% auto auto -10%;
+  width: 65vmax;
+  height: 65vmax;
+  background: radial-gradient(closest-side, rgba(217,255,10,0.18), rgba(217,255,10,0.06), transparent 70%);
+}
+.hero-bg::after {
+  inset: auto -12% -26% auto;
+  width: 52vmax;
+  height: 52vmax;
+  background: radial-gradient(closest-side, rgba(0,0,0,0.05), transparent 65%);
+}

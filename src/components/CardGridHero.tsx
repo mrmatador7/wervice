@@ -83,7 +83,7 @@ export default function CardGridHero() {
 
   const handleCategoryClick = (categoryId: string) => {
     setActiveCategory(categoryId);
-    router.push(`/vendors?category=${categoryId}`);
+    router.push(`/categories/${categoryId}`);
   };
 
   const handleSearch = () => {

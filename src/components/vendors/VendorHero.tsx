@@ -20,7 +20,7 @@ export default function VendorHero() {
   };
 
   return (
-    <section className="relative min-h-[38vh] md:min-h-[44vh] lg:min-h-[48vh] bg-gradient-to-br from-[#D7FF1F]/10 via-white to-[#D7FF1F]/5 overflow-hidden pt-12 md:pt-16 lg:pt-20 pb-12 md:pb-14">
+    <section className="relative min-h-[35vh] md:min-h-[40vh] lg:min-h-[45vh] bg-gradient-to-br from-[#D7FF1F]/10 via-white to-[#D7FF1F]/5 overflow-hidden pt-6 pb-6 md:pt-8 md:pb-8 flex flex-col items-center justify-center">
       {/* Floating Background Icons */}
       <div className="absolute inset-0 pointer-events-none -z-10">
         {floatingIcons.map((icon, index) => (
@@ -46,43 +46,35 @@ export default function VendorHero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 flex items-center justify-center min-h-full">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Title */}
-          <h1 className="font-decorative text-[clamp(28px,5vw,44px)] text-gray-900 mb-3 md:mb-4 leading-tight">
-            Become a Wervice Vendor
-          </h1>
+      <div className="max-w-3xl w-full px-4 flex flex-col items-center justify-center text-center gap-3">
+        {/* Title */}
+        <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-neutral-900">
+          Pricing Plans for Vendors
+        </h1>
 
-          {/* Subtitle */}
-          <p className="text-[clamp(14px,2.2vw,18px)] text-gray-600 mb-6 md:mb-8 max-w-[58ch] mx-auto leading-relaxed">
-            Join Morocco&apos;s premier wedding marketplace and connect with couples planning their big day.
-          </p>
+        {/* Subtitle */}
+        <p className="text-base md:text-lg text-neutral-600">
+          Choose your category plan and save up to 20% on long-term subscriptions. Every long-term plan includes a free social boost on Instagram & TikTok!
+        </p>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center mb-6 md:mb-8">
-            <button
-              onClick={scrollToPricing}
-              className="btn-primary font-ui-primary text-lg px-8 py-4 uppercase tracking-wide"
-            >
-              Start Subscription
-            </button>
+        {/* CTAs */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={scrollToPricing}
+            className="w-full sm:w-auto bg-[#D7FF1F] text-black px-5 md:px-6 py-2.5 md:py-3 rounded-full font-semibold hover:bg-[#c4e600] transition-colors"
+          >
+            Start Subscription
+          </button>
 
-            <Link
-              href="/vendor-login"
-              className="btn-secondary font-ui-primary text-lg px-8 py-4 uppercase tracking-wide"
-            >
-              Vendor Login
-            </Link>
-          </div>
+          <Link
+            href="/vendor-login"
+            className="w-full sm:w-auto border-2 border-neutral-300 text-neutral-700 px-5 md:px-6 py-2.5 md:py-3 rounded-full font-semibold hover:bg-neutral-50 transition-colors"
+          >
+            Vendor Login
+          </Link>
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 animate-bounce">
-        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
-      </div>
     </section>
   );
 }

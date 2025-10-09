@@ -4,6 +4,153 @@
     "description": "Authentic Moroccan weddings made easy with categories like Venues, Dresses, and Decor. Plan your perfect celebration with traditional henna, kaftans, and Amaria processions.",
     "keywords": "Moroccan weddings, henna ceremonies, kaftans, Amaria processions, Riad venues, traditional catering, wedding planning Morocco"
   },
+  "account": {
+    "title": "My Account",
+    "subtitle": "Welcome to your account dashboard. Manage your profile, bookings, and preferences.",
+    "profile": {
+      "title": "Profile",
+      "description": "Manage your personal information and preferences.",
+      "action": "Edit Profile →"
+    },
+    "bookings": {
+      "title": "My Bookings",
+      "description": "View and manage your wedding service bookings.",
+      "action": "View Bookings →"
+    },
+    "favorites": {
+      "title": "Favorites",
+      "description": "Your saved vendors and wedding ideas.",
+      "action": "View Favorites →"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure your account preferences and notifications.",
+      "action": "Account Settings →"
+    },
+    "support": {
+      "title": "Help & Support",
+      "description": "Get help with your account and bookings.",
+      "action": "Contact Support →"
+    },
+    "stats": {
+      "title": "Your Wedding Journey",
+      "daysLeft": "Days Until Wedding",
+      "servicesBooked": "Services Booked",
+      "totalSaved": "Total Saved"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Wervice 🌸",
+      "subtitle": "Let's plan a wedding as beautiful as your story.",
+      "start": "Start Planning",
+      "skip": "Skip for now"
+    },
+    "names": {
+      "title": "Tell us about you two",
+      "subtitle": "Help us personalize your experience",
+      "yourName": "Your first name",
+      "partnerName": "Partner's first name (optional)",
+      "relationshipStage": "Where are you in your journey?",
+      "engaged": "Just got engaged",
+      "soon": "Planning for soon",
+      "celebration": "Already celebrated",
+      "next": "Continue",
+      "back": "Back"
+    },
+    "location": {
+      "title": "Where are you celebrating?",
+      "subtitle": "We'll find the perfect vendors in your area",
+      "city": "City",
+      "selectCity": "Select your city",
+      "setting": "Preferred setting",
+      "luxury": "Luxury venue",
+      "outdoor": "Outdoor",
+      "beachfront": "Beachfront",
+      "riad": "Traditional riad",
+      "villa": "Private villa"
+    },
+    "style": {
+      "title": "What's your wedding style?",
+      "subtitle": "Select all that appeal to you",
+      "classic": "Classic & Elegant",
+      "modern": "Modern Chic",
+      "bohemian": "Bohemian",
+      "moroccan": "Moroccan Traditional",
+      "glamorous": "Glamorous",
+      "minimalist": "Minimalist"
+    },
+    "date": {
+      "title": "When is the big day?",
+      "subtitle": "This helps us find available vendors",
+      "picked": "I have a date",
+      "selectDate": "Select date",
+      "monthYear": "Month and year",
+      "selectMonth": "Select month",
+      "selectYear": "Select year",
+      "unsure": "Not sure yet"
+    },
+    "guests": {
+      "title": "How many guests?",
+      "subtitle": "This helps with venue and catering recommendations",
+      "0-50": "0-50 guests",
+      "51-100": "51-100 guests",
+      "101-200": "101-200 guests",
+      "200+": "200+ guests",
+      "unsure": "Not sure yet"
+    },
+    "services": {
+      "title": "What services do you need?",
+      "subtitle": "Select all the services you're interested in",
+      "venues": "Venues",
+      "catering": "Catering",
+      "photo": "Photography",
+      "video": "Videography",
+      "dresses": "Wedding Dresses",
+      "music": "Music & DJ",
+      "beauty": "Beauty & Hair",
+      "decor": "Decor & Flowers",
+      "planning": "Wedding Planning",
+      "cars": "Wedding Cars",
+      "desserts": "Desserts",
+      "rings": "Rings & Jewelry",
+      "flowers": "Floral Design"
+    },
+    "budget": {
+      "title": "What's your budget?",
+      "subtitle": "Select your preferred currency and budget range",
+      "currency": "Currency",
+      "under_50k": "Under 50,000",
+      "50-100k": "50,000 - 100,000",
+      "100-200k": "100,000 - 200,000",
+      "200k_plus": "200,000+",
+      "unsure": "Not sure yet"
+    },
+    "preferences": {
+      "title": "How can vendors contact you?",
+      "subtitle": "We respect your privacy preferences",
+      "contact": "Vendors can contact me",
+      "browse": "Prefer to browse quietly",
+      "helping": "Helping a friend/family"
+    },
+    "finish": {
+      "title": "You're all set! 🎉",
+      "subtitle": "We've personalized your experience based on your preferences",
+      "complete": "Complete Setup",
+      "viewAccount": "View My Account"
+    },
+    "progress": {
+      "step": "Step",
+      "of": "of"
+    },
+    "common": {
+      "next": "Next",
+      "back": "Back",
+      "skip": "Skip",
+      "saving": "Saving...",
+      "error": "Something went wrong. Please try again."
+    }
+  },
   "how-it-works": {
     "title": "How Wervice Works - Plan Your Moroccan Wedding",
     "description": "Discover how Wervice makes planning your Moroccan wedding easy. Browse vendors, compare options, and contact them directly."

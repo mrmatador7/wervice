@@ -33,9 +33,9 @@ export const CHECKLIST: ChecklistSection[] = [
     title: 'Guest List & Early Bookings',
     items: [
       { id: 'finalize-guest-list', label: 'Finalize initial guest list (100-150 people)', category: 'Planning' },
-      { id: 'book-ceremony-venue', label: 'Book ceremony venue if separate', category: 'Venues', cta: { label: 'Browse Venues', href: '/vendors?category=Venues' } },
-      { id: 'hire-photographer', label: 'Hire photographer for engagement photos', category: 'Photo & Video', cta: { label: 'Browse Photo & Video', href: '/vendors?category=Photo%20&%20Video' } },
-      { id: 'book-reception-venue', label: 'Book reception venue', category: 'Venues', cta: { label: 'Browse Venues', href: '/vendors?category=Venues' } },
+      { id: 'book-ceremony-venue', label: 'Book ceremony venue if separate', category: 'Venues', cta: { label: 'Browse Venues', href: '/categories/venues' } },
+      { id: 'hire-photographer', label: 'Hire photographer for engagement photos', category: 'Photo & Video', cta: { label: 'Browse Photo & Video', href: '/categories/photo-video' } },
+      { id: 'book-reception-venue', label: 'Book reception venue', category: 'Venues', cta: { label: 'Browse Venues', href: '/categories/venues' } },
       { id: 'send-save-dates', label: 'Send save-the-date cards or emails', category: 'Planning' },
     ],
   },
@@ -44,12 +44,12 @@ export const CHECKLIST: ChecklistSection[] = [
     badge: '9 months',
     title: 'Book Core Vendors',
     items: [
-      { id: 'tour-venues', label: 'Tour venues and request proposals', category: 'Venues', cta: { label: 'Browse Venues', href: '/vendors?category=Venues' } },
+      { id: 'tour-venues', label: 'Tour venues and request proposals', category: 'Venues', cta: { label: 'Browse Venues', href: '/categories/venues' } },
       { id: 'book-venue', label: 'Reserve your venue + deposit', category: 'Venues' },
-      { id: 'hire-planner', label: 'Hire a wedding planner', category: 'Planning', cta: { label: 'Find Planners', href: '/vendors?category=Planning' } },
-      { id: 'book-caterer', label: 'Book caterer for menu tasting', category: 'Catering', cta: { label: 'Browse Catering', href: '/vendors?category=Catering' } },
-      { id: 'book-photographer', label: 'Book wedding photographer', category: 'Photo & Video', cta: { label: 'Browse Photo & Video', href: '/vendors?category=Photo%20&%20Video' } },
-      { id: 'book-videographer', label: 'Book videographer', category: 'Photo & Video', cta: { label: 'Browse Photo & Video', href: '/vendors?category=Photo%20&%20Video' } },
+      { id: 'hire-planner', label: 'Hire a wedding planner', category: 'Planning', cta: { label: 'Find Planners', href: '/categories/planning' } },
+      { id: 'book-caterer', label: 'Book caterer for menu tasting', category: 'Catering', cta: { label: 'Browse Catering', href: '/categories/catering' } },
+      { id: 'book-photographer', label: 'Book wedding photographer', category: 'Photo & Video', cta: { label: 'Browse Photo & Video', href: '/categories/photo-video' } },
+      { id: 'book-videographer', label: 'Book videographer', category: 'Photo & Video', cta: { label: 'Browse Photo & Video', href: '/categories/photo-video' } },
     ],
   },
   {
@@ -57,7 +57,7 @@ export const CHECKLIST: ChecklistSection[] = [
     badge: '8 months',
     title: 'Music, Flowers & Details',
     items: [
-      { id: 'book-dj-band', label: 'Book DJ or live band', category: 'Music', cta: { label: 'Browse Music', href: '/vendors?category=Music' } },
+      { id: 'book-dj-band', label: 'Book DJ or live band', category: 'Music', cta: { label: 'Browse Music', href: '/categories/music' } },
       { id: 'hire-florist', label: 'Hire florist and discuss arrangements', category: 'Decor' },
       { id: 'order-invitations', label: 'Order wedding invitations', category: 'Planning' },
       { id: 'book-cake-baker', label: 'Book wedding cake baker', category: 'Catering' },
@@ -72,7 +72,7 @@ export const CHECKLIST: ChecklistSection[] = [
     items: [
       { id: 'find-dress', label: 'Find and purchase wedding dress', category: 'Dresses' },
       { id: 'find-suit', label: 'Find and purchase wedding suit/tuxedo', category: 'Planning' },
-      { id: 'book-hairdresser', label: 'Book hair and makeup artist', category: 'Beauty', cta: { label: 'Browse Beauty', href: '/vendors?category=Beauty' } },
+      { id: 'book-hairdresser', label: 'Book hair and makeup artist', category: 'Beauty', cta: { label: 'Browse Beauty', href: '/categories/beauty' } },
       { id: 'book-bridal-party-attire', label: 'Book attire for bridal party', category: 'Dresses' },
       { id: 'schedule-fittings', label: 'Schedule dress fittings', category: 'Dresses' },
     ],
@@ -95,7 +95,7 @@ export const CHECKLIST: ChecklistSection[] = [
     badge: '4 months',
     title: 'Decor & Details',
     items: [
-      { id: 'hire-decorator', label: 'Hire wedding decorator', category: 'Decor', cta: { label: 'Browse Decor', href: '/vendors?category=Decor' } },
+      { id: 'hire-decorator', label: 'Hire wedding decorator', category: 'Decor', cta: { label: 'Browse Decor', href: '/categories/decor' } },
       { id: 'finalize-flowers', label: 'Finalize flower arrangements', category: 'Decor' },
       { id: 'order-rings', label: 'Order wedding rings', category: 'Planning' },
       { id: 'book-photo-booth', label: 'Book photo booth (optional)', category: 'Photo & Video' },

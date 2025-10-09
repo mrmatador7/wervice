@@ -99,7 +99,7 @@ export interface Database {
                     gender: string | null
                     user_type: string | null
                     user_status: string | null
-                    is_onboarded: boolean | null
+                    onboarded: boolean
                     phone: string | null
                     email: string | null
                     city: string | null
@@ -111,6 +111,8 @@ export interface Database {
                     locale: string | null
                     currency: string | null
                     notification_preferences: Json | null
+                    onboarding_data: Json
+                    onboarding_purpose: string | null
                     business_name: string | null
                     business_description: string | null
                     business_website: string | null
@@ -139,7 +141,7 @@ export interface Database {
                     gender?: string | null
                     user_type?: string | null
                     user_status?: string | null
-                    is_onboarded?: boolean | null
+                    onboarded?: boolean
                     phone?: string | null
                     email?: string | null
                     city?: string | null
@@ -151,6 +153,8 @@ export interface Database {
                     locale?: string | null
                     currency?: string | null
                     notification_preferences?: Json | null
+                    onboarding_data?: Json
+                    onboarding_purpose?: string | null
                     business_name?: string | null
                     business_description?: string | null
                     business_website?: string | null
@@ -179,7 +183,7 @@ export interface Database {
                     gender?: string | null
                     user_type?: string | null
                     user_status?: string | null
-                    is_onboarded?: boolean | null
+                    onboarded?: boolean
                     phone?: string | null
                     email?: string | null
                     city?: string | null
@@ -190,6 +194,8 @@ export interface Database {
                     postal_code?: string | null
                     locale?: string | null
                     currency?: string | null
+                    onboarding_data?: Json
+                    onboarding_purpose?: string | null
                     notification_preferences?: Json | null
                     business_name?: string | null
                     business_description?: string | null
@@ -220,15 +226,135 @@ export interface Database {
                     }
                 ]
             }
+            vendor_leads: {
+                Row: {
+                    id: string
+                    first_name: string
+                    last_name: string
+                    business_name: string
+                    category: string
+                    city: string
+                    whatsapp: string
+                    email: string
+                    instagram: string | null
+                    profile_starting_price: string | null
+                    profile_description: string
+                    service_area: string[]
+                    languages_spoken: string[]
+                    subscription_cadence: Database["public"]["Enums"]["subscription_cadence"]
+                    subscription_price_dhs: number
+                    domain_perk_enabled: boolean
+                    domain_perk_requested_domain: string | null
+                    domain_perk_tld: Database["public"]["Enums"]["domain_tld"] | null
+                    logo_url: string | null
+                    gallery_urls: string[]
+                    source: string
+                    status: Database["public"]["Enums"]["vendor_lead_status"]
+                    admin_notes: string | null
+                    reviewed_by: string | null
+                    reviewed_at: string | null
+                    honeypot: string
+                    submitted_at: string
+                    created_at: string
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    first_name: string
+                    last_name: string
+                    business_name: string
+                    category: string
+                    city: string
+                    whatsapp: string
+                    email: string
+                    instagram?: string | null
+                    profile_starting_price?: string | null
+                    profile_description: string
+                    service_area?: string[]
+                    languages_spoken?: string[]
+                    subscription_cadence: Database["public"]["Enums"]["subscription_cadence"]
+                    subscription_price_dhs: number
+                    domain_perk_enabled?: boolean
+                    domain_perk_requested_domain?: string | null
+                    domain_perk_tld?: Database["public"]["Enums"]["domain_tld"] | null
+                    logo_url?: string | null
+                    gallery_urls?: string[]
+                    source?: string
+                    status?: Database["public"]["Enums"]["vendor_lead_status"]
+                    admin_notes?: string | null
+                    reviewed_by?: string | null
+                    reviewed_at?: string | null
+                    honeypot?: string
+                    submitted_at?: string
+                    created_at?: string
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    first_name?: string
+                    last_name?: string
+                    business_name?: string
+                    category?: string
+                    city?: string
+                    whatsapp?: string
+                    email?: string
+                    instagram?: string | null
+                    profile_starting_price?: string | null
+                    profile_description?: string
+                    service_area?: string[]
+                    languages_spoken?: string[]
+                    subscription_cadence?: Database["public"]["Enums"]["subscription_cadence"]
+                    subscription_price_dhs?: number
+                    domain_perk_enabled?: boolean
+                    domain_perk_requested_domain?: string | null
+                    domain_perk_tld?: Database["public"]["Enums"]["domain_tld"] | null
+                    logo_url?: string | null
+                    gallery_urls?: string[]
+                    source?: string
+                    status?: Database["public"]["Enums"]["vendor_lead_status"]
+                    admin_notes?: string | null
+                    reviewed_by?: string | null
+                    reviewed_at?: string | null
+                    honeypot?: string
+                    submitted_at?: string
+                    created_at?: string
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "vendor_leads_reviewed_by_fkey"
+                        columns: ["reviewed_by"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
         }
         Views: {
             [_ in never]: never
         }
         Functions: {
-            [_ in never]: never
+            upsert_user_profile: {
+                Args: {
+                    p_user_id: string
+                    p_phone?: string
+                    p_city?: string
+                    p_onboarding_purpose?: string
+                    p_onboarding_data?: Json
+                }
+                Returns: Json
+            }
         }
         Enums: {
-            [_ in never]: never
+            user_type: "user" | "vendor" | "admin" | "super_admin"
+            user_status: "active" | "inactive" | "pending" | "banned"
+            subscription_cadence: "monthly" | "6m" | "annual"
+            vendor_lead_status: "pending_review" | "approved" | "rejected" | "contacted"
+            domain_tld: ".ma" | ".com"
         }
         CompositeTypes: {
             [_ in never]: never

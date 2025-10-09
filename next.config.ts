@@ -7,6 +7,20 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['images.unsplash.com'],
   },
+  async rewrites() {
+    return [
+      // Prevent i18n redirect for API routes - rewrite /api to /api (no-op but prevents redirect)
+      {
+        source: "/api/:path*",
+        destination: "/api/:path*",
+      },
+      // Rewrite locale-prefixed API routes to direct API routes
+      {
+        source: "/:locale(en|fr|ar)/api/:path*",
+        destination: "/api/:path*",
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

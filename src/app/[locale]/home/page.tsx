@@ -1,11 +1,8 @@
-'use client';
-
 import Header from '@/components/layout/Header';
-import HeroSearch from '@/components/hero/HeroSearch';
+import Hero from '@/components/home/Hero';
 import CategoriesSection from '@/components/CategoriesSection';
 import CitiesCarousel from '@/components/CitiesCarousel';
 import ListingsRail from '@/components/ListingsRail';
-import ConfidenceMosaic from '@/components/sections/ConfidenceMosaic';
 import BecomeVendorSection from './components/BecomeVendorSection';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/layout/Container';
@@ -13,7 +10,6 @@ import { homepageListings } from '@/lib/mockListings';
 import CategoriesShowcase, {
   CategoryItem,
 } from "@/components/sections/CategoriesShowcase";
-import { Suspense } from 'react';
 
 // Feature flag to control Browse by Category section
 const SHOW_BROWSE_BY_CATEGORY = false;
@@ -49,14 +45,15 @@ const DRESS_ITEMS: CategoryItem[] = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale ?? 'en';
+
   return (
     <div className="min-h-screen">
       <Header />
 
-      <Suspense fallback={<div className="h-screen bg-gray-50"></div>}>
-        <HeroSearch />
-      </Suspense>
+      <Hero locale={locale} />
 
       {/* Categories Section */}
       {SHOW_BROWSE_BY_CATEGORY && (
@@ -93,8 +90,6 @@ export default function HomePage() {
         variant="carousel"
       />
 
-      {/* Confidence Mosaic */}
-      <ConfidenceMosaic />
 
         <BecomeVendorSection />
 

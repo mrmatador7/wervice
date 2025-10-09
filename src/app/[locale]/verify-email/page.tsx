@@ -26,8 +26,8 @@ export default function VerifyEmailPage() {
         // Listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
-                // User has verified their email, redirect to dashboard
-                router.push('/dashboard');
+                // User has verified their email, redirect to onboarding
+                router.push(`/${locale}/onboarding`);
             }
         });
 

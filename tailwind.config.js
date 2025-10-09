@@ -21,9 +21,19 @@ module.exports = {
           alt: '#f7f9fb',     // subtle grey-blue
           tint: '#f4fde1',    // wervice lime-tint, very light
         },
+        wv: {
+          lime: '#D9FF0A',
+          limeDark: '#C8EF00',
+          black: '#11190C',
+          gray1: '#F7F7F5',
+          gray2: '#EFEDEA',
+          gray3: '#DEDBD6',
+        },
+        'wv-gray1': '#F7F7F5',
       },
       boxShadow: {
-        card: '0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06)',
+        card: '0 8px 24px rgba(17, 25, 12, 0.06)',
+        cardHover: '0 12px 28px rgba(17, 25, 12, 0.10)',
       },
       backgroundImage: {
         'radial-fade': 'radial-gradient(600px 600px at 50% -50%, rgba(146, 255, 0, .12), transparent 60%)',
@@ -34,6 +44,22 @@ module.exports = {
         'readex-pro': ['Readex Pro', 'system-ui', 'sans-serif'],
         'allan': ['Allan', 'system-ui', 'sans-serif'],
         'inter': ['Inter', 'system-ui', 'sans-serif'],
+      },
+      keyframes: {
+        fadeInUp: {
+          'from': { opacity: '0', transform: 'translateY(10px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        'fadeInUp': 'fadeInUp 0.4s ease-out',
+      },
+      borderRadius: {
+        xl: '16px',
+        '2xl': '20px',
+      },
+      maxWidth: {
+        content: '1200px',
       },
     },
   },
