@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import VendorHero from '@/components/vendors/VendorHero';
@@ -31,7 +32,9 @@ export default function VendorSignupPage() {
         <VendorHero />
         <WhyChooseWervice />
         <VendorHowItWorks />
-        <VendorPricing />
+        <Suspense fallback={<div>Loading pricing...</div>}>
+          <VendorPricing />
+        </Suspense>
         <VendorSignupForm />
       </main>
       <Footer />

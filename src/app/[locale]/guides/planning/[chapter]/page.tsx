@@ -253,7 +253,7 @@ function StickyTOC({ chapter }: { chapter: Chapter }) {
             Connect with experienced Moroccan wedding planners
           </p>
           <Link
-            href="/vendors?category=planning"
+            href="/categories/planning"
             className="inline-flex items-center gap-2 bg-[#D7FF1F] hover:bg-[#D7FF1F]/90 text-slate-900 font-medium py-2 px-4 rounded-lg transition-colors text-sm"
           >
             Find a Planner

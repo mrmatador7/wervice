@@ -52,6 +52,8 @@ export default function CategoryChips() {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get('category');
+  // Sort categories in a simple order (no personalization for now)
+  const sortedCategories = [...categories];
 
 
   const handleCategoryClick = (categorySlug: string) => {
@@ -79,7 +81,7 @@ export default function CategoryChips() {
   return (
     <div className="flex justify-center">
       <div className="flex flex-wrap items-center justify-center gap-2 max-w-4xl">
-        {categories.map((category) => {
+        {sortedCategories.map((category) => {
           const isActive = activeCategory === category.value;
 
           return (

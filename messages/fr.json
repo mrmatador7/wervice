@@ -4,6 +4,153 @@
     "description": "Mariages marocains authentiques simplifiés avec des catégories comme Lieux, Robes, et Décoration. Planifiez votre célébration parfaite avec du henné traditionnel, des caftans, et des processions Amaria.",
     "keywords": "mariages marocains, cérémonies de henné, caftans, processions Amaria, lieux riad, restauration traditionnelle, planification mariage Maroc"
   },
+  "account": {
+    "title": "Mon Compte",
+    "subtitle": "Bienvenue dans votre tableau de bord. Gérez votre profil, vos réservations et vos préférences.",
+    "profile": {
+      "title": "Profil",
+      "description": "Gérez vos informations personnelles et vos préférences.",
+      "action": "Modifier le Profil →"
+    },
+    "bookings": {
+      "title": "Mes Réservations",
+      "description": "Consultez et gérez vos réservations de services de mariage.",
+      "action": "Voir les Réservations →"
+    },
+    "favorites": {
+      "title": "Favoris",
+      "description": "Vos fournisseurs et idées de mariage sauvegardés.",
+      "action": "Voir les Favoris →"
+    },
+    "settings": {
+      "title": "Paramètres",
+      "description": "Configurez vos préférences de compte et notifications.",
+      "action": "Paramètres du Compte →"
+    },
+    "support": {
+      "title": "Aide & Support",
+      "description": "Obtenez de l'aide avec votre compte et vos réservations.",
+      "action": "Contacter le Support →"
+    },
+    "stats": {
+      "title": "Votre Parcours de Mariage",
+      "daysLeft": "Jours Jusqu'au Mariage",
+      "servicesBooked": "Services Réservés",
+      "totalSaved": "Total Économisé"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenue sur Wervice 🌸",
+      "subtitle": "Planifions un mariage aussi beau que votre histoire.",
+      "start": "Commencer la Planification",
+      "skip": "Passer pour l'instant"
+    },
+    "names": {
+      "title": "Parlez-nous de vous deux",
+      "subtitle": "Aidez-nous à personnaliser votre expérience",
+      "yourName": "Votre prénom",
+      "partnerName": "Prénom du partenaire (optionnel)",
+      "relationshipStage": "Où en êtes-vous dans votre parcours ?",
+      "engaged": "Venez de vous fiancer",
+      "soon": "Planification bientôt",
+      "celebration": "Déjà célébré",
+      "next": "Continuer",
+      "back": "Retour"
+    },
+    "location": {
+      "title": "Où célébrez-vous ?",
+      "subtitle": "Nous trouverons les fournisseurs parfaits dans votre région",
+      "city": "Ville",
+      "selectCity": "Sélectionnez votre ville",
+      "setting": "Cadre préféré",
+      "luxury": "Salle de luxe",
+      "outdoor": "En extérieur",
+      "beachfront": "Front de mer",
+      "riad": "Riad traditionnel",
+      "villa": "Villa privée"
+    },
+    "style": {
+      "title": "Quel est votre style de mariage ?",
+      "subtitle": "Sélectionnez tout ce qui vous plaît",
+      "classic": "Classique & Élégant",
+      "modern": "Chic Moderne",
+      "bohemian": "Bohème",
+      "moroccan": "Traditionnel Marocain",
+      "glamorous": "Glamour",
+      "minimalist": "Minimaliste"
+    },
+    "date": {
+      "title": "Quelle est la date du grand jour ?",
+      "subtitle": "Cela nous aide à trouver des fournisseurs disponibles",
+      "picked": "J'ai une date",
+      "selectDate": "Sélectionner la date",
+      "monthYear": "Mois et année",
+      "selectMonth": "Sélectionner le mois",
+      "selectYear": "Sélectionner l'année",
+      "unsure": "Pas encore sûr"
+    },
+    "guests": {
+      "title": "Combien d'invités ?",
+      "subtitle": "Cela aide pour les recommandations de salle et de restauration",
+      "0-50": "0-50 invités",
+      "51-100": "51-100 invités",
+      "101-200": "101-200 invités",
+      "200+": "Plus de 200 invités",
+      "unsure": "Pas encore sûr"
+    },
+    "services": {
+      "title": "De quels services avez-vous besoin ?",
+      "subtitle": "Sélectionnez tous les services qui vous intéressent",
+      "venues": "Salles",
+      "catering": "Restauration",
+      "photo": "Photographie",
+      "video": "Vidéographie",
+      "dresses": "Robes de Mariée",
+      "music": "Musique & DJ",
+      "beauty": "Beauté & Coiffure",
+      "decor": "Décoration & Fleurs",
+      "planning": "Organisation de Mariage",
+      "cars": "Voitures de Mariage",
+      "desserts": "Desserts",
+      "rings": "Bagues & Bijoux",
+      "flowers": "Design Floral"
+    },
+    "budget": {
+      "title": "Quel est votre budget ?",
+      "subtitle": "Sélectionnez votre devise préférée et votre fourchette budgétaire",
+      "currency": "Devise",
+      "under_50k": "Moins de 50 000",
+      "50-100k": "50 000 - 100 000",
+      "100-200k": "100 000 - 200 000",
+      "200k_plus": "Plus de 200 000",
+      "unsure": "Pas encore sûr"
+    },
+    "preferences": {
+      "title": "Comment les fournisseurs peuvent-ils vous contacter ?",
+      "subtitle": "Nous respectons vos préférences de confidentialité",
+      "contact": "Les fournisseurs peuvent me contacter",
+      "browse": "Préférer naviguer tranquillement",
+      "helping": "Aider un ami/une famille"
+    },
+    "finish": {
+      "title": "Vous êtes prêt ! 🎉",
+      "subtitle": "Nous avons personnalisé votre expérience selon vos préférences",
+      "complete": "Finaliser la Configuration",
+      "viewAccount": "Voir Mon Compte"
+    },
+    "progress": {
+      "step": "Étape",
+      "of": "sur"
+    },
+    "common": {
+      "next": "Suivant",
+      "back": "Retour",
+      "skip": "Passer",
+      "saving": "Enregistrement...",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
   "how-it-works": {
     "title": "Comment fonctionne Wervice - Planifiez votre mariage marocain",
     "description": "Découvrez comment Wervice facilite la planification de votre mariage marocain. Parcourez les fournisseurs, comparez les options et contactez-les directement."

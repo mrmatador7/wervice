@@ -1,75 +1,42 @@
-import dynamic from 'next/dynamic';
-import SearchBarSimple from '@/components/hero/SearchBarSimple';
-import CategoryChips from '@/components/hero/CategoryChips';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Section from '@/components/layout/Section';
-import { Suspense } from 'react';
+import Hero from '@/components/home/Hero';
+import CategoriesSection from '@/components/CategoriesSection';
+import CitiesCarousel from '@/components/CitiesCarousel';
+import HomeCategoryStrips from '@/components/home/HomeCategoryStrips';
+import TrustBand from '@/components/home/TrustBand';
+import BecomeVendorSection from '@/components/sections/VendorCTA';
 
-// Try to load real sections; if not present, fall back to placeholders
-const PopularCities = dynamic(() => import('@/components/sections/PopularCities').catch(() => import('@/components/placeholders/PopularCities')));
-const CategoryBlocks = dynamic(() => import('@/components/sections/CategoryBlocks').catch(() => import('@/components/placeholders/CategoryBlocks')));
-const NewVendors = dynamic(() => import('@/components/sections/NewVendors').catch(() => import('@/components/placeholders/NewVendors')));
-const PlanWithConfidence = dynamic(() => import('@/components/sections/PlanWithConfidence').catch(() => import('@/components/placeholders/PlanWithConfidence')));
-const WeddingInsights = dynamic(() => import('@/components/sections/WeddingInsights').catch(() => import('@/components/placeholders/WeddingInsights')));
-const VendorCTA = dynamic(() => import('@/components/sections/VendorCTA').catch(() => import('@/components/placeholders/VendorCTA')));
+export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale ?? 'en';
 
-export default function Page() {
   return (
-    <main data-testid="home-entry" className="min-h-screen">
-      {/* Header */}
+    <>
       <Header />
+      <main className="min-h-screen">
+        <Hero locale={locale} />
 
-      {/* Hero */}
-      <section className="pt-[calc(var(--header-h,64px)+40px)] pb-8 px-4 text-center">
-        {/* Category Chips */}
-        <div className="mb-6 sm:mb-8">
-          <Suspense fallback={<div className="h-8"></div>}>
-            <CategoryChips />
-          </Suspense>
-        </div>
+        {/* Categories Section */}
+        <CategoriesSection />
 
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-[#11190C]">Plan your wedding, your way.</h1>
-        <p className="mt-2 text-base sm:text-lg text-[#787664]">Compare trusted vendors, read reviews, and book fast — all in one place.</p>
-        <div className="mt-4">
-          <Suspense fallback={<div className="h-16 bg-gray-100 rounded-lg animate-pulse"></div>}>
-            <SearchBarSimple />
-          </Suspense>
-        </div>
-      </section>
+        {/* Cities Carousel */}
+        <section className="py-8 bg-[#F7F8FB]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <CitiesCarousel variant="small" className="-mx-4 md:-mx-6 lg:-mx-8" />
+          </div>
+        </section>
 
-      {/* 1) Popular Cities */}
-      <Section variant="default">
-        <PopularCities />
-      </Section>
+        {/* Category Strips */}
+        <HomeCategoryStrips city={null} />
 
-      {/* 2) Categories (Venues / Catering / Photo & Video) */}
-      <Section variant="default">
-        <CategoryBlocks />
-      </Section>
+        {/* Trust Band */}
+        <TrustBand />
 
-      {/* 3) New Vendors */}
-      <Section variant="default">
-        <NewVendors />
-      </Section>
-
-      {/* 4) Plan With Confidence */}
-      <Section variant="default">
-        <PlanWithConfidence />
-      </Section>
-
-      {/* 5) Wedding Insights & Stories */}
-      <Section variant="default">
-        <WeddingInsights />
-      </Section>
-
-      {/* 6) Vendor CTA */}
-      <Section variant="default">
-        <VendorCTA />
-      </Section>
-
-      {/* Footer */}
+        {/* Become Vendor Section */}
+        <BecomeVendorSection />
+      </main>
       <Footer />
-    </main>
+    </>
   );
 }

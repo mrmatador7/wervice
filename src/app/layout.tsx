@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans, Lora } from "next/font/google";
+import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans } from "next/font/google";
+import { Toaster } from "sonner";
 import ClientHtml from "@/components/ClientHtml";
 import "./globals.css";
 
@@ -45,11 +46,6 @@ const openSans = Open_Sans({
   variable: "--font-open-sans",
 });
 
-const lora = Lora({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-lora",
-});
 
 export const metadata: Metadata = {
   title: "Wervice - Moroccan Wedding Planning",
@@ -68,10 +64,11 @@ export default function RootLayout({
 }) {
   return (
     <ClientHtml
-      className={`${rubik.variable} ${readexPro.variable} ${allan.variable} ${poppins.variable} ${inter.variable} ${montserrat.variable} ${openSans.variable} ${lora.variable}`}
+      className={`${rubik.variable} ${readexPro.variable} ${allan.variable} ${poppins.variable} ${inter.variable} ${montserrat.variable} ${openSans.variable}`}
     >
       <body>
         {children}
+        <Toaster />
       </body>
     </ClientHtml>
   );

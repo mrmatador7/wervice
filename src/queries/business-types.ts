@@ -25,7 +25,7 @@ export async function getBusinessType(id: string): Promise<QueryResult<BusinessT
     return { data, error };
   } catch (error) {
     console.error('Error fetching business type:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -43,7 +43,7 @@ export async function getBusinessTypeByName(name: string): Promise<QueryResult<B
     return { data, error };
   } catch (error) {
     console.error('Error fetching business type by name:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -79,7 +79,7 @@ export async function getBusinessTypes(
     return {
       data: data || [],
       error,
-      count,
+      count: count || undefined,
       pagination: {
         page: currentPage,
         limit,
@@ -91,7 +91,7 @@ export async function getBusinessTypes(
     console.error('Error fetching business types:', error);
     return {
       data: [],
-      error,
+      error: error as Error,
       pagination: { page: 1, limit: 50, total: 0, totalPages: 1 }
     };
   }
@@ -115,7 +115,7 @@ export async function createBusinessType(businessType: BusinessTypeInsert): Prom
     return { data, error };
   } catch (error) {
     console.error('Error creating business type:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -141,7 +141,7 @@ export async function updateBusinessType(id: string, updates: BusinessTypeUpdate
     return { data, error };
   } catch (error) {
     console.error('Error updating business type:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -167,7 +167,7 @@ export async function deleteBusinessType(id: string): Promise<QueryResult<Busine
     return { data, error };
   } catch (error) {
     console.error('Error deleting business type:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -185,10 +185,10 @@ export async function hardDeleteBusinessType(id: string): Promise<QueryResult<nu
       console.log('Business type hard deleted successfully:', id);
     }
 
-    return { data: null, error };
+    return { data: null, error: error as Error };
   } catch (error) {
     console.error('Error hard deleting business type:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -206,7 +206,7 @@ export async function getBusinessTypesForVendors(): Promise<QueryResult<Business
     return { data, error };
   } catch (error) {
     console.error('Error fetching business types for vendors:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -226,7 +226,7 @@ export async function searchBusinessTypes(searchTerm: string, limit = 20): Promi
     return { data, error };
   } catch (error) {
     console.error('Error searching business types:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -243,7 +243,7 @@ export async function getBusinessTypeStats(): Promise<QueryResult<{
       .select('deleted_at');
 
     if (error) {
-      return { data: null, error };
+      return { data: null, error: error as Error };
     }
 
     const stats = {
@@ -254,6 +254,6 @@ export async function getBusinessTypeStats(): Promise<QueryResult<{
     return { data: stats, error: null };
   } catch (error) {
     console.error('Error getting business type stats:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }

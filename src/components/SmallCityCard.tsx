@@ -19,7 +19,7 @@ export default function SmallCityCard({
   const router = useRouter();
 
   const handleClick = () => {
-    window.location.href = `/en/cities/${slug}`;
+    window.location.href = `/en/vendors?city=${name}`;
   };
 
   return (

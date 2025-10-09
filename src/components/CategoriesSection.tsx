@@ -11,56 +11,6 @@ interface Category {
     href: string;
 }
 
-const categories: Category[] = [
-    {
-        name: 'Venues',
-        count: 124,
-        image: '/categories/venues.png',
-        href: '/categories/venues',
-    },
-    {
-        name: 'Catering',
-        count: 87,
-        image: '/categories/Catering.png',
-        href: '/categories/catering',
-    },
-    {
-        name: 'Photo & Video',
-        count: 156,
-        image: '/categories/photo.png',
-        href: '/categories/photo-video',
-    },
-    {
-        name: 'Event Planner',
-        count: 92,
-        image: '/categories/event planner.png',
-        href: '/categories/planning',
-    },
-    {
-        name: 'Beauty',
-        count: 78,
-        image: '/categories/beauty.png',
-        href: '/categories/beauty',
-    },
-    {
-        name: 'Decor',
-        count: 134,
-        image: '/categories/decor.png',
-        href: '/categories/decor',
-    },
-    {
-        name: 'Music',
-        count: 67,
-        image: '/categories/music.png',
-        href: '/categories/music',
-    },
-    {
-        name: 'Dresses',
-        count: 189,
-        image: '/categories/Dresses.png',
-        href: '/categories/dresses',
-    },
-];
 
 export default function CategoriesSection() {
     const locale = useLocale();

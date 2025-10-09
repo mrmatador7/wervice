@@ -4,4 +4,3 @@
 export * from './profiles';
 export * from './categories';
 export * from './business-types';
-export * from './types';

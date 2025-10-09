@@ -1,45 +1,112 @@
 'use client';
 
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
+// Removed Auth UI imports - using custom form only
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { AuthError } from '@supabase/supabase-js';
 import Header from '@/components/layout/Header';
+
+interface SignupResponse {
+  data: {
+    user: unknown;
+    session: unknown;
+  };
+  error: AuthError | null;
+}
 
 export default function SignPage() {
     const router = useRouter();
     const t = useTranslations('auth');
     const locale = useLocale();
+    // Using custom form only
+    const [signupData, setSignupData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleCustomSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        console.log('🚀 Starting signup process...', {
+            email: signupData.email,
+            firstName: signupData.firstName,
+            lastName: signupData.lastName,
+            locale
+        });
+
+        try {
+            console.log('📡 Sending signup request to Supabase...');
+
+            const { data, error } = await supabase.auth.signUp({
+                email: signupData.email,
+                password: signupData.password,
+                options: {
+                    data: {
+                        first_name: signupData.firstName,
+                        last_name: signupData.lastName,
+                        locale: locale,
+                        currency: 'MAD'
+                    },
+                    emailRedirectTo: `/${locale}/onboarding`
+                }
+            });
+
+            console.log('📡 Signup response received:', { hasData: !!data, hasError: !!error, userId: data?.user?.id });
+
+            if (error) {
+                console.error('❌ Supabase signup error:', error);
+                setError(error.message);
+                setIsLoading(false);
+                return;
+            }
+
+            if (data.user) {
+                console.log('✅ Custom signup successful, user created:', {
+                    id: data.user.id,
+                    email: data.user.email,
+                    emailConfirmed: data.user.email_confirmed_at
+                });
+
+                // Since email confirmations are disabled, user should be automatically signed in
+                // Redirect immediately - let the page reload establish the session
+                console.log('🔄 Redirecting to onboarding...');
+                window.location.href = `/${locale}/onboarding`;
+            } else {
+                // Handle case where signup doesn't return a user (shouldn't happen but defensive programming)
+                console.warn('⚠️ Signup completed but no user data received');
+                setError('Signup completed but user data not received. Please try signing in instead.');
+                setIsLoading(false);
+            }
+        } catch (err) {
+            console.error('💥 Signup process failed:', err);
+            const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+            setError(errorMessage);
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         console.log('👤 Signup page mounted, locale:', locale)
+        // Removed auth state listener to prevent conflicts during signup flow
+    }, [locale]);
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log('🔄 Auth state changed:', { event, hasSession: !!session, userEmail: session?.user?.email })
-
-            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-                // Check if user signed up with OAuth (already verified) or email/password
-                const provider = session.user?.app_metadata?.provider;
-                const isOAuthSignup = provider && provider !== 'email';
-
-                if (isOAuthSignup) {
-                    console.log('✅ OAuth user authenticated, redirecting to dashboard')
-                    router.push(`/${locale}/dashboard`);
-                } else if (event === 'SIGNED_IN') {
-                    console.log('✅ Email signup completed, redirecting to verify-email')
-                    router.push(`/${locale}/verify-email`);
-                } else {
-                    // INITIAL_SESSION with email provider - already verified, go to dashboard
-                    console.log('✅ Email user already authenticated, redirecting to dashboard')
-                    router.push(`/${locale}/dashboard`);
-                }
+    // Safety net: Reset loading state if component unmounts while loading
+    useEffect(() => {
+        return () => {
+            if (isLoading) {
+                console.log('🛡️ Component unmounting while loading - resetting state');
+                setIsLoading(false);
             }
-        });
-
-        return () => subscription.unsubscribe();
-    }, [router, locale]);
+        };
+    }, [isLoading]);
 
     return (
         <div className="min-h-screen relative">
@@ -69,52 +136,91 @@ export default function SignPage() {
                         </div>
 
                         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-                            <Auth
-                                supabaseClient={supabase}
-                                view="sign_up"
-                                redirectTo={`/${locale}/dashboard`}
-                                appearance={{
-                                    theme: ThemeSupa,
-                                    variables: {
-                                        default: {
-                                            colors: {
-                                                brand: '#8B5CF6',
-                                                brandAccent: '#7C3AED',
-                                            },
-                                            borderWidths: {
-                                                buttonBorderWidth: '1px',
-                                                inputBorderWidth: '1px',
-                                            },
-                                            radii: {
-                                                borderRadiusButton: '0.75rem',
-                                                buttonBorderRadius: '0.75rem',
-                                                inputBorderRadius: '0.75rem',
-                                            },
-                                        },
-                                    },
-                                    className: {
-                                        container: 'w-full',
-                                        button: 'w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors',
-                                        input: 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
-                                        label: 'text-sm font-medium text-gray-700 mb-2 block',
-                                        message: 'text-sm text-red-600 mt-1',
-                                    },
-                                }}
-                                providers={['google']}
-                                onlyThirdPartyProviders={false}
-                                localization={{
-                                    variables: {
-                                        sign_up: {
-                                            email_label: t('signup.email', { defaultValue: 'Email address' }),
-                                            password_label: t('signup.password', { defaultValue: 'Create a password' }),
-                                            button_label: t('signup.button', { defaultValue: 'Create account' }),
-                                            loading_button_label: t('signup.loading', { defaultValue: 'Creating account...' }),
-                                            social_provider_text: 'Continue with {{provider}}',
-                                            link_text: t('signup.haveAccount', { defaultValue: 'Already have an account? Sign in' })
-                                        },
-                                    },
-                                }}
-                            />
+                            {/* Custom signup form */}
+                            <form onSubmit={handleCustomSignup} className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                                            {t('signup.firstName', { defaultValue: 'First Name' })}
+                                        </label>
+                                        <input
+                                            id="firstName"
+                                            type="text"
+                                            required
+                                            value={signupData.firstName}
+                                            onChange={(e) => setSignupData(prev => ({ ...prev, firstName: e.target.value }))}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            placeholder="John"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                                            {t('signup.lastName', { defaultValue: 'Last Name' })}
+                                        </label>
+                                        <input
+                                            id="lastName"
+                                            type="text"
+                                            required
+                                            value={signupData.lastName}
+                                            onChange={(e) => setSignupData(prev => ({ ...prev, lastName: e.target.value }))}
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                            placeholder="Doe"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t('signup.email', { defaultValue: 'Email address' })}
+                                    </label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        required
+                                        value={signupData.email}
+                                        onChange={(e) => setSignupData(prev => ({ ...prev, email: e.target.value }))}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder="john@example.com"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t('signup.password', { defaultValue: 'Create a password' })}
+                                    </label>
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        required
+                                        minLength={6}
+                                        value={signupData.password}
+                                        onChange={(e) => setSignupData(prev => ({ ...prev, password: e.target.value }))}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+
+                                {error && (
+                                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {isLoading
+                                        ? t('signup.loading', { defaultValue: 'Creating account...' })
+                                        : t('signup.button', { defaultValue: 'Create account' })
+                                    }
+                                </button>
+
+                                <div className="mt-4 text-center text-xs text-gray-500">
+                                    You can verify your email later to access all features
+                                </div>
+                            </form>
                         </div>
 
                         <div className="text-center text-sm text-gray-500">

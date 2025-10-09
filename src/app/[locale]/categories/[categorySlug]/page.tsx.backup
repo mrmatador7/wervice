@@ -1,0 +1,169 @@
+import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+import { Suspense } from 'react';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import { CategoryHero } from '@/components/category/CategoryHero';
+import { CategoryFilters } from '@/components/category/CategoryFilters';
+import { VendorGrid } from '@/components/vendor/VendorGrid';
+import { getCategoryBySlug, getVendorsByCategory, FALLBACK_CATEGORIES } from '@/queries/categories';
+
+export const dynamic = "force-dynamic";
+
+type Props = {
+  params: Promise<{ categorySlug: string }>;
+  searchParams: {
+    city?: string;
+    q?: string;
+    min?: string;
+    max?: string;
+    sort?: "best" | "rating" | "price_asc" | "price_desc";
+    page?: string;
+  };
+};
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const { categorySlug } = await params;
+  const searchParamsResolved = await searchParams;
+  const category = await getCategoryBySlug(categorySlug);
+
+  if (!category) {
+    return {
+      title: 'Category Not Found - Wervice',
+    };
+  }
+
+  const city = searchParamsResolved.city && searchParamsResolved.city !== 'All Cities' ? searchParamsResolved.city : '';
+  const citySuffix = city ? ` in ${city}` : ' in Morocco';
+  const title = `${category.name}${citySuffix} | Wervice`;
+  const description = `Find verified ${category.name.toLowerCase()} professionals${citySuffix}. Compare prices, ratings, and availability to plan your perfect wedding.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: category.coverImage || '/images/hero/hero-bg.jpg' }],
+    },
+    other: {
+      'application/ld+json': JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: title,
+        description,
+        url: `https://wervice.ma/categories/${categorySlug}`,
+      }),
+    },
+  };
+}
+
+export default async function CategoryPage({ params, searchParams }: Props) {
+  const { categorySlug } = await params;
+  const searchParamsResolved = await searchParams;
+  const category = await getCategoryBySlug(categorySlug);
+
+  if (!category) {
+    notFound();
+  }
+
+  const page = Number(searchParamsResolved.page ?? 1);
+  const filters = {
+    categorySlug,
+    city: searchParamsResolved.city || undefined,
+    q: searchParamsResolved.q || undefined,
+    min: searchParamsResolved.min || undefined,
+    max: searchParamsResolved.max || undefined,
+    sort: (searchParamsResolved.sort as "best" | "rating" | "price_asc" | "price_desc") || "best",
+    page,
+    pageSize: 12,
+  };
+
+  const { vendors, total, currentPage, totalPages } = await getVendorsByCategory(filters);
+
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen">
+        {/* Hero Section */}
+        <CategoryHero
+          name={category.name}
+          slug={categorySlug}
+          city={filters.city}
+          count={total}
+        />
+
+        {/* Sticky Filter Bar */}
+        <CategoryFilters initialFilters={filters} />
+
+        {/* Vendors Grid */}
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <Suspense fallback={<VendorGridSkeleton />}>
+            <VendorGrid
+              vendors={vendors}
+              total={total}
+              currentPage={currentPage}
+              totalPages={totalPages}
+            />
+          </Suspense>
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}
+
+// Generate static params for all categories
+export async function generateStaticParams() {
+  const categories = await getAllCategories();
+  return categories.map((category) => ({
+    categorySlug: category.slug,
+  }));
+}
+
+// Helper function for static generation
+function getAllCategories() {
+  // For static generation, we'll use the fallback categories
+  return Object.values(FALLBACK_CATEGORIES);
+}
+
+// Loading skeleton for the entire grid
+function VendorGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-7 xl:gap-8">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div key={i} className="rounded-2xl bg-white ring-1 ring-black/5 overflow-hidden animate-pulse">
+          {/* Image skeleton */}
+          <div className="aspect-[4/3] bg-neutral-200" />
+
+          {/* Content skeleton */}
+          <div className="p-4 md:p-5 space-y-3">
+            {/* Name skeleton */}
+            <div className="h-5 bg-neutral-200 rounded w-3/4" />
+
+            {/* Location skeleton */}
+            <div className="h-4 bg-neutral-200 rounded w-1/2" />
+
+            {/* Rating skeleton */}
+            <div className="flex items-center gap-2">
+              <div className="h-4 bg-neutral-200 rounded w-16" />
+              <div className="h-4 bg-neutral-200 rounded w-12" />
+            </div>
+
+            {/* Features skeleton */}
+            <div className="flex gap-1.5">
+              <div className="h-5 bg-neutral-200 rounded-full w-16" />
+              <div className="h-5 bg-neutral-200 rounded-full w-20" />
+            </div>
+
+            {/* Price and CTA skeleton */}
+            <div className="flex items-center justify-between">
+              <div className="h-4 bg-neutral-200 rounded w-24" />
+              <div className="h-9 bg-neutral-200 rounded-full w-24" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

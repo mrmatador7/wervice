@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/hero.css";
 
 @theme {
   --color-lime-400: #d9ff0a;
@@ -39,7 +40,6 @@
     --font-inter: var(--font-inter);
     --font-montserrat: var(--font-montserrat);
     --font-open-sans: var(--font-open-sans);
-    --font-lora: var(--font-lora);
 
     /* Wervice brand colors */
     --w-lime: #D9FF0A;
@@ -507,5 +507,27 @@
   .text-taupe { color: var(--w-taupe); }
   .bg-shell { background-color: var(--w-shell); }
   .border-sand { border-color: var(--w-sand); }
+
+  /* Vendor Sidebar Sticky Behavior */
+  .sidebar-sticky {
+    position: sticky;
+    top: 32px; /* match Your Plan's top offset (2rem = 32px) */
+    display: flex;
+    flex-direction: column;
+    gap: 24px; /* space between the two cards (1.5rem = 24px) */
+    z-index: 1;
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    padding-right: 4px;
+  }
+
+  @media (max-width: 1024px) {
+    .sidebar-sticky {
+      position: static;
+      max-height: none;
+      overflow: visible;
+      padding-right: 0;
+    }
+  }
 
 }

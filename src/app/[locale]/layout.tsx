@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import AuthGuard from '@/app/(guards)/auth-guard';
 
 const locales = ['en', 'fr', 'ar'] as const;
 const defaultLocale = 'en';
@@ -51,7 +52,9 @@ export default async function RootLayout({
           height: '100%'
         }}
       >
-        {children}
+        <AuthGuard locale={locale}>
+          {children}
+        </AuthGuard>
       </div>
     </NextIntlClientProvider>
   );

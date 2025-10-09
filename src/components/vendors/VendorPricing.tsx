@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 
@@ -30,10 +30,14 @@ const LABELS = {
 
 // Base monthly prices
 const MONTHLY_PRICES = {
-  premium: 250,
-  standard: 200,
-  basic: 150,
+  'venue-planning': 350,
+  'media-entertainment': 250,
+  'style-beauty': 200,
 } as const;
+
+// 6-month discounted monthly price (10% off)
+const getSixMonthMonthlyPrice = (planKey: keyof typeof MONTHLY_PRICES) =>
+  Math.round(MONTHLY_PRICES[planKey] * 0.9);
 
 // Annual discounted monthly price (20% off)
 const getAnnualMonthlyPrice = (planKey: keyof typeof MONTHLY_PRICES) =>
@@ -45,57 +49,79 @@ const getAnnualTotal = (planKey: keyof typeof MONTHLY_PRICES) =>
 
 const PLANS = [
   {
-    key: 'premium',
-    title: 'Premium',
-    monthlyPrice: MONTHLY_PRICES.premium,
-    annualMonthlyPrice: getAnnualMonthlyPrice('premium'),
-    annualTotal: getAnnualTotal('premium'),
-    subtitle: 'Best for high-demand, venue-led services.',
-    categories: ['venues', 'catering', 'planning'],
+    key: 'style-beauty',
+    title: 'Style & Beauty',
+    monthlyPrice: MONTHLY_PRICES['style-beauty'],
+    sixMonthMonthlyPrice: getSixMonthMonthlyPrice('style-beauty'),
+    annualMonthlyPrice: getAnnualMonthlyPrice('style-beauty'),
+    annualTotal: getAnnualTotal('style-beauty'),
+    subtitle: 'Best for Beauty, Decor, Dresses',
+    categories: ['beauty', 'decor', 'dresses'],
   },
   {
-    key: 'standard',
-    title: 'Standard',
-    monthlyPrice: MONTHLY_PRICES.standard,
-    annualMonthlyPrice: getAnnualMonthlyPrice('standard'),
-    annualTotal: getAnnualTotal('standard'),
-    subtitle: 'For media and entertainment providers.',
+    key: 'media-entertainment',
+    title: 'Media & Entertainment',
+    monthlyPrice: MONTHLY_PRICES['media-entertainment'],
+    sixMonthMonthlyPrice: getSixMonthMonthlyPrice('media-entertainment'),
+    annualMonthlyPrice: getAnnualMonthlyPrice('media-entertainment'),
+    annualTotal: getAnnualTotal('media-entertainment'),
+    subtitle: 'Best for Photo & Video, Music',
     categories: ['photo-video', 'music'],
   },
   {
-    key: 'basic',
-    title: 'Basic',
-    monthlyPrice: MONTHLY_PRICES.basic,
-    annualMonthlyPrice: getAnnualMonthlyPrice('basic'),
-    annualTotal: getAnnualTotal('basic'),
-    subtitle: 'Perfect for style & finishing touches.',
-    categories: ['decor', 'beauty', 'dresses'],
+    key: 'venue-planning',
+    title: 'Venue & Planning',
+    monthlyPrice: MONTHLY_PRICES['venue-planning'],
+    sixMonthMonthlyPrice: getSixMonthMonthlyPrice('venue-planning'),
+    annualMonthlyPrice: getAnnualMonthlyPrice('venue-planning'),
+    annualTotal: getAnnualTotal('venue-planning'),
+    subtitle: 'Best for Venues, Catering, Planning',
+    categories: ['venues', 'catering', 'planning'],
   },
 ];
+
+type PricingTerm = 'monthly' | '6m' | 'annual';
 
 export default function VendorPricing() {
   const t = useTranslations('vendor');
   const locale = useLocale();
   const [selectedCategories, setSelectedCategories] = useState<{[planId: string]: string}>({});
-  const [isAnnual, setIsAnnual] = useState(false);
+  const [term, setTerm] = useState<PricingTerm>('monthly');
 
   // Get current price for a plan (for CTA and calculations)
   const getCurrentPrice = (plan: typeof PLANS[0]) => {
-    return isAnnual ? plan.annualMonthlyPrice : plan.monthlyPrice;
+    switch (term) {
+      case '6m':
+        return plan.sixMonthMonthlyPrice;
+      case 'annual':
+        return plan.annualMonthlyPrice;
+      default:
+        return plan.monthlyPrice;
+    }
   };
 
   // Get current pricing text for a plan
   const getCurrentPricingText = (plan: typeof PLANS[0]) => {
-    if (isAnnual) {
-      return `${plan.annualMonthlyPrice} DHS / month`;
+    switch (term) {
+      case '6m':
+        return `${plan.sixMonthMonthlyPrice} DHS / month`;
+      case 'annual':
+        return `${plan.annualMonthlyPrice} DHS / month`;
+      default:
+        return `${plan.monthlyPrice} DHS / month`;
     }
-    return `${plan.monthlyPrice} DHS / month`;
   };
-
 
   // Get cadence for URLs
   const getCurrentCadence = () => {
-    return isAnnual ? 'annual' : 'monthly';
+    switch (term) {
+      case '6m':
+        return '6m';
+      case 'annual':
+        return 'annual';
+      default:
+        return 'monthly';
+    }
   };
 
   // Handle category selection
@@ -132,11 +158,10 @@ export default function VendorPricing() {
 
     if (!plan) return 'Subscribe — Select a category';
 
-    if (isAnnual) {
-      return `Subscribe — ${categoryName} (${plan.annualMonthlyPrice} DHS / month • annual plan)`;
-    } else {
-      return `Subscribe — ${categoryName} (${plan.monthlyPrice} DHS / month)`;
-    }
+    const currentPrice = getCurrentPrice(plan);
+    const termLabel = term === '6m' ? '6-month plan' : term === 'annual' ? 'annual plan' : 'monthly plan';
+
+    return `Subscribe — ${categoryName} (${currentPrice} DHS / month • ${termLabel})`;
   };
 
   // Get CTA aria label
@@ -152,11 +177,10 @@ export default function VendorPricing() {
 
     if (!plan) return 'Select a category to subscribe';
 
-    if (isAnnual) {
-      return `Subscribe to ${categoryName} plan for ${plan.annualMonthlyPrice} DHS per month`;
-    } else {
-      return `Subscribe to ${categoryName} plan for ${plan.monthlyPrice} DHS per month`;
-    }
+    const currentPrice = getCurrentPrice(plan);
+    const termDesc = term === '6m' ? '6-month' : term === 'annual' ? 'annual' : 'monthly';
+
+    return `Subscribe to ${categoryName} ${termDesc} plan for ${currentPrice} DHS per month`;
   };
 
   return (
@@ -173,21 +197,36 @@ export default function VendorPricing() {
 
           {/* Segmented Control */}
           <div className="flex justify-center mt-8 mb-2">
-            <div className="inline-flex items-center bg-white/80 backdrop-blur-sm rounded-2xl p-1 shadow-sm border border-zinc-200">
+            <div className="relative inline-flex items-center overflow-visible bg-white/80 backdrop-blur-sm rounded-2xl p-1 shadow-sm border border-zinc-200">
               <button
-                onClick={() => setIsAnnual(false)}
-                className={`px-6 py-2 text-sm font-medium rounded-xl transition-all ${
-                  !isAnnual
+                onClick={() => setTerm('monthly')}
+                className={`px-4 py-2 text-sm font-medium rounded-xl transition-all flex items-center ${
+                  term === 'monthly'
                     ? 'text-black bg-[#D7FF1F] shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 Monthly
               </button>
+              <span className="relative inline-block">
+                <button
+                  onClick={() => setTerm('6m')}
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all flex items-center ${
+                    term === '6m'
+                      ? 'text-black bg-[#D7FF1F] shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  6 Months
+                  <span className="bg-emerald-50 text-emerald-700 text-xs rounded-full px-2 py-0.5 ml-2">
+                    -10%
+                  </span>
+                </button>
+              </span>
               <button
-                onClick={() => setIsAnnual(true)}
-                className={`px-6 py-2 text-sm font-medium rounded-xl transition-all flex items-center ${
-                  isAnnual
+                onClick={() => setTerm('annual')}
+                className={`px-4 py-2 text-sm font-medium rounded-xl transition-all flex items-center ${
+                  term === 'annual'
                     ? 'text-black bg-[#D7FF1F] shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
@@ -208,6 +247,7 @@ export default function VendorPricing() {
               key={plan.key}
               className="group relative h-full flex flex-col rounded-3xl border border-zinc-200/70 bg-white/85 backdrop-blur-sm shadow-[0_10px_40px_-12px_rgba(0,0,0,0.15)] hover:shadow-[0_18px_60px_-18px_rgba(0,0,0,0.25)] hover:-translate-y-0.5 hover:ring-1 hover:ring-black/5 transition-all duration-300 p-6 md:p-8 bg-gradient-to-b from-white to-zinc-50/50"
             >
+
               {/* Card Header */}
               <div className="relative rounded-2xl border border-zinc-200 bg-white/90 p-4 md:p-5 shadow-sm mb-6">
                 {/* TopRow: Title left, Icons right */}
@@ -238,13 +278,18 @@ export default function VendorPricing() {
                 {/* PriceRow: Vertically stacked */}
                 <div className="flex flex-col space-y-0.5">
                   <span className="text-4xl md:text-5xl font-extrabold text-gray-900 leading-none">
-                    {isAnnual ? plan.annualMonthlyPrice : plan.monthlyPrice}
+                    {term === 'annual' ? plan.annualMonthlyPrice : term === '6m' ? plan.sixMonthMonthlyPrice : plan.monthlyPrice}
                   </span>
                   <div className="flex flex-col text-xs uppercase tracking-wide text-slate-500">
                     <span>DHS</span>
                     <span>per month</span>
                   </div>
-                  {isAnnual && (
+                  {term === '6m' && (
+                    <span className="inline-flex items-center justify-center rounded-lg bg-[#EAFBF1] text-[#198754] text-[11px] font-bold px-2 py-0.5 mt-1 mx-auto">
+                      -10% discount
+                    </span>
+                  )}
+                  {term === 'annual' && (
                     <span className="inline-flex items-center justify-center rounded-lg bg-[#EAFBF1] text-[#198754] text-[11px] font-bold px-2 py-0.5 mt-1 mx-auto">
                       -20% discount
                     </span>
@@ -340,6 +385,30 @@ export default function VendorPricing() {
                   <span>Cancel anytime</span>
                 </div>
               </div>
+
+              {/* Perks Box - Only for 6m and annual terms */}
+              {(term === '6m' || term === 'annual') && (
+                <div className="mt-6 rounded-xl bg-[#F3F1EE] ring-1 ring-black/5 px-4 py-3 space-y-1.5">
+                  <div className="text-xs font-semibold text-neutral-600 uppercase tracking-wide">
+                    Perks
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <span className="text-green-600">✓</span>
+                      <span>{term === '6m' ? '10% discount' : '20% discount'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <span className="text-green-600">✓</span>
+                      <span>Free .ma/.com domain</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <span className="text-green-600">✓</span>
+                      <span>Social Boost on Instagram & TikTok</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           ))}
         </div>

@@ -56,8 +56,8 @@ export default function CategoryStack() {
         <CategoryRow
           title="Venues"
           subtitle="Discover top venues vendors across Morocco."
-          ctaHref={`/${currentLocale}/vendors?category=venues`}
-          seeMoreHref={`/${currentLocale}/vendors?category=venues`}
+          ctaHref={`/${currentLocale}/categories/venues`}
+          seeMoreHref={`/${currentLocale}/categories/venues`}
           items={localizedVenuesItems}
           colorVariant="light"
         />
@@ -69,8 +69,8 @@ export default function CategoryStack() {
         <CategoryRow
           title="Catering"
           subtitle="Discover top catering vendors across Morocco."
-          ctaHref={`/${currentLocale}/vendors?category=catering`}
-          seeMoreHref={`/${currentLocale}/vendors?category=catering`}
+          ctaHref={`/${currentLocale}/categories/catering`}
+          seeMoreHref={`/${currentLocale}/categories/catering`}
           items={localizedCateringItems}
           colorVariant="light"
         />
@@ -82,8 +82,8 @@ export default function CategoryStack() {
         <CategoryRow
           title="Photo & Video"
           subtitle="Capture your day with Morocco's best photographers & videographers."
-          ctaHref={`/${currentLocale}/vendors?category=photo-video`}
-          seeMoreHref={`/${currentLocale}/vendors?category=photo-video`}
+          ctaHref={`/${currentLocale}/categories/photo-video`}
+          seeMoreHref={`/${currentLocale}/categories/photo-video`}
           items={localizedPhotoVideoItems}
           colorVariant="light"
         />

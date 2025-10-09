@@ -1,0 +1,23 @@
+/* soft ambient gradient rings for hero */
+.hero-bg {
+  position: relative;
+  isolation: isolate;
+}
+.hero-bg::before,
+.hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: -30% -10% auto auto;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(217,255,10,0.18), rgba(217,255,10,0.06), transparent 70%);
+  filter: blur(20px);
+  z-index: -1;
+}
+.hero-bg::after {
+  inset: auto auto -25% -10%;
+  width: 55vmax;
+  height: 55vmax;
+  background: radial-gradient(closest-side, rgba(0,0,0,0.04), transparent 65%);
+}

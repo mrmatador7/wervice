@@ -17,14 +17,14 @@ export default function Footer() {
     {
       title: 'Wedding Services',
       links: [
-        { name: 'Wedding Venues', href: '/vendors?category=venues' },
-        { name: 'Catering Services', href: '/vendors?category=catering' },
-        { name: 'Photography & Video', href: '/vendors?category=photo-video' },
-        { name: 'Wedding Planning', href: '/vendors?category=planning' },
-        { name: 'Beauty & Henna', href: '/vendors?category=beauty' },
-        { name: 'Decor & Styling', href: '/vendors?category=decor' },
-        { name: 'Music & Entertainment', href: '/vendors?category=music' },
-        { name: 'Wedding Dresses', href: '/vendors?category=dresses' }
+        { name: 'Wedding Venues', href: '/categories/venues' },
+        { name: 'Catering Services', href: '/categories/catering' },
+        { name: 'Photography & Video', href: '/categories/photo-video' },
+        { name: 'Wedding Planning', href: '/categories/planning' },
+        { name: 'Beauty & Henna', href: '/categories/beauty' },
+        { name: 'Decor & Styling', href: '/categories/decor' },
+        { name: 'Music & Entertainment', href: '/categories/music' },
+        { name: 'Wedding Dresses', href: '/categories/dresses' }
       ]
     },
     {

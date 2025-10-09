@@ -8,14 +8,14 @@ import Footer from '@/components/layout/Footer';
 import { getAllChapters, getTimelineSteps, getFAQItems } from '@/lib/planningChapters';
 
 const VENDOR_CATEGORIES = [
-  { name: 'Venues', href: '/vendors?category=venues', icon: '/categories/venues.png' },
-  { name: 'Catering', href: '/vendors?category=catering', icon: '/categories/catering.png' },
-  { name: 'Photo & Video', href: '/vendors?category=photo-video', icon: '/categories/photo.png' },
-  { name: 'Planning', href: '/vendors?category=planning', icon: '/categories/event planner.png' },
-  { name: 'Beauty', href: '/vendors?category=beauty', icon: '/categories/beauty.png' },
-  { name: 'Decor', href: '/vendors?category=decor', icon: '/categories/decor.png' },
-  { name: 'Music', href: '/vendors?category=music', icon: '/categories/music.png' },
-  { name: 'Dresses', href: '/vendors?category=dresses', icon: '/categories/dresses.png' }
+  { name: 'Venues', href: '/categories/venues', icon: '/categories/venues.png' },
+  { name: 'Catering', href: '/categories/catering', icon: '/categories/catering.png' },
+  { name: 'Photo & Video', href: '/categories/photo-video', icon: '/categories/photo.png' },
+  { name: 'Planning', href: '/categories/planning', icon: '/categories/event planner.png' },
+  { name: 'Beauty', href: '/categories/beauty', icon: '/categories/beauty.png' },
+  { name: 'Decor', href: '/categories/decor', icon: '/categories/decor.png' },
+  { name: 'Music', href: '/categories/music', icon: '/categories/music.png' },
+  { name: 'Dresses', href: '/categories/dresses', icon: '/categories/dresses.png' }
 ];
 
 const CITY_GUIDES = [

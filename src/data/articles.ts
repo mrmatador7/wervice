@@ -142,6 +142,18 @@ The deeper significance of henna in Moroccan culture and its role in wedding cel
 ];
 
 export const getArticle = (slug: string) => ARTICLES.find(a => a.slug === slug) || null;
-export const getAll = () => [...ARTICLES].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+export const getAll = () => {
+  // Sort by date in descending order (newest first)
+  // Use a more robust sorting method to ensure consistency
+  return [...ARTICLES].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    // If dates are equal, sort by title for consistency
+    if (dateA === dateB) {
+      return a.title.localeCompare(b.title);
+    }
+    return dateB - dateA;
+  });
+};
 export const getRelated = (slug: string) => getAll().filter(a => a.slug !== slug).slice(0, 3);
 
