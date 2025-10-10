@@ -291,7 +291,9 @@
     "description": "Serving couples from Rabat to Agadir, with top categories in Venues, Catering, and more."
   },
   "common": {
-    "off": "OFF"
+    "off": "OFF",
+    "vendors": "vendors",
+    "browseVendors": "Browse vendors in {city}"
   },
   "language": {
     "switch": "Language",
@@ -419,6 +421,166 @@
       "successMessage": "Your password has been successfully updated. You will be redirected to your dashboard shortly.",
       "redirecting": "Redirecting...",
       "error": "An error occurred. Please try again."
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Plan your wedding, your way.",
+      "subtitle": "Compare trusted vendors, read reviews, and book fast — all in one place."
+    },
+    "dressCatalog": {
+      "title": "Dress catalog",
+      "subtitle": "Discover the latest trends in wedding dresses by top designers and bridesmaid dresses. Choose your favorite from our catalog!",
+      "ctaLabel": "Explore the catalog"
+    },
+    "newVendors": {
+      "title": "New Vendors",
+      "subtitle": "Explore amazing wedding vendors and services"
+    },
+    "listings": {
+      "defaultTitle": "Discover Listings",
+      "defaultSubtitle": "Explore amazing wedding vendors and services"
+    },
+    "categories": {
+      "browseByCategory": "Browse by Category",
+      "vendorsCount": "{count} vendors",
+      "names": {
+        "venues": "Venues",
+        "catering": "Catering",
+        "photoVideo": "Photo & Video",
+        "eventPlanner": "Event Planner",
+        "beauty": "Beauty",
+        "decor": "Decor",
+        "music": "Music",
+        "dresses": "Dresses"
+      }
+    },
+    "cities": {
+      "popularCities": "Popular Cities",
+      "subtitle": "Explore amazing wedding vendors in Morocco's beautiful cities",
+      "names": {
+        "casablanca": "Casablanca",
+        "marrakech": "Marrakech",
+        "rabat": "Rabat",
+        "tangier": "Tangier",
+        "agadir": "Agadir",
+        "fes": "Fes",
+        "meknes": "Meknes",
+        "elJadida": "El Jadida",
+        "kenitra": "Kenitra"
+      }
+    },
+    "carousel": {
+      "scrollLeft": "Scroll left",
+      "scrollRight": "Scroll right"
+    },
+    "categoryStrips": {
+      "venues": "Venues",
+      "catering": "Catering",
+      "photographers": "Photographers",
+      "music": "Music",
+      "dresses": "Dresses"
+    },
+    "trustBand": {
+      "applicationsProcessed": "500+ Applications Processed",
+      "supportDescription": "Phones, text, and email support in 50+ languages, complemented by automatic notifications.",
+      "verifiedVendors": "Verified Vendors",
+      "vendorsDescription": "Every vendor undergoes thorough verification and background checks.",
+      "securePayments": "Secure Payments",
+      "paymentsDescription": "SSL-encrypted transactions with multiple payment options."
+    },
+    "becomeVendor": {
+      "badge": "Join Morocco's Leading Wedding Marketplace",
+      "title": "Become a",
+      "titleHighlight": "Wervice",
+      "titleEnd": "Vendor",
+      "subtitle": "Join Morocco's premier wedding marketplace with flexible pricing starting from 150 DHS/month. Choose your category, set your pricing tier, and start connecting with couples immediately.",
+      "benefits": {
+        "flexiblePricing": {
+          "title": "Flexible Pricing",
+          "description": "Choose from three pricing tiers (150-250 DHS/month) based on your wedding category"
+        },
+        "categoryPlans": {
+          "title": "Category-Based Plans",
+          "description": "Venues, catering, and planning vendors enjoy premium pricing at 250 DHS/month"
+        },
+        "quickSetup": {
+          "title": "Quick Setup",
+          "description": "Select your category, upload photos, and start receiving inquiries within 24 hours"
+        }
+      },
+      "cta": "Start Your Vendor Journey"
+    }
+  },
+  "contact": {
+    "title": "Contact Wervice",
+    "subtitle": "Questions, feedback, or partnership ideas? We're here to help make your wedding planning journey smooth and memorable.",
+    "methods": {
+      "email": {
+        "label": "Email",
+        "description": "Send us an email anytime",
+        "value": "hello@wervice.com"
+      },
+      "phone": {
+        "label": "Phone",
+        "description": "Call us during office hours",
+        "value": "+212 6 12 34 56 78"
+      },
+      "whatsapp": {
+        "label": "WhatsApp",
+        "description": "Quick message via WhatsApp",
+        "value": "+212 6 12 34 56 78"
+      }
+    },
+    "form": {
+      "title": "Send us a message",
+      "subtitle": "We'll get back to you within 24 hours.",
+      "name": "Name",
+      "namePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "topic": "Topic",
+      "message": "Message",
+      "messagePlaceholder": "Tell us how we can help you...",
+      "topics": {
+        "general": "General Inquiry",
+        "partnerships": "Partnerships",
+        "press": "Press & Media",
+        "support": "Technical Support",
+        "feedback": "Feedback",
+        "other": "Other"
+      },
+      "submit": "Send Message",
+      "submitting": "Sending...",
+      "required": "Please fill in all required fields.",
+      "sent": "Opening your email app...",
+      "copied": "Copied to clipboard!"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Quick answers to common questions about using Wervice.",
+      "items": {
+        "contactVendors": {
+          "question": "How do I contact vendors?",
+          "answer": "Use the phone number or email listed on each vendor's profile page. You can contact them directly to ask questions or make bookings."
+        },
+        "bookVendors": {
+          "question": "Can I book vendors through Wervice?",
+          "answer": "For now, you contact vendors directly through their provided contact information to confirm availability and make bookings."
+        },
+        "becomeVendor": {
+          "question": "How do I become a vendor?",
+          "answer": "Visit our 'Become a Vendor' page to learn about the process and submit your application to join our platform."
+        },
+        "availability": {
+          "question": "Is Wervice available in all Moroccan cities?",
+          "answer": "We're expanding across Morocco. Check our cities page to see which locations currently have active vendors."
+        },
+        "howItWorks": {
+          "question": "How does Wervice work?",
+          "answer": "Browse vendors by category and city, contact them directly, and create your perfect wedding experience with their help."
+        }
+      }
     }
   },
   "vendor": {

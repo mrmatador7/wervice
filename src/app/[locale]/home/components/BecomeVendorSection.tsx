@@ -3,27 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
-const vendorBenefits = [
-  {
-    icon: '💰',
-    alt: 'Money icon representing flexible pricing',
-    title: 'Flexible Pricing',
-    description: 'Choose from three pricing tiers (150-250 DHS/month) based on your wedding category'
-  },
-  {
-    icon: '📊',
-    alt: 'Chart icon representing category selection',
-    title: 'Category-Based Plans',
-    description: 'Venues, catering, and planning vendors enjoy premium pricing at 250 DHS/month'
-  },
-  {
-    icon: '⚡',
-    alt: 'Lightning icon representing quick setup',
-    title: 'Quick Setup',
-    description: 'Select your category, upload photos, and start receiving inquiries within 24 hours'
-  }
-];
+// Vendor benefits will be translated in the component
 
 const decorativeIcons = [
   { src: '/categories/venues.png', x: 10, y: 15, size: 48, rotation: -3 },
@@ -39,6 +21,28 @@ const decorativeIcons = [
 export default function BecomeVendorSection() {
   const pathname = usePathname();
   const currentLocale = pathname.split('/')[1] || 'en';
+  const t = useTranslations('home');
+
+  const vendorBenefits = [
+    {
+      icon: '💰',
+      alt: t('becomeVendor.benefits.flexiblePricing.title'),
+      title: t('becomeVendor.benefits.flexiblePricing.title'),
+      description: t('becomeVendor.benefits.flexiblePricing.description')
+    },
+    {
+      icon: '📊',
+      alt: t('becomeVendor.benefits.categoryPlans.title'),
+      title: t('becomeVendor.benefits.categoryPlans.title'),
+      description: t('becomeVendor.benefits.categoryPlans.description')
+    },
+    {
+      icon: '⚡',
+      alt: t('becomeVendor.benefits.quickSetup.title'),
+      title: t('becomeVendor.benefits.quickSetup.title'),
+      description: t('becomeVendor.benefits.quickSetup.description')
+    }
+  ];
 
   return (
     <section className="relative py-20 overflow-hidden">
@@ -80,18 +84,17 @@ export default function BecomeVendorSection() {
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center gap-2 bg-black text-[#d9ff0a] px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <span className="w-2 h-2 bg-[#d9ff0a] rounded-full"></span>
-                Join Morocco&apos;s Leading Wedding Marketplace
+                {t('becomeVendor.badge')}
               </div>
 
               <h2 className="font-inter font-bold text-4xl md:text-5xl leading-tight text-gray-900 mb-6">
-                Become a
-                <span className="text-[#d9ff0a]"> Wervice </span>
-                Vendor
+                {t('becomeVendor.title')}
+                <span className="text-[#d9ff0a]">{t('becomeVendor.titleHighlight')} </span>
+                {t('becomeVendor.titleEnd')}
               </h2>
 
               <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-lg">
-                Join Morocco&apos;s premier wedding marketplace with flexible pricing starting from 150 DHS/month.
-                Choose your category, set your pricing tier, and start connecting with couples immediately.
+                {t('becomeVendor.subtitle')}
               </p>
 
               {/* Benefits */}
@@ -120,7 +123,7 @@ export default function BecomeVendorSection() {
                   href={`/${currentLocale}/become-vendor`}
                   className="group inline-flex items-center justify-center px-8 py-4 bg-[#11190C] text-white font-bold rounded-2xl hover:bg-[#0a0f0a] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
-                  Start Your Vendor Journey
+                  {t('becomeVendor.cta')}
                   <svg
                     className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300"
                     fill="none"

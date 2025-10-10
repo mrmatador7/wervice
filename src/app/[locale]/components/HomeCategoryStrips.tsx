@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils'; // if you have a classnames helper
 import { vendors } from '@/lib/vendors';
+import { useTranslations } from 'next-intl';
 
 type Vendor = {
   id: string;
@@ -28,15 +29,16 @@ type CategoryStripProps = {
 export default function HomeCategoryStrips(props: { city?: string | null }) {
   // If you store selected city in context/local storage, pass it down
   const city = props.city ?? null;
+  const t = useTranslations('home');
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 mt-16">
       <div className="space-y-12">
-        <CategoryStrip title="Venues" href="/categories/venues" category="venues" city={city} />
-        <CategoryStrip title="Catering" href="/categories/catering" category="catering" city={city} />
-        <CategoryStrip title="Photographers" href="/categories/photo-video" category="photo-video" city={city} />
-        <CategoryStrip title="Music" href="/categories/music" category="music" city={city} />
-        <CategoryStrip title="Dresses" href="/categories/dresses" category="dresses" city={city} />
+        <CategoryStrip title={t('categoryStrips.venues')} href="/categories/venues" category="venues" city={city} />
+        <CategoryStrip title={t('categoryStrips.catering')} href="/categories/catering" category="catering" city={city} />
+        <CategoryStrip title={t('categoryStrips.photographers')} href="/categories/photo-video" category="photo-video" city={city} />
+        <CategoryStrip title={t('categoryStrips.music')} href="/categories/music" category="music" city={city} />
+        <CategoryStrip title={t('categoryStrips.dresses')} href="/categories/dresses" category="dresses" city={city} />
       </div>
     </section>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useLocale } from '@/contexts/LocaleContext';
 
 interface LanguageOption {
   code: string;
@@ -32,9 +33,7 @@ export default function LanguageCurrencyDropdown() {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
-
-  // Extract current locale from pathname
-  const currentLocale = pathname.split('/')[1] || 'en';
+  const { locale: currentLocale } = useLocale();
   const currentLanguage = languages.find(lang => lang.code === currentLocale) || languages[0];
 
   // For now, we'll just show USD as selected - in a real app, this would be stored in user preferences or localStorage
@@ -89,9 +88,8 @@ export default function LanguageCurrencyDropdown() {
               <button
                 key={language.code}
                 onClick={() => switchLocale(language.code)}
-                className={`w-full flex items-center gap-3 px-2 py-2 text-left hover:bg-gray-50 transition-colors rounded ${
-                  currentLocale === language.code ? 'bg-gray-50' : ''
-                }`}
+                className={`w-full flex items-center gap-3 px-2 py-2 text-left hover:bg-gray-50 transition-colors rounded ${currentLocale === language.code ? 'bg-gray-50' : ''
+                  }`}
               >
                 <span className="text-lg">{language.flag}</span>
                 <span className="text-sm font-medium">{language.name}</span>
@@ -106,9 +104,8 @@ export default function LanguageCurrencyDropdown() {
               <button
                 key={currency.code}
                 onClick={() => selectCurrency(currency.code)}
-                className={`w-full flex items-center justify-between px-2 py-2 text-left hover:bg-gray-50 transition-colors rounded ${
-                  selectedCurrency === currency.code ? 'bg-gray-50' : ''
-                }`}
+                className={`w-full flex items-center justify-between px-2 py-2 text-left hover:bg-gray-50 transition-colors rounded ${selectedCurrency === currency.code ? 'bg-gray-50' : ''
+                  }`}
               >
                 <span className="text-sm font-medium">{currency.name}</span>
                 <span className="text-sm text-gray-500">{currency.symbol}</span>

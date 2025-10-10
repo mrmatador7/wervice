@@ -1,14 +1,20 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import LanguageCurrencyDropdown from "../ui/LanguageDropdown";
 import { useUser } from "@/contexts/UserContext";
+import { useLocale } from "@/contexts/LocaleContext";
 
 export default function Header() {
-  const pathname = usePathname();
-  const currentLocale = pathname.split('/')[1] || 'en';
+  const { locale: currentLocale } = useLocale();
   const { user, profile, signOut } = useUser();
   const userType = profile?.user_type ?? 'user';
+  const [isClient, setIsClient] = useState(false);
+
+  // Prevent hydration mismatch by only showing auth buttons after client-side mount
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <header
@@ -22,7 +28,7 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="h-16 flex items-center justify-between gap-3">
           {/* Left: Logo */}
-          <Link href="/" aria-label="Wervice home" className="shrink-0">
+          <Link href={`/${currentLocale}`} aria-label="Wervice home" className="shrink-0">
             <img
               src="/wervice-logo-black.png"
               alt="Wervice"
@@ -35,41 +41,46 @@ export default function Header() {
             {/* Language & Currency */}
             <LanguageCurrencyDropdown />
 
-            {/* Admin Panel - Only for admin and super_admin users */}
-            {user && (userType === 'admin' || userType === 'super_admin') && (
-              <Link
-                href={`/${currentLocale}/admin`}
-                className="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-100"
-              >
-                Admin
-              </Link>
-            )}
+            {/* Auth-related buttons - only render on client to prevent hydration mismatch */}
+            {isClient && (
+              <>
+                {/* Admin Panel - Only for admin and super_admin users */}
+                {user && (userType === 'admin' || userType === 'super_admin') && (
+                  <Link
+                    href={`/${currentLocale}/admin`}
+                    className="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-100"
+                  >
+                    Admin
+                  </Link>
+                )}
 
-            {/* Dashboard - For all authenticated users */}
-            {user && (
-              <Link
-                href={`/${currentLocale}/dashboard`}
-                className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
-              >
-                Dashboard
-              </Link>
-            )}
+                {/* Dashboard - For all authenticated users */}
+                {user && (
+                  <Link
+                    href={`/${currentLocale}/dashboard`}
+                    className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
+                  >
+                    Dashboard
+                  </Link>
+                )}
 
-            {/* Sign In / Sign Out */}
-            {user ? (
-              <button
-                onClick={signOut}
-                className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
-              >
-                Sign Out
-              </button>
-            ) : (
-              <Link
-                href={`/${currentLocale}/auth/signin`}
-                className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
-              >
-                Sign In
-              </Link>
+                {/* Sign In / Sign Out */}
+                {user ? (
+                  <button
+                    onClick={signOut}
+                    className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
+                  >
+                    Sign Out
+                  </button>
+                ) : (
+                  <Link
+                    href={`/${currentLocale}/auth/signin`}
+                    className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
+                  >
+                    Sign In
+                  </Link>
+                )}
+              </>
             )}
 
             {/* Become a Vendor */}

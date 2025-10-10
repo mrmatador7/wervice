@@ -4,8 +4,11 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FiShield, FiBarChart, FiSettings } from 'react-icons/fi';
+import { useTranslations } from 'next-intl';
 
 export default function TrustBand() {
+  const t = useTranslations('home');
+
   return (
     <section className="py-16 lg:py-20" data-section="trust-band">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -37,10 +40,10 @@ export default function TrustBand() {
                 </div>
 
                 <h3 className="mb-2 text-xl font-bold text-[#11190C] lg:text-2xl">
-                  500+ Applications Processed
+                  {t('trustBand.applicationsProcessed')}
                 </h3>
                 <p className="text-sm leading-relaxed text-[#555]">
-                  Phones, text, and email support in 50+ languages, complemented by automatic notifications.
+                  {t('trustBand.supportDescription')}
                 </p>
               </div>
             </div>
@@ -56,10 +59,10 @@ export default function TrustBand() {
                 95%
               </div>
               <div className="mb-1 text-lg font-semibold text-[#11190C]">
-                Couples find what they need in minutes
+                {t('trustBand.verifiedVendors')}
               </div>
               <div className="text-sm text-[#666]">
-                Delivered faster and seamlessly
+                {t('trustBand.vendorsDescription')}
               </div>
             </div>
           </div>
@@ -79,17 +82,17 @@ export default function TrustBand() {
                   100M MAD
                 </div>
                 <div className="text-sm font-medium text-[#666]">
-                  Fraud & Scam Protection
+                  {t('trustBand.securePayments')}
                 </div>
               </div>
             </div>
 
             <div className="mt-4">
               <h4 className="mb-2 text-lg font-semibold text-[#11190C]">
-                Safe and Secure
+                {t('trustBand.securePayments')}
               </h4>
               <p className="mb-3 text-sm leading-relaxed text-[#555]">
-                Your data and funds are always encrypted and secured with industry-leading protections.
+                {t('trustBand.paymentsDescription')}
               </p>
               <Link
                 href="/safety"

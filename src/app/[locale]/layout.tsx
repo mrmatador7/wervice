@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import OnboardingGuard from '@/app/(guards)/onboarding-guard';
 import { UserProvider } from '@/contexts/UserContext';
+import { LocaleProvider } from '@/contexts/LocaleContext';
 
 const locales = ['en', 'fr', 'ar'] as const;
 const defaultLocale = 'en';
@@ -44,21 +45,23 @@ export default async function RootLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <UserProvider>
-        <div
-          dir={isRTL ? 'rtl' : 'ltr'}
-          lang={locale}
-          style={{
-            fontFamily: isRTL ? "'Readex Pro', system-ui, sans-serif" : "Rubik, system-ui, sans-serif",
-            width: '100%',
-            height: '100%'
-          }}
-        >
-          <OnboardingGuard locale={locale}>
-            {children}
-          </OnboardingGuard>
-        </div>
-      </UserProvider>
+      <LocaleProvider>
+        <UserProvider>
+          <div
+            dir={isRTL ? 'rtl' : 'ltr'}
+            lang={locale}
+            style={{
+              fontFamily: isRTL ? "'Readex Pro', system-ui, sans-serif" : "Rubik, system-ui, sans-serif",
+              width: '100%',
+              height: '100%'
+            }}
+          >
+            <OnboardingGuard locale={locale}>
+              {children}
+            </OnboardingGuard>
+          </div>
+        </UserProvider>
+      </LocaleProvider>
     </NextIntlClientProvider>
   );
 }

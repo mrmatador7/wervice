@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import HeroCityCard from '../cards/HeroCityCard';
 import SmallCityCard from '../cards/SmallCityCard';
+import { useTranslations } from 'next-intl';
 
 interface CityItem {
     name: string;
@@ -18,88 +19,91 @@ interface CitiesCarouselProps {
     className?: string;
 }
 
-// Sample Moroccan cities data with tint colors
-const defaultCities: CityItem[] = [
-    {
-        name: 'Casablanca',
-        slug: 'casablanca',
-        image: '/cities/Casablanca.jpg',
-        vendors: 245,
-    },
-    {
-        name: 'Marrakech',
-        slug: 'marrakech',
-        image: '/cities/Marrakech.jpg',
-        vendors: 312,
-    },
-    {
-        name: 'Rabat',
-        slug: 'rabat',
-        image: '/cities/Rabat.jpg',
-        vendors: 189,
-    },
-    {
-        name: 'Tangier',
-        slug: 'tangier',
-        image: '/cities/tanger.jpg',
-        vendors: 156,
-    },
-    {
-        name: 'Agadir',
-        slug: 'agadir',
-        image: '/cities/Marrakech.jpg', // Using Marrakech as fallback
-        vendors: 134,
-    },
-    {
-        name: 'Fes',
-        slug: 'fes',
-        image: '/cities/Fez.jpg',
-        vendors: 178,
-    },
-    {
-        name: 'Meknes',
-        slug: 'meknes',
-        image: '/cities/meknes.jpg',
-        vendors: 98,
-    },
-    {
-        name: 'El Jadida',
-        slug: 'el-jadida',
-        image: '/cities/El Jadida.jpg',
-        vendors: 87,
-    },
-    {
-        name: 'Kenitra',
-        slug: 'kenitra',
-        image: '/cities/Kenitra.webp',
-        vendors: 76,
-    },
-];
-
-// City tint color mapping
-const cityTintColors: Record<string, string> = {
-    'Casablanca': '#4338CA',
-    'Marrakech': '#E11D48',
-    'Rabat': '#2563EB',
-    'Tangier': '#7C3AED',
-    'Agadir': '#F97316',
-    'Fes': '#10B981',
-    'Meknes': '#14B8A6',
-    'El Jadida': '#06B6D4',
-    'Kenitra': '#65A30D',
-};
-
-// Helper function to get tint color for a city
-function getCityTint(cityName: string): string {
-    return cityTintColors[cityName] || '#0B0D2E';
-}
-
 export default function CitiesCarousel({
-    items = defaultCities,
-    title = "Popular Cities",
+    items,
+    title,
     variant = 'default',
     className = ""
 }: CitiesCarouselProps) {
+    const t = useTranslations('home');
+    const carouselTitle = title || t('cities.popularCities');
+
+    // Sample Moroccan cities data with tint colors
+    const defaultCities: CityItem[] = [
+        {
+            name: t('cities.names.casablanca'),
+            slug: 'casablanca',
+            image: '/cities/Casablanca.jpg',
+            vendors: 245,
+        },
+        {
+            name: t('cities.names.marrakech'),
+            slug: 'marrakech',
+            image: '/cities/Marrakech.jpg',
+            vendors: 312,
+        },
+        {
+            name: t('cities.names.rabat'),
+            slug: 'rabat',
+            image: '/cities/Rabat.jpg',
+            vendors: 189,
+        },
+        {
+            name: t('cities.names.tangier'),
+            slug: 'tangier',
+            image: '/cities/tanger.jpg',
+            vendors: 156,
+        },
+        {
+            name: t('cities.names.agadir'),
+            slug: 'agadir',
+            image: '/cities/Marrakech.jpg', // Using Marrakech as fallback
+            vendors: 134,
+        },
+        {
+            name: t('cities.names.fes'),
+            slug: 'fes',
+            image: '/cities/Fez.jpg',
+            vendors: 178,
+        },
+        {
+            name: t('cities.names.meknes'),
+            slug: 'meknes',
+            image: '/cities/meknes.jpg',
+            vendors: 98,
+        },
+        {
+            name: t('cities.names.elJadida'),
+            slug: 'el-jadida',
+            image: '/cities/El Jadida.jpg',
+            vendors: 87,
+        },
+        {
+            name: t('cities.names.kenitra'),
+            slug: 'kenitra',
+            image: '/cities/Kenitra.webp',
+            vendors: 76,
+        },
+    ];
+
+    // City tint color mapping by slug
+    const cityTintColors: Record<string, string> = {
+        'casablanca': '#4338CA',
+        'marrakech': '#E11D48',
+        'rabat': '#2563EB',
+        'tangier': '#7C3AED',
+        'agadir': '#F97316',
+        'fes': '#10B981',
+        'meknes': '#14B8A6',
+        'el-jadida': '#06B6D4',
+        'kenitra': '#65A30D',
+    };
+
+    // Helper function to get tint color for a city
+    function getCityTint(citySlug: string): string {
+        return cityTintColors[citySlug] || '#0B0D2E';
+    }
+
     const carouselRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
@@ -126,15 +130,17 @@ export default function CitiesCarousel({
         setTimeout(checkScrollButtons, 300);
     };
 
+    const cities = items || defaultCities;
+
     return (
         <div className={className}>
             {/* Section Title */}
             <div className="text-center mb-8">
                 <h2 className="font-inter font-bold text-2xl md:text-3xl text-gray-900 mb-2">
-                    {title}
+                    {carouselTitle}
                 </h2>
                 <p className="text-gray-600 text-sm md:text-base">
-                    Discover wedding vendors in Morocco&apos;s most beautiful cities
+                    {t('cities.subtitle')}
                 </p>
             </div>
 
@@ -145,7 +151,7 @@ export default function CitiesCarousel({
                     <button
                         onClick={scrollLeft}
                         className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-lime-400 hover:bg-lime-500 border border-lime-300 rounded-full p-2 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lime-400"
-                        aria-label="Scroll left"
+                        aria-label={t('carousel.scrollLeft')}
                     >
                         <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -158,7 +164,7 @@ export default function CitiesCarousel({
                     <button
                         onClick={scrollRight}
                         className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-lime-400 hover:bg-lime-500 border border-lime-300 rounded-full p-2 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lime-400"
-                        aria-label="Scroll right"
+                        aria-label={t('carousel.scrollRight')}
                     >
                         <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -173,7 +179,7 @@ export default function CitiesCarousel({
                     onScroll={checkScrollButtons}
                 >
                     <div className={`flex pb-4 pr-4 ${variant === 'small' ? 'space-x-3 md:space-x-4' : 'space-x-5 md:space-x-6'}`}>
-                        {items.map((city) => (
+                        {cities.map((city) => (
                             variant === 'small' ? (
                                 <SmallCityCard
                                     key={city.slug}
@@ -189,7 +195,7 @@ export default function CitiesCarousel({
                                     slug={city.slug}
                                     image={city.image}
                                     vendors={city.vendors}
-                                    tint={getCityTint(city.name)}
+                                    tint={getCityTint(city.slug)}
                                 />
                             )
                         ))}

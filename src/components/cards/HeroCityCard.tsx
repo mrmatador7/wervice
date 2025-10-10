@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 type HeroCityCardProps = {
   name: string;
@@ -21,6 +22,7 @@ export default function HeroCityCard({
   className = ''
 }: HeroCityCardProps) {
   const router = useRouter();
+  const t = useTranslations('common');
 
   const handleClick = () => {
     window.location.href = `/en/cities/${slug}`;
@@ -35,7 +37,7 @@ export default function HeroCityCard({
         height: 'clamp(380px, 48vw, 520px)',
         borderRadius: '28px'
       }}
-      aria-label={`Browse vendors in ${name}`}
+      aria-label={t('browseVendors', { city: name })}
     >
       {/* Faint ambient halo */}
       <div className="absolute inset-0 rounded-[28px] bg-white/5 blur-xl scale-105 -z-10"></div>
@@ -69,7 +71,7 @@ export default function HeroCityCard({
           {/* Vendors Count */}
           {vendors && vendors > 0 && (
             <p className="text-white/80 text-sm leading-relaxed">
-              {vendors.toLocaleString()} vendors
+              {t('numberOfVendors', { count: vendors })}
             </p>
           )}
         </div>

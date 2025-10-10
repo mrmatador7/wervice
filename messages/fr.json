@@ -291,7 +291,9 @@
     "description": "Servir les couples de Rabat à Agadir, avec les meilleures catégories en Lieux, Restauration, et plus."
   },
   "common": {
-    "off": "DE RÉDUCTION"
+    "off": "DE RÉDUCTION",
+    "vendors": "Vendeurs",
+    "browseVendors": "Parcourir les vendeurs"
   },
   "language": {
     "switch": "Langue",
@@ -419,6 +421,166 @@
       "successMessage": "Votre mot de passe a été mis à jour avec succès. Vous serez redirigé vers votre tableau de bord sous peu.",
       "redirecting": "Redirection...",
       "error": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Planifiez votre mariage, à votre façon.",
+      "subtitle": "Comparez les vendeurs de confiance, lisez les avis, et réservez rapidement — tout en un seul endroit."
+    },
+    "dressCatalog": {
+      "title": "Catalogue de robes",
+      "subtitle": "Découvrez les dernières tendances en robes de mariée par les meilleurs designers et robes de demoiselles d'honneur. Choisissez votre préférée dans notre catalogue !",
+      "ctaLabel": "Explorer le catalogue"
+    },
+    "newVendors": {
+      "title": "Nouveaux vendeurs",
+      "subtitle": "Explorez d'incroyables vendeurs de mariage et services"
+    },
+    "listings": {
+      "defaultTitle": "Découvrez les annonces",
+      "defaultSubtitle": "Explorez d'incroyables vendeurs de mariage et services"
+    },
+    "categories": {
+      "browseByCategory": "Parcourir par catégorie",
+      "vendorsCount": "{count} vendeurs",
+      "names": {
+        "venues": "Lieux",
+        "catering": "Restauration",
+        "photoVideo": "Photo & Vidéo",
+        "eventPlanner": "Organisateur d'événements",
+        "beauty": "Beauté",
+        "decor": "Décoration",
+        "music": "Musique",
+        "dresses": "Robes"
+      }
+    },
+    "cities": {
+      "popularCities": "Villes Populaires",
+      "subtitle": "Explorez d'incroyables vendeurs de mariage dans les belles villes du Maroc",
+      "names": {
+        "casablanca": "Casablanca",
+        "marrakech": "Marrakech",
+        "rabat": "Rabat",
+        "tangier": "Tanger",
+        "agadir": "Agadir",
+        "fes": "Fès",
+        "meknes": "Meknès",
+        "elJadida": "El Jadida",
+        "kenitra": "Kénitra"
+      }
+    },
+    "carousel": {
+      "scrollLeft": "Défiler à gauche",
+      "scrollRight": "Défiler à droite"
+    },
+    "categoryStrips": {
+      "venues": "Lieux",
+      "catering": "Restauration",
+      "photographers": "Photographes",
+      "music": "Musique",
+      "dresses": "Robes"
+    },
+    "trustBand": {
+      "applicationsProcessed": "500+ demandes traitées",
+      "supportDescription": "Support téléphonique, SMS et email dans plus de 50 langues, complété par des notifications automatiques.",
+      "verifiedVendors": "Vendeurs vérifiés",
+      "vendorsDescription": "Chaque vendeur subit une vérification approfondie et des contrôles de background.",
+      "securePayments": "Paiements sécurisés",
+      "paymentsDescription": "Transactions chiffrées SSL avec multiples options de paiement."
+    },
+    "becomeVendor": {
+      "badge": "Rejoignez la principale marketplace de mariage du Maroc",
+      "title": "Devenez un",
+      "titleHighlight": "Wervice",
+      "titleEnd": "vendeur",
+      "subtitle": "Rejoignez la première marketplace de mariage du Maroc avec une tarification flexible à partir de 150 DHS/mois. Choisissez votre catégorie, définissez votre niveau de tarification, et commencez à vous connecter avec les couples immédiatement.",
+      "benefits": {
+        "flexiblePricing": {
+          "title": "Tarification flexible",
+          "description": "Choisissez parmi trois niveaux de tarification (150-250 DHS/mois) selon votre catégorie de mariage"
+        },
+        "categoryPlans": {
+          "title": "Plans par catégorie",
+          "description": "Les vendeurs de lieux, restauration et organisation profitent d'une tarification premium à 250 DHS/mois"
+        },
+        "quickSetup": {
+          "title": "Configuration rapide",
+          "description": "Sélectionnez votre catégorie, téléchargez des photos, et commencez à recevoir des demandes dans les 24 heures"
+        }
+      },
+      "cta": "Commencez votre parcours de vendeur"
+    }
+  },
+  "contact": {
+    "title": "Contacter Wervice",
+    "subtitle": "Questions, commentaires ou idées de partenariat ? Nous sommes là pour rendre votre parcours de planification de mariage fluide et mémorable.",
+    "methods": {
+      "email": {
+        "label": "Email",
+        "description": "Envoyez-nous un email à tout moment",
+        "value": "hello@wervice.com"
+      },
+      "phone": {
+        "label": "Téléphone",
+        "description": "Appelez-nous pendant les heures de bureau",
+        "value": "+212 6 12 34 56 78"
+      },
+      "whatsapp": {
+        "label": "WhatsApp",
+        "description": "Message rapide via WhatsApp",
+        "value": "+212 6 12 34 56 78"
+      }
+    },
+    "form": {
+      "title": "Envoyez-nous un message",
+      "subtitle": "Nous vous répondrons dans les 24 heures.",
+      "name": "Nom",
+      "namePlaceholder": "Votre nom complet",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "topic": "Sujet",
+      "message": "Message",
+      "messagePlaceholder": "Dites-nous comment nous pouvons vous aider...",
+      "topics": {
+        "general": "Demande générale",
+        "partnerships": "Partenariats",
+        "press": "Presse & Médias",
+        "support": "Support technique",
+        "feedback": "Commentaires",
+        "other": "Autre"
+      },
+      "submit": "Envoyer le message",
+      "submitting": "Envoi en cours...",
+      "required": "Veuillez remplir tous les champs obligatoires.",
+      "sent": "Ouverture de votre application email...",
+      "copied": "Copié dans le presse-papiers !"
+    },
+    "faq": {
+      "title": "Questions fréquemment posées",
+      "subtitle": "Réponses rapides aux questions courantes sur l'utilisation de Wervice.",
+      "items": {
+        "contactVendors": {
+          "question": "Comment contacter les vendeurs ?",
+          "answer": "Utilisez le numéro de téléphone ou l'email indiqué sur la page de profil de chaque vendeur. Vous pouvez les contacter directement pour poser des questions ou effectuer des réservations."
+        },
+        "bookVendors": {
+          "question": "Puis-je réserver des vendeurs via Wervice ?",
+          "answer": "Pour l'instant, vous contactez les vendeurs directement via leurs informations de contact pour confirmer la disponibilité et effectuer des réservations."
+        },
+        "becomeVendor": {
+          "question": "Comment devenir vendeur ?",
+          "answer": "Visitez notre page 'Devenir vendeur' pour découvrir le processus et soumettre votre candidature pour rejoindre notre plateforme."
+        },
+        "availability": {
+          "question": "Wervice est-il disponible dans toutes les villes marocaines ?",
+          "answer": "Nous nous étendons à travers le Maroc. Consultez notre page des villes pour voir quels endroits ont actuellement des vendeurs actifs."
+        },
+        "howItWorks": {
+          "question": "Comment fonctionne Wervice ?",
+          "answer": "Parcourez les vendeurs par catégorie et ville, contactez-les directement, et créez votre expérience de mariage parfaite avec leur aide."
+        }
+      }
     }
   },
   "vendor": {
