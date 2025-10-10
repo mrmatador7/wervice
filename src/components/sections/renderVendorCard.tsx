@@ -1,4 +1,4 @@
-import CompactListingCard from '@/components/CompactListingCard';
+import CompactListingCard from '../cards/CompactListingCard';
 import type { RailItem } from './CategoryRail';
 
 export function renderVendorCard(item: RailItem) {

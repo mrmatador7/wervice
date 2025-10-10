@@ -1,191 +1,180 @@
 // Database queries for categories and category-specific vendors
 
-import { Vendor } from '@/components/vendor/VendorCard';
+import { Vendor } from '@/models/vendor';
+import { supabase } from '@/lib/supabase';
 
 // Mock vendor data for categories
 const MOCK_VENDORS: Vendor[] = [
   // Venues
   {
-    id: '1',
     name: 'Riad Dar Moha',
     slug: 'riad-dar-moha',
+    category: 'Venues',
     city: 'Marrakech',
-    primaryCategory: 'Venues',
-    images: ['https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop'],
+    startingPrice: 25000,
     rating: 4.8,
-    reviewCount: 127,
-    minPrice: 25000,
-    maxPrice: 25000,
-    isFeatured: true,
-    shortFeatures: ['Indoor', 'Outdoor', 'Traditional'],
+    reviewsCount: 127,
+    featured: true,
+    tags: ['Indoor', 'Outdoor', 'Traditional'],
   },
   {
-    id: '2',
     name: 'Nomad Marrakech',
     slug: 'nomad-marrakech',
+    category: 'Venues',
     city: 'Marrakech',
-    primaryCategory: 'Venues',
-    images: ['https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'],
+    startingPrice: 35000,
     rating: 4.6,
-    reviewCount: 89,
-    minPrice: 35000,
-    maxPrice: 35000,
-    isFeatured: false,
-    shortFeatures: ['Outdoor', 'Modern', 'Panoramic'],
+    reviewsCount: 89,
+    featured: false,
+    tags: ['Outdoor', 'Modern', 'Panoramic'],
   },
   {
-    id: '3',
     name: 'Kasbah Wedding Hall',
     slug: 'kasbah-wedding-hall',
+    category: 'Venues',
     city: 'Marrakech',
-    primaryCategory: 'Venues',
-    images: ['https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=600&fit=crop'],
+    startingPrice: 18000,
     rating: 4.4,
-    reviewCount: 76,
-    minPrice: 18000,
-    maxPrice: 18000,
-    isFeatured: false,
-    shortFeatures: ['Indoor', 'Traditional', 'Elegant'],
+    reviewsCount: 76,
+    featured: false,
+    tags: ['Indoor', 'Traditional', 'Elegant'],
   },
 
   // Catering
   {
-    id: '4',
     name: 'Authentic Moroccan Kitchen',
     slug: 'authentic-moroccan-kitchen',
+    category: 'Catering',
     city: 'Marrakech',
-    primaryCategory: 'Catering',
-    images: ['https://images.unsplash.com/photo-1544124499-58912cbddaad?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1544124499-58912cbddaad?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1544124499-58912cbddaad?w=800&h=600&fit=crop'],
+    startingPrice: 150,
     rating: 4.9,
-    reviewCount: 203,
-    minPrice: 150,
-    maxPrice: 150,
-    isFeatured: true,
-    shortFeatures: ['Traditional', 'Moroccan', 'Catering'],
+    reviewsCount: 203,
+    featured: true,
+    tags: ['Traditional', 'Moroccan', 'Catering'],
   },
   {
-    id: '5',
     name: 'Mediterranean Feast',
     slug: 'mediterranean-feast',
+    category: 'Catering',
     city: 'Casablanca',
-    primaryCategory: 'Catering',
-    images: ['https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop'],
+    startingPrice: 200,
     rating: 4.7,
-    reviewCount: 156,
-    minPrice: 200,
-    maxPrice: 200,
-    isFeatured: false,
-    shortFeatures: ['Fusion', 'Mediterranean', 'Catering'],
+    reviewsCount: 156,
+    featured: false,
+    tags: ['Fusion', 'Mediterranean', 'Catering'],
   },
 
   // Photography
   {
-    id: '6',
     name: 'Desert Dreams Photography',
     slug: 'desert-dreams-photography',
+    category: 'Photo & Video',
     city: 'Marrakech',
-    primaryCategory: 'Photography & Videography',
-    images: ['https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&h=600&fit=crop'],
+    startingPrice: 8000,
     rating: 4.9,
-    reviewCount: 312,
-    minPrice: 8000,
-    maxPrice: 8000,
-    isFeatured: true,
-    shortFeatures: ['Photography', 'Cultural', 'Professional'],
+    reviewsCount: 312,
+    featured: true,
+    tags: ['Photography', 'Cultural', 'Professional'],
   },
 
   // Beauty
   {
-    id: '7',
     name: 'Desert Beauty',
     slug: 'desert-beauty',
+    category: 'Beauty',
     city: 'Marrakech',
-    primaryCategory: 'Beauty & Hair',
-    images: ['https://images.unsplash.com/photo-1583393781828-e5c4e7b5f8c9?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1583393781828-e5c4e7b5f8c9?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1583393781828-e5c4e7b5f8c9?w=800&h=600&fit=crop'],
+    startingPrice: 600,
     rating: 4.8,
-    reviewCount: 178,
-    minPrice: 600,
-    maxPrice: 600,
-    isFeatured: false,
-    shortFeatures: ['Henna', 'Makeup', 'Traditional'],
+    reviewsCount: 178,
+    featured: false,
+    tags: ['Henna', 'Makeup', 'Traditional'],
   },
 
   // Music
   {
-    id: '8',
     name: 'Sahara Sounds',
     slug: 'sahara-sounds',
+    category: 'Music',
     city: 'Marrakech',
-    primaryCategory: 'Music & Entertainment',
-    images: ['https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop'],
+    startingPrice: 7000,
     rating: 4.7,
-    reviewCount: 134,
-    minPrice: 7000,
-    maxPrice: 7000,
-    isFeatured: false,
-    shortFeatures: ['Traditional', 'Moroccan', 'Entertainment'],
+    reviewsCount: 134,
+    featured: false,
+    tags: ['Traditional', 'Moroccan', 'Entertainment'],
   },
   {
-    id: '9',
     name: 'Atlas DJ Services',
     slug: 'atlas-dj-services',
+    category: 'Music',
     city: 'Marrakech',
-    primaryCategory: 'Music & Entertainment',
-    images: ['https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop'],
+    startingPrice: 8000,
     rating: 4.5,
-    reviewCount: 98,
-    minPrice: 8000,
-    maxPrice: 8000,
-    isFeatured: false,
-    shortFeatures: ['DJ', 'Modern', 'Entertainment'],
+    reviewsCount: 98,
+    featured: false,
+    tags: ['DJ', 'Modern', 'Entertainment'],
   },
 
   // Decor
   {
-    id: '10',
     name: 'Medina Magic Decor',
     slug: 'medina-magic-decor',
+    category: 'Decor',
     city: 'Marrakech',
-    primaryCategory: 'Decor & Styling',
-    images: ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&h=600&fit=crop'],
+    startingPrice: 10000,
     rating: 4.6,
-    reviewCount: 156,
-    minPrice: 10000,
-    maxPrice: 10000,
-    isFeatured: false,
-    shortFeatures: ['Floral', 'Traditional', 'Decor'],
+    reviewsCount: 156,
+    featured: false,
+    tags: ['Floral', 'Traditional', 'Decor'],
   },
 
   // Planning
   {
-    id: '11',
     name: 'Desert Dreams Planner',
     slug: 'desert-dreams-planner',
+    category: 'Planning',
     city: 'Marrakech',
-    primaryCategory: 'Wedding Planning',
-    images: ['https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop'],
+    startingPrice: 20000,
     rating: 4.8,
-    reviewCount: 203,
-    minPrice: 20000,
-    maxPrice: 20000,
-    isFeatured: true,
-    shortFeatures: ['Full Service', 'Planning', 'Coordination'],
+    reviewsCount: 203,
+    featured: true,
+    tags: ['Full Service', 'Planning', 'Coordination'],
   },
 
   // Dresses
   {
-    id: '12',
     name: 'Moroccan Bridal Couture',
     slug: 'moroccan-bridal-couture',
+    category: 'Dresses',
     city: 'Casablanca',
-    primaryCategory: 'Wedding Dresses',
-    images: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&h=600&fit=crop'],
+    coverImage: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&h=600&fit=crop',
+    gallery: ['https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&h=600&fit=crop'],
+    startingPrice: 5000,
     rating: 4.7,
-    reviewCount: 89,
-    minPrice: 5000,
-    maxPrice: 5000,
-    isFeatured: false,
-    shortFeatures: ['Traditional', 'Modern', 'Bridal'],
+    reviewsCount: 89,
+    featured: false,
+    tags: ['Traditional', 'Modern', 'Bridal'],
   },
 ];
 
@@ -310,15 +299,19 @@ export const FALLBACK_CATEGORIES: Record<string, CategoryData> = {
 export async function getCategoryBySlug(slug: string): Promise<CategoryData | null> {
   // First try database
   try {
-    const supabase = createClient();
     const { data, error } = await supabase
       .from("categories")
-      .select("id, name, slug, description, icon, cover_image")
+      .select("id, name, slug, description, image")
       .eq("slug", slug)
       .single();
 
     if (!error && data) {
-      return data;
+      return {
+        ...data,
+        description: data.description || undefined,
+        icon: data.image,
+        cover_image: data.image,
+      };
     }
   } catch (error) {
     // Database not available, continue to fallback
@@ -346,7 +339,7 @@ export async function getVendorsByCategory(filters: {
   // Use mock data for now
   let filteredVendors = MOCK_VENDORS.filter(vendor => {
     // Match category by slug - convert category name to slug for comparison
-    const categorySlug = vendor.primaryCategory.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const categorySlug = vendor.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     return categorySlug === filters.categorySlug;
   });
 
@@ -361,7 +354,7 @@ export async function getVendorsByCategory(filters: {
   if (filters.q) {
     filteredVendors = filteredVendors.filter(vendor =>
       vendor.name.toLowerCase().includes(filters.q!.toLowerCase()) ||
-      vendor.primaryCategory.toLowerCase().includes(filters.q!.toLowerCase())
+      vendor.category.toLowerCase().includes(filters.q!.toLowerCase())
     );
   }
 
@@ -369,14 +362,14 @@ export async function getVendorsByCategory(filters: {
   if (filters.min) {
     const minPrice = parseInt(filters.min);
     filteredVendors = filteredVendors.filter(vendor =>
-      vendor.minPrice && vendor.minPrice >= minPrice
+      vendor.startingPrice && vendor.startingPrice >= minPrice
     );
   }
 
   if (filters.max) {
     const maxPrice = parseInt(filters.max);
     filteredVendors = filteredVendors.filter(vendor =>
-      vendor.maxPrice && vendor.maxPrice <= maxPrice
+      vendor.startingPrice && vendor.startingPrice <= maxPrice
     );
   }
 
@@ -386,15 +379,15 @@ export async function getVendorsByCategory(filters: {
       filteredVendors.sort((a, b) => (b.rating || 0) - (a.rating || 0));
       break;
     case "price_asc":
-      filteredVendors.sort((a, b) => (a.minPrice || 0) - (b.minPrice || 0));
+      filteredVendors.sort((a, b) => (a.startingPrice || 0) - (b.startingPrice || 0));
       break;
     case "price_desc":
-      filteredVendors.sort((a, b) => (b.minPrice || 0) - (a.minPrice || 0));
+      filteredVendors.sort((a, b) => (b.startingPrice || 0) - (a.startingPrice || 0));
       break;
     default: // "best" or "relevance"
       filteredVendors.sort((a, b) => {
-        if (a.isFeatured && !b.isFeatured) return -1;
-        if (!a.isFeatured && b.isFeatured) return 1;
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
         return (b.rating || 0) - (a.rating || 0);
       });
   }

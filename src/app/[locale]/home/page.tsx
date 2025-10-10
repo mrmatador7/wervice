@@ -1,8 +1,8 @@
 import Header from '@/components/layout/Header';
 import Hero from '@/components/home/Hero';
-import CategoriesSection from '@/components/CategoriesSection';
-import CitiesCarousel from '@/components/CitiesCarousel';
-import ListingsRail from '@/components/ListingsRail';
+import CategoriesSection from '@/components/category/CategoriesSection';
+import CitiesCarousel from '@/components/cities/CitiesCarousel';
+import ListingsRail from '@/components/sections/ListingsRail';
 import BecomeVendorSection from './components/BecomeVendorSection';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/layout/Container';
@@ -91,7 +91,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       />
 
 
-        <BecomeVendorSection />
+      <BecomeVendorSection />
 
       <Footer />
     </div>

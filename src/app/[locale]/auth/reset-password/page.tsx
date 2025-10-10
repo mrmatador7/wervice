@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useTranslations, useLocale } from 'next-intl';
 import { FiMail } from 'react-icons/fi';
 import Header from '@/components/layout/Header';
@@ -9,6 +9,7 @@ import Header from '@/components/layout/Header';
 export default function ResetPasswordPage() {
     const t = useTranslations('auth');
     const locale = useLocale();
+    const supabase = createClientComponentClient();
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);

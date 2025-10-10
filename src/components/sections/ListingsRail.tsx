@@ -1,6 +1,6 @@
 'use client';
 
-import ListingCard from './ListingCard';
+import ListingCard from '../cards/ListingCard';
 
 type ListingItem = {
   id: string;

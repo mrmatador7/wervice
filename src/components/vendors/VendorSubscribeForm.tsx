@@ -171,7 +171,7 @@ export default function VendorSubscribeForm({
   }, [basePrice, formData.plan]);
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<{[key: string]: boolean}>({});
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
 
   // Validate WhatsApp number (E.164 format)
   const validateWhatsApp = (value: string) => {
@@ -637,51 +637,8 @@ export default function VendorSubscribeForm({
       // Add honeypot for spam prevention
       submitData.append('honeypot', formData.honeypot);
 
-      const response = await fetch('/api/vendor-leads', {
-        method: 'POST',
-        body: submitData
-      });
-
-      if (response.ok) {
-        const responseData = await response.json();
-        const leadId = responseData.leadId;
-
-        if (!leadId) {
-          alert('Server did not return a lead ID. Please try again.');
-          return;
-        }
-
-        // Store fallback data in sessionStorage
-        sessionStorage.setItem('lastVendorLead', JSON.stringify({
-          leadId,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          businessName: formData.businessName,
-          category: formData.category,
-          city: formData.city,
-          whatsapp: formData.whatsapp,
-          email: formData.email,
-          mappedMonthlyPrice: currentPrice,
-          logoFile: !!formData.logoFile,
-          galleryFiles: formData.galleryFiles.length,
-          serviceArea: formData.serviceArea,
-          languages: formData.languages
-        }));
-
-        // Redirect to success page with lead ID
-        const successUrl = `/${locale}/vendors/subscribe/success?lead=${leadId}`;
-
-        try {
-          router.push(successUrl);
-        } catch (error) {
-          console.error('Router push failed, using window.location:', error);
-          window.location.href = successUrl;
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('API error:', errorData);
-        alert(errorData.error || errorData.message || 'Failed to submit application. Please try again.');
-      }
+      // API has been removed - show error message for now
+      alert('Vendor registration is currently unavailable. Please contact us directly at contact@wervice.ma');
     } catch (error) {
       console.error('Submission error:', error);
       alert(`Failed to submit application. Error: ${error instanceof Error ? error.message : 'Unknown error'}. Please check your connection and try again.`);
@@ -699,17 +656,14 @@ export default function VendorSubscribeForm({
             {/* Progress Indicator */}
             <div className="flex items-center justify-center mb-8">
               <div className="flex items-center space-x-4">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                  currentStep >= 1 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${currentStep >= 1 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
+                  }`}>
                   1
                 </div>
-                <div className={`h-1 w-16 ${
-                  currentStep >= 2 ? 'bg-[#D7FF1F]' : 'bg-gray-200'
-                }`} />
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                  currentStep >= 2 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div className={`h-1 w-16 ${currentStep >= 2 ? 'bg-[#D7FF1F]' : 'bg-gray-200'
+                  }`} />
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${currentStep >= 2 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
+                  }`}>
                   2
                 </div>
               </div>
@@ -738,9 +692,8 @@ export default function VendorSubscribeForm({
                       value={formData.firstName}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('firstName')}
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.firstName ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.firstName ? 'border-red-500' : ''
+                        }`}
                       placeholder="Your first name"
                       aria-describedby={errors.firstName ? "firstName-error" : undefined}
                     />
@@ -761,9 +714,8 @@ export default function VendorSubscribeForm({
                       value={formData.lastName}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('lastName')}
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.lastName ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.lastName ? 'border-red-500' : ''
+                        }`}
                       placeholder="Your last name"
                       aria-describedby={errors.lastName ? "lastName-error" : undefined}
                     />
@@ -784,9 +736,8 @@ export default function VendorSubscribeForm({
                       value={formData.businessName}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('businessName')}
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.businessName ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.businessName ? 'border-red-500' : ''
+                        }`}
                       placeholder="Your Business Name"
                       aria-describedby={errors.businessName ? "businessName-error" : undefined}
                     />
@@ -806,18 +757,17 @@ export default function VendorSubscribeForm({
                       value={formData.category}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('category')}
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.category ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.category ? 'border-red-500' : ''
+                        }`}
                       aria-describedby={errors.category ? "category-error" : undefined}
                     >
                       <option value="">Select a category</option>
                       {Object.entries(categoryPricing).map(([slug, data]) => {
                         const effectivePrice = getEffectiveMonthlyPrice(data.name, formData.plan);
                         return (
-                        <option key={slug} value={data.name}>
+                          <option key={slug} value={data.name}>
                             {data.name} — {effectivePrice.toLocaleString()} MAD/month
-                        </option>
+                          </option>
                         );
                       })}
                     </select>
@@ -837,9 +787,8 @@ export default function VendorSubscribeForm({
                       value={formData.city}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('city')}
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.city ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.city ? 'border-red-500' : ''
+                        }`}
                       aria-describedby={errors.city ? "city-error" : undefined}
                     >
                       <option value="">Select a city</option>
@@ -864,9 +813,8 @@ export default function VendorSubscribeForm({
                       value={formData.whatsapp}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('whatsapp')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.whatsapp ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.whatsapp ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="+212 6XX XXX XXX"
                       aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
                     />
@@ -887,9 +835,8 @@ export default function VendorSubscribeForm({
                       value={formData.email}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('email')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="your@email.com"
                       aria-describedby={errors.email ? "email-error" : undefined}
                     />
@@ -911,9 +858,8 @@ export default function VendorSubscribeForm({
                       value={formData.instagram}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('instagram')}
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.instagram ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.instagram ? 'border-red-500' : ''
+                        }`}
                       placeholder="@yourhandle"
                       aria-describedby={errors.instagram ? "instagram-error" : undefined}
                     />
@@ -956,9 +902,8 @@ export default function VendorSubscribeForm({
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('startingPrice')}
                       min="0"
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.startingPrice ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.startingPrice ? 'border-red-500' : ''
+                        }`}
                       placeholder="5000"
                       aria-describedby={errors.startingPrice ? "startingPrice-error" : undefined}
                     />
@@ -981,9 +926,8 @@ export default function VendorSubscribeForm({
                       onBlur={() => handleBlur('description')}
                       rows={4}
                       maxLength={300}
-                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${
-                        errors.description ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-3 bg-wervice-shell border border-wervice-sand/70 text-wervice-ink rounded-xl focus:ring-2 focus:ring-wervice-sand/40 focus:border-wervice-sand transition-all duration-200 hover:bg-wervice-shell/80 ${errors.description ? 'border-red-500' : ''
+                        }`}
                       placeholder="Tell us about your business..."
                       aria-describedby={`description-count ${errors.description ? "description-error" : ""}`}
                     />
@@ -1127,11 +1071,10 @@ export default function VendorSubscribeForm({
                       <button
                         type="button"
                         onClick={() => handleCityToggle('All Cities (Nationwide)')}
-                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${
-                          formData.serviceArea.includes('All Cities (Nationwide)')
+                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${formData.serviceArea.includes('All Cities (Nationwide)')
                             ? 'bg-[#D9FF0A] border-[#D9FF0A] text-black font-bold'
                             : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:shadow-sm'
-                        }`}
+                          }`}
                         aria-pressed={formData.serviceArea.includes('All Cities (Nationwide)')}
                       >
                         <span className="text-sm font-medium">🌍 All Cities</span>
@@ -1144,11 +1087,10 @@ export default function VendorSubscribeForm({
                           type="button"
                           onClick={() => handleCityToggle(city)}
                           disabled={formData.serviceArea.includes('All Cities (Nationwide)')}
-                          className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${
-                            formData.serviceArea.includes(city) && !formData.serviceArea.includes('All Cities (Nationwide)')
+                          className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${formData.serviceArea.includes(city) && !formData.serviceArea.includes('All Cities (Nationwide)')
                               ? 'bg-[#D9FF0A] border-[#D9FF0A] text-black font-bold'
                               : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed'
-                          }`}
+                            }`}
                           aria-pressed={formData.serviceArea.includes(city)}
                         >
                           <span className="text-sm font-medium">{city}</span>
@@ -1175,11 +1117,10 @@ export default function VendorSubscribeForm({
                               : [...prev.languages, 'ar']
                           }));
                         }}
-                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${
-                          formData.languages.includes('ar')
+                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${formData.languages.includes('ar')
                             ? 'bg-[#D9FF0A] border-[#D9FF0A] text-black font-bold'
                             : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:shadow-sm'
-                        }`}
+                          }`}
                         aria-pressed={formData.languages.includes('ar')}
                       >
                         <span className="text-sm font-medium">🇲🇦 Arabic</span>
@@ -1196,11 +1137,10 @@ export default function VendorSubscribeForm({
                               : [...prev.languages, 'fr']
                           }));
                         }}
-                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${
-                          formData.languages.includes('fr')
+                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${formData.languages.includes('fr')
                             ? 'bg-[#D9FF0A] border-[#D9FF0A] text-black font-bold'
                             : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:shadow-sm'
-                        }`}
+                          }`}
                         aria-pressed={formData.languages.includes('fr')}
                       >
                         <span className="text-sm font-medium">🇫🇷 French</span>
@@ -1217,11 +1157,10 @@ export default function VendorSubscribeForm({
                               : [...prev.languages, 'en']
                           }));
                         }}
-                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${
-                          formData.languages.includes('en')
+                        className={`flex items-center justify-center px-3 py-2 rounded-full border-2 transition-all duration-200 text-center ${formData.languages.includes('en')
                             ? 'bg-[#D9FF0A] border-[#D9FF0A] text-black font-bold'
                             : 'bg-white border-gray-300 text-gray-700 hover:border-gray-400 hover:shadow-sm'
-                        }`}
+                          }`}
                         aria-pressed={formData.languages.includes('en')}
                       >
                         <span className="text-sm font-medium">🇬🇧 English</span>
@@ -1248,11 +1187,10 @@ export default function VendorSubscribeForm({
                           type="button"
                           onClick={() => handleTldChange('.ma')}
                           aria-pressed={formData.domainPerk.tld === '.ma'}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                            formData.domainPerk.tld === '.ma'
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${formData.domainPerk.tld === '.ma'
                               ? 'bg-[#D9FF0A] text-black border-2 border-[#D9FF0A]'
                               : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-                          }`}
+                            }`}
                         >
                           .ma
                         </button>
@@ -1260,11 +1198,10 @@ export default function VendorSubscribeForm({
                           type="button"
                           onClick={() => handleTldChange('.com')}
                           aria-pressed={formData.domainPerk.tld === '.com'}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                            formData.domainPerk.tld === '.com'
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${formData.domainPerk.tld === '.com'
                               ? 'bg-[#D9FF0A] text-black border-2 border-[#D9FF0A]'
                               : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-                          }`}
+                            }`}
                         >
                           .com
                         </button>
@@ -1292,7 +1229,7 @@ export default function VendorSubscribeForm({
                           Your free domain will point to your Wervice profile, making it easier to share.<br />
                           Example: www.{(formData.domainPerk.requestedDomain || businessSlug || 'ma-journeys')}{formData.domainPerk.tld} instead of www.wervice.com/vendor/{businessSlug || 'ma-journeys'}.
                         </p>
-                  </div>
+                      </div>
 
                       {/* Live Domain Preview */}
                       {formData.domainPerk.requestedDomain && (
@@ -1477,23 +1414,23 @@ export default function VendorSubscribeForm({
                         Next
                       </button>
                     ) : (
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="bg-[#D7FF1F] text-black font-semibold px-8 py-3 rounded-xl hover:bg-[#c4e600] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSubmitting ? (
-                        <span className="flex items-center gap-2">
-                          <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Submitting...
-                        </span>
-                      ) : (
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-[#D7FF1F] text-black font-semibold px-8 py-3 rounded-xl hover:bg-[#c4e600] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? (
+                          <span className="flex items-center gap-2">
+                            <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Submitting...
+                          </span>
+                        ) : (
                           `Submit — ${currentPrice.toLocaleString()} MAD / month (${formData.plan === '6m' ? '6 Months' : formData.plan === 'annual' ? 'Annual' : 'Monthly'} Plan)`
-                      )}
-                    </button>
+                        )}
+                      </button>
                     )}
                   </div>
                 </form>
@@ -1506,127 +1443,127 @@ export default function VendorSubscribeForm({
         <div className="lg:col-span-1">
           <div className="sidebar-sticky">
             <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Plan</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Plan</h3>
 
-            <div className="space-y-4">
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Selected Category</div>
-                <div className="font-medium text-gray-900">
-                  {formData.category || 'Not selected'}
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Selected Category</div>
+                  <div className="font-medium text-gray-900">
+                    {formData.category || 'Not selected'}
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Monthly Price</div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {currentPrice.toLocaleString()} MAD
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Monthly Price</div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {currentPrice.toLocaleString()} MAD
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Cadence</div>
-                <div className="font-medium text-gray-900">
-                  {formData.plan === '6m' ? '6 Months' : formData.plan === 'annual' ? 'Annual' : 'Monthly'}
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Cadence</div>
+                  <div className="font-medium text-gray-900">
+                    {formData.plan === '6m' ? '6 Months' : formData.plan === 'annual' ? 'Annual' : 'Monthly'}
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Billing</div>
-                <div className="text-sm text-gray-700">We&apos;ll contact you to activate</div>
-              </div>
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Billing</div>
+                  <div className="text-sm text-gray-700">We&apos;ll contact you to activate</div>
+                </div>
 
-              {/* Total and Perks for 6M/Annual plans */}
-              {planTotals && (
-                <div className="bg-[#F7F8FB] rounded-lg border border-gray-200 p-4 space-y-3">
-                  <div>
-                    <div className="text-sm font-bold text-gray-900">
-                      Total for {planTotals.months} months: {planTotals.total.toLocaleString()} MAD
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      ≈ {planTotals.equivalent.toLocaleString()} MAD / month
-              </div>
-            </div>
-
-                  <div className="space-y-2">
-                    <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                      Included perks
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <span className="text-green-600 text-xs">✓</span>
-                        <span>{formData.plan === '6m' ? '-10%' : '-20%'} automatically applied</span>
+                {/* Total and Perks for 6M/Annual plans */}
+                {planTotals && (
+                  <div className="bg-[#F7F8FB] rounded-lg border border-gray-200 p-4 space-y-3">
+                    <div>
+                      <div className="text-sm font-bold text-gray-900">
+                        Total for {planTotals.months} months: {planTotals.total.toLocaleString()} MAD
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <span className="text-green-600 text-xs">✓</span>
-                        <span>
-                          {formData.domainPerk.enabled && formData.domainPerk.requestedDomain
-                            ? `Free domain: ${formData.domainPerk.requestedDomain}${formData.domainPerk.tld}`
-                            : 'Free .ma/.com domain'
-                          }
-                        </span>
+                      <div className="text-sm text-gray-600">
+                        ≈ {planTotals.equivalent.toLocaleString()} MAD / month
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <span className="text-green-600 text-xs">✓</span>
-                        <span>Social Boost on Instagram & TikTok</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                        Included perks
+                      </div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <span className="text-green-600 text-xs">✓</span>
+                          <span>{formData.plan === '6m' ? '-10%' : '-20%'} automatically applied</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <span className="text-green-600 text-xs">✓</span>
+                          <span>
+                            {formData.domainPerk.enabled && formData.domainPerk.requestedDomain
+                              ? `Free domain: ${formData.domainPerk.requestedDomain}${formData.domainPerk.tld}`
+                              : 'Free .ma/.com domain'
+                            }
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                          <span className="text-green-600 text-xs">✓</span>
+                          <span>Social Boost on Instagram & TikTok</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+
+              <div className="text-xs text-gray-500 text-center space-y-1">
+                <div>No commissions • Cancel anytime • Invoices in DHS (MAD)</div>
+              </div>
             </div>
 
-            <div className="text-xs text-gray-500 text-center space-y-1">
-              <div>No commissions • Cancel anytime • Invoices in DHS (MAD)</div>
-            </div>
-          </div>
+            {/* Profile Completion Card - Separate Block */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Completion</h3>
 
-          {/* Profile Completion Card - Separate Block */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Completion</h3>
-
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-600">Progress</span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {Math.round(
-                      (formData.description.trim() ? 17 : 0) + // Description → +17%
-                      (logoPreview ? 17 : 0) + // Logo → +17%
-                      (formData.galleryFiles.length > 0 ? 17 : 0) + // Gallery → +17%
-                      (formData.serviceArea.length > 0 ? 16 : 0) + // Service Area → +16%
-                      (formData.languages.length > 0 ? 16 : 0) + // Languages → +16%
-                      (formData.startingPrice.trim() ? 17 : 0) // Starting Price → +17%
-                    )}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className="bg-[#D7FF1F] h-3 rounded-full transition-all duration-500 ease-out"
-                    style={{
-                      width: `${Math.round(
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-600">Progress</span>
+                    <span className="text-sm font-bold text-gray-900">
+                      {Math.round(
                         (formData.description.trim() ? 17 : 0) + // Description → +17%
                         (logoPreview ? 17 : 0) + // Logo → +17%
                         (formData.galleryFiles.length > 0 ? 17 : 0) + // Gallery → +17%
                         (formData.serviceArea.length > 0 ? 16 : 0) + // Service Area → +16%
                         (formData.languages.length > 0 ? 16 : 0) + // Languages → +16%
                         (formData.startingPrice.trim() ? 17 : 0) // Starting Price → +17%
-                      )}%`
-                    }}
-                  ></div>
+                      )}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-[#D7FF1F] h-3 rounded-full transition-all duration-500 ease-out"
+                      style={{
+                        width: `${Math.round(
+                          (formData.description.trim() ? 17 : 0) + // Description → +17%
+                          (logoPreview ? 17 : 0) + // Logo → +17%
+                          (formData.galleryFiles.length > 0 ? 17 : 0) + // Gallery → +17%
+                          (formData.serviceArea.length > 0 ? 16 : 0) + // Service Area → +16%
+                          (formData.languages.length > 0 ? 16 : 0) + // Languages → +16%
+                          (formData.startingPrice.trim() ? 17 : 0) // Starting Price → +17%
+                        )}%`
+                      }}
+                    ></div>
+                  </div>
                 </div>
-              </div>
 
-              <p className="text-xs text-gray-500 text-center">
-                Complete all required fields to reach 100% and get verified faster.
-              </p>
+                <p className="text-xs text-gray-500 text-center">
+                  Complete all required fields to reach 100% and get verified faster.
+                </p>
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
 
       {/* Mobile Sticky CTA */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 lg:hidden">
         <div className="flex gap-3">
           <button
             type="button"
@@ -1644,18 +1581,18 @@ export default function VendorSubscribeForm({
               Next
             </button>
           ) : (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              handleSubmit({ preventDefault: () => {} } as React.FormEvent);
-            }}
-            disabled={isSubmitting}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleSubmit({ preventDefault: () => { } } as React.FormEvent);
+              }}
+              disabled={isSubmitting}
               className="flex-1 bg-[#D7FF1F] text-black font-semibold py-3 rounded-xl hover:bg-[#c4e600] transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+            >
               {isSubmitting ? 'Submitting...' : `Submit — ${currentPrice.toLocaleString()} MAD / month`}
-          </button>
-      )}
+            </button>
+          )}
         </div>
       </div>
     </div>

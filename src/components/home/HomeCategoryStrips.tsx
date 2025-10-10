@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils'; // if you have a classnames helper
+import { vendors } from '@/lib/vendors';
 
 type Vendor = {
   id: string;
@@ -19,23 +20,23 @@ type Vendor = {
 type CategoryStripProps = {
   title: string;
   href: string;
-  category: 'venues'|'catering'|'photo-video'|'music'|'dresses';
+  category: 'venues' | 'catering' | 'photo-video' | 'music' | 'dresses';
   city?: string | null;
   className?: string;
 };
 
-export default function HomeCategoryStrips(props:{ city?: string|null }) {
+export default function HomeCategoryStrips(props: { city?: string | null }) {
   // If you store selected city in context/local storage, pass it down
   const city = props.city ?? null;
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 mt-16">
       <div className="space-y-12">
-        <CategoryStrip title="Venues"        href="/categories/venues"       category="venues"     city={city} />
-        <CategoryStrip title="Catering"      href="/categories/catering"     category="catering"   city={city} />
-        <CategoryStrip title="Photographers" href="/categories/photo-video"  category="photo-video"city={city} />
-        <CategoryStrip title="Music"         href="/categories/music"        category="music"      city={city} />
-        <CategoryStrip title="Dresses"       href="/categories/dresses"      category="dresses"    city={city} />
+        <CategoryStrip title="Venues" href="/categories/venues" category="venues" city={city} />
+        <CategoryStrip title="Catering" href="/categories/catering" category="catering" city={city} />
+        <CategoryStrip title="Photographers" href="/categories/photo-video" category="photo-video" city={city} />
+        <CategoryStrip title="Music" href="/categories/music" category="music" city={city} />
+        <CategoryStrip title="Dresses" href="/categories/dresses" category="dresses" city={city} />
       </div>
     </section>
   );
@@ -51,11 +52,10 @@ function CategoryStrip({ title, href, category, city, className }: CategoryStrip
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(getApi(category, city), { next: { revalidate: 60 } });
-        if (!res.ok) throw new Error(`Failed ${res.status}`);
-        const data = (await res.json()) as Vendor[];
+        // Get vendors directly from mock data instead of API call
+        const data = getVendors(category, city) as Vendor[];
         if (!cancelled) setVendors(data);
-      } catch (e:any) {
+      } catch (e: any) {
         if (!cancelled) setError(e?.message ?? 'Failed to load');
       } finally {
         if (!cancelled) setLoading(false);
@@ -89,12 +89,47 @@ function CategoryStrip({ title, href, category, city, className }: CategoryStrip
   );
 }
 
-function getApi(category:string, city?:string|null) {
-  const params = new URLSearchParams();
-  params.set('category', category);
-  if (city) params.set('city', city);
-  params.set('limit', '12');
-  return `/api/public/vendors?${params.toString()}`;
+function getVendors(category: string, city?: string | null) {
+  // Map category slugs to the enum values used in mock data
+  const categoryMap: Record<string, string> = {
+    'venues': 'Venues',
+    'catering': 'Catering',
+    'photo-video': 'Photo & Video',
+    'music': 'Music',
+    'dresses': 'Dresses',
+    'planning': 'Planning',
+    'beauty': 'Beauty',
+    'decor': 'Decor'
+  };
+
+  const mappedCategory = categoryMap[category];
+  if (!mappedCategory) return [];
+
+  // Filter vendors by category and optionally by city
+  let filteredVendors = vendors.filter(vendor => vendor.category === mappedCategory);
+
+  if (city) {
+    filteredVendors = filteredVendors.filter(vendor =>
+      vendor.city.toLowerCase().includes(city.toLowerCase())
+    );
+  }
+
+  // Sort by rating (highest first) and limit results
+  const sortedVendors = filteredVendors
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    .slice(0, 12);
+
+  // Transform to the expected API format
+  return sortedVendors.map(vendor => ({
+    id: vendor.slug, // Use slug as ID for now
+    slug: vendor.slug,
+    name: vendor.name,
+    city: vendor.city,
+    cover_url: vendor.coverImage,
+    min_price: vendor.startingPrice,
+    rating: vendor.rating,
+    category: category
+  }));
 }
 
 /* ---------- Generic, dependency-free carousel ---------- */
@@ -108,7 +143,7 @@ function HorizontalCarousel<T>({
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
 
-  const scrollBy = (dir: 'left'|'right') => {
+  const scrollBy = (dir: 'left' | 'right') => {
     const el = ref.current;
     if (!el) return;
     const card = el.querySelector('[data-card="1"]') as HTMLElement | null;
@@ -224,7 +259,7 @@ function SkeletonRow() {
   );
 }
 
-function formatMAD(v:number) {
+function formatMAD(v: number) {
   try {
     return new Intl.NumberFormat('en-MA', { style: 'currency', currency: 'MAD', maximumFractionDigits: 0 }).format(v);
   } catch {
