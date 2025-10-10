@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import Hero from '@/components/category/Hero';
-import CategoryClient from '@/components/category/CategoryClient';
+import Hero from '../components/Hero';
+import CategoryClient from '../components/CategoryClient';
 import { formatCategoryName } from '@/lib/format';
 
 interface PageProps {

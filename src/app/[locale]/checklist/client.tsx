@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { FiChevronDown, FiChevronRight, FiSearch, FiPrinter, FiRotateCcw, FiCheckCircle, FiCircle, FiPlus, FiInfo } from 'react-icons/fi';
-import { CHECKLIST, getTotalItems, getCategories, type ChecklistItem, type ChecklistSection } from '@/lib/checklist';
+import { CHECKLIST, getTotalItems, getCategories, type ChecklistItem, type ChecklistSection } from '@/data/checklist';
 
 const STORAGE_KEY = 'wervice_checklist_v1';
 
@@ -270,11 +270,10 @@ export default function ChecklistClient() {
                 <button
                   key={option}
                   onClick={() => updateFilter('show', option)}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
-                    filters.show === option
+                  className={`px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${filters.show === option
                       ? 'bg-[#D7FF1F] border-[#D7FF1F] text-gray-900'
                       : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {option === 'all' ? 'All' : option === 'completed' ? 'Completed' : 'Remaining'}
                 </button>
@@ -288,11 +287,10 @@ export default function ChecklistClient() {
               <button
                 key={category}
                 onClick={() => toggleCategory(category)}
-                className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                  filters.categories.includes(category)
+                className={`px-3 py-1 text-sm rounded-full border transition-colors ${filters.categories.includes(category)
                     ? 'bg-[#D7FF1F] border-[#D7FF1F] text-gray-900'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {category}
               </button>
@@ -305,11 +303,10 @@ export default function ChecklistClient() {
               <button
                 key={section.slug}
                 onClick={() => updateFilter('timeline', filters.timeline === section.slug ? '' : section.slug)}
-                className={`px-3 py-1 text-sm rounded-full border transition-colors ${
-                  filters.timeline === section.slug
+                className={`px-3 py-1 text-sm rounded-full border transition-colors ${filters.timeline === section.slug
                     ? 'bg-[#D7FF1F] border-[#D7FF1F] text-gray-900'
                     : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {section.badge}
               </button>

@@ -1,120 +1,15 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useUser } from '@/contexts/UserContext';
 import { useLocale } from 'next-intl';
 import Header from '@/components/layout/Header';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
-    const { user, isLoading } = useAuth();
-    const router = useRouter();
+    const { user, profile, isLoading } = useUser();
     const locale = useLocale();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [profile, setProfile] = useState<Record<string, any> | null>(null);
-    const [profileLoading, setProfileLoading] = useState(false);
 
-    useEffect(() => {
-        if (!isLoading && user) {
-            if (!user.id) {
-                console.error('Dashboard: User object exists but has no ID!');
-                setProfile(null);
-                return;
-            }
-
-            // Fetch user profile
-            const fetchProfile = async () => {
-                setProfileLoading(true);
-                try {
-                    console.log('Dashboard: Fetching profile for user:', user.id);
-
-                    const { data, error } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', user.id)
-                        .single();
-
-                    if (error) {
-                        console.error('Error fetching profile:', error);
-                        console.error('Error details:', {
-                            message: error.message,
-                            details: error.details,
-                            hint: error.hint,
-                            code: error.code,
-                            fullError: JSON.stringify(error, null, 2)
-                        });
-
-                        // If profile doesn't exist (PGRST116) or error is empty (indicating no profile found)
-                        const isProfileNotFound = error.code === 'PGRST116' ||
-                            (error.code === undefined && Object.keys(error).length === 0) ||
-                            (error.message && error.message.includes('No rows found'));
-
-
-                        if (isProfileNotFound) {
-                            console.log('Dashboard: Profile not found, creating new profile for user:', user.id);
-                            try {
-                                const { data: newProfile, error: createError } = await supabase
-                                    .from('profiles')
-                                    .upsert({
-                                        id: user.id,
-                                        onboarded: false,
-                                        user_type: 'user', // Default to user
-                                        user_status: 'active'
-                                    }, {
-                                        onConflict: 'id'
-                                    })
-                                    .select('*')
-                                    .single();
-
-                                if (createError) {
-                                    // If profile already exists (conflict), try to fetch it again
-                                    if (createError.code === '23505') { // Unique violation
-                                        console.log('Dashboard: Profile already exists, fetching...');
-                                        const { data: existingProfile, error: fetchError } = await supabase
-                                            .from('profiles')
-                                            .select('*')
-                                            .eq('id', user.id)
-                                            .single();
-
-                                        if (fetchError) {
-                                            console.error('Dashboard: Error fetching existing profile:', fetchError);
-                                            setProfile(null);
-                                        } else {
-                                            console.log('Dashboard: Existing profile fetched:', existingProfile);
-                                            setProfile(existingProfile);
-                                        }
-                                    } else {
-                                        console.error('Dashboard: Error creating profile:', createError);
-                                        setProfile(null);
-                                    }
-                                } else {
-                                    console.log('Dashboard: ✅ Profile created successfully:', newProfile);
-                                    setProfile(newProfile);
-                                }
-                            } catch (createErr) {
-                                console.error('Dashboard: Unexpected error creating profile:', createErr);
-                                setProfile(null);
-                            }
-                        } else {
-                            console.error('Dashboard: Other error fetching profile:', error);
-                            setProfile(null);
-                        }
-                    } else {
-                        setProfile(data);
-                    }
-                } catch (err) {
-                    console.error('Unexpected error fetching profile:', err);
-                    setProfile(null);
-                } finally {
-                    setProfileLoading(false);
-                }
-            };
-
-            fetchProfile();
-        }
-    }, [user, isLoading, router, locale]);
+    // No need for useEffect - data comes from UserContext
 
     if (isLoading) {
         return (
@@ -170,12 +65,6 @@ export default function DashboardPage() {
                                             <div><strong>Phone:</strong> {profile.phone || 'Not set'}</div>
                                             <div><strong>City:</strong> {profile.city || 'Not set'}</div>
                                         </div>
-                                    </div>
-                                )}
-
-                                {profileLoading && (
-                                    <div className="bg-black/20 rounded-lg p-4 mt-4">
-                                        <div className="text-white/80">Loading profile...</div>
                                     </div>
                                 )}
                             </div>

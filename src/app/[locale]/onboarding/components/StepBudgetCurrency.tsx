@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { OnboardingData } from '@/app/[locale]/onboarding/page';
-import { BUDGET_BANDS, getBudgetBandLabel, type Currency } from '@/lib/currency';
+import { BUDGET_BANDS, getBudgetBandLabel, type Currency, type BudgetBandKey, getBudgetBandMADValues, convertToMAD } from '@/lib/currency';
 
 interface StepBudgetCurrencyProps {
   data: OnboardingData;
@@ -23,17 +23,23 @@ export default function StepBudgetCurrency({ data, onSave, isSaving }: StepBudge
   const [currency, setCurrency] = useState<Currency>(
     (data.budget?.currency as Currency) || 'MAD'
   );
-  const [budgetBand, setBudgetBand] = useState<string>(
-    data.budget?.budgetBand || ''
+  const [budgetBand, setBudgetBand] = useState<BudgetBandKey | ''>(
+    (data.budget?.budgetBand as BudgetBandKey) || ''
   );
 
   const isValid = currency && budgetBand;
 
   const handleNext = () => {
-    if (isValid) {
+    if (isValid && budgetBand) {
+      // Get MAD values for the selected budget band
+      const madValues = getBudgetBandMADValues(budgetBand);
+
       onSave('budget', {
         currency,
-        budgetBand
+        budgetBand,
+        // Store normalized MAD values for filtering
+        budgetMinMAD: madValues.min,
+        budgetMaxMAD: madValues.max
       });
     }
   };
@@ -41,7 +47,9 @@ export default function StepBudgetCurrency({ data, onSave, isSaving }: StepBudge
   const handleSkip = () => {
     onSave('budget', {
       currency: 'MAD',
-      budgetBand: 'unsure'
+      budgetBand: 'unsure',
+      budgetMinMAD: null,
+      budgetMaxMAD: null
     }, true);
   };
 
@@ -73,11 +81,10 @@ export default function StepBudgetCurrency({ data, onSave, isSaving }: StepBudge
               <button
                 key={curr.value}
                 onClick={() => setCurrency(curr.value)}
-                className={`flex-1 py-3 px-4 border-2 rounded-lg font-medium transition-all ${
-                  currency === curr.value
+                className={`flex-1 py-3 px-4 border-2 rounded-lg font-medium transition-all ${currency === curr.value
                     ? 'border-[#D9FF0A] bg-[#D9FF0A]/10 text-[#11190C]'
                     : 'border-gray-200 hover:border-gray-300 text-[#787664]'
-                }`}
+                  }`}
               >
                 {curr.label}
               </button>
@@ -87,9 +94,9 @@ export default function StepBudgetCurrency({ data, onSave, isSaving }: StepBudge
 
         {/* Budget Bands */}
         <div className="space-y-3 mb-8">
-          {Object.entries(BUDGET_BANDS).map(([key, band]) => {
+          {(Object.keys(BUDGET_BANDS) as BudgetBandKey[]).map((key) => {
             const isSelected = budgetBand === key;
-            const displayLabel = getBudgetBandLabel(key as any, currency);
+            const displayLabel = getBudgetBandLabel(key, currency);
 
             return (
               <label key={key} className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#D9FF0A] cursor-pointer transition-colors">
@@ -98,7 +105,7 @@ export default function StepBudgetCurrency({ data, onSave, isSaving }: StepBudge
                   name="budgetBand"
                   value={key}
                   checked={isSelected}
-                  onChange={(e) => setBudgetBand(e.target.value)}
+                  onChange={(e) => setBudgetBand(key)}
                   className="w-4 h-4 text-[#D9FF0A] focus:ring-[#D9FF0A]"
                 />
                 <span className={`ml-3 font-medium ${isSelected ? 'text-[#11190C]' : 'text-[#787664]'}`}>

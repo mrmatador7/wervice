@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-// Custom hook for auth state management
+// Custom hook for auth state management via API
 export const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const supabase = createClientComponentClient();
 
     useEffect(() => {
         const initializeAuth = async () => {
@@ -14,19 +12,23 @@ export const useAuth = () => {
             setIsLoading(true);
 
             try {
-                const { data: { session }, error } = await supabase.auth.getSession();
+                const response = await fetch('/api/auth/session', {
+                    method: 'GET',
+                    credentials: 'include',
+                });
 
-                if (error) {
-                    console.error('❌ Error getting session:', error);
+                if (!response.ok) {
+                    console.error('❌ Error getting session:', response.statusText);
                     setUser(null);
                 } else {
+                    const data = await response.json();
                     console.log('✅ Session loaded:', {
-                        hasSession: !!session,
-                        userEmail: session?.user?.email,
-                        userId: session?.user?.id,
-                        provider: session?.user?.app_metadata?.provider
+                        hasSession: !!data.session,
+                        userEmail: data.user?.email,
+                        userId: data.user?.id,
+                        provider: data.user?.app_metadata?.provider
                     });
-                    setUser(session?.user ?? null);
+                    setUser(data.user);
                 }
             } catch (err) {
                 console.error('❌ Unexpected error initializing auth:', err);
@@ -38,31 +40,27 @@ export const useAuth = () => {
 
         initializeAuth();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
-                console.log('🔄 Auth state changed:', {
-                    event,
-                    hasSession: !!session,
-                    userEmail: session?.user?.email,
-                    userId: session?.user?.id,
-                    provider: session?.user?.app_metadata?.provider
-                });
+        // Set up periodic auth check (every 5 minutes)
+        const interval = setInterval(initializeAuth, 5 * 60 * 1000);
 
-                setUser(session?.user ?? null);
-                setIsLoading(false);
-
-                if (event === 'SIGNED_IN') {
-                    console.log('✅ User signed in');
-                } else if (event === 'SIGNED_OUT') {
-                    console.log('🚪 User signed out');
-                } else if (event === 'TOKEN_REFRESHED') {
-                    console.log('🔄 Token refreshed');
-                }
-            }
-        );
-
-        return () => subscription.unsubscribe();
+        return () => clearInterval(interval);
     }, []);
 
-    return { user, isLoading };
+    const signOut = async () => {
+        try {
+            const response = await fetch('/api/auth/signout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                setUser(null);
+                console.log('🚪 User signed out');
+            }
+        } catch (error) {
+            console.error('❌ Error signing out:', error);
+        }
+    };
+
+    return { user, isLoading, signOut };
 };

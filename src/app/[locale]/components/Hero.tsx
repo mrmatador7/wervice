@@ -1,6 +1,6 @@
 import '../../../styles/gradients.css';
 import SearchBar from './SearchBar';
-import { getCities, getCategories } from '@/lib/wervice-data';
+import { getCities, getCategories } from '@/data/wervice-data';
 
 export default async function Hero({ locale = 'en' }: { locale?: string }) {
   const [cities, categories] = await Promise.all([getCities(), getCategories()]);

@@ -2,9 +2,6 @@
 
 import { toast } from "sonner";
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-
-const supabase = createClientComponentClient();
 
 export function useSaveStep(step: number) {
   const [loading, setLoading] = useState(false);
@@ -12,77 +9,56 @@ export function useSaveStep(step: number) {
   const save = async (data: Record<string, any>, opts?: { complete?: boolean }) => {
     setLoading(true);
     try {
-      // Get current user
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
+      // Check authentication via API
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!sessionResponse.ok) {
         throw new Error("Not authenticated. Please sign in again.");
       }
 
-      const userId = session.user.id;
+      const sessionData = await sessionResponse.json();
+      if (!sessionData.user) {
+        throw new Error("Not authenticated. Please sign in again.");
+      }
 
-      // Prepare the data to save
-      const stepKey = `step_${step}`;
-      const onboardingData = {
-        [stepKey]: data
-      };
+      // If completing onboarding, use the complete endpoint
+      if (opts?.complete) {
+        const response = await fetch('/api/onboarding/complete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include cookies for authentication
+        });
 
-      // Check if profile exists, if not create it
-      let { data: profile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('id, onboarding_data, onboarded')
-        .eq('id', userId)
-        .single();
-
-      if (fetchError && fetchError.code === 'PGRST116') {
-        // Profile doesn't exist, create it
-        const { data: newProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert({
-            id: userId,
-            onboarded: false,
-            user_type: 'user',
-            user_status: 'active',
-            onboarding_data: onboardingData
-          })
-          .select('id, onboarding_data, onboarded')
-          .single();
-
-        if (createError) {
-          console.error('Error creating profile:', createError);
-          throw new Error('Failed to create profile');
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to complete onboarding');
         }
 
-        profile = newProfile;
-      } else if (fetchError) {
-        console.error('Error fetching profile:', fetchError);
-        throw new Error('Failed to fetch profile');
+        toast.success("Onboarding completed!");
+        return true;
       }
 
-      // Update the onboarding data
-      const existingData = profile?.onboarding_data || {};
-      const updatedData = {
-        ...existingData,
-        ...onboardingData
-      };
+      // Use the save endpoint for regular step saves
+      const response = await fetch('/api/onboarding/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies for authentication
+        body: JSON.stringify({
+          step: `step_${step}`,
+          data
+        }),
+      });
 
-      const updateData: any = {
-        onboarding_data: updatedData,
-        updated_at: new Date().toISOString()
-      };
-
-      // If completing onboarding, mark as onboarded
-      if (opts?.complete) {
-        updateData.onboarded = true;
-      }
-
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', userId);
-
-      if (updateError) {
-        console.error('Error updating profile:', updateError);
-        throw new Error('Failed to save onboarding data');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save step data');
       }
 
       toast.success("Saved");

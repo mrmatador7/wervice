@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import type { ReactNode } from 'react';
-import AuthGuard from '@/app/(guards)/auth-guard';
+import OnboardingGuard from '@/app/(guards)/onboarding-guard';
+import { UserProvider } from '@/contexts/UserContext';
 
 const locales = ['en', 'fr', 'ar'] as const;
 const defaultLocale = 'en';
@@ -43,19 +44,21 @@ export default async function RootLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <div
-        dir={isRTL ? 'rtl' : 'ltr'}
-        lang={locale}
-        style={{
-          fontFamily: isRTL ? "'Readex Pro', system-ui, sans-serif" : "Rubik, system-ui, sans-serif",
-          width: '100%',
-          height: '100%'
-        }}
-      >
-        <AuthGuard locale={locale}>
-          {children}
-        </AuthGuard>
-      </div>
+      <UserProvider>
+        <div
+          dir={isRTL ? 'rtl' : 'ltr'}
+          lang={locale}
+          style={{
+            fontFamily: isRTL ? "'Readex Pro', system-ui, sans-serif" : "Rubik, system-ui, sans-serif",
+            width: '100%',
+            height: '100%'
+          }}
+        >
+          <OnboardingGuard locale={locale}>
+            {children}
+          </OnboardingGuard>
+        </div>
+      </UserProvider>
     </NextIntlClientProvider>
   );
 }

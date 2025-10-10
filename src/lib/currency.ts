@@ -124,6 +124,28 @@ export function getCurrencyName(currency: Currency): string {
   return CURRENCY_NAMES[currency] || CURRENCY_NAMES[DEFAULT_CURRENCY];
 }
 
+// Exchange rates for converting to/from MAD (Moroccan Dirham)
+// These are approximate rates - in production, fetch from a reliable API
+const EXCHANGE_RATES: Record<Currency, number> = {
+  MAD: 1,        // Base currency
+  EUR: 10.9,     // 1 EUR = 10.9 MAD
+  USD: 10.1      // 1 USD = 10.1 MAD
+};
+
+// Convert amount from any currency to MAD
+export function convertToMAD(amount: number, fromCurrency: Currency): number {
+  if (fromCurrency === 'MAD') return amount;
+  const rate = EXCHANGE_RATES[fromCurrency];
+  return Math.round(amount * rate);
+}
+
+// Convert amount from MAD to target currency
+export function convertFromMAD(amountMAD: number, toCurrency: Currency): number {
+  if (toCurrency === 'MAD') return amountMAD;
+  const rate = EXCHANGE_RATES[toCurrency];
+  return Math.round(amountMAD / rate);
+}
+
 // Convert between currencies (basic implementation - in reality would use exchange rates)
 export function convertCurrency(
   amount: number,
@@ -135,9 +157,9 @@ export function convertCurrency(
 
   // Basic exchange rates (would normally fetch from API)
   const RATES: Record<Currency, Record<Currency, number>> = {
-    MAD: { MAD: 1, USD: 0.091, EUR: 0.085 },
-    USD: { MAD: 11.0, USD: 1, EUR: 0.93 },
-    EUR: { MAD: 11.8, USD: 1.08, EUR: 1 },
+    MAD: { MAD: 1, USD: 1/10.1, EUR: 1/10.9 },
+    USD: { MAD: 10.1, USD: 1, EUR: 10.1/10.9 },
+    EUR: { MAD: 10.9, USD: 10.9/10.1, EUR: 1 },
   };
 
   const rate = exchangeRate || (RATES[from]?.[to] || 1);
@@ -147,31 +169,41 @@ export function convertCurrency(
 // Simple convert function for MAD to other currencies
 export function convert(amountMAD: number, currency: Currency): number {
   if (currency === 'MAD') return amountMAD;
-
-  const rates = { MAD: 1, EUR: 0.093, USD: 0.10 };
-  return Math.round(amountMAD * rates[currency]);
+  return convertFromMAD(amountMAD, currency);
 }
 
-// Budget bands for wedding planning (in MAD)
+// Budget bands for wedding planning (in MAD - base currency for storage)
 export const BUDGET_BANDS = {
-  'under-50000': { min: 0, max: 50000, label: 'Under 50,000 MAD' },
-  '50000-100000': { min: 50000, max: 100000, label: '50,000 - 100,000 MAD' },
-  '100000-150000': { min: 100000, max: 150000, label: '100,000 - 150,000 MAD' },
-  '150000-200000': { min: 150000, max: 200000, label: '150,000 - 200,000 MAD' },
-  'over-200000': { min: 200000, max: null, label: 'Over 200,000 MAD' },
+  'under_50k': { min: 0, max: 50000, label: 'Under 50,000 MAD' },
+  '50-100k': { min: 50000, max: 100000, label: '50,000 - 100,000 MAD' },
+  '100-200k': { min: 100000, max: 200000, label: '100,000 - 200,000 MAD' },
+  '200k_plus': { min: 200000, max: null, label: '200,000 MAD+' },
   'unsure': { min: null, max: null, label: 'Not sure yet' }
-};
+} as const;
+
+export type BudgetBandKey = keyof typeof BUDGET_BANDS;
 
 // Get budget band label formatted for the specified currency
-export function getBudgetBandLabel(bandKey: string, currency: Currency = DEFAULT_CURRENCY): string {
-  const band = BUDGET_BANDS[bandKey as keyof typeof BUDGET_BANDS];
+export function getBudgetBandLabel(bandKey: BudgetBandKey, currency: Currency = DEFAULT_CURRENCY): string {
+  const band = BUDGET_BANDS[bandKey];
   if (!band) return 'Unknown budget range';
 
   if (bandKey === 'unsure') return band.label;
 
   if (band.min === null && band.max === null) return band.label;
-  if (band.min === 0) return `Under ${formatCurrency(band.max!, currency, { showSymbol: false })} ${currency}`;
-  if (band.max === null) return `Over ${formatCurrency(band.min!, currency, { showSymbol: false })} ${currency}`;
 
-  return `${formatCurrency(band.min!, currency, { showSymbol: false })} - ${formatCurrency(band.max!, currency, { showSymbol: false })} ${currency}`;
+  // Convert MAD amounts to display currency
+  const displayMin = band.min !== null ? convertFromMAD(band.min, currency) : null;
+  const displayMax = band.max !== null ? convertFromMAD(band.max, currency) : null;
+
+  if (band.min === 0) return `Under ${formatCurrency(displayMax!, currency, { showSymbol: false })} ${currency}`;
+  if (band.max === null) return `${formatCurrency(displayMin!, currency, { showSymbol: false })} ${currency}+`;
+
+  return `${formatCurrency(displayMin!, currency, { showSymbol: false })} - ${formatCurrency(displayMax!, currency, { showSymbol: false })} ${currency}`;
+}
+
+// Get the MAD min/max values for a budget band
+export function getBudgetBandMADValues(bandKey: BudgetBandKey): { min: number | null; max: number | null } {
+  const band = BUDGET_BANDS[bandKey];
+  return band ? { min: band.min, max: band.max } : { min: null, max: null };
 }

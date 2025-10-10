@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { FiClock, FiChevronLeft, FiChevronRight, FiArrowLeft, FiUser } from 'react-icons/fi';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { getChapterBySlug, getNextChapter, getPreviousChapter, getAllChapters } from '@/lib/planningChapters';
+import { getChapterBySlug, getNextChapter, getPreviousChapter, getAllChapters } from '@/data/planningChapters';
 import { Chapter } from '@/models/chapter';
 
 interface ChapterPageProps {

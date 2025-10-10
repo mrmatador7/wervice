@@ -1,10 +1,10 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import Hero from '@/components/home/Hero';
-import CategoriesSection from '@/components/category/CategoriesSection';
+import Hero from './components/Hero';
+import CategoriesSection from './categories/components/CategoriesSection';
 import CitiesCarousel from '@/components/cities/CitiesCarousel';
-import HomeCategoryStrips from '@/components/home/HomeCategoryStrips';
-import TrustBand from '@/components/home/TrustBand';
+import HomeCategoryStrips from './components/HomeCategoryStrips';
+import TrustBand from './components/TrustBand';
 import BecomeVendorSection from '@/components/sections/VendorCTA';
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {

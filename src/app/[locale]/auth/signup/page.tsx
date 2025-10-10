@@ -1,7 +1,6 @@
 'use client';
 
 // Removed Auth UI imports - using custom form only
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -20,7 +19,6 @@ export default function SignPage() {
     const router = useRouter();
     const t = useTranslations('auth');
     const locale = useLocale();
-    const supabase = createClientComponentClient();
     // Using custom form only
     const [signupData, setSignupData] = useState({
         firstName: '',
@@ -36,7 +34,7 @@ export default function SignPage() {
         setIsLoading(true);
         setError('');
 
-        console.log('🚀 Starting signup process...', {
+        console.log('🚀 Starting signup process via API...', {
             email: signupData.email,
             firstName: signupData.firstName,
             lastName: signupData.lastName,
@@ -44,76 +42,92 @@ export default function SignPage() {
         });
 
         try {
-            console.log('📡 Sending signup request to Supabase...');
+            console.log('📡 Sending signup request to API...');
 
-            const { data, error } = await supabase.auth.signUp({
-                email: signupData.email,
-                password: signupData.password,
-                options: {
-                    data: {
-                        first_name: signupData.firstName,
-                        last_name: signupData.lastName,
-                        locale: locale,
-                        currency: 'MAD'
-                    },
-                    emailRedirectTo: `/${locale}/onboarding`
-                }
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Include cookies for authentication
+                body: JSON.stringify({
+                    email: signupData.email,
+                    password: signupData.password,
+                    firstName: signupData.firstName,
+                    lastName: signupData.lastName,
+                    locale
+                }),
             });
 
-            console.log('📡 Signup response received:', { hasData: !!data, hasError: !!error, userId: data?.user?.id });
+            const data = await response.json();
 
-            if (error) {
-                console.error('❌ Supabase signup error:', error);
-                setError(error.message);
+            if (!response.ok) {
+                console.error('❌ API signup error:', data.error);
+                setError(data.error || 'Signup failed');
                 setIsLoading(false);
                 return;
             }
 
+            console.log('✅ API signup successful:', {
+                success: data.success,
+                userId: data.user?.id,
+                hasSession: !!data.session,
+                message: data.message
+            });
+
+            // Save user information to localStorage
             if (data.user) {
-                console.log('✅ Custom signup successful, user created:', {
+                const userInfo = {
                     id: data.user.id,
                     email: data.user.email,
-                    emailConfirmed: data.user.email_confirmed_at,
-                    session: !!data.session
-                });
+                    firstName: signupData.firstName,
+                    lastName: signupData.lastName,
+                    locale: locale,
+                    signedUpAt: new Date().toISOString(),
+                    onboarded: false
+                };
 
-                // If we got a session directly from signup, use it
-                if (data.session) {
-                    console.log('✅ Session established directly from signup');
-                    console.log('🔄 Redirecting to onboarding page...');
-                    window.location.href = `/${locale}/onboarding`;
-                    return;
-                }
-
-                // Otherwise, try to sign in the user manually
-                console.log('🔄 No session from signup, attempting manual sign in...');
-                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-                    email: signupData.email,
-                    password: signupData.password
-                });
-
-                if (signInError) {
-                    console.error('❌ Failed to sign in after signup:', signInError);
-                    setError('Account created but sign in failed. Please try signing in manually.');
-                    setIsLoading(false);
-                    return;
-                }
-
-                if (signInData.session) {
-                    console.log('✅ Manual sign in successful after signup');
-                    console.log('🔄 Redirecting to onboarding page...');
-                    window.location.href = `/${locale}/onboarding`;
-                } else {
-                    console.log('⚠️ Sign in completed but no session established');
-                    setError('Account created but session not established. Please try signing in.');
-                    setIsLoading(false);
-                }
-            } else {
-                // Handle case where signup doesn't return a user (shouldn't happen but defensive programming)
-                console.warn('⚠️ Signup completed but no user data received');
-                setError('Signup completed but user data not received. Please try signing in instead.');
-                setIsLoading(false);
+                localStorage.setItem('wervice_user', JSON.stringify(userInfo));
+                console.log('💾 User info saved to localStorage:', userInfo);
             }
+
+            // The API now handles both signup and authentication
+            console.log('✅ User authenticated via signup API');
+            console.log('🔄 Waiting for auth state sync...');
+
+            // Wait for auth state to be properly established
+            const checkAuthState = async () => {
+                try {
+                    const sessionResponse = await fetch('/api/auth/session', {
+                        method: 'GET',
+                        credentials: 'include',
+                    });
+
+                    if (sessionResponse.ok) {
+                        const sessionData = await sessionResponse.json();
+                        if (sessionData.session) {
+                            console.log('✅ Auth state synced, redirecting to onboarding...');
+                            window.location.replace(`/${locale}/onboarding`);
+                        } else {
+                            console.log('⏳ Auth state not ready, retrying...');
+                            setTimeout(checkAuthState, 500);
+                        }
+                    } else {
+                        console.log('⏳ Session check failed, retrying...');
+                        setTimeout(checkAuthState, 500);
+                    }
+                } catch (err) {
+                    console.error('Error checking auth state:', err);
+                    // Fallback: redirect anyway
+                    setTimeout(() => {
+                        window.location.replace(`/${locale}/onboarding`);
+                    }, 1000);
+                }
+            };
+
+            // Wait a moment for cookies to be set, then check auth state
+            setTimeout(checkAuthState, 1000);
+
         } catch (err) {
             console.error('💥 Signup process failed:', err);
             const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';

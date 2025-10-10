@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import Combobox from '@/components/ui/Combobox';
-import type { SimpleItem } from '@/lib/wervice-data';
+import type { SimpleItem } from '@/data/wervice-data';
 
 export default function SearchBar({
   cities,

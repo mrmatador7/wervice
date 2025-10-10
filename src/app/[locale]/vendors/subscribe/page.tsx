@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from 'next-intl/server';
-import VendorSubscribeForm from '@/components/vendors/VendorSubscribeForm';
+import VendorSubscribeForm from '../components/VendorSubscribeForm';
 
 interface PageProps {
   searchParams: Promise<{ category?: string; cadence?: string }>;

@@ -2,7 +2,9 @@
 // Add this to the Header component temporarily
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-browser';
+
+const supabase = createClient();
 
 export default function DebugHeaderAdmin() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
