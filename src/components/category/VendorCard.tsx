@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { FiStar, FiHeart } from 'react-icons/fi';
 import { formatPrice, formatRating } from '@/lib/format';
-import { convert, CurrencyCode } from '@/lib/currency';
+import { convert } from '@/lib/currency';
+import { CurrencyCode } from '@/lib/types/vendor';
 
 interface Vendor {
   id: string;

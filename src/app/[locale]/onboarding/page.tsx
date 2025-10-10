@@ -89,44 +89,11 @@ export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
-  // Check authentication on mount
+  // Authentication is now handled by the auth guard
   useEffect(() => {
-    let isChecking = false;
-
-    const checkAuth = async () => {
-      if (isChecking) return; // Prevent multiple checks
-      isChecking = true;
-
-      try {
-        console.log('🔍 Onboarding: Checking authentication...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        console.log('🔍 Onboarding: Auth check result:', {
-          hasSession: !!session,
-          userId: session?.user?.id,
-          error: error?.message
-        });
-
-        if (!session) {
-          console.log('❌ Onboarding: No session found, redirecting to signin');
-          // Redirect to sign-in if not authenticated
-          router.replace(`/${locale}/auth/signin`);
-          return;
-        }
-
-        console.log('✅ Onboarding: User authenticated, proceeding');
-      } catch (error) {
-        console.error('💥 Onboarding: Auth check failed:', error);
-        router.replace(`/${locale}/auth/signin`);
-        return;
-      } finally {
-        setIsAuthChecking(false);
-      }
-    };
-
-    // Check auth immediately since we're now using window.location.href for redirects
-    checkAuth();
-  }, [router, locale]);
+    console.log('✅ Onboarding: Page loaded, auth guard will handle authentication');
+    setIsAuthChecking(false);
+  }, []);
 
   // Use the save hook for the current step
   const { save, skip, loading: isSaving } = useSaveStep(currentStep + 1);
@@ -139,35 +106,64 @@ export default function OnboardingPage() {
 
       try {
         console.log('🔍 Loading onboarding data...');
-        const response = await fetch(`/${locale}/api/onboarding/load`, {
-          method: 'GET',
+
+        // Auth guard ensures we have a session, get the user ID
+        console.log('🔍 Onboarding: About to check session...');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+
+        console.log('🔍 Onboarding: Session check for profile load:', {
+          timestamp: new Date().toISOString(),
+          hasSession: !!session,
+          userId: userId,
+          email: session?.user?.email,
+          emailConfirmed: session?.user?.email_confirmed_at,
+          sessionAccessToken: session?.access_token ? 'present' : 'missing',
+          sessionRefreshToken: session?.refresh_token ? 'present' : 'missing',
+          sessionError: sessionError?.message
         });
 
-        console.log('🔍 Onboarding load response:', response.status);
+        if (!userId) {
+          console.error('❌ Auth guard should have prevented this - no user ID available');
+          return;
+        }
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('✅ Onboarding data loaded:', data);
-          if (data.onboardingData) {
-            setOnboardingData(data.onboardingData);
+        // Load onboarding data directly from Supabase
+        console.log('🔍 Onboarding: Loading profile for user:', userId);
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('onboarding_data, onboarded')
+          .eq('id', userId)
+          .single();
+
+        console.log('🔍 Onboarding: Profile query result:', {
+          hasData: !!profile,
+          error: error?.message,
+          errorCode: error?.code
+        });
+
+        if (error && error.code === 'PGRST116') {
+          // Profile doesn't exist yet, that's fine - start with empty data
+          console.log('ℹ️ No profile found, starting with empty onboarding data');
+          setOnboardingData({});
+        } else if (error) {
+          console.error('❌ Error loading profile:', error);
+          // Don't redirect for database errors, just log them
+        } else {
+          console.log('✅ Onboarding data loaded:', profile);
+          if (profile?.onboarding_data) {
+            setOnboardingData(profile.onboarding_data);
             // Find the furthest completed step
-            const steps = Object.keys(data.onboardingData);
+            const steps = Object.keys(profile.onboarding_data);
             const lastStepIndex = STEPS.findIndex(step => !steps.includes(step)) - 1;
             if (lastStepIndex >= 0) {
               setCurrentStep(Math.max(0, lastStepIndex));
             }
           }
-        } else if (response.status === 401) {
-          console.log('❌ Onboarding API returned 401 - authentication failed, redirecting to signin');
-          router.replace(`/${locale}/auth/signin`);
-          return;
-        } else {
-          console.error('❌ Failed to load onboarding data:', response.status, response.statusText);
-          // Don't redirect for other errors, just log them
         }
       } catch (error) {
         console.error('💥 Error loading onboarding data:', error);
-        // Don't redirect on network errors, just log them
+        // Don't redirect on unexpected errors, just log them
       }
     };
 
@@ -175,7 +171,7 @@ export default function OnboardingPage() {
     if (!isAuthChecking) {
       loadExistingData();
     }
-  }, [locale, isAuthChecking, router]);
+  }, [locale, isAuthChecking, router, supabase]);
 
   const handleStepSave = async (step: string, data: any, shouldSkip: boolean = false) => {
     const success = shouldSkip ? await skip() : await save(data);
@@ -191,8 +187,8 @@ export default function OnboardingPage() {
         // Complete onboarding - save with markComplete flag
         const completeSuccess = await save(data, { complete: true });
         if (completeSuccess) {
-          // Redirect to account with welcome flag
-          router.replace(`/${locale}/account?welcome=1`);
+          // Redirect to home - auth guard will handle proper routing
+          router.replace(`/${locale}`);
         }
       } else {
         // Move to next step

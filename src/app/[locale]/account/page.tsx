@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface VendorRecommendation {
   vendor: any;
@@ -21,11 +22,34 @@ export default function AccountPage() {
   useEffect(() => {
     const loadRecommendations = async () => {
       try {
-        const response = await fetch(`/${locale}/api/recommend/vendors`);
-        if (response.ok) {
-          const data = await response.json();
-          setRecommendations(data.recommendations || {});
+        const supabaseClient = createClientComponentClient();
+
+        // Check if user is authenticated
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session?.user) {
+          setIsLoadingRecommendations(false);
+          return;
         }
+
+        const userId = session.user.id;
+
+        // Get user's profile data for recommendations
+        const { data: profile, error: profileError } = await supabaseClient
+          .from('profiles')
+          .select('city, services_needed, style, budget_min_mad, budget_max_mad, guest_count_band')
+          .eq('id', userId)
+          .single();
+
+        if (profileError || !profile) {
+          console.error('Error fetching profile:', profileError);
+          setIsLoadingRecommendations(false);
+          return;
+        }
+
+        // For now, return empty recommendations since we don't have a vendors table
+        // In the future, you can add vendor data to Supabase and implement the scoring logic
+        setRecommendations({});
+
       } catch (error) {
         console.error('Error loading recommendations:', error);
       } finally {

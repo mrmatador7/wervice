@@ -1,7 +1,7 @@
 import React from 'react';
-import HowItWorks from './HowItWorks';
+import HowItWorks from '../sections/HowItWorks';
 import GuidesList from './GuidesList';
-import VendorCtaStrip from './VendorCtaStrip';
+import VendorCtaStrip from '../vendors/VendorCtaStrip';
 
 type Step = {
   icon?: React.ReactNode;

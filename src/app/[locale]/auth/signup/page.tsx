@@ -1,7 +1,7 @@
 'use client';
 
 // Removed Auth UI imports - using custom form only
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -9,17 +9,18 @@ import { AuthError } from '@supabase/supabase-js';
 import Header from '@/components/layout/Header';
 
 interface SignupResponse {
-  data: {
-    user: unknown;
-    session: unknown;
-  };
-  error: AuthError | null;
+    data: {
+        user: unknown;
+        session: unknown;
+    };
+    error: AuthError | null;
 }
 
 export default function SignPage() {
     const router = useRouter();
     const t = useTranslations('auth');
     const locale = useLocale();
+    const supabase = createClientComponentClient();
     // Using custom form only
     const [signupData, setSignupData] = useState({
         firstName: '',
@@ -72,13 +73,41 @@ export default function SignPage() {
                 console.log('✅ Custom signup successful, user created:', {
                     id: data.user.id,
                     email: data.user.email,
-                    emailConfirmed: data.user.email_confirmed_at
+                    emailConfirmed: data.user.email_confirmed_at,
+                    session: !!data.session
                 });
 
-                // Since email confirmations are disabled, user should be automatically signed in
-                // Redirect immediately - let the page reload establish the session
-                console.log('🔄 Redirecting to onboarding...');
-                window.location.href = `/${locale}/onboarding`;
+                // If we got a session directly from signup, use it
+                if (data.session) {
+                    console.log('✅ Session established directly from signup');
+                    console.log('🔄 Redirecting to onboarding page...');
+                    window.location.href = `/${locale}/onboarding`;
+                    return;
+                }
+
+                // Otherwise, try to sign in the user manually
+                console.log('🔄 No session from signup, attempting manual sign in...');
+                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                    email: signupData.email,
+                    password: signupData.password
+                });
+
+                if (signInError) {
+                    console.error('❌ Failed to sign in after signup:', signInError);
+                    setError('Account created but sign in failed. Please try signing in manually.');
+                    setIsLoading(false);
+                    return;
+                }
+
+                if (signInData.session) {
+                    console.log('✅ Manual sign in successful after signup');
+                    console.log('🔄 Redirecting to onboarding page...');
+                    window.location.href = `/${locale}/onboarding`;
+                } else {
+                    console.log('⚠️ Sign in completed but no session established');
+                    setError('Account created but session not established. Please try signing in.');
+                    setIsLoading(false);
+                }
             } else {
                 // Handle case where signup doesn't return a user (shouldn't happen but defensive programming)
                 console.warn('⚠️ Signup completed but no user data received');

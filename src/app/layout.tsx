@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans } from "next/font/google";
 import { Toaster } from "sonner";
-import ClientHtml from "@/components/ClientHtml";
+import ClientHtml from "@/components/sections/ClientHtml";
 import "./globals.css";
 
 const rubik = Rubik({

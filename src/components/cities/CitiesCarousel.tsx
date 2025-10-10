@@ -1,8 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import HeroCityCard from './HeroCityCard';
-import SmallCityCard from './SmallCityCard';
+import HeroCityCard from '../cards/HeroCityCard';
+import SmallCityCard from '../cards/SmallCityCard';
 
 interface CityItem {
     name: string;
@@ -140,62 +140,62 @@ export default function CitiesCarousel({
 
             {/* Carousel Track with Navigation */}
             <div className="relative">
-                    {/* Left Navigation Arrow */}
-                    {canScrollLeft && (
-                        <button
-                            onClick={scrollLeft}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-lime-400 hover:bg-lime-500 border border-lime-300 rounded-full p-2 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lime-400"
-                            aria-label="Scroll left"
-                        >
-                            <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                    )}
-
-                    {/* Right Navigation Arrow */}
-                    {canScrollRight && (
-                        <button
-                            onClick={scrollRight}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-lime-400 hover:bg-lime-500 border border-lime-300 rounded-full p-2 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lime-400"
-                            aria-label="Scroll right"
-                        >
-                            <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    )}
-
-                    {/* Carousel Container */}
-                    <div
-                        ref={carouselRef}
-                        className="overflow-hidden snap-x snap-mandatory -mx-4 px-4"
-                        onScroll={checkScrollButtons}
+                {/* Left Navigation Arrow */}
+                {canScrollLeft && (
+                    <button
+                        onClick={scrollLeft}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-lime-400 hover:bg-lime-500 border border-lime-300 rounded-full p-2 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        aria-label="Scroll left"
                     >
-                        <div className={`flex pb-4 pr-4 ${variant === 'small' ? 'space-x-3 md:space-x-4' : 'space-x-5 md:space-x-6'}`}>
-                            {items.map((city) => (
-                                variant === 'small' ? (
-                                    <SmallCityCard
-                                        key={city.slug}
-                                        name={city.name}
-                                        slug={city.slug}
-                                        image={city.image}
-                                        vendors={city.vendors}
-                                    />
-                                ) : (
-                                    <HeroCityCard
-                                        key={city.slug}
-                                        name={city.name}
-                                        slug={city.slug}
-                                        image={city.image}
-                                        vendors={city.vendors}
-                                        tint={getCityTint(city.name)}
-                                    />
-                                )
-                            ))}
-                        </div>
+                        <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                )}
+
+                {/* Right Navigation Arrow */}
+                {canScrollRight && (
+                    <button
+                        onClick={scrollRight}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-lime-400 hover:bg-lime-500 border border-lime-300 rounded-full p-2 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        aria-label="Scroll right"
+                    >
+                        <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                )}
+
+                {/* Carousel Container */}
+                <div
+                    ref={carouselRef}
+                    className="overflow-hidden snap-x snap-mandatory -mx-4 px-4"
+                    onScroll={checkScrollButtons}
+                >
+                    <div className={`flex pb-4 pr-4 ${variant === 'small' ? 'space-x-3 md:space-x-4' : 'space-x-5 md:space-x-6'}`}>
+                        {items.map((city) => (
+                            variant === 'small' ? (
+                                <SmallCityCard
+                                    key={city.slug}
+                                    name={city.name}
+                                    slug={city.slug}
+                                    image={city.image}
+                                    vendors={city.vendors}
+                                />
+                            ) : (
+                                <HeroCityCard
+                                    key={city.slug}
+                                    name={city.name}
+                                    slug={city.slug}
+                                    image={city.image}
+                                    vendors={city.vendors}
+                                    tint={getCityTint(city.name)}
+                                />
+                            )
+                        ))}
                     </div>
                 </div>
+            </div>
         </div>
     );
 }

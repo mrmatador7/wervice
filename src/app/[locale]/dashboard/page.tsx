@@ -17,14 +17,19 @@ export default function DashboardPage() {
     const [profileLoading, setProfileLoading] = useState(false);
 
     useEffect(() => {
-        if (!isLoading && !user) {
-            // Redirect to sign in if not authenticated
-            router.push(`/${locale}/auth/signin`);
-        } else if (!isLoading && user) {
+        if (!isLoading && user) {
+            if (!user.id) {
+                console.error('Dashboard: User object exists but has no ID!');
+                setProfile(null);
+                return;
+            }
+
             // Fetch user profile
             const fetchProfile = async () => {
                 setProfileLoading(true);
                 try {
+                    console.log('Dashboard: Fetching profile for user:', user.id);
+
                     const { data, error } = await supabase
                         .from('profiles')
                         .select('*')
@@ -33,17 +38,32 @@ export default function DashboardPage() {
 
                     if (error) {
                         console.error('Error fetching profile:', error);
-                        // If profile doesn't exist (PGRST116), create it
-                        if (error.code === 'PGRST116') {
+                        console.error('Error details:', {
+                            message: error.message,
+                            details: error.details,
+                            hint: error.hint,
+                            code: error.code,
+                            fullError: JSON.stringify(error, null, 2)
+                        });
+
+                        // If profile doesn't exist (PGRST116) or error is empty (indicating no profile found)
+                        const isProfileNotFound = error.code === 'PGRST116' ||
+                            (error.code === undefined && Object.keys(error).length === 0) ||
+                            (error.message && error.message.includes('No rows found'));
+
+
+                        if (isProfileNotFound) {
                             console.log('Dashboard: Profile not found, creating new profile for user:', user.id);
                             try {
                                 const { data: newProfile, error: createError } = await supabase
                                     .from('profiles')
-                                    .insert({
+                                    .upsert({
                                         id: user.id,
                                         onboarded: false,
-                                        user_type: 'couple', // Default to couple
+                                        user_type: 'user', // Default to user
                                         user_status: 'active'
+                                    }, {
+                                        onConflict: 'id'
                                     })
                                     .select('*')
                                     .single();

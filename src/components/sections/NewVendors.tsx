@@ -1,4 +1,4 @@
-import ListingsRail from '@/components/ListingsRail';
+import ListingsRail from './ListingsRail';
 import { homepageListings } from '@/lib/mockListings';
 
 export default function NewVendors() {

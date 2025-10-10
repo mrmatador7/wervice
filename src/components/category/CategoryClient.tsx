@@ -155,7 +155,7 @@ export default function CategoryClient({ category, initialSearchParams }: Catego
   return (
     <>
       <FilterBar
-        cities={MOROCCAN_CITIES}
+        cities={[...MOROCCAN_CITIES]}
         currency={currency}
         setCurrency={setCurrency}
         onFilterChange={handleFilterChange}

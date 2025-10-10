@@ -15,16 +15,8 @@ interface VendorLead {
 }
 
 async function getLeadById(leadId: string): Promise<VendorLead | null> {
-  try {
-    const response = await fetch(`/api/vendor-leads/${leadId}`);
-
-    if (response.ok) {
-      return await response.json();
-    }
-  } catch (error) {
-    console.error('Failed to fetch lead:', error);
-  }
-
+  // API has been removed - return null for now
+  console.log('Vendor leads API has been removed, cannot fetch lead data');
   return null;
 }
 

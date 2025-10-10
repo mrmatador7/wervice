@@ -2,7 +2,7 @@
 
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
@@ -13,29 +13,19 @@ export default function SignInPage() {
     const router = useRouter();
     const t = useTranslations('auth');
     const locale = useLocale();
+    const supabase = createClientComponentClient();
 
     useEffect(() => {
         if (!locale) return;
 
         const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (!session) return;
-
-            // Read profile to decide next step
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('onboarded')
-                .eq('id', session.user.id)
-                .single();
-
-            // If not onboarded -> force onboarding
-            if (!profile || profile.onboarded === false) {
-                router.replace(`/${locale}/onboarding`);
-                return;
-            }
-
-            // If onboarded -> go to the intended page or account
-            const returnTo = (new URLSearchParams(window.location.search)).get('returnTo');
-            router.replace(returnTo || `/${locale}/account`);
+            // Since we removed authentication checks, just log the auth state change
+            // Don't redirect - let users stay on the page and see the updated UI
+            console.log('🔄 Auth state changed:', {
+                event,
+                hasSession: !!session,
+                userEmail: session?.user?.email
+            });
         });
 
         return () => sub.subscription?.unsubscribe();

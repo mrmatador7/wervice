@@ -7,7 +7,9 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 console.log('🔧 Supabase client initialized:', {
     url: supabaseUrl ? 'set' : 'missing',
     key: supabaseAnonKey ? 'set (length: ' + supabaseAnonKey.length + ')' : 'missing',
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    urlValue: supabaseUrl,
+    keyLength: supabaseAnonKey?.length
 })
 
 if (!supabaseUrl || !supabaseAnonKey) {

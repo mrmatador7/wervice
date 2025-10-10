@@ -90,7 +90,7 @@ export default function VendorSubscribeForm({
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [touched, setTouched] = useState<{[key: string]: boolean}>({});
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
 
   // Validate WhatsApp number (E.164 format)
   const validateWhatsApp = (value: string) => {
@@ -330,27 +330,8 @@ export default function VendorSubscribeForm({
       // Add honeypot for spam prevention
       submitData.append('honeypot', formData.honeypot);
 
-      const response = await fetch('/api/vendor-leads', {
-        method: 'POST',
-        body: submitData
-      });
-
-      if (response.ok) {
-        // Store summary for success page
-        localStorage.setItem('wervice_vendor_lead_summary', JSON.stringify({
-          businessName: formData.businessName,
-          category: formData.category,
-          city: formData.city,
-          whatsapp: formData.whatsapp,
-          email: formData.email,
-          price: getCurrentPrice()
-        }));
-
-        router.push('/vendors/subscribe/success');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.message || 'Failed to submit application. Please try again.');
-      }
+      // API has been removed - show error message for now
+      alert('Vendor registration is currently unavailable. Please contact us directly at contact@wervice.ma');
     } catch (error) {
       console.error('Submission error:', error);
       alert('Failed to submit application. Please check your connection and try again.');
@@ -368,17 +349,14 @@ export default function VendorSubscribeForm({
             {/* Progress Indicator */}
             <div className="flex items-center justify-center mb-8">
               <div className="flex items-center space-x-4">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                  currentStep >= 1 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${currentStep >= 1 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
+                  }`}>
                   1
                 </div>
-                <div className={`h-1 w-16 ${
-                  currentStep >= 2 ? 'bg-[#D7FF1F]' : 'bg-gray-200'
-                }`} />
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${
-                  currentStep >= 2 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div className={`h-1 w-16 ${currentStep >= 2 ? 'bg-[#D7FF1F]' : 'bg-gray-200'
+                  }`} />
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold ${currentStep >= 2 ? 'bg-[#D7FF1F] text-black' : 'bg-gray-200 text-gray-500'
+                  }`}>
                   2
                 </div>
               </div>
@@ -407,9 +385,8 @@ export default function VendorSubscribeForm({
                       value={formData.businessName}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('businessName')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.businessName ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.businessName ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Your Business Name"
                       aria-describedby={errors.businessName ? "businessName-error" : undefined}
                     />
@@ -429,9 +406,8 @@ export default function VendorSubscribeForm({
                       value={formData.category}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('category')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.category ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.category ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       aria-describedby={errors.category ? "category-error" : undefined}
                     >
                       <option value="">Select a category</option>
@@ -457,9 +433,8 @@ export default function VendorSubscribeForm({
                       value={formData.city}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('city')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.city ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.city ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       aria-describedby={errors.city ? "city-error" : undefined}
                     >
                       <option value="">Select a city</option>
@@ -484,9 +459,8 @@ export default function VendorSubscribeForm({
                       value={formData.whatsapp}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('whatsapp')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.whatsapp ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.whatsapp ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="+212 6XX XXX XXX"
                       aria-describedby={errors.whatsapp ? "whatsapp-error" : undefined}
                     />
@@ -507,9 +481,8 @@ export default function VendorSubscribeForm({
                       value={formData.email}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('email')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="your@email.com"
                       aria-describedby={errors.email ? "email-error" : undefined}
                     />
@@ -530,9 +503,8 @@ export default function VendorSubscribeForm({
                       value={formData.website}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('website')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.website ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.website ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="https://yourwebsite.com"
                       aria-describedby={errors.website ? "website-error" : undefined}
                     />
@@ -553,9 +525,8 @@ export default function VendorSubscribeForm({
                       value={formData.instagram}
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('instagram')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.instagram ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.instagram ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="@yourhandle"
                       aria-describedby={errors.instagram ? "instagram-error" : undefined}
                     />
@@ -599,9 +570,8 @@ export default function VendorSubscribeForm({
                       onChange={handleInputChange}
                       onBlur={() => handleBlur('startingPrice')}
                       min="0"
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.startingPrice ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.startingPrice ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="5000"
                       aria-describedby={errors.startingPrice ? "startingPrice-error" : undefined}
                     />
@@ -624,9 +594,8 @@ export default function VendorSubscribeForm({
                       onBlur={() => handleBlur('description')}
                       rows={4}
                       maxLength={300}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${
-                        errors.description ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#D7FF1F] focus:border-transparent ${errors.description ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="Tell us about your business..."
                       aria-describedby={`description-count ${errors.description ? "description-error" : ""}`}
                     />

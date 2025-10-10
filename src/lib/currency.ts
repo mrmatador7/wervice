@@ -135,9 +135,9 @@ export function convertCurrency(
 
   // Basic exchange rates (would normally fetch from API)
   const RATES: Record<Currency, Record<Currency, number>> = {
-    MAD: { USD: 0.091, EUR: 0.085 },
-    USD: { MAD: 11.0, EUR: 0.93 },
-    EUR: { MAD: 11.8, USD: 1.08 },
+    MAD: { MAD: 1, USD: 0.091, EUR: 0.085 },
+    USD: { MAD: 11.0, USD: 1, EUR: 0.93 },
+    EUR: { MAD: 11.8, USD: 1.08, EUR: 1 },
   };
 
   const rate = exchangeRate || (RATES[from]?.[to] || 1);

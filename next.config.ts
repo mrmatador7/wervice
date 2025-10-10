@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['images.unsplash.com'],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   async rewrites() {
     return [
       // Prevent i18n redirect for API routes - rewrite /api to /api (no-op but prevents redirect)

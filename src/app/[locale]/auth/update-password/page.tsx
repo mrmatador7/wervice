@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { FiLock, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi';
@@ -11,6 +11,7 @@ export default function UpdatePasswordPage() {
     const router = useRouter();
     const t = useTranslations('auth');
     const locale = useLocale();
+    const supabase = createClientComponentClient();
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);

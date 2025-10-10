@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 // Custom hook for auth state management
 export const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const supabase = createClientComponentClient();
 
     useEffect(() => {
         const initializeAuth = async () => {
