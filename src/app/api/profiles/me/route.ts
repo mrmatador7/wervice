@@ -28,14 +28,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })
     }
 
-    const response = NextResponse.json({
-      user,
-      profile: profile || { 
-        id: user.id,
-        user_type: 'user',
-        onboarded: false 
-      }
-    })
+    // Return only personal information
+    const personalInfo = {
+      id: user.id,
+      email: user.email,
+      first_name: profile?.first_name || undefined,
+      last_name: profile?.last_name || undefined,
+      city: profile?.city || undefined,
+      user_type: profile?.user_type || 'user',
+      onboarded: profile?.onboarded || false
+    }
+
+    const response = NextResponse.json(personalInfo)
 
     // Add cache headers for better performance
     response.headers.set('Cache-Control', `private, max-age=${CACHE_DURATION}`)

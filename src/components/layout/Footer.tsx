@@ -2,16 +2,14 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useLocale } from '@/contexts/LocaleContext';
 import { CURRENT_YEAR } from '@/lib/config';
 
 export default function Footer() {
   const router = useRouter();
-  const pathname = usePathname();
+  const { locale: currentLocale } = useLocale();
   const t = useTranslations('footer');
-
-  // Extract current locale from pathname
-  const currentLocale = pathname.split('/')[1] || 'en';
 
   const footerSections = [
     {
@@ -98,7 +96,7 @@ export default function Footer() {
                         <button
                           onClick={() => {
                             const path = link.name === 'Planning Guide' ? 'guides/planning' :
-                                        link.name === 'Vendor Directory' ? 'vendors' : '';
+                              link.name === 'Vendor Directory' ? 'vendors' : '';
                             router.push(`/${currentLocale}/${path}`);
                           }}
                           className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm text-left"
@@ -109,9 +107,9 @@ export default function Footer() {
                         <Link
                           href={
                             link.name === 'Wedding Checklist' ? `/${currentLocale}/checklist` :
-                            link.name === 'How It Works' ? `/${currentLocale}/how-it-works` :
-                            link.href.startsWith('/vendors?') ? `/${currentLocale}${link.href}` :
-                            `/${currentLocale}${link.href}`
+                              link.name === 'How It Works' ? `/${currentLocale}/how-it-works` :
+                                link.href.startsWith('/vendors?') ? `/${currentLocale}${link.href}` :
+                                  `/${currentLocale}${link.href}`
                           }
                           className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm"
                         >

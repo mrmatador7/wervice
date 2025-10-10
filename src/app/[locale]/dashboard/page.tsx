@@ -1,13 +1,13 @@
 'use client';
 
 import { useUser } from '@/contexts/UserContext';
-import { useLocale } from 'next-intl';
+import { useLocale } from '@/contexts/LocaleContext';
 import Header from '@/components/layout/Header';
 import Link from 'next/link';
 
 export default function DashboardPage() {
     const { user, profile, isLoading } = useUser();
-    const locale = useLocale();
+    const { locale } = useLocale();
 
     // No need for useEffect - data comes from UserContext
 

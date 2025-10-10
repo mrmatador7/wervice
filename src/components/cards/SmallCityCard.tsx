@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 type SmallCityCardProps = {
   name: string;
@@ -17,6 +18,7 @@ export default function SmallCityCard({
   vendors
 }: SmallCityCardProps) {
   const router = useRouter();
+  const t = useTranslations('home');
 
   const handleClick = () => {
     window.location.href = `/en/vendors?city=${name}`;
@@ -61,7 +63,7 @@ export default function SmallCityCard({
         {/* Vendors Count */}
         {vendors && vendors > 0 && (
           <p className="text-white/90 text-xs leading-relaxed drop-shadow-md" style={{ textShadow: '1px 1px 2px rgba(0, 0, 0, 0.8)' }}>
-            {vendors.toLocaleString()} vendors
+            {t('categories.vendorsCount', { count: vendors })}
           </p>
         )}
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import ListingCard from '../cards/ListingCard';
+import { useTranslations } from 'next-intl';
 
 type ListingItem = {
   id: string;
@@ -23,12 +24,14 @@ interface ListingsRailProps {
 }
 
 export default function ListingsRail({
-  title = "Discover Listings",
+  title,
   items,
   variant = "carousel",
   className = "",
   onToggleFavorite
 }: ListingsRailProps) {
+  const t = useTranslations('home');
+  const displayTitle = title || t('listings.defaultTitle');
   if (variant === "grid") {
     return (
       <section className={`px-4 md:px-6 lg:px-8 py-8 ${className}`}>
@@ -36,10 +39,10 @@ export default function ListingsRail({
           {/* Section Title */}
           <div className="text-center mb-8">
             <h2 className="font-inter font-bold text-2xl md:text-3xl text-gray-900 mb-2">
-              {title}
+              {displayTitle}
             </h2>
             <p className="text-gray-600 text-sm md:text-base">
-              Explore amazing wedding vendors and services
+              {t('listings.defaultSubtitle')}
             </p>
           </div>
 

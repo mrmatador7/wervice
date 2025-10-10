@@ -10,6 +10,7 @@ import { homepageListings } from '@/data/mockListings';
 import CategoriesShowcase, {
   CategoryItem,
 } from "@/components/sections/CategoriesShowcase";
+import { getTranslations } from 'next-intl/server';
 
 // Feature flag to control Browse by Category section
 const SHOW_BROWSE_BY_CATEGORY = false;
@@ -48,6 +49,7 @@ const DRESS_ITEMS: CategoryItem[] = [
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const resolvedParams = await params;
   const locale = resolvedParams?.locale ?? 'en';
+  const t = await getTranslations({ locale, namespace: 'home' });
 
   return (
     <div className="min-h-screen">
@@ -71,9 +73,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <section className="py-8">
         <Container>
           <CategoriesShowcase
-            title="Dress catalog"
-            subtitle="Discover the latest trends in wedding dresses by top designers and bridesmaid dresses. Choose your favorite from our catalog!"
-            ctaLabel="Explore the catalog"
+            title={t('dressCatalog.title')}
+            subtitle={t('dressCatalog.subtitle')}
+            ctaLabel={t('dressCatalog.ctaLabel')}
             ctaHref="/catalog/dresses"
             seeMoreHref="/catalog/dresses"
             items={DRESS_ITEMS}
@@ -85,7 +87,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* New Vendors */}
       <ListingsRail
-        title="New Vendors"
+        title={t('newVendors.title')}
         items={homepageListings}
         variant="carousel"
       />

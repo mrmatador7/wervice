@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
 
@@ -12,7 +12,6 @@ interface OnboardingGuardProps {
 export default function OnboardingGuard({ children, locale }: OnboardingGuardProps) {
     const router = useRouter();
     const pathname = usePathname();
-    const [isChecking, setIsChecking] = useState(true);
     const { user, profile, isLoading: userLoading } = useUser();
 
     useEffect(() => {
@@ -21,7 +20,35 @@ export default function OnboardingGuard({ children, locale }: OnboardingGuardPro
 
             // Completely bypass all checks for auth pages
             if (isAuthPage) {
-                setIsChecking(false);
+                return;
+            }
+
+            // Define public pages that don't require authentication
+            const publicPages = [
+                '/',
+                '/home',
+                '/about',
+                '/how-it-works',
+                '/guides',
+                '/blog',
+                '/contact',
+                '/cookies',
+                '/privacy',
+                '/terms',
+                '/become-vendor',
+                '/categories',
+                '/vendors',
+                '/cities'
+            ];
+
+            // Check if current page is public
+            const isPublicPage = publicPages.some(page => {
+                const fullPath = page === '/' ? `/${locale}` : `/${locale}${page}`;
+                return pathname === fullPath || pathname.startsWith(`${fullPath}/`);
+            });
+
+            // Allow access to public pages without authentication
+            if (isPublicPage) {
                 return;
             }
 
@@ -30,7 +57,7 @@ export default function OnboardingGuard({ children, locale }: OnboardingGuardPro
                 return;
             }
 
-            // If no user, redirect to sign-in
+            // If no user and not on a public page, redirect to sign-in
             if (!user) {
                 router.replace(`/${locale}/auth/signin`);
                 return;
@@ -51,30 +78,10 @@ export default function OnboardingGuard({ children, locale }: OnboardingGuardPro
                 router.replace(`/${locale}/onboarding`);
                 return;
             }
-
-            // All good, allow access
-            setIsChecking(false);
-
-            // All checks passed
-            setIsChecking(false);
         };
 
         checkOnboardingStatus();
     }, [locale, pathname, router, user, profile, userLoading]);
-
-    // Show loading while checking
-    if (isChecking) {
-        return (
-            <div className="min-h-screen bg-[#F6F5F2] flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-16 h-16 bg-[#D9FF0A] rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-2xl">⏳</span>
-                    </div>
-                    <p className="text-[#787664]">Checking your account...</p>
-                </div>
-            </div>
-        );
-    }
 
     return <>{children}</>;
 }

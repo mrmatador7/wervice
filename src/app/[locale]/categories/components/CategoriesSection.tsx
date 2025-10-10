@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale } from '@/contexts/LocaleContext';
+import { useTranslations } from 'next-intl';
 
 
 interface Category {
@@ -13,53 +14,54 @@ interface Category {
 
 
 export default function CategoriesSection() {
-    const locale = useLocale();
+    const { locale } = useLocale();
+    const t = useTranslations('home');
 
     const categories: Category[] = [
         {
-            name: 'Venues',
+            name: t('categories.names.venues'),
             count: 124,
             image: '/categories/venues.png',
             href: `/${locale}/categories/venues`,
         },
         {
-            name: 'Catering',
+            name: t('categories.names.catering'),
             count: 87,
             image: '/categories/Catering.png',
             href: `/${locale}/categories/catering`,
         },
         {
-            name: 'Photo & Video',
+            name: t('categories.names.photoVideo'),
             count: 156,
             image: '/categories/photo.png',
             href: `/${locale}/categories/photo-video`,
         },
         {
-            name: 'Event Planner',
+            name: t('categories.names.eventPlanner'),
             count: 92,
             image: '/categories/event planner.png',
             href: `/${locale}/categories/planning`,
         },
         {
-            name: 'Beauty',
+            name: t('categories.names.beauty'),
             count: 78,
             image: '/categories/beauty.png',
             href: `/${locale}/categories/beauty`,
         },
         {
-            name: 'Decor',
+            name: t('categories.names.decor'),
             count: 134,
             image: '/categories/decor.png',
             href: `/${locale}/categories/decor`,
         },
         {
-            name: 'Music',
+            name: t('categories.names.music'),
             count: 67,
             image: '/categories/music.png',
             href: `/${locale}/categories/music`,
         },
         {
-            name: 'Dresses',
+            name: t('categories.names.dresses'),
             count: 189,
             image: '/categories/Dresses.png',
             href: `/${locale}/categories/dresses`,
@@ -72,7 +74,7 @@ export default function CategoriesSection() {
                 {/* Section Title */}
                 <div className="text-center mb-8">
                     <h2 className="font-inter font-bold text-2xl md:text-3xl text-gray-900 mb-4">
-                        Browse by Category
+                        {t('categories.browseByCategory')}
                     </h2>
                 </div>
 
@@ -95,7 +97,7 @@ export default function CategoriesSection() {
                                     </h3>
                                     {category.count && (
                                         <p className="text-gray-500 text-sm">
-                                            {category.count} vendors
+                                            {t('categories.vendorsCount', { count: category.count })}
                                         </p>
                                     )}
                                 </div>
@@ -136,7 +138,7 @@ export default function CategoriesSection() {
                     >
                         See all categories →
                     </Link>
-                    </div >
+                </div >
             </div >
         </section >
     );
