@@ -1,10 +1,7 @@
 'use client';
 
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
@@ -13,22 +10,82 @@ export default function SignInPage() {
     const router = useRouter();
     const t = useTranslations('auth');
     const locale = useLocale();
-    const supabase = createClientComponentClient();
 
-    useEffect(() => {
-        if (!locale) return;
+    const [signinData, setSigninData] = useState({
+        email: '',
+        password: ''
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
-        const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
-            // Since we removed authentication checks, just log the auth state change
-            // Don't redirect - let users stay on the page and see the updated UI
-            console.log('🔄 Auth state changed:', {
-                event,
-                hasSession: !!session,
-                userEmail: session?.user?.email
-            });
+    const handleCustomSignin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+
+        console.log('🚀 Starting signin process via API...', {
+            email: signinData.email,
+            locale
         });
 
-        return () => sub.subscription?.unsubscribe();
+        try {
+            console.log('📡 Sending signin request to API...');
+
+            const response = await fetch('/api/auth/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Include cookies for authentication
+                body: JSON.stringify({
+                    email: signinData.email,
+                    password: signinData.password
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('❌ API signin error:', data.error);
+                setError(data.error || 'Sign in failed');
+                setIsLoading(false);
+                return;
+            }
+
+            console.log('✅ API signin successful:', {
+                success: data.success,
+                userId: data.user?.id,
+                message: data.message
+            });
+
+            // Save user information to localStorage
+            if (data.user) {
+                const userInfo = {
+                    id: data.user.id,
+                    email: data.user.email,
+                    signedInAt: new Date().toISOString()
+                };
+
+                localStorage.setItem('wervice_user', JSON.stringify(userInfo));
+                console.log('💾 User info saved to localStorage:', userInfo);
+            }
+
+            console.log('✅ User authenticated via signin API');
+            console.log('🔄 Syncing auth state and redirecting to account...');
+
+            // Force a complete page reload to ensure auth state is synced
+            window.location.replace(`/${locale}/account`);
+
+        } catch (err) {
+            console.error('💥 Signin process failed:', err);
+            const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+            setError(errorMessage);
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        console.log('👤 Signin page mounted, locale:', locale);
     }, [locale]);
 
     return (
@@ -59,58 +116,74 @@ export default function SignInPage() {
                         </div>
 
                         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-                            <Auth
-                                supabaseClient={supabase}
-                                view="sign_in"
-                                appearance={{
-                                    theme: ThemeSupa,
-                                    variables: {
-                                        default: {
-                                            colors: {
-                                                brand: '#8B5CF6',
-                                                brandAccent: '#7C3AED',
-                                            },
-                                            borderWidths: {
-                                                buttonBorderWidth: '1px',
-                                                inputBorderWidth: '1px',
-                                            },
-                                            radii: {
-                                                borderRadiusButton: '0.75rem',
-                                                buttonBorderRadius: '0.75rem',
-                                                inputBorderRadius: '0.75rem',
-                                            },
-                                        },
-                                    },
-                                    className: {
-                                        container: 'w-full',
-                                        button: 'w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors',
-                                        input: 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent',
-                                        label: 'text-sm font-medium text-gray-700 mb-2 block',
-                                        message: 'text-sm text-red-600 mt-1',
-                                        anchor: 'hidden', // Hide the built-in forgot password link
-                                    },
-                                }}
-                                providers={['google']}
-                                onlyThirdPartyProviders={false}
-                                localization={{
-                                    variables: {
-                                        sign_in: {
-                                            email_label: t('signin.email', { defaultValue: 'Email address' }),
-                                            password_label: t('signin.password', { defaultValue: 'Password' }),
-                                            button_label: t('signin.button', { defaultValue: 'Sign in' }),
-                                            loading_button_label: t('signin.loading', { defaultValue: 'Signing in...' }),
-                                            social_provider_text: 'Continue with {{provider}}',
-                                            link_text: t('signin.noAccount', { defaultValue: 'Don\'t have an account? Sign up' })
-                                        },
-                                    },
-                                }}
-                            />
+                            <form onSubmit={handleCustomSignin} className="space-y-6">
+                                {/* Email Field */}
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t('signin.email', { defaultValue: 'Email address' })}
+                                    </label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        value={signinData.email}
+                                        onChange={(e) => setSigninData({ ...signinData, email: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                                        placeholder={t('signin.emailPlaceholder', { defaultValue: 'Enter your email' })}
+                                    />
+                                </div>
+
+                                {/* Password Field */}
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t('signin.password', { defaultValue: 'Password' })}
+                                    </label>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        autoComplete="current-password"
+                                        required
+                                        value={signinData.password}
+                                        onChange={(e) => setSigninData({ ...signinData, password: e.target.value })}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                                        placeholder={t('signin.passwordPlaceholder', { defaultValue: 'Enter your password' })}
+                                    />
+                                </div>
+
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+                                        {error}
+                                    </div>
+                                )}
+
+                                {/* Submit Button */}
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                                >
+                                    {isLoading ? t('signin.loading', { defaultValue: 'Signing in...' }) : t('signin.button', { defaultValue: 'Sign in' })}
+                                </button>
+                            </form>
+                        </div>
+
+                        <div className="text-center">
+                            <Link
+                                href={`/${locale}/auth/signup`}
+                                className="text-sm text-purple-600 hover:text-purple-700 transition-colors"
+                            >
+                                {t('signin.noAccount')}
+                            </Link>
                         </div>
 
                         <div className="text-center">
                             <Link
                                 href={`/${locale}/auth/reset-password`}
-                                className="text-sm text-purple-600 hover:text-purple-700 transition-colors"
+                                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
                             >
                                 {t('signin.forgotPassword')}
                             </Link>

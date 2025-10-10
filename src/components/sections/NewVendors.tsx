@@ -1,5 +1,5 @@
 import ListingsRail from './ListingsRail';
-import { homepageListings } from '@/lib/mockListings';
+import { homepageListings } from '@/data/mockListings';
 
 export default function NewVendors() {
   return (

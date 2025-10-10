@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { FiHeart } from 'react-icons/fi';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface SaveHeartProps {
   vendorId: string;
@@ -12,7 +11,6 @@ interface SaveHeartProps {
 export function SaveHeart({ vendorId, className = '' }: SaveHeartProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClientComponentClient();
 
   const handleToggleSave = async () => {
     if (isLoading) return;
@@ -21,21 +19,27 @@ export function SaveHeart({ vendorId, className = '' }: SaveHeartProps) {
 
     try {
       // Optimistic UI update
-      setIsSaved(!isSaved);
+      const newSavedState = !isSaved;
+      setIsSaved(newSavedState);
 
-      // TODO: Implement actual save/unsave logic with Supabase
-      // For now, just simulate the action
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Call API to save/unsave vendor
+      const response = await fetch(`/api/vendors/${vendorId}/save`, {
+        method: newSavedState ? 'POST' : 'DELETE',
+        credentials: 'include',
+      });
 
-      // In a real implementation, you would:
-      // 1. Check if user is authenticated
-      // 2. Add/remove from user's saved vendors
-      // 3. Update UI based on response
+      if (!response.ok) {
+        throw new Error('Failed to update save status');
+      }
 
+      const data = await response.json();
+      setIsSaved(data.saved);
+
+      console.log(data.saved ? 'Vendor saved' : 'Vendor unsaved', vendorId);
     } catch (error) {
       // Revert optimistic update on error
       setIsSaved(!isSaved);
-      console.error('Failed to save vendor:', error);
+      console.error('Error saving vendor:', error);
     } finally {
       setIsLoading(false);
     }
@@ -53,11 +57,10 @@ export function SaveHeart({ vendorId, className = '' }: SaveHeartProps) {
       aria-pressed={isSaved}
     >
       <FiHeart
-        className={`w-4 h-4 transition-all duration-200 ${
-          isSaved
-            ? 'fill-red-500 text-red-500 scale-110'
-            : 'text-neutral-600 group-hover:text-red-500 group-hover:scale-110'
-        }`}
+        className={`w-4 h-4 transition-all duration-200 ${isSaved
+          ? 'fill-red-500 text-red-500 scale-110'
+          : 'text-neutral-600 group-hover:text-red-500 group-hover:scale-110'
+          }`}
       />
     </button>
   );

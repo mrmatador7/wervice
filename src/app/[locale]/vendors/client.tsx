@@ -5,10 +5,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import VendorsHero from '@/components/vendors/VendorsHero';
-import VendorsCategoryChips from '@/components/vendors/VendorsCategoryChips';
-import VendorsFeaturedBlock from '@/components/vendors/VendorsFeaturedBlock';
-import VendorsResultsGrid from '@/components/vendors/VendorsResultsGrid';
+import VendorsHero from './components/VendorsHero';
+import VendorsCategoryChips from './components/VendorsCategoryChips';
+import VendorsFeaturedBlock from './components/VendorsFeaturedBlock';
+import VendorsResultsGrid from './components/VendorsResultsGrid';
 import { Vendor, VendorFilters, VendorCity, VendorCategory, getAllVendors, filterVendors, sortVendors } from '@/lib/vendors';
 
 interface VendorDirectoryClientProps {

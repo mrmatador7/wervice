@@ -1,4 +1,4 @@
-import { Vendor } from './types';
+import { Vendor } from '@/lib/types';
 
 // Mock vendor data
 export const mockVendors: Vendor[] = [

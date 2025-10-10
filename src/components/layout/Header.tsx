@@ -1,75 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import LanguageCurrencyDropdown from "../ui/LanguageDropdown";
+import { useUser } from "@/contexts/UserContext";
 
 export default function Header() {
   const pathname = usePathname();
   const currentLocale = pathname.split('/')[1] || 'en';
-  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
-  const [userType, setUserType] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
-
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-
-      if (session?.user) {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('user_type')
-          .eq('id', session.user.id)
-          .single();
-
-        // Handle case where profile doesn't exist yet
-        if (error && error.code === 'PGRST116') {
-          console.log('Profile not found for user, setting default user_type');
-          setUserType('user'); // Default to regular user
-        } else if (error) {
-          console.error('Error fetching profile:', error);
-          setUserType('user'); // Default to regular user on error
-        } else {
-          setUserType(profile?.user_type ?? 'user');
-        }
-      } else {
-        setUserType(null);
-      }
-    };
-
-    getUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('user_type')
-            .eq('id', session.user.id)
-            .single();
-
-          // Handle case where profile doesn't exist yet
-          if (error && error.code === 'PGRST116') {
-            console.log('Profile not found for user, setting default user_type');
-            setUserType('user'); // Default to regular user
-          } else if (error) {
-            console.error('Error fetching profile:', error);
-            setUserType('user'); // Default to regular user on error
-          } else {
-            setUserType(profile?.user_type ?? 'user');
-          }
-        } else {
-          setUserType(null);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { user, profile, signOut } = useUser();
+  const userType = profile?.user_type ?? 'user';
 
   return (
     <header
@@ -119,14 +58,7 @@ export default function Header() {
             {/* Sign In / Sign Out */}
             {user ? (
               <button
-                onClick={async () => {
-                  try {
-                    await supabase.auth.signOut();
-                    console.log('✅ User signed out successfully');
-                  } catch (error) {
-                    console.error('❌ Error signing out:', error);
-                  }
-                }}
+                onClick={signOut}
                 className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
               >
                 Sign Out

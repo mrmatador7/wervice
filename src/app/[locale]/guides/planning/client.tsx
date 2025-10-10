@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { FiArrowRight, FiCheck } from 'react-icons/fi';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { getAllChapters, getTimelineSteps, getFAQItems } from '@/lib/planningChapters';
+import { getAllChapters, getTimelineSteps, getFAQItems } from '@/data/planningChapters';
 
 const VENDOR_CATEGORIES = [
   { name: 'Venues', href: '/categories/venues', icon: '/categories/venues.png' },
@@ -51,7 +51,7 @@ function TimelineStepper() {
               </div>
 
               <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-3 mb-3">
                   <span className="inline-flex items-center gap-1 rounded-full border border-[var(--wervice-lime)] bg-white px-2.5 py-1 text-[13px] font-medium text-[var(--ink)]">
                     <i className="h-1.5 w-1.5 rounded-full bg-[var(--wervice-lime)]" aria-hidden />
                     {step.months === 0 ? 'Final' : `${step.months} months`}

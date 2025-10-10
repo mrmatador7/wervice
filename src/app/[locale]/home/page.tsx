@@ -1,12 +1,12 @@
 import Header from '@/components/layout/Header';
-import Hero from '@/components/home/Hero';
-import CategoriesSection from '@/components/category/CategoriesSection';
+import Hero from '../components/Hero';
+import CategoriesSection from '../categories/components/CategoriesSection';
 import CitiesCarousel from '@/components/cities/CitiesCarousel';
 import ListingsRail from '@/components/sections/ListingsRail';
 import BecomeVendorSection from './components/BecomeVendorSection';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/layout/Container';
-import { homepageListings } from '@/lib/mockListings';
+import { homepageListings } from '@/data/mockListings';
 import CategoriesShowcase, {
   CategoryItem,
 } from "@/components/sections/CategoriesShowcase";

@@ -1,4 +1,6 @@
-import { supabase } from './supabase';
+import { createClient } from '@/lib/supabase-browser';
+
+const supabase = createClient();
 
 export interface OnboardingData {
   isPlanning: 'yes' | 'no' | 'exploring';

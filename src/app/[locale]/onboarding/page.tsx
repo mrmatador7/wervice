@@ -3,41 +3,41 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useSaveStep } from '@/hooks/useSaveStep';
-import OnboardingShell from '@/components/onboarding/OnboardingShell';
-import StepWelcome from '@/components/onboarding/StepWelcome';
-import StepNames from '@/components/onboarding/StepNames';
-import StepLocation from '@/components/onboarding/StepLocation';
-import StepStyle from '@/components/onboarding/StepStyle';
-import StepDate from '@/components/onboarding/StepDate';
-import StepGuests from '@/components/onboarding/StepGuests';
-import StepServices from '@/components/onboarding/StepServices';
-import StepBudgetCurrency from '@/components/onboarding/StepBudgetCurrency';
-import StepPreferences from '@/components/onboarding/StepPreferences';
-import StepFinish from '@/components/onboarding/StepFinish';
+import OnboardingShell from './components/OnboardingShell';
+import StepWelcome from './components/StepWelcome';
+import StepNames from './components/StepNames';
+import StepLocation from './components/StepLocation';
+import StepStyle from './components/StepStyle';
+import StepDate from './components/StepDate';
+import StepGuests from './components/StepGuests';
+import StepServices from './components/StepServices';
+import StepBudgetCurrency from './components/StepBudgetCurrency';
+import StepPreferences from './components/StepPreferences';
+import StepFinish from './components/StepFinish';
 
 export interface OnboardingData {
-  // Step 1: Welcome (minimal data)
+  // Step 1: Welcome
   welcome?: { started: boolean };
 
-  // Step 2: Names
+  // Step 2: Names + Stage
   user?: {
     firstName: string;
     partnerFirstName?: string;
+    phone?: string;
     relationshipStage?: 'engaged' | 'soon' | 'celebration';
   };
 
   // Step 3: Location
   location?: {
     city: string;
-    setting?: string;
+    setting?: 'luxury' | 'outdoor' | 'beachfront' | 'traditional' | 'private';
   };
 
   // Step 4: Style
   style?: string[];
 
-  // Step 5: Date/Timeline
+  // Step 5: Date
   timeline?: {
     dateType: 'picked' | 'monthYear' | 'unsure';
     weddingDate?: string;
@@ -47,30 +47,35 @@ export interface OnboardingData {
 
   // Step 6: Guests
   guests?: {
-    guestCount: string;
+    guestCount: '0-50' | '51-100' | '101-200' | '200+' | 'unsure';
   };
 
   // Step 7: Services
   services?: string[];
 
-  // Step 8: Budget & Currency
+  // Step 8: Budget + Currency
   budget?: {
-    currency: string;
+    currency: 'MAD' | 'EUR' | 'USD';
     budgetBand: string;
+    budgetMinMAD?: number;
+    budgetMaxMAD?: number;
   };
 
   // Step 9: Preferences
   preferences?: {
-    contactPreference: string;
+    contactPreference: 'vendors_can_contact' | 'browse_quietly' | 'helping_friend';
   };
+
+  // Step 10: Finish
+  finish?: { completed: boolean };
 }
 
 const STEPS = [
   'welcome',
-  'names',
+  'user',      // names + stage
   'location',
   'style',
-  'date',
+  'timeline',  // date
   'guests',
   'services',
   'budget',
@@ -82,7 +87,6 @@ export default function OnboardingPage() {
   const router = useRouter();
   const { locale } = useParams() as { locale: string };
   const t = useTranslations('onboarding');
-  const supabase = createClientComponentClient();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({});
@@ -105,64 +109,41 @@ export default function OnboardingPage() {
       await new Promise(resolve => setTimeout(resolve, 200));
 
       try {
-        console.log('🔍 Loading onboarding data...');
+        console.log('🔍 Loading onboarding data via API...');
 
-        // Auth guard ensures we have a session, get the user ID
-        console.log('🔍 Onboarding: About to check session...');
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        const userId = session?.user?.id;
-
-        console.log('🔍 Onboarding: Session check for profile load:', {
-          timestamp: new Date().toISOString(),
-          hasSession: !!session,
-          userId: userId,
-          email: session?.user?.email,
-          emailConfirmed: session?.user?.email_confirmed_at,
-          sessionAccessToken: session?.access_token ? 'present' : 'missing',
-          sessionRefreshToken: session?.refresh_token ? 'present' : 'missing',
-          sessionError: sessionError?.message
+        // Call the API to load onboarding data
+        const response = await fetch('/api/onboarding/load', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include cookies for authentication
         });
 
-        if (!userId) {
-          console.error('❌ Auth guard should have prevented this - no user ID available');
-          return;
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to load onboarding data');
         }
 
-        // Load onboarding data directly from Supabase
-        console.log('🔍 Onboarding: Loading profile for user:', userId);
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('onboarding_data, onboarded')
-          .eq('id', userId)
-          .single();
+        const { onboardingData, onboarded } = await response.json();
 
-        console.log('🔍 Onboarding: Profile query result:', {
-          hasData: !!profile,
-          error: error?.message,
-          errorCode: error?.code
-        });
+        console.log('✅ Onboarding data loaded via API:', { onboardingData, onboarded });
 
-        if (error && error.code === 'PGRST116') {
-          // Profile doesn't exist yet, that's fine - start with empty data
-          console.log('ℹ️ No profile found, starting with empty onboarding data');
-          setOnboardingData({});
-        } else if (error) {
-          console.error('❌ Error loading profile:', error);
-          // Don't redirect for database errors, just log them
-        } else {
-          console.log('✅ Onboarding data loaded:', profile);
-          if (profile?.onboarding_data) {
-            setOnboardingData(profile.onboarding_data);
-            // Find the furthest completed step
-            const steps = Object.keys(profile.onboarding_data);
-            const lastStepIndex = STEPS.findIndex(step => !steps.includes(step)) - 1;
-            if (lastStepIndex >= 0) {
-              setCurrentStep(Math.max(0, lastStepIndex));
-            }
+        if (onboardingData) {
+          setOnboardingData(onboardingData);
+          // Find the furthest completed step
+          const steps = Object.keys(onboardingData);
+          const lastStepIndex = STEPS.findIndex(step => !steps.includes(step)) - 1;
+          if (lastStepIndex >= 0) {
+            setCurrentStep(Math.max(0, lastStepIndex));
           }
+        } else {
+          // No onboarding data yet, start with empty data
+          console.log('ℹ️ No onboarding data found, starting fresh');
+          setOnboardingData({});
         }
       } catch (error) {
-        console.error('💥 Error loading onboarding data:', error);
+        console.error('💥 Error loading onboarding data via API:', error);
         // Don't redirect on unexpected errors, just log them
       }
     };
@@ -171,7 +152,7 @@ export default function OnboardingPage() {
     if (!isAuthChecking) {
       loadExistingData();
     }
-  }, [locale, isAuthChecking, router, supabase]);
+  }, [locale, isAuthChecking]);
 
   const handleStepSave = async (step: string, data: any, shouldSkip: boolean = false) => {
     const success = shouldSkip ? await skip() : await save(data);
@@ -214,13 +195,13 @@ export default function OnboardingPage() {
     switch (step) {
       case 'welcome':
         return <StepWelcome {...commonProps} />;
-      case 'names':
+      case 'user':
         return <StepNames {...commonProps} />;
       case 'location':
         return <StepLocation {...commonProps} />;
       case 'style':
         return <StepStyle {...commonProps} />;
-      case 'date':
+      case 'timeline':
         return <StepDate {...commonProps} />;
       case 'guests':
         return <StepGuests {...commonProps} />;

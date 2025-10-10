@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { getVendorBySlug, getSimilarVendors } from '@/lib/vendors.mock';
+import { getVendorBySlug, getSimilarVendors } from '@/data/vendors.mock';
 import { VendorHero } from './components/VendorHero';
 import { VendorGallery } from './components/VendorGallery';
 import { VendorInfoRow } from './components/VendorInfoRow';

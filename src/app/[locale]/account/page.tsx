@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface VendorRecommendation {
   vendor: any;
@@ -22,36 +21,45 @@ export default function AccountPage() {
   useEffect(() => {
     const loadRecommendations = async () => {
       try {
-        const supabaseClient = createClientComponentClient();
+        // Fetch recommendations from API (API will handle auth check)
+        const response = await fetch('/api/recommendations', {
+          method: 'GET',
+          credentials: 'include',
+        });
 
-        // Check if user is authenticated
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session?.user) {
-          setIsLoadingRecommendations(false);
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('Error fetching recommendations:', error);
+          setRecommendations({});
           return;
         }
 
-        const userId = session.user.id;
+        const data = await response.json();
 
-        // Get user's profile data for recommendations
-        const { data: profile, error: profileError } = await supabaseClient
-          .from('profiles')
-          .select('city, services_needed, style, budget_min_mad, budget_max_mad, guest_count_band')
-          .eq('id', userId)
-          .single();
+        // Transform API response to expected format
+        const transformedRecommendations: Record<string, VendorRecommendation[]> = {};
+        data.recommendations.forEach((categoryData: any) => {
+          transformedRecommendations[categoryData.category] = categoryData.vendors.map((vendor: any) => ({
+            vendor: {
+              id: vendor.id,
+              name: vendor.name,
+              slug: vendor.slug,
+              category: vendor.category,
+              city: vendor.city,
+              rating: vendor.rating,
+              reviewsCount: vendor.reviewsCount,
+              startingPrice: vendor.startingPrice,
+            },
+            score: vendor.score,
+            reasons: vendor.reasons
+          }));
+        });
 
-        if (profileError || !profile) {
-          console.error('Error fetching profile:', profileError);
-          setIsLoadingRecommendations(false);
-          return;
-        }
-
-        // For now, return empty recommendations since we don't have a vendors table
-        // In the future, you can add vendor data to Supabase and implement the scoring logic
-        setRecommendations({});
+        setRecommendations(transformedRecommendations);
 
       } catch (error) {
         console.error('Error loading recommendations:', error);
+        setRecommendations({});
       } finally {
         setIsLoadingRecommendations(false);
       }

@@ -15,17 +15,19 @@ export default function StepNames({ data, onSave, isSaving }: StepNamesProps) {
   const t = useTranslations('onboarding');
   const [firstName, setFirstName] = useState(data.user?.firstName || '');
   const [partnerFirstName, setPartnerFirstName] = useState(data.user?.partnerFirstName || '');
+  const [phone, setPhone] = useState(data.user?.phone || '');
   const [relationshipStage, setRelationshipStage] = useState<'engaged' | 'soon' | 'celebration'>(
     data.user?.relationshipStage || 'engaged'
   );
 
-  const isValid = firstName.trim().length > 0;
+  const isValid = firstName.trim().length > 0 && phone.trim().length > 0;
 
   const handleNext = () => {
     if (isValid) {
       onSave('names', {
         firstName: firstName.trim(),
         partnerFirstName: partnerFirstName.trim() || undefined,
+        phone: phone.trim(),
         relationshipStage
       });
     }
@@ -85,6 +87,21 @@ export default function StepNames({ data, onSave, isSaving }: StepNamesProps) {
               onChange={(e) => setPartnerFirstName(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D9FF0A] focus:border-transparent"
               placeholder="Jane"
+            />
+          </div>
+
+          {/* Phone Number */}
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-[#11190C] mb-2">
+              {t('names.phone')} *
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D9FF0A] focus:border-transparent"
+              placeholder="+212 6XX XXX XXX"
             />
           </div>
 

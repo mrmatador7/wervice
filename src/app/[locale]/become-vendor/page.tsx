@@ -3,11 +3,11 @@ import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import VendorHero from '@/components/vendors/VendorHero';
-import WhyChooseWervice from '@/components/vendors/WhyChooseWervice';
-import VendorHowItWorks from '@/components/vendors/VendorHowItWorks';
-import VendorPricing from '@/components/vendors/VendorPricing';
-import VendorSignupForm from '@/components/vendors/VendorSignupForm';
+import VendorHero from '../vendors/components/VendorHero';
+import WhyChooseWervice from '../vendors/components/WhyChooseWervice';
+import VendorHowItWorks from '../vendors/components/VendorHowItWorks';
+import VendorPricing from '../vendors/components/VendorPricing';
+import VendorSignupForm from '../vendors/components/VendorSignupForm';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('vendor');
