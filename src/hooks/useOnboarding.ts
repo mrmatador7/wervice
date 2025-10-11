@@ -23,14 +23,14 @@ export function useOnboarding() {
   useEffect(() => {
     const fetchOnboardingData = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user }, error } = await supabase.auth.getUser();
 
-        if (!session?.user) {
+        if (error || !user) {
           setLoading(false);
           return;
         }
 
-        const data = await getUserOnboardingData(session.user.id);
+        const data = await getUserOnboardingData(user.id);
         setOnboardingData(data);
       } catch (err) {
         console.error('Error fetching onboarding data:', err);
@@ -43,12 +43,15 @@ export function useOnboarding() {
     fetchOnboardingData();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        fetchOnboardingData();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === 'SIGNED_IN') {
+        await fetchOnboardingData();
       } else if (event === 'SIGNED_OUT') {
         setOnboardingData(null);
         setLoading(false);
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Re-fetch data on token refresh to ensure we have fresh data
+        await fetchOnboardingData();
       }
     });
 

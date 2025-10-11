@@ -13,14 +13,31 @@ export default function DebugHeaderAdmin() {
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { user }, error } = await supabase.auth.getUser();
+
+        if (error) {
+          setDebugInfo({
+            error: error.message,
+            session: false,
+            userId: null,
+            email: null,
+            profile: null,
+            userType: null,
+            isAdmin: false,
+            isSuperAdmin: false,
+            canAccessAdmin: false,
+            currentLocale: window.location.pathname.split('/')[1] || 'en',
+            adminLink: `/${window.location.pathname.split('/')[1] || 'en'}/admin`
+          });
+          return;
+        }
 
         let profile = null;
-        if (session?.user?.id) {
+        if (user?.id) {
           const { data } = await supabase
             .from('profiles')
             .select('user_type, email')
-            .eq('id', session.user.id)
+            .eq('id', user.id)
             .single();
           profile = data;
         }
@@ -30,9 +47,9 @@ export default function DebugHeaderAdmin() {
         const canAccessAdmin = isAdmin || isSuperAdmin;
 
         setDebugInfo({
-          session: !!session,
-          userId: session?.user?.id,
-          email: session?.user?.email,
+          session: !!user,
+          userId: user?.id,
+          email: user?.email,
           profile: profile,
           userType: profile?.user_type,
           isAdmin,
@@ -48,8 +65,10 @@ export default function DebugHeaderAdmin() {
 
     checkAdminStatus();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAdminStatus();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        await checkAdminStatus();
+      }
     });
 
     return () => subscription.unsubscribe();
