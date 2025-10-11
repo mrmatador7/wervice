@@ -22,7 +22,7 @@ const STYLE_OPTIONS = [
 
 export default function StepStyle({ data, onSave, isSaving }: StepStyleProps) {
   const t = useTranslations('onboarding');
-  const [selectedStyles, setSelectedStyles] = useState<string[]>(data.style || []);
+  const [selectedStyles, setSelectedStyles] = useState<string[]>(data.style?.styles || []);
 
   const toggleStyle = (style: string) => {
     setSelectedStyles(prev =>
@@ -70,11 +70,10 @@ export default function StepStyle({ data, onSave, isSaving }: StepStyleProps) {
               <button
                 key={option.value}
                 onClick={() => toggleStyle(option.value)}
-                className={`p-4 border-2 rounded-lg text-left transition-all ${
-                  isSelected
-                    ? 'border-[#D9FF0A] bg-[#D9FF0A]/10 shadow-md'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
+                  ? 'border-[#D9FF0A] bg-[#D9FF0A]/10 shadow-md'
+                  : 'border-gray-200 hover:border-gray-300'
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{option.emoji}</span>

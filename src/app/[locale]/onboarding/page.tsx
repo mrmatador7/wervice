@@ -35,7 +35,7 @@ export interface OnboardingData {
   };
 
   // Step 4: Style
-  style?: string[];
+  style?: { styles: string[] };
 
   // Step 5: Date
   timeline?: {
@@ -51,7 +51,7 @@ export interface OnboardingData {
   };
 
   // Step 7: Services
-  services?: string[];
+  services?: { services: string[] };
 
   // Step 8: Budget + Currency
   budget?: {

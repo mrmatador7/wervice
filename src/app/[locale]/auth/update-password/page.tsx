@@ -22,13 +22,13 @@ export default function UpdatePasswordPage() {
 
     useEffect(() => {
         // Check if user is authenticated and came from password reset
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+        const checkUser = async () => {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
                 router.push(`/${locale}/auth/signin`);
             }
         };
-        checkSession();
+        checkUser();
     }, [router, locale]);
 
     const handleSubmit = async (e: React.FormEvent) => {

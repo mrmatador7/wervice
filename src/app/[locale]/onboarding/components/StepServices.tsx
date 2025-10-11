@@ -29,7 +29,7 @@ const SERVICE_CATEGORIES = [
 
 export default function StepServices({ data, onSave, isSaving }: StepServicesProps) {
   const t = useTranslations('onboarding');
-  const [selectedServices, setSelectedServices] = useState<string[]>(data.services || []);
+  const [selectedServices, setSelectedServices] = useState<string[]>(data.services?.services || []);
 
   const toggleService = (service: string) => {
     setSelectedServices(prev =>
@@ -77,11 +77,10 @@ export default function StepServices({ data, onSave, isSaving }: StepServicesPro
               <button
                 key={service.value}
                 onClick={() => toggleService(service.value)}
-                className={`p-3 border-2 rounded-lg text-center transition-all ${
-                  isSelected
-                    ? 'border-[#D9FF0A] bg-[#D9FF0A]/10 shadow-sm'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                className={`p-3 border-2 rounded-lg text-center transition-all ${isSelected
+                  ? 'border-[#D9FF0A] bg-[#D9FF0A]/10 shadow-sm'
+                  : 'border-gray-200 hover:border-gray-300'
+                  }`}
               >
                 <span className={`text-sm font-medium ${isSelected ? 'text-[#11190C]' : 'text-[#787664]'}`}>
                   {t(`services.${service.labelKey}`)}
