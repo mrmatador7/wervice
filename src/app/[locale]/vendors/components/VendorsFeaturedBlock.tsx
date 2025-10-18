@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiStar, FiMapPin } from 'react-icons/fi';
-import { Vendor } from '@/lib/vendors';
+import { Vendor } from '@/lib/types/vendor';
 
 interface VendorsFeaturedBlockProps {
   vendors: Vendor[];
@@ -45,8 +45,8 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
                   <Image
-                    src={vendor.coverImage}
-                    alt={vendor.name}
+                    src={vendor.profile_photo_url || '/placeholder-vendor.jpg'}
+                    alt={vendor.business_name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -66,7 +66,7 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
                 {/* Content */}
                 <div className="p-4">
                   <h3 className="font-semibold text-[#11190C] text-lg mb-1 group-hover:text-[#D9FF0A] transition-colors">
-                    {vendor.name}
+                    {vendor.business_name}
                   </h3>
 
                   <div className="flex items-center gap-4 text-sm text-[#787664] mb-3">
@@ -78,17 +78,15 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
                       <div className="flex items-center gap-1">
                         <FiStar className="w-4 h-4 fill-[#D9FF0A] text-[#D9FF0A]" />
                         <span>{vendor.rating}</span>
-                        {vendor.reviewsCount && (
-                          <span className="text-[#CAC4B7]">({vendor.reviewsCount})</span>
-                        )}
+                        {/* TODO: Add reviews count to schema */}
                       </div>
                     )}
                   </div>
 
                   {/* Price range */}
-                  {vendor.startingPrice && (
+                  {vendor.starting_price && (
                     <div className="text-[#11190C] font-medium">
-                      From ${vendor.startingPrice.toLocaleString()}+
+                      From MAD {vendor.starting_price.toLocaleString()}+
                     </div>
                   )}
                 </div>

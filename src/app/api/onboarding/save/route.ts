@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const existingData = (profile?.onboarding_data as Record<string, any>) || {}
     const updatedOnboardingData = {
       ...existingData,
-      [`step_${step}`]: data
+      [step]: data
     }
 
     // Prepare update data with denormalized fields
@@ -50,55 +50,41 @@ export async function POST(request: NextRequest) {
       updated_at: new Date().toISOString()
     }
 
-    // Map step data to denormalized database fields
-    switch (`step_${step}`) {
-      case 'step_names':
+    // Map step data to denormalized database fields based on new data model
+    switch (step) {
+      case 'basicInfo':
         if (data.firstName) updateData.first_name = data.firstName
-        if (data.partnerFirstName !== undefined) updateData.partner_name = data.partnerFirstName || null
-        if (data.phone) updateData.phone = data.phone
+        if (data.partnerName !== undefined) updateData.partner_name = data.partnerName || null
         break
 
-      case 'step_location':
-        if (data.city) updateData.city = data.city
+      case 'city':
+        if (data) updateData.city = data
         break
 
-      case 'step_style':
-        if (data.style) updateData.style = data.style
-        break
-
-      case 'step_timeline':
-        if (data.timeline) {
-          if (data.timeline.dateType === 'picked' && data.timeline.weddingDate) {
-            updateData.wedding_date = data.timeline.weddingDate
-          } else if (data.timeline.dateType === 'monthYear') {
-            updateData.wedding_month = data.timeline.month
-            updateData.wedding_year = data.timeline.year
+      case 'date':
+        if (data.weddingDate) {
+          if (data.weddingDateType === 'exact') {
+            updateData.wedding_date = data.weddingDate
           }
         }
         break
 
-      case 'step_guests':
-        if (data.guests?.guestCount) {
-          updateData.guest_count_band = data.guests.guestCount
-        }
+      case 'guests':
+        if (data) updateData.guest_count = data
         break
 
-      case 'step_services':
-        if (data.services) {
-          updateData.services_needed = data.services
-        }
+      case 'budget':
+        if (data.currency) updateData.currency = data.currency
+        if (data.budgetTotal) updateData.budget_total = data.budgetTotal
         break
 
-      case 'step_budget':
-        if (data.budgetBand) {
-          updateData.budget_band = data.budgetBand
-          const madValues = getBudgetBandMADValues(data.budgetBand as BudgetBandKey)
-          updateData.budget_min_mad = madValues.min
-          updateData.budget_max_mad = madValues.max
-        }
-        if (data.currency) {
-          updateData.currency_preference = data.currency
-        }
+      case 'style':
+        if (data.styles) updateData.styles = data.styles
+        if (data.priorities) updateData.priorities = data.priorities
+        break
+
+      case 'services':
+        if (data.servicesNeeded) updateData.services_needed = data.servicesNeeded
         break
     }
 

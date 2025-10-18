@@ -1,170 +1,83 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { OnboardingData } from '@/app/[locale]/onboarding/page';
+import { motion } from 'framer-motion';
+import { Calendar } from 'lucide-react';
+import { inputStyles } from '../utils/classes';
+import type { OnboardingData } from '../schemas/onboarding.schemas';
 
 interface StepDateProps {
   data: OnboardingData;
-  onSave: (step: string, data: any, skip?: boolean) => void;
-  onBack?: () => void;
+  currentStepData: any;
+  onContinue: (data: any) => Promise<boolean>;
+  onSkip: () => void;
   isSaving: boolean;
 }
 
-export default function StepDate({ data, onSave, isSaving }: StepDateProps) {
-  const t = useTranslations('onboarding');
-  const [dateType, setDateType] = useState<'picked' | 'monthYear' | 'unsure'>(
-    data.timeline?.dateType || 'unsure'
-  );
-  const [weddingDate, setWeddingDate] = useState(data.timeline?.weddingDate || '');
-  const [month, setMonth] = useState(data.timeline?.month || new Date().getMonth() + 1);
-  const [year, setYear] = useState(data.timeline?.year || new Date().getFullYear() + 1);
+export function StepDate({ data, currentStepData, onContinue, isSaving }: StepDateProps) {
+  const [selectedDate, setSelectedDate] = useState(currentStepData?.date || '');
 
-  const isValid =
-    dateType === 'unsure' ||
-    (dateType === 'picked' && weddingDate) ||
-    (dateType === 'monthYear' && month && year);
-
-  const handleNext = () => {
-    if (isValid) {
-      const timelineData: any = { dateType };
-
-      if (dateType === 'picked' && weddingDate) {
-        timelineData.weddingDate = weddingDate;
-      } else if (dateType === 'monthYear') {
-        timelineData.month = month;
-        timelineData.year = year;
-      }
-
-      onSave('date', timelineData);
-    }
+  const handleContinue = async () => {
+    if (!selectedDate) return;
+    await onContinue({ date: selectedDate });
   };
 
-  const handleSkip = () => {
-    onSave('date', { dateType: 'unsure' }, true);
-  };
+  // Calculate minimum date (today + 30 days for planning)
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() + 30);
+  const minDateString = minDate.toISOString().split('T')[0];
+
+  // Calculate maximum date (2 years from now)
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() + 2);
+  const maxDateString = maxDate.toISOString().split('T')[0];
 
   return (
-    <div className="p-8 md:p-12">
-      <div className="max-w-md mx-auto">
-        {/* Icon */}
-        <div className="w-16 h-16 bg-[#D9FF0A] rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-2xl">📅</span>
+    <motion.form
+      id="step-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleContinue();
+      }}
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Date Picker */}
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto mb-4">
+            <Calendar className="w-8 h-8 text-wervice-ink" />
+          </div>
+          <h3 className="text-xl font-semibold text-wervice-ink">
+            When is your wedding day?
+          </h3>
+          <p className="text-wervice-taupe max-w-md mx-auto">
+            Select your wedding date to help us find available vendors and provide accurate recommendations.
+          </p>
         </div>
 
-        {/* Title */}
-        <h1 className="text-2xl md:text-3xl font-bold text-[#11190C] text-center mb-3">
-          {t('date.title')}
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-[#787664] text-center mb-8">
-          {t('date.subtitle')}
-        </p>
-
-        {/* Date Type Selection */}
-        <div className="space-y-4 mb-8">
-          {/* Picked Date */}
-          <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#D9FF0A] cursor-pointer">
+        <div className="max-w-sm mx-auto space-y-4">
+          <div>
+            <label className="text-sm font-medium text-wervice-ink block mb-2">
+              Wedding Date
+            </label>
             <input
-              type="radio"
-              name="dateType"
-              value="picked"
-              checked={dateType === 'picked'}
-              onChange={(e) => setDateType(e.target.value as any)}
-              className="w-4 h-4 text-[#D9FF0A] focus:ring-[#D9FF0A]"
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              min={minDateString}
+              max={maxDateString}
+              className={inputStyles.base}
+              required
             />
-            <div className="ml-4 flex-1">
-              <div className="font-medium text-[#11190C]">{t('date.picked')}</div>
-              {dateType === 'picked' && (
-                <input
-                  type="date"
-                  value={weddingDate}
-                  onChange={(e) => setWeddingDate(e.target.value)}
-                  className="mt-2 w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#D9FF0A] focus:border-transparent"
-                  min={new Date().toISOString().split('T')[0]}
-                />
-              )}
-            </div>
-          </label>
-
-          {/* Month and Year */}
-          <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#D9FF0A] cursor-pointer">
-            <input
-              type="radio"
-              name="dateType"
-              value="monthYear"
-              checked={dateType === 'monthYear'}
-              onChange={(e) => setDateType(e.target.value as any)}
-              className="w-4 h-4 text-[#D9FF0A] focus:ring-[#D9FF0A]"
-            />
-            <div className="ml-4 flex-1">
-              <div className="font-medium text-[#11190C]">{t('date.monthYear')}</div>
-              {dateType === 'monthYear' && (
-                <div className="flex gap-3 mt-2">
-                  <select
-                    value={month}
-                    onChange={(e) => setMonth(parseInt(e.target.value))}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#D9FF0A] focus:border-transparent"
-                  >
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <option key={i + 1} value={i + 1}>
-                        {new Date(0, i).toLocaleString('default', { month: 'long' })}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={year}
-                    onChange={(e) => setYear(parseInt(e.target.value))}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#D9FF0A] focus:border-transparent"
-                  >
-                    {Array.from({ length: 5 }, (_, i) => {
-                      const y = new Date().getFullYear() + i;
-                      return (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-              )}
-            </div>
-          </label>
-
-          {/* Not sure */}
-          <label className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#D9FF0A] cursor-pointer">
-            <input
-              type="radio"
-              name="dateType"
-              value="unsure"
-              checked={dateType === 'unsure'}
-              onChange={(e) => setDateType(e.target.value as any)}
-              className="w-4 h-4 text-[#D9FF0A] focus:ring-[#D9FF0A]"
-            />
-            <span className="ml-4 font-medium text-[#11190C]">{t('date.unsure')}</span>
-          </label>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex gap-4">
-          <button
-            onClick={handleSkip}
-            disabled={isSaving}
-            className="flex-1 border-2 border-gray-300 hover:border-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-gray-600 font-medium py-3 px-6 rounded-full transition-colors"
-          >
-            {t('common.skip')}
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={!isValid || isSaving}
-            className="flex-1 bg-[#D9FF0A] hover:bg-[#D9FF0A]/90 disabled:bg-gray-200 disabled:cursor-not-allowed text-[#11190C] font-semibold py-3 px-6 rounded-full transition-colors"
-          >
-            {isSaving ? t('common.saving') : t('common.next')}
-          </button>
+            <p className="text-xs text-wervice-taupe mt-2">
+              We recommend planning at least 6-12 months in advance for the best vendor availability.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.form>
   );
 }

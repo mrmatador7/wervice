@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useLocale } from '@/contexts/LocaleContext';
 import { useTranslations } from 'next-intl';
+import { VALID_CATEGORY_SLUGS, labelForCategory } from '@/lib/categories';
 
 
 interface Category {
@@ -17,56 +18,27 @@ export default function CategoriesSection() {
     const { locale } = useLocale();
     const t = useTranslations('home');
 
-    const categories: Category[] = [
-        {
-            name: t('categories.names.venues'),
-            count: 124,
-            image: '/categories/venues.png',
-            href: `/${locale}/categories/venues`,
-        },
-        {
-            name: t('categories.names.catering'),
-            count: 87,
-            image: '/categories/Catering.png',
-            href: `/${locale}/categories/catering`,
-        },
-        {
-            name: t('categories.names.photoVideo'),
-            count: 156,
-            image: '/categories/photo.png',
-            href: `/${locale}/categories/photo-video`,
-        },
-        {
-            name: t('categories.names.eventPlanner'),
-            count: 92,
-            image: '/categories/event planner.png',
-            href: `/${locale}/categories/planning`,
-        },
-        {
-            name: t('categories.names.beauty'),
-            count: 78,
-            image: '/categories/beauty.png',
-            href: `/${locale}/categories/beauty`,
-        },
-        {
-            name: t('categories.names.decor'),
-            count: 134,
-            image: '/categories/decor.png',
-            href: `/${locale}/categories/decor`,
-        },
-        {
-            name: t('categories.names.music'),
-            count: 67,
-            image: '/categories/music.png',
-            href: `/${locale}/categories/music`,
-        },
-        {
-            name: t('categories.names.dresses'),
-            count: 189,
-            image: '/categories/Dresses.png',
-            href: `/${locale}/categories/dresses`,
-        },
-    ];
+    const categories: Category[] = VALID_CATEGORY_SLUGS.map(slug => {
+        // Map slugs to their display URLs and images
+        const categoryMappings: Record<string, { href: string; image: string; count: number }> = {
+            venues: { href: 'venues', image: '/categories/venues.png', count: 124 },
+            catering: { href: 'catering', image: '/categories/Catering.png', count: 87 },
+            photo_video: { href: 'photo_video', image: '/categories/photo.png', count: 156 },
+            event_planner: { href: 'event_planner', image: '/categories/event planner.png', count: 92 },
+            beauty: { href: 'beauty', image: '/categories/beauty.png', count: 78 },
+            decor: { href: 'decor', image: '/categories/decor.png', count: 134 },
+            music: { href: 'music', image: '/categories/music.png', count: 67 },
+            dresses: { href: 'dresses', image: '/categories/Dresses.png', count: 189 },
+        };
+
+        const mapping = categoryMappings[slug];
+        return {
+            name: labelForCategory(slug),
+            count: mapping.count,
+            image: mapping.image,
+            href: `/${locale}/vendors/${mapping.href}`,
+        };
+    });
 
     return (
         <section className="pt-12 md:pt-16 px-4 md:px-6 lg:px-8 bg-[#F7F8FB]">

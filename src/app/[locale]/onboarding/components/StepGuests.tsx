@@ -1,96 +1,143 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { OnboardingData } from '@/app/[locale]/onboarding/page';
+import { motion } from 'framer-motion';
+import { Users, Minus, Plus } from 'lucide-react';
+import { inputStyles } from '../utils/classes';
+import type { OnboardingData } from '../schemas/onboarding.schemas';
 
 interface StepGuestsProps {
   data: OnboardingData;
-  onSave: (step: string, data: any, skip?: boolean) => void;
-  onBack?: () => void;
+  currentStepData: any;
+  onContinue: (data: any) => Promise<boolean>;
+  onSkip: () => void;
   isSaving: boolean;
 }
 
-const GUEST_OPTIONS = [
-  { value: '0-50', labelKey: '0-50' },
-  { value: '51-100', labelKey: '51-100' },
-  { value: '101-200', labelKey: '101-200' },
-  { value: '200+', labelKey: '200+' },
-  { value: 'unsure', labelKey: 'unsure' }
-];
+export function StepGuests({ data, currentStepData, onContinue, isSaving }: StepGuestsProps) {
+  const [guestCount, setGuestCount] = useState(currentStepData?.count || 50);
 
-export default function StepGuests({ data, onSave, isSaving }: StepGuestsProps) {
-  const t = useTranslations('onboarding');
-  const [guestCount, setGuestCount] = useState(data.guests?.guestCount || '');
+  const handleContinue = async () => {
+    await onContinue({ count: guestCount });
+  };
 
-  const isValid = guestCount.length > 0;
-
-  const handleNext = () => {
-    if (isValid) {
-      onSave('guests', { guestCount });
+  const increment = () => {
+    if (guestCount < 800) {
+      setGuestCount((prev: number) => prev + 10);
     }
   };
 
-  const handleSkip = () => {
-    onSave('guests', { guestCount: 'unsure' }, true);
+  const decrement = () => {
+    if (guestCount > 20) {
+      setGuestCount((prev: number) => Math.max(20, prev - 10));
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value >= 20 && value <= 800) {
+      setGuestCount(value);
+    }
   };
 
   return (
-    <div className="p-8 md:p-12">
-      <div className="max-w-md mx-auto">
-        {/* Icon */}
-        <div className="w-16 h-16 bg-[#D9FF0A] rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-2xl">👥</span>
+    <motion.form
+      id="step-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleContinue();
+      }}
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Guest Counter */}
+      <div className="text-center space-y-6">
+        <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto">
+          <Users className="w-8 h-8 text-wervice-ink" />
         </div>
 
-        {/* Title */}
-        <h1 className="text-2xl md:text-3xl font-bold text-[#11190C] text-center mb-3">
-          {t('guests.title')}
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-[#787664] text-center mb-8">
-          {t('guests.subtitle')}
-        </p>
-
-        {/* Guest Options */}
-        <div className="space-y-3 mb-8">
-          {GUEST_OPTIONS.map((option) => (
-            <label key={option.value} className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#D9FF0A] cursor-pointer transition-colors">
-              <input
-                type="radio"
-                name="guestCount"
-                value={option.value}
-                checked={guestCount === option.value}
-                onChange={(e) => setGuestCount(e.target.value)}
-                className="w-4 h-4 text-[#D9FF0A] focus:ring-[#D9FF0A]"
-              />
-              <span className="ml-3 text-[#11190C] font-medium">
-                {t(`guests.${option.labelKey}`)}
-              </span>
-            </label>
-          ))}
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-wervice-ink">
+            How many guests are you expecting?
+          </h3>
+          <p className="text-wervice-taupe max-w-md mx-auto">
+            This helps us recommend venues and caterers that can accommodate your group size.
+          </p>
         </div>
 
-        {/* Buttons */}
-        <div className="flex gap-4">
+        {/* Counter Controls */}
+        <div className="flex items-center justify-center gap-6">
           <button
-            onClick={handleSkip}
-            disabled={isSaving}
-            className="flex-1 border-2 border-gray-300 hover:border-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-gray-600 font-medium py-3 px-6 rounded-full transition-colors"
+            type="button"
+            onClick={decrement}
+            disabled={guestCount <= 20}
+            className="w-12 h-12 bg-wv-gray2 hover:bg-wv-gray3 disabled:opacity-50 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-colors"
           >
-            {t('common.skip')}
+            <Minus className="w-5 h-5 text-wervice-taupe" />
           </button>
 
+          <div className="text-center">
+            <div className="text-4xl font-bold text-wervice-ink mb-2">
+              {guestCount}
+            </div>
+            <div className="text-sm text-wervice-taupe">guests</div>
+          </div>
+
           <button
-            onClick={handleNext}
-            disabled={!isValid || isSaving}
-            className="flex-1 bg-[#D9FF0A] hover:bg-[#D9FF0A]/90 disabled:bg-gray-200 disabled:cursor-not-allowed text-[#11190C] font-semibold py-3 px-6 rounded-full transition-colors"
+            type="button"
+            onClick={increment}
+            disabled={guestCount >= 800}
+            className="w-12 h-12 bg-wv-gray2 hover:bg-wv-gray3 disabled:opacity-50 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-colors"
           >
-            {isSaving ? t('common.saving') : t('common.next')}
+            <Plus className="w-5 h-5 text-wervice-taupe" />
           </button>
+        </div>
+
+        {/* Manual Input */}
+        <div className="max-w-xs mx-auto">
+          <label className="text-sm font-medium text-wervice-ink block mb-2">
+            Or enter exact number
+          </label>
+          <input
+            type="number"
+            value={guestCount}
+            onChange={handleInputChange}
+            min={20}
+            max={800}
+            className={inputStyles.base}
+          />
+        </div>
+
+        {/* Size Categories */}
+        <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto text-sm">
+          <div className={`p-3 rounded-lg border transition-colors ${
+            guestCount <= 100
+              ? 'bg-wervice-lime/10 border-wervice-lime text-wervice-ink'
+              : 'border-wv-gray3 text-wervice-taupe'
+          }`}>
+            <div className="font-medium">Intimate</div>
+            <div className="text-xs">20-100 guests</div>
+          </div>
+          <div className={`p-3 rounded-lg border transition-colors ${
+            guestCount > 100 && guestCount <= 300
+              ? 'bg-wervice-lime/10 border-wervice-lime text-wervice-ink'
+              : 'border-wv-gray3 text-wervice-taupe'
+          }`}>
+            <div className="font-medium">Medium</div>
+            <div className="text-xs">100-300 guests</div>
+          </div>
+          <div className={`p-3 rounded-lg border transition-colors ${
+            guestCount > 300
+              ? 'bg-wervice-lime/10 border-wervice-lime text-wervice-ink'
+              : 'border-wv-gray3 text-wervice-taupe'
+          }`}>
+            <div className="font-medium">Large</div>
+            <div className="text-xs">300+ guests</div>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.form>
   );
 }

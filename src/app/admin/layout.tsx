@@ -1,0 +1,19 @@
+import type { ReactNode } from 'react';
+import Sidebar from '@/components/admin/Sidebar';
+import Topbar from '@/components/admin/Topbar';
+
+export default function AdminLayout({ children }: { children: ReactNode }) {
+  return (
+    <div className="min-h-screen bg-wv.bg text-wv.text">
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 min-w-0">
+          <Topbar />
+          <div className="p-6 md:p-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

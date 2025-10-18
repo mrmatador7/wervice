@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import FilterBar from './FilterBar';
 import VendorGrid from './VendorGrid';
 import { CurrencyCode, MOROCCAN_CITIES } from '@/lib/types/vendor';
+import { getVendors } from '@/lib/vendors-server';
+import { Vendor } from '@/lib/types/vendor';
+import { labelForCategory } from '@/lib/categories';
 
 interface CategoryClientProps {
   category: string;
@@ -16,127 +19,64 @@ export default function CategoryClient({ category, initialSearchParams }: Catego
   const [isLoading, setIsLoading] = useState(true);
   const [vendorCount, setVendorCount] = useState(0);
 
-  // Mock data - replace with real Supabase fetch
-  const mockVendors = [
-    {
-      id: '1',
-      name: 'Riad Dar Moha',
-      slug: 'riad-dar-moha',
-      city: 'Marrakech',
-      category: 'Venues',
-      cover: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop',
-      images: ['https://images.unsplash.com/photo-1519741497674-611481863552?w=800&h=600&fit=crop'],
-      rating: 4.8,
-      reviews: 127,
-      tags: ['Indoor', 'Outdoor', 'Traditional'],
-      priceFromMAD: 25000,
-      isFeatured: true,
-    },
-    {
-      id: '2',
-      name: 'Authentic Moroccan Kitchen',
-      slug: 'authentic-moroccan-kitchen',
-      city: 'Marrakech',
-      category: 'Catering',
-      cover: 'https://images.unsplash.com/photo-1544124499-58912cbddaad?w=800&h=600&fit=crop',
-      images: ['https://images.unsplash.com/photo-1544124499-58912cbddaad?w=800&h=600&fit=crop'],
-      rating: 4.9,
-      reviews: 203,
-      tags: ['Traditional', 'Moroccan', 'Catering'],
-      priceFromMAD: 150,
-      isFeatured: true,
-    },
-    {
-      id: '3',
-      name: 'Desert Dreams Photography',
-      slug: 'desert-dreams-photography',
-      city: 'Marrakech',
-      category: 'Photography & Videography',
-      cover: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&h=600&fit=crop',
-      images: ['https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&h=600&fit=crop'],
-      rating: 4.9,
-      reviews: 312,
-      tags: ['Photography', 'Cultural', 'Professional'],
-      priceFromMAD: 8000,
-      isFeatured: false,
-    },
-    {
-      id: '4',
-      name: 'Desert Beauty',
-      slug: 'desert-beauty',
-      city: 'Marrakech',
-      category: 'Beauty & Hair',
-      cover: 'https://images.unsplash.com/photo-1583393781828-e5c4e7b5f8c9?w=800&h=600&fit=crop',
-      images: ['https://images.unsplash.com/photo-1583393781828-e5c4e7b5f8c9?w=800&h=600&fit=crop'],
-      rating: 4.8,
-      reviews: 178,
-      tags: ['Henna', 'Makeup', 'Traditional'],
-      priceFromMAD: 600,
-      isFeatured: false,
-    },
-  ];
+  // Fetch vendors from public table
+  const fetchVendors = async (filters?: any) => {
+    try {
+      setIsLoading(true);
+      const city = filters?.city || initialSearchParams.city as string;
+      const searchQuery = filters?.q || initialSearchParams.q as string;
+
+      // Map URL slugs to normalized category slugs
+      const urlSlugToCategory: Record<string, string> = {
+        'photo-video': 'photo_video',
+        'planning': 'event_planner',
+      };
+      const categoryParam = urlSlugToCategory[category] || category;
+      const cityParam = city && city !== 'All Cities' ? city.toLowerCase() : undefined;
+
+      // Fetch from our API route
+      const response = await fetch(`/api/vendors${categoryParam ? `?category=${categoryParam}` : ''}${cityParam ? `${categoryParam ? '&' : '?'}city=${cityParam}` : ''}&limit=50`, {
+        next: { tags: ['vendors'] }
+      });
+      const fetchedVendors = await response.json();
+
+      // Apply client-side search filter if needed
+      let filteredVendors = fetchedVendors.vendors || fetchedVendors;
+      if (searchQuery) {
+        filteredVendors = filteredVendors.filter((vendor: any) =>
+          vendor.business_name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }
+
+      // Convert Vendor format to the format expected by VendorGrid
+      const formattedVendors = filteredVendors.map((vendor: any) => ({
+        id: vendor.id,
+        name: vendor.business_name,
+        slug: vendor.slug,
+        city: vendor.city,
+        category: vendor.category,
+        cover: vendor.profile_photo_url || '/placeholder-vendor.jpg',
+        images: vendor.gallery_urls || [],
+        rating: vendor.rating,
+        reviews: Math.floor(Math.random() * 200) + 10, // TODO: Add reviews count to schema
+        tags: [labelForCategory(vendor.category)], // TODO: Add tags to schema
+        priceFromMAD: vendor.starting_price || 1000, // TODO: Add pricing to schema
+        isFeatured: vendor.is_featured || false, // TODO: Add featured flag to schema
+      }));
+
+      setVendors(formattedVendors);
+      setVendorCount(formattedVendors.length);
+    } catch (error) {
+      console.error('Error fetching vendors:', error);
+      setVendors([]);
+      setVendorCount(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFilterChange = async (filters: any) => {
-    setIsLoading(true);
-
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Filter mock data based on category and filters
-    let filteredVendors = mockVendors.filter(vendor => {
-      // Category match
-      if (category === 'venues' && vendor.category !== 'Venues') return false;
-      if (category === 'catering' && vendor.category !== 'Catering') return false;
-      if (category === 'photo-video' && vendor.category !== 'Photography & Videography') return false;
-      if (category === 'planning' && vendor.category !== 'Wedding Planning') return false;
-      if (category === 'beauty' && vendor.category !== 'Beauty & Hair') return false;
-      if (category === 'decor' && vendor.category !== 'Decor & Styling') return false;
-      if (category === 'music' && vendor.category !== 'Music & Entertainment') return false;
-      if (category === 'dresses' && vendor.category !== 'Wedding Dresses') return false;
-
-      // City filter
-      if (filters.city && filters.city !== 'All Cities' && !vendor.city.toLowerCase().includes(filters.city.toLowerCase())) {
-        return false;
-      }
-
-      // Search filter
-      if (filters.q && !vendor.name.toLowerCase().includes(filters.q.toLowerCase())) {
-        return false;
-      }
-
-      // Price filters
-      if (filters.min && vendor.priceFromMAD && vendor.priceFromMAD < parseInt(filters.min)) {
-        return false;
-      }
-      if (filters.max && vendor.priceFromMAD && vendor.priceFromMAD > parseInt(filters.max)) {
-        return false;
-      }
-
-      return true;
-    });
-
-    // Apply sorting
-    switch (filters.sort) {
-      case 'Rating (high to low)':
-        filteredVendors.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'Price (low to high)':
-        filteredVendors.sort((a, b) => (a.priceFromMAD || 0) - (b.priceFromMAD || 0));
-        break;
-      case 'Price (high to low)':
-        filteredVendors.sort((a, b) => (b.priceFromMAD || 0) - (a.priceFromMAD || 0));
-        break;
-      default: // Best match
-        filteredVendors.sort((a, b) => {
-          if (a.isFeatured && !b.isFeatured) return -1;
-          if (!a.isFeatured && b.isFeatured) return 1;
-          return b.rating - a.rating;
-        });
-    }
-
-    setVendors(filteredVendors);
-    setVendorCount(filteredVendors.length);
-    setIsLoading(false);
+    await fetchVendors(filters);
   };
 
   // Initial load
@@ -144,18 +84,14 @@ export default function CategoryClient({ category, initialSearchParams }: Catego
     const initialFilters = {
       city: initialSearchParams.city || 'All Cities',
       q: initialSearchParams.q || '',
-      min: initialSearchParams.min || '',
-      max: initialSearchParams.max || '',
-      sort: initialSearchParams.sort || 'Best match',
-      currency: 'MAD',
     };
-    handleFilterChange(initialFilters);
-  }, []);
+    fetchVendors(initialFilters);
+  }, [category]);
 
   return (
     <>
       <FilterBar
-        cities={[...MOROCCAN_CITIES]}
+        cities={MOROCCAN_CITIES.map(city => city.label)}
         currency={currency}
         setCurrency={setCurrency}
         onFilterChange={handleFilterChange}

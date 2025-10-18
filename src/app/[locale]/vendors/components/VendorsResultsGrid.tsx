@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiStar, FiMessageCircle, FiHeart } from 'react-icons/fi';
-import { Vendor } from '@/lib/vendors';
+import { Vendor } from '@/lib/types/vendor';
+import { labelForCategory } from '@/lib/categories';
 
 interface VendorsResultsGridProps {
   vendors: Vendor[];
@@ -19,19 +20,25 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
   const pathname = usePathname();
   const currentLocale = pathname.split('/')[1] || 'en';
 
-  const whatsappUrl = vendor.whatsapp ? `https://wa.me/${vendor.whatsapp}` : null;
+  const whatsappUrl = vendor.phone ? `https://wa.me/${vendor.phone}` : null;
 
   return (
     <div className="bg-white rounded-2xl border border-[#CAC4B7] shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
       {/* Image */}
       <div className="relative h-[200px] md:h-[210px] lg:h-[220px] overflow-hidden">
-        <Image
-          src={vendor.coverImage}
-          alt={vendor.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
+        {vendor.profile_photo_url && vendor.profile_photo_url.trim() !== '' ? (
+          <Image
+            src={vendor.profile_photo_url}
+            alt={vendor.business_name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <div className="text-gray-400 text-sm">No image</div>
+          </div>
+        )}
 
         {/* Gradient overlay for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -39,7 +46,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
         {/* Category badge */}
         <div className="absolute top-3 left-3">
           <span className="inline-flex items-center px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-slate-700 rounded-full">
-            {vendor.category}
+            {labelForCategory(vendor.category)}
           </span>
         </div>
 
@@ -58,7 +65,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
         </button>
 
         {/* Featured/New badges */}
-        {vendor.featured && (
+        {vendor.is_featured && (
           <div className="absolute top-3 right-14">
             <span className="inline-flex items-center px-2 py-1 bg-[#D9FF0A] text-xs font-medium text-[#11190C] rounded-full">
               Featured
@@ -73,7 +80,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
           <div className="flex-1 min-w-0">
             <Link href={`/${currentLocale}/vendors/${vendor.slug}`}>
               <h3 className="font-semibold text-[#11190C] text-lg mb-1 hover:text-[#D9FF0A] transition-colors truncate">
-                {vendor.name}
+                {vendor.business_name}
               </h3>
             </Link>
             <p className="text-[#787664] text-sm">{vendor.city}</p>
@@ -87,16 +94,14 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
               <FiStar className="w-4 h-4 fill-[#D9FF0A] text-[#D9FF0A]" />
               <span className="font-medium text-[#11190C]">{vendor.rating}</span>
             </div>
-            {vendor.reviewsCount && (
-              <span className="text-[#787664] text-sm">({vendor.reviewsCount} reviews)</span>
-            )}
+            {/* TODO: Add reviews count */}
           </div>
         )}
 
         {/* Price range */}
-        {vendor.startingPrice && (
+        {vendor.starting_price && (
           <div className="text-[#11190C] font-medium mb-3">
-            From ${vendor.startingPrice.toLocaleString()}
+            From MAD {vendor.starting_price.toLocaleString()}
           </div>
         )}
 
@@ -121,7 +126,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-[#CAC4B7] hover:border-[#787664] text-[#787664] hover:text-[#11190C] font-medium rounded-xl transition-colors text-sm"
-              aria-label={`Contact ${vendor.name} on WhatsApp`}
+              aria-label={`Contact ${vendor.business_name} on WhatsApp`}
             >
               <FiMessageCircle className="w-4 h-4" />
             </a>

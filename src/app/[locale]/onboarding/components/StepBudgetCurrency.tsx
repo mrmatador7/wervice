@@ -1,149 +1,194 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { OnboardingData } from '@/app/[locale]/onboarding/page';
-import { BUDGET_BANDS, getBudgetBandLabel, type Currency, type BudgetBandKey, getBudgetBandMADValues, convertToMAD } from '@/lib/currency';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { DollarSign, TrendingUp } from 'lucide-react';
+import { inputStyles } from '../utils/classes';
+import type { OnboardingData, Currency } from '../schemas/onboarding.schemas';
 
 interface StepBudgetCurrencyProps {
   data: OnboardingData;
-  onSave: (step: string, data: any, skip?: boolean) => void;
-  onBack?: () => void;
+  currentStepData: any;
+  onContinue: (data: any) => Promise<boolean>;
+  onSkip: () => void;
   isSaving: boolean;
 }
 
-const CURRENCIES: { value: Currency; label: string }[] = [
-  { value: 'MAD', label: 'MAD' },
-  { value: 'EUR', label: 'EUR' },
-  { value: 'USD', label: 'USD' }
+const CURRENCIES: Array<{ value: Currency; label: string; symbol: string }> = [
+  { value: 'MAD', label: 'Moroccan Dirham', symbol: 'MAD' },
+  { value: 'EUR', label: 'Euro', symbol: '€' },
+  { value: 'USD', label: 'US Dollar', symbol: '$' },
 ];
 
-export default function StepBudgetCurrency({ data, onSave, isSaving }: StepBudgetCurrencyProps) {
-  const t = useTranslations('onboarding');
-  const [currency, setCurrency] = useState<Currency>(
-    (data.budget?.currency as Currency) || 'MAD'
-  );
-  const [budgetBand, setBudgetBand] = useState<BudgetBandKey | ''>(
-    (data.budget?.budgetBand as BudgetBandKey) || ''
-  );
+const BUDGET_RANGES = [
+  { min: 1000, max: 50000, label: 'Intimate Celebration', description: 'Cozy gathering with essentials' },
+  { min: 50000, max: 150000, label: 'Standard Wedding', description: 'Complete wedding with all services' },
+  { min: 150000, max: 300000, label: 'Luxury Affair', description: 'High-end experience with premium services' },
+  { min: 300000, max: 1000000, label: 'Grand Celebration', description: 'Extravagant wedding with all luxuries' },
+];
 
-  const isValid = currency && budgetBand;
+export function StepBudgetCurrency({ data, currentStepData, onContinue, isSaving }: StepBudgetCurrencyProps) {
+  const [budget, setBudget] = useState(currentStepData?.budget || 100000);
+  const [currency, setCurrency] = useState<Currency>(currentStepData?.currency || 'MAD');
 
-  const handleNext = () => {
-    if (isValid && budgetBand) {
-      // Get MAD values for the selected budget band
-      const madValues = getBudgetBandMADValues(budgetBand);
-
-      onSave('budget', {
-        currency,
-        budgetBand,
-        // Store normalized MAD values for filtering
-        budgetMinMAD: madValues.min,
-        budgetMaxMAD: madValues.max
-      });
-    }
+  const handleContinue = async () => {
+    await onContinue({ budget, currency });
   };
 
-  const handleSkip = () => {
-    onSave('budget', {
-      currency: 'MAD',
-      budgetBand: 'unsure',
-      budgetMinMAD: null,
-      budgetMaxMAD: null
-    }, true);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
+
+  const getBudgetBreakdown = () => {
+    const breakdown = {
+      venue: Math.round(budget * 0.3),
+      catering: Math.round(budget * 0.25),
+      photography: Math.round(budget * 0.15),
+      decor: Math.round(budget * 0.15),
+      other: Math.round(budget * 0.15),
+    };
+    return breakdown;
+  };
+
+  const breakdown = getBudgetBreakdown();
 
   return (
-    <div className="p-8 md:p-12">
-      <div className="max-w-md mx-auto">
-        {/* Icon */}
-        <div className="w-16 h-16 bg-[#D9FF0A] rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-2xl">💰</span>
+    <motion.form
+      id="step-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleContinue();
+      }}
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Header */}
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto">
+          <DollarSign className="w-8 h-8 text-wervice-ink" />
         </div>
-
-        {/* Title */}
-        <h1 className="text-2xl md:text-3xl font-bold text-[#11190C] text-center mb-3">
-          {t('budget.title')}
-        </h1>
-
-        {/* Subtitle */}
-        <p className="text-[#787664] text-center mb-8">
-          {t('budget.subtitle')}
+        <h3 className="text-xl font-semibold text-wervice-ink">
+          What's your wedding budget?
+        </h3>
+        <p className="text-wervice-taupe max-w-md mx-auto">
+          This helps us recommend vendors within your price range and show realistic cost estimates.
         </p>
+      </div>
 
-        {/* Currency Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-[#11190C] mb-3">
-            {t('budget.currency')}
-          </label>
-          <div className="flex gap-2">
-            {CURRENCIES.map((curr) => (
-              <button
-                key={curr.value}
-                onClick={() => setCurrency(curr.value)}
-                className={`flex-1 py-3 px-4 border-2 rounded-lg font-medium transition-all ${currency === curr.value
-                    ? 'border-[#D9FF0A] bg-[#D9FF0A]/10 text-[#11190C]'
-                    : 'border-gray-200 hover:border-gray-300 text-[#787664]'
-                  }`}
-              >
-                {curr.label}
-              </button>
-            ))}
-          </div>
+      {/* Currency Selection */}
+      <div className="space-y-4">
+        <label className="text-sm font-medium text-wervice-ink">
+          Currency
+        </label>
+        <div className="grid grid-cols-3 gap-3">
+          {CURRENCIES.map((curr) => (
+            <button
+              key={curr.value}
+              type="button"
+              onClick={() => setCurrency(curr.value)}
+              className={`p-3 border rounded-lg text-center transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wervice-lime ${
+                currency === curr.value
+                  ? 'bg-wervice-lime text-wervice-ink border-transparent'
+                  : 'border-wv-gray3 bg-white hover:border-wervice-lime/50 text-wervice-ink'
+              }`}
+            >
+              <div className="font-medium text-sm">{curr.symbol}</div>
+              <div className="text-xs text-wervice-taupe mt-1">{curr.label}</div>
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Budget Bands */}
-        <div className="space-y-3 mb-8">
-          {(Object.keys(BUDGET_BANDS) as BudgetBandKey[]).map((key) => {
-            const isSelected = budgetBand === key;
-            const displayLabel = getBudgetBandLabel(key, currency);
+      {/* Budget Input */}
+      <div className="space-y-4">
+        <label className="text-sm font-medium text-wervice-ink">
+          Total Budget ({currency})
+        </label>
+        <input
+          type="number"
+          value={budget}
+          onChange={(e) => setBudget(parseInt(e.target.value) || 0)}
+          min={1000}
+          step={1000}
+          className={inputStyles.base}
+        />
+        <div className="text-sm text-wervice-taupe">
+          Current budget: {formatCurrency(budget)}
+        </div>
+      </div>
 
+      {/* Budget Ranges */}
+      <div className="space-y-4">
+        <h4 className="font-medium text-wervice-ink">Budget Categories</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {BUDGET_RANGES.map((range) => {
+            const isInRange = budget >= range.min && budget <= range.max;
             return (
-              <label key={key} className="flex items-center p-4 border border-gray-200 rounded-lg hover:border-[#D9FF0A] cursor-pointer transition-colors">
-                <input
-                  type="radio"
-                  name="budgetBand"
-                  value={key}
-                  checked={isSelected}
-                  onChange={(e) => setBudgetBand(key)}
-                  className="w-4 h-4 text-[#D9FF0A] focus:ring-[#D9FF0A]"
-                />
-                <span className={`ml-3 font-medium ${isSelected ? 'text-[#11190C]' : 'text-[#787664]'}`}>
-                  {displayLabel}
-                </span>
-              </label>
+              <div
+                key={range.label}
+                className={`p-4 border rounded-lg transition-all ${
+                  isInRange
+                    ? 'bg-wervice-lime/5 border-wervice-lime'
+                    : 'border-wv-gray3 bg-white'
+                }`}
+              >
+                <h5 className="font-medium text-wervice-ink">{range.label}</h5>
+                <p className="text-sm text-wervice-taupe mt-1">{range.description}</p>
+                <p className="text-xs text-wervice-taupe mt-2">
+                  {formatCurrency(range.min)} - {formatCurrency(range.max)}
+                </p>
+              </div>
             );
           })}
         </div>
-
-        {/* Note about conversion */}
-        {currency !== 'MAD' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800">
-              💡 Budget ranges are displayed in {currency} but will be stored in MAD for accurate vendor matching.
-            </p>
-          </div>
-        )}
-
-        {/* Buttons */}
-        <div className="flex gap-4">
-          <button
-            onClick={handleSkip}
-            disabled={isSaving}
-            className="flex-1 border-2 border-gray-300 hover:border-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-gray-600 font-medium py-3 px-6 rounded-full transition-colors"
-          >
-            {t('common.skip')}
-          </button>
-
-          <button
-            onClick={handleNext}
-            disabled={!isValid || isSaving}
-            className="flex-1 bg-[#D9FF0A] hover:bg-[#D9FF0A]/90 disabled:bg-gray-200 disabled:cursor-not-allowed text-[#11190C] font-semibold py-3 px-6 rounded-full transition-colors"
-          >
-            {isSaving ? t('common.saving') : t('common.next')}
-          </button>
-        </div>
       </div>
-    </div>
+
+      {/* Budget Breakdown */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-wervice-lime" />
+          <h4 className="font-medium text-wervice-ink">Estimated Breakdown</h4>
+        </div>
+
+        <div className="bg-wv-gray1 rounded-lg p-6 space-y-3">
+          <div className="flex justify-between text-sm">
+            <span className="text-wervice-taupe">Venue</span>
+            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.venue)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-wervice-taupe">Catering</span>
+            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.catering)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-wervice-taupe">Photography</span>
+            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.photography)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-wervice-taupe">Décor & Flowers</span>
+            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.decor)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-wervice-taupe">Other Services</span>
+            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.other)}</span>
+          </div>
+          <div className="border-t border-wv-gray3 pt-3 mt-4">
+            <div className="flex justify-between font-semibold text-wervice-ink">
+              <span>Total</span>
+              <span>{formatCurrency(budget)}</span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs text-wervice-taupe">
+          These are rough estimates. Actual costs may vary based on your location, preferences, and vendor choices.
+        </p>
+      </div>
+    </motion.form>
   );
 }

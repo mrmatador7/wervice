@@ -7,6 +7,7 @@ import { useLocale } from '@/contexts/LocaleContext';
 import { CURRENT_YEAR } from '@/lib/config';
 
 export default function Footer() {
+  // Suppress hydration warnings for this component as it may be affected by browser extensions
   const router = useRouter();
   const { locale: currentLocale } = useLocale();
   const t = useTranslations('footer');
@@ -56,7 +57,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-black text-white">
+    <footer className="bg-black text-white" suppressHydrationWarning>
       {/* Main Footer Content */}
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
@@ -151,13 +152,14 @@ export default function Footer() {
               {/* Social Media */}
               <div className="flex items-center gap-4">
                 <span className="text-white/60 text-sm mr-4">Follow Us:</span>
-                <div className="flex gap-3">
+                <div className="flex gap-3" suppressHydrationWarning>
                   <a
                     href="https://facebook.com/wervice"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-10 h-10 bg-[#d9ff0a] text-black rounded-full flex items-center justify-center hover:bg-white transition-colors duration-200"
                     aria-label="Follow us on Facebook"
+                    suppressHydrationWarning
                   >
                     📘
                   </a>
@@ -167,6 +169,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="w-10 h-10 bg-[#d9ff0a] text-black rounded-full flex items-center justify-center hover:bg-white transition-colors duration-200"
                     aria-label="Follow us on Instagram"
+                    suppressHydrationWarning
                   >
                     📷
                   </a>
@@ -176,6 +179,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="w-10 h-10 bg-[#d9ff0a] text-black rounded-full flex items-center justify-center hover:bg-white transition-colors duration-200"
                     aria-label="Follow us on Twitter"
+                    suppressHydrationWarning
                   >
                     🐦
                   </a>
@@ -185,6 +189,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="w-10 h-10 bg-[#d9ff0a] text-black rounded-full flex items-center justify-center hover:bg-white transition-colors duration-200"
                     aria-label="Follow us on LinkedIn"
+                    suppressHydrationWarning
                   >
                     💼
                   </a>

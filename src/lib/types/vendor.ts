@@ -4,27 +4,32 @@ export type CurrencyCode = 'MAD' | 'EUR' | 'USD';
 
 export interface Vendor {
   id: string;
-  name: string;
-  city: string;
-  category: string;
-  cover: string;
-  images?: string[];
-  rating: number;
-  reviews: number;
-  tags: string[];
-  priceFromMAD?: number; // base price in Moroccan Dirhams
-  isFeatured?: boolean;
   slug: string;
+  business_name: string;
+  category: string;
+  city: string;
+  rating: number;
+  starting_price?: number;
+  profile_photo_url?: string;
+  gallery_urls?: string[];
   description?: string;
+  is_featured?: boolean;
+  phone?: string;
+  email?: string;
+  plan_tier: string;
+  published: boolean;
+  created_at: string;
 }
 
 export interface VendorFilters {
   q?: string;
   city?: string;
-  min?: number;
-  max?: number;
-  sort?: 'best' | 'rating' | 'price_asc' | 'price_desc' | 'newest';
-  currency?: CurrencyCode;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  rating?: number;
+  sort?: 'relevance' | 'rating_desc' | 'price_asc' | 'price_desc' | 'newest';
+  page?: number;
 }
 
 export interface VendorSearchResult {
@@ -70,8 +75,8 @@ export type VendorCategory = typeof VENDOR_CATEGORIES[number];
 
 // Sort options
 export const SORT_OPTIONS = [
-  { value: 'best', label: 'Best match' },
-  { value: 'rating', label: 'Rating (high to low)' },
+  { value: 'relevance', label: 'Relevance' },
+  { value: 'rating_desc', label: 'Rating (high to low)' },
   { value: 'price_asc', label: 'Price (low to high)' },
   { value: 'price_desc', label: 'Price (high to low)' },
   { value: 'newest', label: 'Newest' }
@@ -79,23 +84,18 @@ export const SORT_OPTIONS = [
 
 export type SortOption = typeof SORT_OPTIONS[number]['value'];
 
-// Moroccan cities for filters
+// Moroccan cities for filters (matches database schema)
 export const MOROCCAN_CITIES = [
-  'All Cities',
-  'Casablanca',
-  'Marrakech',
-  'Rabat',
-  'Tangier',
-  'Agadir',
-  'Fès',
-  'Meknes',
-  'El Jadida',
-  'Kenitra',
-  'Ouarzazate',
-  'Chefchaouen',
-  'Essaouira',
-  'Salé',
-  'Tétouan'
+  { value: 'all', label: 'All Cities' },
+  { value: 'marrakech', label: 'Marrakech' },
+  { value: 'casablanca', label: 'Casablanca' },
+  { value: 'rabat', label: 'Rabat' },
+  { value: 'tangier', label: 'Tangier' },
+  { value: 'agadir', label: 'Agadir' },
+  { value: 'fes', label: 'Fès' },
+  { value: 'meknes', label: 'Meknes' },
+  { value: 'elJadida', label: 'El Jadida' },
+  { value: 'kenitra', label: 'Kenitra' }
 ] as const;
 
 export type MoroccanCity = typeof MOROCCAN_CITIES[number];

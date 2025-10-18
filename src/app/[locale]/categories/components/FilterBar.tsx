@@ -5,6 +5,8 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { FiSearch, FiX } from 'react-icons/fi';
 import { CurrencyCode, MOROCCAN_CITIES } from '@/lib/types/vendor';
 
+const CITIES_ARRAY = MOROCCAN_CITIES.map(city => city.label);
+
 interface FilterBarProps {
   cities: string[];
   currency: CurrencyCode;
@@ -117,7 +119,7 @@ export default function FilterBar({
               className="h-10 rounded-xl border border-neutral-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-wv-lime transition-colors"
               aria-label="Select city"
             >
-              {MOROCCAN_CITIES.map(c => (
+              {CITIES_ARRAY.map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>

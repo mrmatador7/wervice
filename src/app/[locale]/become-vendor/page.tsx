@@ -29,7 +29,11 @@ export default function VendorSignupPage() {
     <div className="min-h-screen">
       <Header />
       <main className="-mt-8 md:-mt-12">
-        <VendorHero />
+        <VendorHero
+          title="Become a Wervice Vendor"
+          subtitle="Join Morocco's premier wedding marketplace and connect with couples planning their big day"
+          totalCount={0}
+        />
         <WhyChooseWervice />
         <VendorHowItWorks />
         <Suspense fallback={<div>Loading pricing...</div>}>

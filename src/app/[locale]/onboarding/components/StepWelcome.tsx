@@ -1,63 +1,98 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { OnboardingData } from '@/app/[locale]/onboarding/page';
+import { motion } from 'framer-motion';
+import { Heart, Sparkles, MapPin, Star } from 'lucide-react';
+import type { OnboardingData } from '../schemas/onboarding.schemas';
 
 interface StepWelcomeProps {
   data: OnboardingData;
-  onSave: (step: string, data: any, skip?: boolean) => void;
-  onBack?: () => void;
+  currentStepData: any;
+  onContinue: (data: any) => Promise<boolean>;
+  onSkip: () => void;
   isSaving: boolean;
 }
 
-export default function StepWelcome({ onSave, isSaving }: StepWelcomeProps) {
-  const t = useTranslations('onboarding');
-
-  const handleStart = () => {
-    onSave('welcome', { started: true });
-  };
-
-  const handleSkip = () => {
-    onSave('welcome', { skipped: true }, true);
+export function StepWelcome({ onContinue, isSaving }: StepWelcomeProps) {
+  const handleContinue = async () => {
+    await onContinue({ started: true });
   };
 
   return (
-    <div className="p-8 md:p-12">
-      <div className="text-center">
-        {/* Icon */}
-        <div className="w-20 h-20 bg-[#D9FF0A] rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-3xl">💐</span>
+    <motion.form
+      id="step-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleContinue();
+      }}
+      className="text-center space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Floating Icon */}
+      <motion.div
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="mx-auto w-24 h-24 bg-wervice-lime rounded-full flex items-center justify-center"
+      >
+        <Heart className="w-12 h-12 text-wervice-ink" fill="currentColor" />
+      </motion.div>
+
+      {/* Main Heading */}
+      <div className="space-y-4">
+        <h2 className="text-4xl lg:text-5xl font-bold text-wervice-ink leading-tight">
+          Welcome to Wervice
+          <span className="inline-block ml-2">💐</span>
+        </h2>
+        <p className="text-xl text-wervice-taupe max-w-lg mx-auto leading-relaxed">
+          Let's plan a wedding as beautiful as your story. We'll guide you through every step with personalized recommendations.
+        </p>
+      </div>
+
+      {/* Feature Highlights */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div className="bg-white border border-wv-gray3 rounded-xl p-6 shadow-card hover:shadow-cardHover transition-shadow">
+          <div className="w-12 h-12 bg-wervice-lime/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Sparkles className="w-6 h-6 text-wervice-lime" />
+          </div>
+          <h3 className="font-semibold text-wervice-ink mb-2">Personalized Experience</h3>
+          <p className="text-sm text-wervice-taupe">Get tailored recommendations based on your preferences and location.</p>
         </div>
 
-        {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold text-[#11190C] mb-4">
-          {t('welcome.title')}
-        </h1>
+        <div className="bg-white border border-wv-gray3 rounded-xl p-6 shadow-card hover:shadow-cardHover transition-shadow">
+          <div className="w-12 h-12 bg-wervice-lime/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <MapPin className="w-6 h-6 text-wervice-lime" />
+          </div>
+          <h3 className="font-semibold text-wervice-ink mb-2">Local Expertise</h3>
+          <p className="text-sm text-wervice-taupe">Connect with trusted Moroccan wedding professionals in your area.</p>
+        </div>
 
-        {/* Subtitle */}
-        <p className="text-lg text-[#787664] mb-12 max-w-md mx-auto">
-          {t('welcome.subtitle')}
-        </p>
-
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-xs mx-auto">
-          <button
-            onClick={handleStart}
-            disabled={isSaving}
-            className="flex-1 bg-[#D9FF0A] hover:bg-[#D9FF0A]/90 disabled:bg-gray-200 disabled:cursor-not-allowed text-[#11190C] font-semibold py-4 px-8 rounded-full transition-colors"
-          >
-            {isSaving ? t('common.saving') : t('welcome.start')}
-          </button>
-
-          <button
-            onClick={handleSkip}
-            disabled={isSaving}
-            className="flex-1 border-2 border-[#D9FF0A] hover:bg-[#D9FF0A]/10 disabled:bg-gray-200 disabled:cursor-not-allowed text-[#11190C] font-semibold py-4 px-8 rounded-full transition-colors"
-          >
-            {t('welcome.skip')}
-          </button>
+        <div className="bg-white border border-wv-gray3 rounded-xl p-6 shadow-card hover:shadow-cardHover transition-shadow">
+          <div className="w-12 h-12 bg-wervice-lime/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <Star className="w-6 h-6 text-wervice-lime" />
+          </div>
+          <h3 className="font-semibold text-wervice-ink mb-2">Smart Planning</h3>
+          <p className="text-sm text-wervice-taupe">AI-powered suggestions and checklists to keep you organized.</p>
         </div>
       </div>
-    </div>
+
+      {/* Progress Indicator */}
+      <div className="pt-8">
+        <div className="flex justify-center items-center gap-2 text-xs text-wervice-taupe">
+          <div className="flex gap-1">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full ${
+                  i === 0 ? 'bg-wervice-lime' : 'bg-wv-gray3'
+                }`}
+              />
+            ))}
+          </div>
+          <span className="ml-2">10 steps to your perfect wedding</span>
+        </div>
+      </div>
+    </motion.form>
   );
 }
