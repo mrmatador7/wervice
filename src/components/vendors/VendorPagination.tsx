@@ -1,100 +1,65 @@
 'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface VendorPaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
 }
 
-export default function VendorPagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: VendorPaginationProps) {
-  if (totalPages <= 1) return null;
+export default function VendorPagination({ currentPage, totalPages }: VendorPaginationProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
+  const goToPage = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (page > 1) {
+      params.set('page', String(page));
     } else {
-      if (currentPage <= 3) {
-        pages.push(1, 2, 3, 4, '...', totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-      } else {
-        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-      }
+      params.delete('page');
     }
-
-    return pages;
+    router.push(`/en/vendors?${params.toString()}`);
   };
 
-  const pageNumbers = getPageNumbers();
+  if (totalPages <= 1) return null;
 
   return (
-    <nav
-      aria-label="Pagination"
-      className="flex items-center justify-center gap-2 mt-12"
-    >
-      {/* Previous Button */}
+    <div className="flex items-center justify-center gap-2">
+      {/* Previous */}
       <button
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => goToPage(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        aria-label="Previous page"
+        className="rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200"
       >
-        ← Previous
+        Previous
       </button>
 
       {/* Page Numbers */}
-      {pageNumbers.map((page, index) => {
-        if (page === '...') {
-          return (
-            <span
-              key={`ellipsis-${index}`}
-              className="px-3 py-2 text-sm text-gray-500"
-              aria-hidden="true"
-            >
-              ...
-            </span>
-          );
-        }
-
-        const isCurrent = page === currentPage;
-
+      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+        const pageNum = i + 1;
         return (
           <button
-            key={page}
-            onClick={() => onPageChange(page as number)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              isCurrent
-                ? "bg-black text-white"
-                : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+            key={pageNum}
+            onClick={() => goToPage(pageNum)}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              currentPage === pageNum
+                ? 'bg-black text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
-            aria-label={`Page ${page}`}
-            aria-current={isCurrent ? 'page' : undefined}
           >
-            {page}
+            {pageNum}
           </button>
         );
       })}
 
-      {/* Next Button */}
+      {/* Next */}
       <button
-        onClick={() => onPageChange(currentPage + 1)}
+        onClick={() => goToPage(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-        aria-label="Next page"
+        className="rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 text-gray-700 hover:bg-gray-200"
       >
-        Next →
+        Next
       </button>
-    </nav>
+    </div>
   );
 }

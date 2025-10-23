@@ -54,3 +54,50 @@ export const safeLocalStorage = {
     }
   }
 };
+
+/**
+ * Capitalize city names properly
+ */
+/**
+ * Basic capitalize function: capitalizes first letter and lowercases the rest
+ */
+function capitalizeWord(word: string): string {
+  if (!word) return '';
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+/**
+ * Capitalize city names properly, handling multi-word cities and null/undefined values
+ */
+export function capitalizeCity(city: string | null | undefined): string {
+  if (!city) return '';
+
+  // Handle special cases for multi-word cities
+  const specialCases: Record<string, string> = {
+    'eljadida': 'El Jadida',
+    'el jadida': 'El Jadida',
+    'eljada': 'El Jadida',
+    'elJadida': 'El Jadida',
+  };
+
+  const lowerCity = city.toLowerCase();
+  if (specialCases[lowerCity]) {
+    return specialCases[lowerCity];
+  }
+
+  // Default: capitalize first letter of each word
+  return city
+    .split(' ')
+    .map(capitalizeWord)
+    .join(' ');
+}
+
+/**
+ * Normalize city names for consistent filtering
+ */
+export function normalizeCity(city: string | undefined): string | undefined {
+  if (!city) return undefined;
+  
+  // Normalize to lowercase for consistent filtering
+  return city.toLowerCase().trim();
+}

@@ -30,17 +30,7 @@ export default function ResultGrid({ vendors, totalCount, currentFilters }: Resu
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7 lg:gap-8">
         {vendors.map((vendor) => (
-          <div key={vendor.id} className="h-full">
-            <VendorCard
-              href={`/vendors/${vendor.slug}`}
-              imageUrl={vendor.profile_photo_url || '/images/sample/venues-1.jpg'}
-              title={vendor.business_name}
-              category={labelForCategory(vendor.category)}
-              city={vendor.city.charAt(0).toUpperCase() + vendor.city.slice(1)}
-              price={vendor.starting_price ? `From MAD ${vendor.starting_price.toLocaleString()}` : "N/A"}
-              featured={vendor.is_featured}
-            />
-          </div>
+          <VendorCard key={vendor.id} vendor={vendor} />
         ))}
       </div>
     </div>

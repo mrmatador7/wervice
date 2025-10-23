@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from '@/contexts/LocaleContext';
+import { ChevronUp } from 'lucide-react';
 
 interface LanguageOption {
   code: string;
@@ -36,9 +37,16 @@ export default function LanguageCurrencyDropdown() {
   const { locale: currentLocale } = useLocale();
   const currentLanguage = languages.find(lang => lang.code === currentLocale) || languages[0];
 
-  // For now, we'll just show USD as selected - in a real app, this would be stored in user preferences or localStorage
+  // Load currency from localStorage on mount
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
   const currentCurrency = currencies.find(curr => curr.code === selectedCurrency) || currencies[0];
+
+  useEffect(() => {
+    const savedCurrency = localStorage.getItem('preferred-currency');
+    if (savedCurrency) {
+      setSelectedCurrency(savedCurrency);
+    }
+  }, []);
 
   const switchLocale = (locale: string) => {
     startTransition(() => {
@@ -52,74 +60,106 @@ export default function LanguageCurrencyDropdown() {
 
   const selectCurrency = (currencyCode: string) => {
     setSelectedCurrency(currencyCode);
-    // In a real app, you'd save this to user preferences/localStorage
-    // For now, we'll just close the dropdown
+    localStorage.setItem('preferred-currency', currencyCode);
     setIsOpen(false);
   };
 
   return (
     <div className="relative">
+      {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isPending}
-        className="hidden sm:inline-flex items-center gap-1 rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-[#11190C] shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-900 shadow-sm hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         aria-label="Language and currency selection"
+        aria-expanded={isOpen}
       >
-        <span className="text-base">{currentLanguage.flag}</span>
-        <span className="font-medium">{currentLanguage.code.toUpperCase()}</span>
-        <span className="text-gray-400">|</span>
-        <span className="font-medium">{currentCurrency.symbol}</span>
-        <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <span className="text-base leading-none">{currentLanguage.flag}</span>
+        <span className="font-semibold">{currentLanguage.code.toUpperCase()}</span>
+        <span className="text-zinc-400">|</span>
+        <span className="font-semibold">{currentCurrency.symbol}</span>
+        <ChevronUp
+          className={`h-3.5 w-3.5 text-zinc-500 transition-transform duration-200 ${
+            isOpen ? 'rotate-180' : ''
+          }`}
+        />
       </button>
 
+      {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white border border-black/10 rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-60 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Languages Section */}
-          <div className="px-3 py-2 border-b border-gray-100">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Language</div>
-            {languages.map((language) => (
-              <button
-                key={language.code}
-                onClick={() => switchLocale(language.code)}
-                className={`w-full flex items-center gap-3 px-2 py-2 text-left hover:bg-gray-50 transition-colors rounded ${currentLocale === language.code ? 'bg-gray-50' : ''
-                  }`}
-              >
-                <span className="text-lg">{language.flag}</span>
-                <span className="text-sm font-medium">{language.name}</span>
-              </button>
-            ))}
+          <div className="p-3">
+            <h3 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+              Language
+            </h3>
+            <div className="space-y-0.5">
+              {languages.map((language) => (
+                <button
+                  key={language.code}
+                  onClick={() => switchLocale(language.code)}
+                  disabled={isPending}
+                  className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors rounded-lg ${
+                    currentLocale === language.code
+                      ? 'bg-zinc-100'
+                      : 'hover:bg-zinc-50'
+                  } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <span className="text-lg leading-none">{language.flag}</span>
+                  <span className={`text-sm ${
+                    currentLocale === language.code ? 'font-bold' : 'font-medium'
+                  }`}>
+                    {language.name}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
+          {/* Divider */}
+          <div className="border-t border-zinc-200" />
+
           {/* Currency Section */}
-          <div className="px-3 py-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Currency</div>
-            {currencies.map((currency) => (
-              <button
-                key={currency.code}
-                onClick={() => selectCurrency(currency.code)}
-                className={`w-full flex items-center justify-between px-2 py-2 text-left hover:bg-gray-50 transition-colors rounded ${selectedCurrency === currency.code ? 'bg-gray-50' : ''
+          <div className="p-3">
+            <h3 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+              Currency
+            </h3>
+            <div className="space-y-0.5">
+              {currencies.map((currency) => (
+                <button
+                  key={currency.code}
+                  onClick={() => selectCurrency(currency.code)}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-left transition-colors rounded-lg ${
+                    selectedCurrency === currency.code
+                      ? 'bg-zinc-100'
+                      : 'hover:bg-zinc-50'
                   }`}
-              >
-                <span className="text-sm font-medium">{currency.name}</span>
-                <span className="text-sm text-gray-500">{currency.symbol}</span>
-              </button>
-            ))}
+                >
+                  <span className={`text-sm ${
+                    selectedCurrency === currency.code ? 'font-bold' : 'font-medium'
+                  }`}>
+                    {currency.name}
+                  </span>
+                  <span className={`text-xs ${
+                    selectedCurrency === currency.code 
+                      ? 'font-bold text-zinc-900' 
+                      : 'font-medium text-zinc-500'
+                  }`}>
+                    {currency.symbol}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Click outside to close */}
+      {/* Backdrop - Click outside to close */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => setIsOpen(false)}
+          aria-hidden="true"
         />
       )}
     </div>

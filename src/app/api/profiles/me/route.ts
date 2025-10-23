@@ -1,55 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { createClient } from '@/lib/supabase-server'
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase-server';
+import { cookies } from 'next/headers';
 
-// Add cache headers to improve performance
-const CACHE_DURATION = 60; // 1 minute cache
-
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const cookieStore = await cookies();
+    const supabase = await createClient(cookieStore);
 
-    // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Get the current user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user profile with optimized query (only select needed fields)
-    const { data: profile, error } = await supabase
+    // Fetch the user's profile
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, user_type, user_status, onboarded, first_name, last_name, email, phone, city, onboarding_data')
+      .select('*')
       .eq('id', user.id)
-      .single()
+      .single();
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching profile:', error)
-      return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    // Return only personal information
-    const personalInfo = {
-      id: user.id,
-      email: user.email,
-      first_name: profile?.first_name || undefined,
-      last_name: profile?.last_name || undefined,
-      city: profile?.city || undefined,
-      user_type: profile?.user_type || 'user',
-      onboarded: profile?.onboarded || false
-    }
-
-    const response = NextResponse.json(personalInfo)
-
-    // Add cache headers for better performance
-    response.headers.set('Cache-Control', `private, max-age=${CACHE_DURATION}`)
-    
-    return response
-  } catch (error) {
-    console.error('Unexpected error:', error)
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        ...profile,
+      },
+    });
+  } catch (error: any) {
+    console.error('API Error in /api/profiles/me:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error?.message },
       { status: 500 }
-    )
+    );
   }
 }
+

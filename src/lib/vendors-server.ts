@@ -118,36 +118,29 @@ function getVendorsFromMock(filters: VendorFilters = {}): VendorSearchResult {
 }
 
 export async function getVendors(filters: VendorFilters = {}): Promise<VendorSearchResult> {
-  // In development, use mock data by default for faster development
-  // Remove this check when database is properly set up
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Using mock data in development mode');
-    return getVendorsFromMock(filters);
-  }
-
   try {
     const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
 
-    console.log('Attempting to query vendors table...');
+    console.log('Querying vendors from database with filters:', filters);
 
     let query = supabase
       .from('vendors')
       .select('*', { count: 'exact' })
       .eq('published', true);
 
-    // Apply category filter
+    // Apply category filter (case-insensitive)
     if (filters.category && VALID_CATEGORY_SLUGS.includes(filters.category as any)) {
-      query = query.eq('category', filters.category);
+      query = query.ilike('category', filters.category);
     }
 
-    // Apply city filter
+    // Apply city filter (case-insensitive)
     if (filters.city && filters.city !== 'all') {
-      query = query.eq('city', filters.city);
+      query = query.ilike('city', filters.city);
     }
 
     // Apply search query
     if (filters.q) {
-      query = query.or(`name.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
+      query = query.or(`business_name.ilike.%${filters.q}%,description.ilike.%${filters.q}%`);
     }
 
     // Apply price range filters
@@ -211,18 +204,18 @@ export async function getVendors(filters: VendorFilters = {}): Promise<VendorSea
     const transformedVendors = (vendors || []).map(vendor => ({
       id: vendor.id,
       slug: vendor.slug,
-      business_name: vendor.name, // Map 'name' to 'business_name'
+      business_name: vendor.business_name,
       category: vendor.category,
       city: vendor.city,
       rating: vendor.rating || 0,
       starting_price: vendor.starting_price || undefined,
       profile_photo_url: vendor.profile_photo_url,
-      gallery_urls: vendor.gallery_urls || [],
+      gallery_urls: vendor.gallery_photos || [],
       description: vendor.description,
       is_featured: vendor.is_featured || false,
       phone: vendor.phone,
       email: vendor.email,
-      plan_tier: vendor.plan_tier,
+      plan_tier: vendor.plan || 'basic',
       published: vendor.published,
       created_at: vendor.created_at,
     }));
@@ -320,11 +313,6 @@ export async function getVendors(filters: VendorFilters = {}): Promise<VendorSea
 }
 
 export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
-  if (process.env.NODE_ENV === 'development') {
-    const mockVendor = mockVendors.find(v => v.slug === slug);
-    return mockVendor ? transformMockVendor(mockVendor) : null;
-  }
-
   try {
     const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
 
@@ -336,6 +324,11 @@ export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
       .single();
 
     if (error) {
+      // PGRST116 means no rows returned - vendor doesn't exist
+      if (error.code === 'PGRST116') {
+        console.log(`Vendor with slug "${slug}" not found or not published`);
+        return null;
+      }
       console.error('Error fetching vendor by slug from database:', error);
       throw error;
     }
@@ -344,27 +337,24 @@ export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
     return {
       id: vendor.id,
       slug: vendor.slug,
-      business_name: vendor.name, // Map 'name' to 'business_name'
+      business_name: vendor.business_name,
       category: vendor.category,
       city: vendor.city,
       rating: vendor.rating || 0,
       starting_price: vendor.starting_price || undefined,
       profile_photo_url: vendor.profile_photo_url,
-      gallery_urls: vendor.gallery_urls || [],
+      gallery_urls: vendor.gallery_photos || [],
       description: vendor.description,
       is_featured: vendor.is_featured || false,
       phone: vendor.phone,
       email: vendor.email,
-      plan_tier: vendor.plan_tier,
+      plan_tier: vendor.plan || 'basic',
       published: vendor.published,
       created_at: vendor.created_at,
     };
   } catch (error) {
-    console.warn('Database query failed, falling back to mock data for vendor:', slug);
-
-    // Fall back to mock data
-    const mockVendor = mockVendors.find(v => v.slug === slug);
-    return mockVendor ? transformMockVendor(mockVendor) : null;
+    console.warn('Database query failed for vendor:', slug, error);
+    return null;
   }
 }
 
@@ -388,10 +378,6 @@ export async function getFeaturedVendors(limit: number = 6): Promise<Vendor[]> {
 }
 
 export async function getVendorCount(): Promise<number> {
-  if (process.env.NODE_ENV === 'development') {
-    return mockVendors.length;
-  }
-
   try {
     const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
 
@@ -402,21 +388,17 @@ export async function getVendorCount(): Promise<number> {
 
     if (error) {
       console.error('Error fetching vendor count from database:', error);
-      throw error;
+      return 0;
     }
 
     return count || 0;
   } catch (error) {
-    console.warn('Database query failed, using mock data count');
-    return mockVendors.length;
+    console.warn('Database query failed for vendor count');
+    return 0;
   }
 }
 
 export async function getCategoryVendorCount(category: string): Promise<number> {
-  if (process.env.NODE_ENV === 'development') {
-    return mockVendors.filter(v => v.category === category).length;
-  }
-
   try {
     const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
 
@@ -424,16 +406,16 @@ export async function getCategoryVendorCount(category: string): Promise<number> 
       .from('vendors')
       .select('*', { count: 'exact', head: true })
       .eq('published', true)
-      .eq('category', category);
+      .ilike('category', category);
 
     if (error) {
       console.error('Error fetching category vendor count from database:', error);
-      throw error;
+      return 0;
     }
 
     return count || 0;
   } catch (error) {
-    console.warn('Database query failed, using mock data count for category:', category);
-    return mockVendors.filter(v => v.category === category).length;
+    console.warn('Database query failed for category count:', category);
+    return 0;
   }
 }

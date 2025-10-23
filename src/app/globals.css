@@ -530,4 +530,34 @@
     }
   }
 
+  /* Hide scrollbar for horizontal scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+
+  /* Floating animation for hero icons */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-20px) translateX(10px) rotate(5deg);
+    }
+    50% {
+      transform: translateY(-10px) translateX(-10px) rotate(-5deg);
+    }
+    75% {
+      transform: translateY(-15px) translateX(5px) rotate(3deg);
+    }
+  }
+
+  .animate-float {
+    animation: float ease-in-out infinite;
+  }
+
 }

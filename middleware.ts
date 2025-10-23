@@ -45,8 +45,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Default redirect to /en
-  return NextResponse.redirect(new URL('/en', request.url));
+  // For paths without locale, prepend /en and redirect
+  const url = request.nextUrl.clone();
+  url.pathname = `/en${pathname}`;
+  return NextResponse.redirect(url, 308);
 }
 
 export const config = {

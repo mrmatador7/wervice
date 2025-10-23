@@ -75,6 +75,8 @@ export interface Category {
   description: string;
   activeVendors: number;
   isHidden: boolean;
+  coverUrl?: string;
+  strapline?: string;
 }
 
 export interface BlogPost {

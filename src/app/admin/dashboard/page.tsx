@@ -5,6 +5,7 @@ import AreaRevenue from '@/components/admin/charts/AreaRevenue';
 import BarBookingsByCity from '@/components/admin/charts/BarBookingsByCity';
 import DonutBookingsByCategory from '@/components/admin/charts/DonutBookingsByCategory';
 import { kpiStats, revenueData, categoryBookings, cityBookings, topVendors, recentBookings, systemAlerts } from '@/lib/mock';
+import { capitalizeCity } from '@/lib/utils';
 import { AlertTriangle, Info, CheckCircle } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -52,7 +53,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <p className="font-medium text-wv.text">{vendor.name}</p>
-                    <p className="text-sm text-wv.sub">{vendor.city}</p>
+                    <p className="text-sm text-wv.sub">{capitalizeCity(vendor.city)}</p>
                   </div>
                 </div>
                 <div className="text-right">

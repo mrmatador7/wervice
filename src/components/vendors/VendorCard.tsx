@@ -1,82 +1,105 @@
 'use client';
 
-// /components/vendors/VendorCard.tsx
+import Link from 'next/link';
+import Image from 'next/image';
+import { useState } from 'react';
+import { Bookmark } from 'lucide-react';
+import { labelForCategory } from '@/lib/categories';
+import { capitalizeCity } from '@/lib/utils';
+
+import { Vendor } from '@/lib/types/vendor';
+
 type VendorCardProps = {
-  href: string;
-  imageUrl: string;
-  title: string;
-  category: string;
-  city: string;
-  price?: string;
-  categoryIconUrl?: string;
-  featured?: boolean;
+  vendor: Vendor;
 };
 
-export default function VendorCard({
-  href,
-  imageUrl,
-  title,
-  category,
-  city,
-  price,
-  categoryIconUrl,
-  featured,
-}: VendorCardProps) {
+export default function VendorCard({ vendor }: VendorCardProps) {
+  const [imgError, setImgError] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  const getImageUrl = () => {
+    if (imgError) return null;
+    return vendor.profile_photo_url || (vendor.gallery_urls && vendor.gallery_urls[0]) || null;
+  };
+
+  const imageUrl = getImageUrl();
+  const categoryLabel = labelForCategory(vendor.category);
+  const cityLabel = capitalizeCity(vendor.city);
+
   return (
-    <a
-      href={href}
-      aria-label={title}
-      className="group relative rounded-3xl bg-white shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-black/30"
-    >
-      <article className="h-full flex flex-col">
-        {/* Image section */}
-        <div className="relative aspect-[16/10]">
-          <img
+    <article className="group relative flex flex-col rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm transition-all hover:shadow-md">
+      {/* Image */}
+      <div className="relative aspect-[16/10] overflow-hidden rounded-xl">
+        {imageUrl ? (
+          <Image
             src={imageUrl}
-            alt={title}
-            className="h-full w-full object-cover rounded-t-3xl group-hover:scale-[1.02] transition-transform"
+            alt={vendor.business_name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+            className="object-cover transition-transform group-hover:scale-105"
+            onError={() => setImgError(true)}
           />
+        ) : (
+          <div className="h-full w-full bg-[radial-gradient(circle_at_30%_20%,#f1f5f9,transparent),radial-gradient(circle_at_80%_0,#e2e8f0,transparent)] bg-zinc-100" />
+        )}
 
-          {featured && (
-            <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium shadow-sm">
-              Featured
-            </span>
-          )}
-
-          {categoryIconUrl && (
-            <img
-              src={categoryIconUrl}
-              alt={category}
-              className="absolute right-3 top-3 h-8 w-8 rounded-full bg-white/90 p-1.5 shadow-sm"
-            />
-          )}
+        {/* Category Pill */}
+        <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium shadow backdrop-blur-sm">
+          {categoryLabel}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 p-4 md:p-5 space-y-1">
-          <h3 className="text-[16px] font-semibold text-gray-900 line-clamp-2">
-            {title}
-          </h3>
-          <p className="text-sm text-gray-500">{category} • {city}</p>
-        </div>
+        {/* Bookmark Button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setIsBookmarked(!isBookmarked);
+          }}
+          className={`absolute right-2 top-2 grid h-8 w-8 place-content-center rounded-full backdrop-blur-sm transition-colors ${
+            isBookmarked ? 'bg-zinc-900 text-white' : 'bg-black/60 text-white hover:bg-black/80'
+          }`}
+          aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+        >
+          <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="mt-3 flex flex-1 flex-col">
+        {/* Title */}
+        <h3 className="line-clamp-1 font-semibold text-zinc-900">
+          {vendor.business_name}
+        </h3>
+
+        {/* Meta */}
+        <p className="mt-1 text-sm text-zinc-500">
+          {categoryLabel} • {cityLabel}
+        </p>
+
+        {/* Spacer */}
+        <div className="flex-1" />
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 md:px-5 pb-4 md:pb-5">
-          <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
-            {price ?? 'N/A'}
-          </span>
-          <button
-            type="button"
-            className="rounded-full bg-black text-white px-4 py-1.5 text-sm font-medium hover:bg-gray-900 transition focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-black/30"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.href = href;
-            }}
-          >
-            View Vendor →
-          </button>
+        <div className="mt-3 flex items-center justify-between gap-2">
+          {/* Price Chip */}
+          {vendor.starting_price ? (
+            <span className="rounded-full bg-zinc-100 px-3 py-1 text-[12px] font-medium text-zinc-800">
+              From MAD {vendor.starting_price.toLocaleString()}
+            </span>
+          ) : (
+            <span className="rounded-full bg-zinc-100 px-3 py-1 text-[12px] font-medium text-zinc-500">
+              Price on request
+            </span>
+          )}
         </div>
-      </article>
-    </a>
+
+        {/* CTA Button */}
+        <Link
+          href={vendor.slug ? `/en/vendors/${vendor.slug}` : '/en/vendors'}
+          className="mt-3 w-full rounded-full bg-zinc-900 px-4 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2"
+        >
+          View Vendor →
+        </Link>
+      </div>
+    </article>
   );
 }

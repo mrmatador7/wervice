@@ -1,22 +1,43 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getVendorBySlug, getSimilarVendors } from '@/lib/db/vendors';
+import { labelForCategory, VALID_CATEGORY_SLUGS } from '@/lib/categories';
+import { capitalizeCity } from '@/lib/utils';
+import VendorHero from '@/components/vendor/VendorHero';
+import VendorGallery from '@/components/vendor/VendorGallery';
+import VendorContactCard from '@/components/vendor/VendorContactCard';
+import VendorAbout from '@/components/vendor/VendorAbout';
+import VendorMeta from '@/components/vendor/VendorMeta';
+import SimilarVendors from '@/components/vendor/SimilarVendors';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { getVendorBySlug } from '@/lib/vendors-server';
-import { getVendorBySlug as getMockVendorBySlug } from '@/data/vendors.mock';
+import CategoryVendorsClient from '../[...slug]/client';
 
-interface PageProps {
-  params: Promise<{ slug: string }>;
+interface VendorPageProps {
+  params: Promise<{ locale: string; slug: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: VendorPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  let vendor = await getVendorBySlug(slug);
-
-  if (!vendor) {
-    vendor = getMockVendorBySlug(slug) as any;
+  // Check if this is a category page
+  if (VALID_CATEGORY_SLUGS.includes(slug as any)) {
+    const categoryLabel = labelForCategory(slug);
+    return {
+      title: `${categoryLabel} Vendors in Morocco | Wervice`,
+      description: `Find verified ${categoryLabel.toLowerCase()} vendors in Morocco. Browse professionals by city and budget.`,
+      keywords: ['wedding vendors', categoryLabel.toLowerCase(), 'Morocco', 'wedding planning'],
+      openGraph: {
+        title: `${categoryLabel} Vendors in Morocco | Wervice`,
+        description: `Find verified ${categoryLabel.toLowerCase()} vendors in Morocco. Browse professionals by city and budget.`,
+        images: [{ url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=630&fit=crop' }],
+        type: 'website',
+      },
+    };
   }
+
+  // Otherwise, it's a vendor detail page
+  const vendor = await getVendorBySlug(slug);
 
   if (!vendor) {
     return {
@@ -24,109 +45,115 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const vendorName = (vendor as any).business_name || (vendor as any).name;
-  const vendorCategory = (vendor as any).category;
-  const vendorCity = (vendor as any).city;
-  const vendorDescription = (vendor as any).description;
+  const categoryLabel = labelForCategory(vendor.category);
+  const cityLabel = capitalizeCity(vendor.city);
+  const description = vendor.description
+    ? vendor.description.substring(0, 150) + (vendor.description.length > 150 ? '...' : '')
+    : `Find and book ${vendor.business_name} for your wedding in ${cityLabel}. Professional ${categoryLabel.toLowerCase()} services.`;
+
+  const imageUrl = vendor.profile_photo_url || vendor.gallery_photos?.[0] || '';
 
   return {
-    title: `${vendorName} - ${vendorCategory} in ${vendorCity} | Wervice`,
-    description: vendorDescription?.slice(0, 155) || `${vendorName} - Professional ${vendorCategory} services in ${vendorCity}, Morocco.`,
-    keywords: `${vendorCategory}, ${vendorCity}, Morocco, wedding services, ${vendorName}`,
+    title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel} | Wervice`,
+    description,
+    keywords: [
+      vendor.business_name,
+      categoryLabel,
+      cityLabel,
+      'wedding vendor',
+      'Morocco wedding',
+      'wedding planning',
+    ],
     openGraph: {
-      title: `${vendorName} - ${vendorCategory} in ${vendorCity}`,
-      description: vendorDescription?.slice(0, 155) || `${vendorName} - Professional ${vendorCategory} services in ${vendorCity}, Morocco.`,
-      images: [{ url: (vendor as any).profile_photo_url || (vendor as any).coverImage || 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=630&fit=crop' }],
+      title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel}`,
+      description,
+      images: imageUrl ? [{ url: imageUrl }] : [],
       type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel}`,
+      description,
+      images: imageUrl ? [imageUrl] : [],
     },
   };
 }
 
-export default async function VendorProfilePage({ params }: PageProps) {
-  const { slug } = await params;
+export default async function VendorPage({ params }: VendorPageProps) {
+  const { locale, slug } = await params;
 
-  // Try to get vendor from real database first
-  let vendor = await getVendorBySlug(slug);
-
-  // Fall back to mock data if not found
-  if (!vendor) {
-    vendor = getMockVendorBySlug(slug) as any;
+  // Check if this is a category page
+  if (VALID_CATEGORY_SLUGS.includes(slug as any)) {
+    return <CategoryVendorsClient categorySlug={slug} locale={locale} />;
   }
+
+  // Otherwise, it's a vendor detail page
+  const vendor = await getVendorBySlug(slug);
 
   if (!vendor) {
     notFound();
   }
 
-  const vendorData = vendor as any;
-  const vendorName = vendorData.business_name || vendorData.name;
-  const vendorCategory = vendorData.category;
-  const vendorCity = vendorData.city;
-  const vendorRating = vendorData.rating;
-  const vendorPrice = vendorData.starting_price;
-  const vendorDescription = vendorData.description;
-  const vendorPhone = vendorData.phone;
-  const vendorEmail = vendorData.email;
+  const similar = await getSimilarVendors(vendor.category, vendor.city, vendor.id);
+
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: vendor.business_name,
+    description: vendor.description || `${labelForCategory(vendor.category)} services in ${capitalizeCity(vendor.city)}`,
+    brand: {
+      '@type': 'Organization',
+      name: vendor.business_name,
+    },
+    category: labelForCategory(vendor.category),
+    ...(vendor.profile_photo_url && {
+      image: vendor.profile_photo_url,
+    }),
+    ...(vendor.starting_price && {
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'MAD',
+        price: vendor.starting_price,
+        priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        availability: 'https://schema.org/InStock',
+      },
+    }),
+  };
 
   return (
-    <div className="min-h-screen">
+    <>
       <Header />
+      
+      {/* JSON-LD Script */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {vendorName}
-          </h1>
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <VendorHero vendor={vendor} locale={locale} />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">Details</h2>
-              <p className="text-gray-600 mb-2"><strong>Category:</strong> {vendorCategory}</p>
-              <p className="text-gray-600 mb-2"><strong>City:</strong> {vendorCity}</p>
-              {vendorRating && (
-                <p className="text-gray-600 mb-2"><strong>Rating:</strong> {vendorRating}/5</p>
-              )}
-              {vendorPrice && (
-                <p className="text-gray-600 mb-2"><strong>Starting Price:</strong> MAD {vendorPrice.toLocaleString()}</p>
-              )}
-            </div>
-
-            <div>
-              {vendorDescription && (
-                <>
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">Description</h2>
-                  <p className="text-gray-600">{vendorDescription}</p>
-                </>
-              )}
-            </div>
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column: Main Content */}
+          <div className="lg:col-span-8 space-y-6">
+            <VendorGallery vendor={vendor} />
+            <VendorAbout vendor={vendor} />
+            <VendorMeta vendor={vendor} />
+            <SimilarVendors items={similar} locale={locale} />
           </div>
 
-          {(vendorPhone || vendorEmail) && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Contact</h2>
-              <div className="flex flex-col sm:flex-row gap-4">
-                {vendorPhone && (
-                  <a
-                    href={`https://wa.me/${vendorPhone}`}
-                    className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    Contact on WhatsApp
-                  </a>
-                )}
-                {vendorEmail && (
-                  <a
-                    href={`mailto:${vendorEmail}`}
-                    className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Send Email
-                  </a>
-                )}
-              </div>
+          {/* Right Column: Sticky Contact Card */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-24">
+              <VendorContactCard vendor={vendor} />
             </div>
-          )}
+          </div>
         </div>
       </main>
 
       <Footer />
-    </div>
+    </>
   );
 }
+

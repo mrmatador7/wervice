@@ -4,6 +4,7 @@ import CategoriesSection from '../categories/components/CategoriesSection';
 import CitiesCarousel from '@/components/cities/CitiesCarousel';
 import ListingsRail from '@/components/sections/ListingsRail';
 import BecomeVendorSection from './components/BecomeVendorSection';
+import FeaturedVendorsSection from '@/components/home/FeaturedVendorsSection';
 import Footer from '@/components/layout/Footer';
 import Container from '@/components/layout/Container';
 import CategoriesShowcase, {
@@ -94,6 +95,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <CitiesCarousel variant="small" className="-mx-4 md:-mx-6 lg:-mx-8" />
         </Container>
       </section>
+
+      {/* Featured Vendors Section */}
+      <FeaturedVendorsSection locale={locale} />
 
       {/* Dress Catalog */}
       <section className="py-8">

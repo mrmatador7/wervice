@@ -3,6 +3,7 @@ import Footer from '@/components/layout/Footer';
 import Hero from './components/Hero';
 import CategoriesSection from './categories/components/CategoriesSection';
 import CitiesCarousel from '@/components/cities/CitiesCarousel';
+import FeaturedVendorsSection from '@/components/home/FeaturedVendorsSection';
 import TrustBand from './components/TrustBand';
 import BecomeVendorSection from '@/components/sections/VendorCTA';
 
@@ -25,6 +26,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
             <CitiesCarousel variant="small" className="-mx-4 md:-mx-6 lg:-mx-8" />
           </div>
         </section>
+
+        {/* Featured Vendors Section */}
+        <FeaturedVendorsSection locale={locale} />
 
         {/* Trust Band */}
         <TrustBand />

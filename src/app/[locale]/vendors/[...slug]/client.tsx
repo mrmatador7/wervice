@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { labelForCategory } from '@/lib/categories';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import ModernFilterBar from '@/components/vendors/ModernFilterBar';
@@ -30,12 +31,16 @@ type Category = {
   cover_url: string | null;
 };
 
-export default function VendorsPage() {
+interface CategoryVendorsClientProps {
+  categorySlug: string;
+  locale: string;
+}
+
+export default function CategoryVendorsClient({ categorySlug, locale }: CategoryVendorsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [category, setCategory] = useState<Category | null>(null);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -45,7 +50,7 @@ export default function VendorsPage() {
   // Parse filters from URL
   const filters = {
     q: searchParams.get('q') || undefined,
-    category: searchParams.get('category') || undefined,
+    category: categorySlug,
     city: searchParams.get('city') || undefined,
     priceMin: searchParams.get('priceMin') ? parseInt(searchParams.get('priceMin')!) : undefined,
     priceMax: searchParams.get('priceMax') ? parseInt(searchParams.get('priceMax')!) : undefined,
@@ -58,7 +63,7 @@ export default function VendorsPage() {
     try {
       const params = new URLSearchParams();
       if (filters.q) params.set('q', filters.q);
-      if (filters.category) params.set('category', filters.category);
+      params.set('category', categorySlug); // Force category from URL
       if (filters.city) params.set('city', filters.city);
       if (filters.priceMin) params.set('priceMin', String(filters.priceMin));
       if (filters.priceMax) params.set('priceMax', String(filters.priceMax));
@@ -87,13 +92,8 @@ export default function VendorsPage() {
 
   // Fetch category data
   const fetchCategory = async () => {
-    if (!filters.category) {
-      setCategory(null);
-      return;
-    }
-
     try {
-      const res = await fetch(`/api/categories/${filters.category}`);
+      const res = await fetch(`/api/categories/${categorySlug}`);
       if (res.ok) {
         const data = await res.json();
         setCategory(data);
@@ -119,19 +119,18 @@ export default function VendorsPage() {
     fetchVendors();
     fetchCategory();
     fetchCities();
-  }, [searchParams]);
+  }, [categorySlug, searchParams]);
 
   // Handle filter changes
   const handleFilterChange = (newFilters: any) => {
     const params = new URLSearchParams();
     if (newFilters.q) params.set('q', newFilters.q);
-    if (newFilters.category) params.set('category', newFilters.category);
     if (newFilters.city) params.set('city', newFilters.city);
     if (newFilters.priceMin) params.set('priceMin', String(newFilters.priceMin));
     if (newFilters.priceMax) params.set('priceMax', String(newFilters.priceMax));
     if (newFilters.sort) params.set('sort', newFilters.sort);
 
-    router.push(`/en/vendors?${params.toString()}`);
+    router.push(`/${locale}/vendors/${categorySlug}?${params.toString()}`);
   };
 
   // Handle city selection
@@ -148,10 +147,11 @@ export default function VendorsPage() {
 
   // Clear all filters
   const handleClearAll = () => {
-    router.push('/en/vendors');
+    router.push(`/${locale}/vendors/${categorySlug}`);
   };
 
   const activeCity = filters.city ? capitalizeCity(filters.city) : 'All Cities';
+  const categoryLabel = labelForCategory(categorySlug);
 
   return (
     <>
@@ -166,15 +166,20 @@ export default function VendorsPage() {
           />
         )}
 
-        {/* Modern Filters Bar */}
+        {/* Modern Filters Bar - Hide category filter since we're on a category page */}
         <div className="sticky top-14 z-30 mb-6 rounded-2xl border border-zinc-200 bg-white/80 px-6 py-4 shadow-sm backdrop-blur">
-          <ModernFilterBar initialFilters={filters} cities={cities} onChange={handleFilterChange} />
+          <ModernFilterBar 
+            initialFilters={filters} 
+            cities={cities} 
+            onChange={handleFilterChange}
+            hideCategoryFilter={true}
+          />
         </div>
 
         {/* Heading + Count */}
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-zinc-900">
-            🔥 Popular in {activeCity}
+            🔥 {categoryLabel} in {activeCity}
           </h2>
           <span className="text-sm text-zinc-500">{total} vendors</span>
         </div>
@@ -217,7 +222,7 @@ export default function VendorsPage() {
               No vendors found
             </h3>
             <p className="mb-4 text-sm text-zinc-500">
-              Try changing the city, category, or price range.
+              Try changing the city or price range.
             </p>
             <button
               onClick={handleClearAll}
@@ -232,3 +237,4 @@ export default function VendorsPage() {
     </>
   );
 }
+
