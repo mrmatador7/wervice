@@ -4,3 +4,5 @@ export default function AdminRootPage() {
   redirect('/admin/dashboard');
 }
 
+
+

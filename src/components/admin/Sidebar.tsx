@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useUser } from '@/contexts/UserContext';
 import {
   LayoutDashboard,
   Users,
@@ -35,6 +36,7 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { signOut } = useUser();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -43,6 +45,10 @@ export default function Sidebar() {
       return pathname === href || pathname === '/admin';
     }
     return pathname.startsWith(href);
+  };
+
+  const handleLogout = async () => {
+    await signOut();
   };
 
   return (
@@ -125,6 +131,7 @@ export default function Sidebar() {
         {/* Footer */}
         <div className="px-4 pb-6">
           <button
+            onClick={handleLogout}
             className={`
               flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-wv.danger
               hover:bg-red-50 transition-colors focus:outline-none focus:ring-2 focus:ring-red-300

@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import VendorHero from '../vendors/components/VendorHero';
+import BecomeVendorHero from './components/BecomeVendorHero';
 import WhyChooseWervice from '../vendors/components/WhyChooseWervice';
 import VendorHowItWorks from '../vendors/components/VendorHowItWorks';
 import VendorPricing from '../vendors/components/VendorPricing';
@@ -28,12 +28,8 @@ export default function VendorSignupPage() {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="-mt-8 md:-mt-12">
-        <VendorHero
-          title="Become a Wervice Vendor"
-          subtitle="Join Morocco's premier wedding marketplace and connect with couples planning their big day"
-          totalCount={0}
-        />
+      <main>
+        <BecomeVendorHero />
         <WhyChooseWervice />
         <VendorHowItWorks />
         <Suspense fallback={<div>Loading pricing...</div>}>

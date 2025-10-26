@@ -2,8 +2,8 @@ import { createClient } from '@/lib/supabase-server';
 import { cookies } from 'next/headers';
 
 export type VendorFilters = {
-  category?: string;
-  city?: string;
+  category?: string | string[]; // Support single or multiple categories
+  city?: string | string[]; // Support single or multiple cities
   q?: string;
   priceMin?: number;
   priceMax?: number;
@@ -41,6 +41,7 @@ export type Category = {
  */
 export async function fetchVendors(filters: VendorFilters = {}) {
   try {
+    console.log('fetchVendors called with filters:', JSON.stringify(filters, null, 2));
     const cookieStore = await cookies();
     const supabase = await createClient(cookieStore);
 
@@ -49,14 +50,27 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       .select('*', { count: 'exact' })
       .eq('published', true);
 
-    // Category filter (case-insensitive using SQL lower function)
+    // Category filter (case-insensitive)
     if (filters.category) {
-      query = query.ilike('category', filters.category);
+      if (Array.isArray(filters.category) && filters.category.length > 0) {
+        // Multiple categories - use in operator with lowercase values
+        const categories = filters.category.map(c => c.toLowerCase());
+        query = query.in('category', categories);
+      } else if (!Array.isArray(filters.category)) {
+        // Single category - use eq with lowercase
+        query = query.eq('category', filters.category.toLowerCase());
+      }
     }
 
-    // City filter (case-insensitive using ilike)
+    // City filter (exact match - database stores cities with proper capitalization)
     if (filters.city && filters.city !== 'all') {
-      query = query.ilike('city', filters.city);
+      if (Array.isArray(filters.city) && filters.city.length > 0) {
+        // Multiple cities - use in operator
+        query = query.in('city', filters.city);
+      } else if (!Array.isArray(filters.city)) {
+        // Single city - use eq
+        query = query.eq('city', filters.city);
+      }
     }
 
     // Search filter
@@ -103,6 +117,16 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       console.error('Error fetching vendors:', error);
       throw error;
     }
+
+    console.log('Database query result:', { 
+      vendorCount: data?.length || 0, 
+      total: count,
+      firstVendor: data?.[0] ? { 
+        name: data[0].business_name, 
+        category: data[0].category,
+        city: data[0].city 
+      } : null 
+    });
 
     return {
       vendors: data as Vendor[],

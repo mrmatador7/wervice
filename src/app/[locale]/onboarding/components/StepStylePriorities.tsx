@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Star, Sparkles } from 'lucide-react';
+import { Palette } from 'lucide-react';
 import type { OnboardingData } from '../schemas/onboarding.schemas';
 
 interface StepStylePrioritiesProps {
@@ -24,20 +24,8 @@ const WEDDING_STYLES = [
   { id: 'minimalist', label: 'Minimalist', emoji: '⚪', description: 'Clean and simple' },
 ];
 
-const PRIORITIES = [
-  { id: 'venue', label: 'Venue', emoji: '🏛️', description: 'Perfect location and ambiance' },
-  { id: 'photography', label: 'Photography', emoji: '📸', description: 'Capture every special moment' },
-  { id: 'decor', label: 'Décor', emoji: '🎨', description: 'Beautiful styling and flowers' },
-  { id: 'food', label: 'Food & Catering', emoji: '🍽️', description: 'Delicious cuisine and service' },
-  { id: 'music', label: 'Music & Entertainment', emoji: '🎵', description: 'Perfect soundtrack and fun' },
-  { id: 'beauty', label: 'Beauty & Hair', emoji: '💄', description: 'Glam team for the big day' },
-  { id: 'dress', label: 'Wedding Dress', emoji: '👗', description: 'Perfect attire for everyone' },
-  { id: 'planner', label: 'Wedding Planner', emoji: '📋', description: 'Expert coordination' },
-];
-
 export default function StepStylePriorities({ data, currentStepData, onContinue, isSaving }: StepStylePrioritiesProps) {
   const [selectedStyles, setSelectedStyles] = useState<string[]>(currentStepData?.styles || data.stylePriorities?.styles || []);
-  const [selectedPriorities, setSelectedPriorities] = useState<string[]>(currentStepData?.topPriorities || data.stylePriorities?.topPriorities || []);
 
   const handleStyleToggle = (styleId: string) => {
     setSelectedStyles(prev =>
@@ -47,26 +35,10 @@ export default function StepStylePriorities({ data, currentStepData, onContinue,
     );
   };
 
-  const handlePriorityToggle = (priorityId: string) => {
-    setSelectedPriorities(prev =>
-      prev.includes(priorityId)
-        ? prev.filter(id => id !== priorityId)
-        : prev.length < 3 ? [...prev, priorityId] : prev // Max 3 priorities
-    );
-  };
-
-  const handleStyleRemove = (styleId: string) => {
-    setSelectedStyles(prev => prev.filter(id => id !== styleId));
-  };
-
-  const handlePriorityRemove = (priorityId: string) => {
-    setSelectedPriorities(prev => prev.filter(id => id !== priorityId));
-  };
-
   const handleContinue = async () => {
     return await onContinue({
       styles: selectedStyles,
-      topPriorities: selectedPriorities,
+      topPriorities: [], // Empty array since we removed priorities
     });
   };
 
@@ -79,62 +51,51 @@ export default function StepStylePriorities({ data, currentStepData, onContinue,
         e.preventDefault();
         handleContinue();
       }}
-      className="space-y-8"
+      className="max-w-md mx-auto space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-lime rounded-full flex items-center justify-center mx-auto mb-4">
-          <Palette className="w-8 h-8 text-text" />
-        </div>
-        <h2 className="text-3xl font-bold text-text">What's your wedding vision?</h2>
-        <p className="text-muted max-w-md mx-auto">
-          Tell us about your style preferences and what matters most to you for personalized recommendations.
+      {/* Icon */}
+      <div className="w-16 h-16 bg-gradient-to-br from-wervice-lime to-lime-400 rounded-full flex items-center justify-center mx-auto shadow-lg">
+        <Palette className="w-8 h-8 text-wervice-ink" />
+      </div>
+
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-bold text-wervice-ink">
+          What's your wedding style?
+        </h3>
+        <p className="text-gray-500">
+          Choose the styles that match your vision
         </p>
       </div>
 
       {/* Wedding Styles */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="space-y-4"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-5 h-5 text-lime" />
-          <h3 className="text-lg font-semibold text-text">Wedding Styles</h3>
-          <span className="text-sm text-muted">Select all that appeal to you</span>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="space-y-4">
+        <label className="block text-sm font-semibold text-gray-700">
+          Wedding Style (select all that apply)
+        </label>
+        
+        <div className="grid grid-cols-2 gap-3">
           {WEDDING_STYLES.map((style) => {
             const isSelected = selectedStyles.includes(style.id);
             return (
               <button
                 key={style.id}
+                type="button"
                 onClick={() => handleStyleToggle(style.id)}
-                aria-pressed={isSelected}
-                role="button"
-                className={`relative p-4 border rounded-xl text-center transition-all hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime ${
+                className={`p-4 border-2 rounded-xl text-center transition-all ${
                   isSelected
-                    ? 'bg-lime text-text border-transparent shadow-soft'
-                    : 'border-border bg-white hover:border-lime/50 text-text'
+                    ? 'bg-gradient-to-br from-orange-50 to-white border-orange-500 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-orange-200'
                 }`}
               >
-                <div className="text-2xl mb-2">{style.emoji}</div>
-                <div className="font-medium text-sm">
-                  {style.label}
-                </div>
-                <div className={`text-xs mt-1 ${
-                  isSelected ? 'text-text/80' : 'text-muted'
-                }`}>
-                  {style.description}
-                </div>
+                <div className="text-2xl mb-1">{style.emoji}</div>
+                <div className="font-medium text-sm text-wervice-ink">{style.label}</div>
                 {isSelected && (
-                  <div className="absolute top-3 right-3 text-white/90">
-                    <span className="text-sm font-bold">✓</span>
+                  <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center mx-auto mt-2">
+                    <span className="text-xs text-white font-bold">✓</span>
                   </div>
                 )}
               </button>
@@ -142,120 +103,15 @@ export default function StepStylePriorities({ data, currentStepData, onContinue,
           })}
         </div>
 
+        {/* Selected Counter */}
         {selectedStyles.length > 0 && (
-          <div className="bg-gray-50 border border-border rounded-lg p-4">
-            <p className="text-sm text-muted mb-2">Selected styles:</p>
-            <div className="flex flex-wrap gap-2">
-              {selectedStyles.map(styleId => {
-                const style = WEDDING_STYLES.find(s => s.id === styleId);
-                return (
-                  <span
-                    key={styleId}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-neutral-100 text-neutral-700 text-sm rounded-full"
-                  >
-                    {style?.emoji} {style?.label}
-                    <button
-                      onClick={() => handleStyleRemove(styleId)}
-                      className="ml-1 hover:bg-neutral-200 rounded-full w-4 h-4 flex items-center justify-center"
-                      aria-label={`Remove ${style?.label}`}
-                    >
-                      ×
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
+          <div className="bg-gradient-to-r from-wv-gray1 to-white border border-wv-gray2 rounded-xl p-4 text-center">
+            <p className="text-sm text-gray-500">
+              <span className="font-bold text-wervice-ink">{selectedStyles.length}</span> style{selectedStyles.length > 1 ? 's' : ''} selected
+            </p>
           </div>
         )}
-      </motion.div>
-
-      {/* Priorities */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="space-y-4"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <Star className="w-5 h-5 text-lime" />
-          <h3 className="text-lg font-semibold text-text">Top Priorities</h3>
-          <span className="text-sm text-muted">Choose up to 3 that matter most</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {PRIORITIES.map((priority) => {
-            const isSelected = selectedPriorities.includes(priority.id);
-            const isDisabled = !isSelected && selectedPriorities.length >= 3;
-
-            return (
-              <button
-                key={priority.id}
-                onClick={() => handlePriorityToggle(priority.id)}
-                disabled={isDisabled}
-                aria-pressed={isSelected}
-                aria-disabled={isDisabled}
-                role="button"
-                className={`p-4 border rounded-xl text-left transition-all hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime ${
-                  isSelected
-                    ? 'bg-lime text-text border-transparent shadow-soft'
-                    : isDisabled
-                    ? 'border-border/50 bg-gray-50 opacity-50 cursor-not-allowed text-muted pointer-events-none'
-                    : 'border-border bg-white hover:border-lime/50 text-text'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    isSelected ? 'bg-lime text-text' : 'bg-gray-50 text-muted'
-                  }`}>
-                    <span className="text-lg">{priority.emoji}</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-medium">
-                      {priority.label}
-                    </h4>
-                    <p className={`text-sm mt-1 ${
-                      isSelected ? 'text-text/80' : 'text-muted'
-                    }`}>
-                      {priority.description}
-                    </p>
-                  </div>
-                  {isSelected && (
-                    <div className="w-6 h-6 bg-lime rounded-full flex items-center justify-center">
-                      <span className="text-xs text-text font-bold">✓</span>
-                    </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {selectedPriorities.length > 0 && (
-          <div className="bg-lime/5 border border-lime/20 rounded-lg p-4">
-            <p className="text-sm text-muted mb-2">Your top priorities:</p>
-            <div className="flex flex-wrap gap-2">
-              {selectedPriorities.map(priorityId => {
-                const priority = PRIORITIES.find(p => p.id === priorityId);
-                return (
-                  <span
-                    key={priorityId}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-neutral-100 text-neutral-700 text-sm rounded-full"
-                  >
-                    {priority?.emoji} {priority?.label}
-                    <button
-                      onClick={() => handlePriorityRemove(priorityId)}
-                      className="ml-1 hover:bg-neutral-200 rounded-full w-4 h-4 flex items-center justify-center"
-                      aria-label={`Remove ${priority?.label}`}
-                    >
-                      ×
-                    </button>
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </motion.div>
+      </div>
     </motion.form>
   );
 }

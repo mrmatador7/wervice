@@ -123,6 +123,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 setUser(null);
                 setProfile(null);
                 console.log('✅ User signed out successfully');
+                
+                // Redirect to homepage
+                const locale = window.location.pathname.split('/')[1] || 'en';
+                window.location.href = `/${locale}`;
             }
         } catch (error) {
             console.error('❌ Error signing out:', error);

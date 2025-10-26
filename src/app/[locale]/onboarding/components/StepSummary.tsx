@@ -1,6 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   MapPin,
   Calendar,
@@ -9,7 +11,8 @@ import {
   Palette,
   Star,
   Sparkles,
-  CheckCircle
+  CheckCircle,
+  ExternalLink
 } from 'lucide-react';
 import type { OnboardingData } from '../schemas/onboarding.schemas';
 
@@ -55,7 +58,20 @@ const SERVICES: Record<string, string> = {
   dresses: 'Wedding Dresses',
 };
 
+interface SuggestedVendor {
+  id: string;
+  business_name: string;
+  category: string;
+  city: string;
+  starting_price: number;
+  profile_photo_url: string;
+  slug: string;
+}
+
 export function StepSummary({ data, onComplete, isSaving }: StepSummaryProps) {
+  const [suggestedVendors, setSuggestedVendors] = useState<SuggestedVendor[]>([]);
+  const [loadingVendors, setLoadingVendors] = useState(true);
+
   const formatCurrency = (amount: number, currency = 'MAD') => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -76,6 +92,54 @@ export function StepSummary({ data, onComplete, isSaving }: StepSummaryProps) {
     await onComplete();
   };
 
+  // Fetch vendor suggestions based on user data
+  useEffect(() => {
+    async function fetchSuggestions() {
+      try {
+        // Get user's selected services
+        const services = data.servicesNeeded?.services || [];
+        const city = data.city?.city;
+        
+        if (services.length === 0) {
+          setLoadingVendors(false);
+          return;
+        }
+
+        // Fetch vendors for each service category
+        const vendorPromises = services.slice(0, 3).map(async (service) => {
+          const params = new URLSearchParams({
+            category: service,
+            ...(city && { city }),
+            limit: '2',
+          });
+
+          const response = await fetch(`/api/vendors?${params}`);
+          if (response.ok) {
+            const result = await response.json();
+            return result.vendors || [];
+          }
+          return [];
+        });
+
+        const vendorResults = await Promise.all(vendorPromises);
+        const allVendors = vendorResults.flat();
+        
+        // Remove duplicates and limit to 4 vendors
+        const uniqueVendors = Array.from(
+          new Map(allVendors.map((v: SuggestedVendor) => [v.id, v])).values()
+        ).slice(0, 4);
+
+        setSuggestedVendors(uniqueVendors as SuggestedVendor[]);
+      } catch (error) {
+        console.error('Error fetching vendor suggestions:', error);
+      } finally {
+        setLoadingVendors(false);
+      }
+    }
+
+    fetchSuggestions();
+  }, [data]);
+
   return (
     <motion.form
       id="step-form"
@@ -83,143 +147,152 @@ export function StepSummary({ data, onComplete, isSaving }: StepSummaryProps) {
         e.preventDefault();
         handleComplete();
       }}
-      className="space-y-8"
+      className="max-w-md mx-auto space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto">
-          <CheckCircle className="w-8 h-8 text-wervice-ink" />
-        </div>
-        <h3 className="text-xl font-semibold text-wervice-ink">
-          Ready to start planning?
+      {/* Icon */}
+      <div className="w-20 h-20 bg-gradient-to-br from-wervice-lime to-lime-400 rounded-full flex items-center justify-center mx-auto shadow-xl">
+        <CheckCircle className="w-10 h-10 text-wervice-ink" />
+      </div>
+
+      {/* Title */}
+      <div className="text-center space-y-3">
+        <h3 className="text-3xl font-bold text-wervice-ink">
+          You're All Set!
         </h3>
-        <p className="text-wervice-taupe max-w-md mx-auto">
-          Review your preferences and let's begin your wedding journey.
+        <p className="text-gray-500 text-lg">
+          Your personalized wedding journey awaits
         </p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-6">
-        {/* Basic Info */}
-        {data.basicInfo && (
-          <SummaryCard
-            icon={<Users className="w-5 h-5" />}
-            title="Planning Details"
-            items={[
-              data.basicInfo.partnerName ? `Partner: ${data.basicInfo.partnerName}` : undefined,
-              `Intent: ${data.basicInfo.intent === 'planning' ? 'Actively Planning' :
-                       data.basicInfo.intent === 'exploring' ? 'Exploring Options' : 'Wedding Vendor'}`,
-            ].filter((item): item is string => item !== undefined)}
-          />
-        )}
+      {/* Summary Info */}
+      <div className="bg-gradient-to-br from-wv-gray1 to-white border border-wv-gray2 rounded-xl p-6 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          {data.city && (
+            <div className="text-center p-3 bg-white/50 rounded-lg">
+              <MapPin className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+              <div className="text-xs text-gray-500">Location</div>
+              <div className="font-semibold text-sm text-wervice-ink capitalize">{data.city.city}</div>
+            </div>
+          )}
 
-        {/* Wedding City */}
-        {data.city && (
-          <SummaryCard
-            icon={<MapPin className="w-5 h-5" />}
-            title="Wedding Location"
-            items={[data.city.city]}
-          />
-        )}
+          {data.guests && (
+            <div className="text-center p-3 bg-white/50 rounded-lg">
+              <Users className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+              <div className="text-xs text-gray-500">Guests</div>
+              <div className="font-semibold text-sm text-wervice-ink">{data.guests.count}</div>
+            </div>
+          )}
 
-        {/* Wedding Date */}
-        {data.date && (
-          <SummaryCard
-            icon={<Calendar className="w-5 h-5" />}
-            title="Wedding Date"
-            items={[formatDate(data.date.date)]}
-          />
-        )}
+          {data.date && (
+            <div className="text-center p-3 bg-white/50 rounded-lg">
+              <Calendar className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+              <div className="text-xs text-gray-500">Date</div>
+              <div className="font-semibold text-sm text-wervice-ink">{formatDate(data.date.date).split(',')[0]}</div>
+            </div>
+          )}
 
-        {/* Guest Count */}
-        {data.guests && (
-          <SummaryCard
-            icon={<Users className="w-5 h-5" />}
-            title="Guest Count"
-            items={[`${data.guests.count} guests`]}
-          />
-        )}
+          {data.budgetCurrency && (
+            <div className="text-center p-3 bg-white/50 rounded-lg">
+              <DollarSign className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+              <div className="text-xs text-gray-500">Budget</div>
+              <div className="font-semibold text-sm text-wervice-ink">
+                {formatCurrency(data.budgetCurrency.budget, data.budgetCurrency.currency)}
+              </div>
+            </div>
+          )}
+        </div>
 
-        {/* Budget */}
-        {data.budgetCurrency && (
-          <SummaryCard
-            icon={<DollarSign className="w-5 h-5" />}
-            title="Budget"
-            items={[formatCurrency(data.budgetCurrency.budget, data.budgetCurrency.currency)]}
-          />
-        )}
-
-        {/* Wedding Styles */}
-        {data.stylePriorities?.styles && data.stylePriorities.styles.length > 0 && (
-          <SummaryCard
-            icon={<Palette className="w-5 h-5" />}
-            title="Wedding Styles"
-            items={data.stylePriorities.styles.map(style => WEDDING_STYLES[style] || style)}
-          />
-        )}
-
-        {/* Top Priorities */}
-        {data.stylePriorities?.topPriorities && data.stylePriorities.topPriorities.length > 0 && (
-          <SummaryCard
-            icon={<Star className="w-5 h-5" />}
-            title="Top Priorities"
-            items={data.stylePriorities.topPriorities.map(priority => PRIORITIES[priority] || priority)}
-          />
-        )}
-
-        {/* Services Needed */}
         {data.servicesNeeded?.services && data.servicesNeeded.services.length > 0 && (
-          <SummaryCard
-            icon={<Sparkles className="w-5 h-5" />}
-            title="Services Needed"
-            items={data.servicesNeeded.services.map(service => SERVICES[service] || service)}
-          />
+          <div className="pt-4 border-t border-gray-200">
+            <div className="text-xs text-gray-500 mb-2">Services Selected</div>
+            <div className="flex flex-wrap gap-2">
+              {data.servicesNeeded.services.slice(0, 4).map(service => (
+                <span key={service} className="px-3 py-1 bg-orange-50 text-orange-700 text-xs rounded-full font-medium">
+                  {SERVICES[service]}
+                </span>
+              ))}
+              {data.servicesNeeded.services.length > 4 && (
+                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium">
+                  +{data.servicesNeeded.services.length - 4} more
+                </span>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="bg-wervice-lime/5 border border-wervice-lime/20 rounded-lg p-6 text-center space-y-4">
-        <h4 className="font-semibold text-wervice-ink">
+      {/* Vendor Suggestions */}
+      {suggestedVendors.length > 0 && (
+        <div className="space-y-4">
+          <h4 className="font-bold text-wervice-ink text-lg text-center">
+            🎯 Recommended Vendors for You
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            {suggestedVendors.map((vendor) => (
+              <Link
+                key={vendor.id}
+                href={`/en/vendors/${vendor.slug}`}
+                className="group bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:border-wervice-lime transition-all hover:shadow-lg"
+              >
+                <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                  {vendor.profile_photo_url ? (
+                    <img
+                      src={vendor.profile_photo_url}
+                      alt={vendor.business_name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-wv-gray1 to-wv-gray2">
+                      <Sparkles className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-3">
+                  <h5 className="font-semibold text-sm text-wervice-ink line-clamp-1 group-hover:text-wervice-lime transition-colors">
+                    {vendor.business_name}
+                  </h5>
+                  <p className="text-xs text-gray-500 capitalize mt-1">
+                    {vendor.category.replace('-', ' ')}
+                  </p>
+                  {vendor.starting_price && (
+                    <p className="text-xs text-orange-600 font-medium mt-1">
+                      From {formatCurrency(vendor.starting_price, data.budgetCurrency?.currency)}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              More personalized recommendations available in your dashboard
+            </p>
+          </div>
+        </div>
+      )}
+
+      {loadingVendors && (
+        <div className="text-center py-8">
+          <div className="w-8 h-8 border-2 border-wervice-lime border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p className="text-sm text-gray-500">Finding perfect vendors for you...</p>
+        </div>
+      )}
+
+      {/* Success Message */}
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 text-center">
+        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+          <span className="text-2xl">🎉</span>
+        </div>
+        <h4 className="font-bold text-wervice-ink text-lg mb-2">
           Everything looks perfect!
         </h4>
-        <p className="text-sm text-wervice-taupe">
-          Your personalized dashboard is ready with recommendations, planning tools, and vendor connections.
+        <p className="text-sm text-gray-600">
+          Click "Explore" to start planning your dream wedding!
         </p>
-
       </div>
     </motion.form>
-  );
-}
-
-function SummaryCard({
-  icon,
-  title,
-  items
-}: {
-  icon: React.ReactNode;
-  title: string;
-  items: string[];
-}) {
-  return (
-    <div className="bg-white border border-wv-gray3 rounded-lg p-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-wervice-lime/10 rounded-lg flex items-center justify-center text-wervice-lime">
-          {icon}
-        </div>
-        <h4 className="font-semibold text-wervice-ink">{title}</h4>
-      </div>
-
-      <div className="space-y-2">
-        {items.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-wervice-lime rounded-full flex-shrink-0" />
-            <span className="text-wervice-ink">{item}</span>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }

@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Search, Bell, User, ChevronDown } from 'lucide-react';
+import { useUser } from '@/contexts/UserContext';
 
 export default function Topbar() {
+  const { signOut } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [dateRange, setDateRange] = useState('This Month');
   const [language, setLanguage] = useState('EN');
@@ -11,6 +13,11 @@ export default function Topbar() {
 
   const dateRanges = ['Today', 'This Week', 'This Month', 'Last 30 Days', 'Custom'];
   const languages = ['EN', 'FR', 'AR'];
+
+  const handleSignOut = async () => {
+    setShowProfileMenu(false);
+    await signOut();
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-wv.card shadow-soft border-b border-wv.line">
@@ -109,7 +116,7 @@ export default function Topbar() {
                   <hr className="my-2 border-wv.line" />
                   <button
                     className="block w-full text-left px-4 py-2 text-sm text-wv.danger hover:bg-red-50"
-                    onClick={() => setShowProfileMenu(false)}
+                    onClick={handleSignOut}
                   >
                     Sign out
                   </button>

@@ -44,25 +44,23 @@ export default function Header() {
             {/* Auth-related buttons - only render on client to prevent hydration mismatch */}
             {isClient && (
               <>
-                {/* Admin Panel - Only for admin and super_admin users */}
-                {user && (userType === 'admin' || userType === 'super_admin') && (
+                {/* Admin Dashboard - For admin and super_admin users */}
+                {user && (userType === 'admin' || userType === 'super_admin') ? (
                   <Link
-                    href={`/${currentLocale}/admin`}
+                    href="/admin/dashboard"
                     className="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-100"
                   >
                     Admin
                   </Link>
-                )}
-
-                {/* Dashboard - For all authenticated users */}
-                {user && (
+                ) : user ? (
+                  /* Dashboard - For regular authenticated users */
                   <Link
                     href={`/${currentLocale}/dashboard`}
                     className="inline-flex items-center rounded-lg border border-black/10 bg-white px-3 py-2 text-sm font-medium text-[#11190C] shadow-sm hover:bg-gray-50"
                   >
                     Dashboard
                   </Link>
-                )}
+                ) : null}
 
                 {/* Sign In / Sign Out */}
                 {user ? (

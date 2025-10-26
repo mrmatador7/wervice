@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
 
 interface StepShellProps {
   title: string;
@@ -8,6 +8,7 @@ interface StepShellProps {
   onSkip?: () => void;
   isSaving?: boolean;
   showFooter?: boolean;
+  buttonText?: string;
 }
 
 export function StepShell({
@@ -18,48 +19,63 @@ export function StepShell({
   onSkip,
   isSaving = false,
   showFooter = true,
+  buttonText = 'Continue',
 }: StepShellProps) {
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl lg:text-4xl font-bold text-wervice-ink">
-          {title}
-        </h1>
+    <div className="space-y-10">
+      {/* Header - Hidden as it's shown in parent now */}
+      <div className="text-center space-y-3 hidden">
+        <div className="flex items-center justify-center gap-2">
+          <Sparkles className="w-5 h-5 text-wervice-lime" />
+          <h1 className="text-2xl lg:text-3xl font-bold text-wervice-ink">
+            {title}
+          </h1>
+        </div>
         {subtitle && (
-          <p className="text-lg text-wervice-taupe max-w-2xl mx-auto">
+          <p className="text-base text-wervice-taupe max-w-2xl mx-auto leading-relaxed">
             {subtitle}
           </p>
         )}
       </div>
 
+      {/* Subtitle shown at top */}
+      {subtitle && (
+        <div className="text-center -mt-2">
+          <p className="text-base text-wervice-taupe max-w-xl mx-auto leading-relaxed">
+            {subtitle}
+          </p>
+        </div>
+      )}
+
       {/* Content */}
-      <div className="space-y-8">
+      <div className="space-y-6">
         {children}
       </div>
 
       {/* Footer */}
       {showFooter && (
-        <div className="flex items-center justify-between pt-8 border-t border-wv-gray3">
-          <div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-8 mt-8 border-t border-wv-gray2">
+          {/* Back Button */}
+          <div className="order-2 sm:order-1">
             {onBack && (
               <button
                 onClick={onBack}
                 disabled={isSaving}
-                className="inline-flex items-center gap-2 px-4 py-2 text-wervice-taupe hover:text-wervice-ink transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-wervice-taupe hover:text-wervice-ink hover:bg-wv-gray1 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 <ArrowLeft className="w-4 h-4" />
-                Back
+                <span>Back</span>
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Continue & Skip Buttons */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 order-1 sm:order-2">
             {onSkip && (
               <button
                 onClick={onSkip}
                 disabled={isSaving}
-                className="px-4 py-2 text-wervice-taupe hover:text-wervice-ink transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2.5 text-wervice-taupe hover:text-wervice-ink hover:bg-wv-gray1 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium text-center"
               >
                 Skip for now
               </button>
@@ -69,17 +85,17 @@ export function StepShell({
               type="submit"
               form="step-form"
               disabled={isSaving}
-              className="inline-flex items-center gap-2 bg-wervice-lime text-wervice-ink font-semibold px-6 py-3 rounded-xl hover:bg-wv-limeDark transition-colors shadow-card hover:shadow-cardHover disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-wervice-lime via-lime-400 to-yellow-300 text-wervice-ink font-bold px-8 py-3.5 rounded-xl hover:shadow-lg transition-all shadow-md shadow-wervice-lime/30 hover:shadow-xl hover:shadow-wervice-lime/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg min-w-[160px]"
             >
               {isSaving ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-wervice-ink border-t-transparent rounded-full animate-spin" />
-                  Saving...
+                  <div className="w-5 h-5 border-2 border-wervice-ink border-t-transparent rounded-full animate-spin" />
+                  <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  Continue
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{buttonText}</span>
+                  <ArrowRight className="w-5 h-5" />
                 </>
               )}
             </button>

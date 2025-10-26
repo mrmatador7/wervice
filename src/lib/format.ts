@@ -44,11 +44,21 @@ export function formatVendorName(name: string): string {
  * Format category name for display
  */
 export function formatCategoryName(slug: string): string {
-  return slug
+  const categoryNames: Record<string, string> = {
+    'venues': 'Venues',
+    'catering': 'Catering',
+    'photography': 'Photo & Video',
+    'planning': 'Event Planner',
+    'beauty': 'Beauty',
+    'decor': 'Decor',
+    'music': 'Music',
+    'dresses': 'Dresses',
+  };
+  
+  return categoryNames[slug] || slug
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-    .replace('Photo Video', 'Photography & Video');
+    .join(' ');
 }
 
 /**

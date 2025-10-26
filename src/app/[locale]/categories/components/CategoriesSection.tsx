@@ -25,8 +25,8 @@ export default function CategoriesSection() {
         const categoryMappings: Record<string, { href: string; image: string; count: number; color: string; gradient: string }> = {
             venues: { href: 'venues', image: '/categories/venues.png', count: 124, color: 'bg-rose-500', gradient: 'from-[#E8A3A3] to-[#C67373]' },
             catering: { href: 'catering', image: '/categories/Catering.png', count: 87, color: 'bg-blue-500', gradient: 'from-[#7BA8D4] to-[#4A7BA7]' },
-            photo_video: { href: 'photo_video', image: '/categories/photo.png', count: 156, color: 'bg-purple-500', gradient: 'from-[#B89FD9] to-[#8B6DB8]' },
-            event_planner: { href: 'event_planner', image: '/categories/event planner.png', count: 92, color: 'bg-amber-500', gradient: 'from-[#E8C47C] to-[#C9A053]' },
+            photo_video: { href: 'photo-video', image: '/categories/photo.png', count: 156, color: 'bg-purple-500', gradient: 'from-[#B89FD9] to-[#8B6DB8]' },
+            event_planner: { href: 'planning', image: '/categories/event planner.png', count: 92, color: 'bg-amber-500', gradient: 'from-[#E8C47C] to-[#C9A053]' },
             beauty: { href: 'beauty', image: '/categories/beauty.png', count: 78, color: 'bg-pink-500', gradient: 'from-[#E8A8C9] to-[#C57BA3]' },
             decor: { href: 'decor', image: '/categories/decor.png', count: 134, color: 'bg-emerald-500', gradient: 'from-[#7BC5A8] to-[#4A9B7F]' },
             music: { href: 'music', image: '/categories/music.png', count: 67, color: 'bg-red-500', gradient: 'from-[#E88F8F] to-[#C95D5D]' },
@@ -38,14 +38,14 @@ export default function CategoriesSection() {
             name: labelForCategory(slug),
             count: mapping.count,
             image: mapping.image,
-            href: `/${locale}/vendors/${mapping.href}`,
+            href: `/${locale}/categories/${mapping.href}`,
             color: mapping.color,
             gradient: mapping.gradient,
         };
     });
 
     return (
-        <section className="pt-12 md:pt-16 px-4 md:px-6 lg:px-8 bg-[#F7F8FB]">
+        <section className="pt-12 md:pt-16 px-4 md:px-6 lg:px-8 bg-[#F7F8FB] relative z-0 isolate">
             <div className="max-w-7xl mx-auto">
                 {/* Section Title */}
                 <div className="text-center mb-8">
@@ -55,13 +55,13 @@ export default function CategoriesSection() {
                 </div>
 
                 {/* Categories - Horizontal Scroll on Mobile, Grid on Desktop */}
-                <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible">
-                    <div className="flex md:grid md:grid-cols-8 gap-3 sm:gap-4 md:gap-5 lg:gap-6 min-w-max md:min-w-0">
+                <div className="overflow-x-auto scrollbar-hide md:overflow-visible">
+                    <div className="flex md:grid md:grid-cols-8 gap-3 sm:gap-4 md:gap-5 lg:gap-6 min-w-max md:min-w-0 px-4 md:px-0">
                         {categories.map((category) => (
                             <Link
                                 key={category.name}
                                 href={category.href}
-                                className="group relative flex flex-col items-center flex-shrink-0 w-[100px] sm:w-[110px] md:w-auto"
+                                className="group relative flex flex-col items-center flex-shrink-0 w-[100px] sm:w-[110px] md:w-auto pointer-events-auto"
                                 aria-label={`Browse ${category.name}`}
                             >
                             {/* Clean Card */}

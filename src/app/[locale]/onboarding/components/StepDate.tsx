@@ -39,42 +39,72 @@ export function StepDate({ data, currentStepData, onContinue, isSaving }: StepDa
         e.preventDefault();
         handleContinue();
       }}
-      className="space-y-8"
+      className="max-w-md mx-auto space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Date Picker */}
-      <div className="space-y-4">
-        <div className="text-center space-y-2">
-          <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto mb-4">
-            <Calendar className="w-8 h-8 text-wervice-ink" />
-          </div>
-          <h3 className="text-xl font-semibold text-wervice-ink">
-            When is your wedding day?
-          </h3>
-          <p className="text-wervice-taupe max-w-md mx-auto">
-            Select your wedding date to help us find available vendors and provide accurate recommendations.
-          </p>
-        </div>
+      {/* Icon */}
+      <div className="w-16 h-16 bg-gradient-to-br from-wervice-lime to-lime-400 rounded-full flex items-center justify-center mx-auto shadow-lg">
+        <Calendar className="w-8 h-8 text-wervice-ink" />
+      </div>
 
-        <div className="max-w-sm mx-auto space-y-4">
-          <div>
-            <label className="text-sm font-medium text-wervice-ink block mb-2">
-              Wedding Date
-            </label>
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-bold text-wervice-ink">
+          When is your wedding day?
+        </h3>
+        <p className="text-gray-500">
+          Select your wedding date to check vendor availability
+        </p>
+      </div>
+
+      {/* Date Input */}
+      <div className="space-y-4">
+        {/* Date picker with visual calendar */}
+        <div className="bg-gradient-to-br from-wv-gray1 to-white border-2 border-wv-gray2 rounded-2xl p-6 hover:border-wervice-lime transition-all">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            Select Wedding Date
+          </label>
+          <div className="relative">
+            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-wervice-lime pointer-events-none" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               min={minDateString}
               max={maxDateString}
-              className={inputStyles.base}
+              className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-wervice-lime focus:border-wervice-lime transition-all outline-none text-lg font-medium bg-white cursor-pointer"
               required
             />
-            <p className="text-xs text-wervice-taupe mt-2">
-              We recommend planning at least 6-12 months in advance for the best vendor availability.
-            </p>
+          </div>
+          
+          {selectedDate && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-700 font-medium">
+                ✓ Date selected: {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { 
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Planning tip */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-lg">💡</span>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 text-sm mb-1">Planning Tip</h4>
+              <p className="text-xs text-gray-600">
+                We recommend booking at least 6-12 months in advance for the best vendor availability and prices.
+              </p>
+            </div>
           </div>
         </div>
       </div>

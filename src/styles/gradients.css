@@ -14,10 +14,12 @@
   background: radial-gradient(closest-side, rgba(217,255,10,0.18), rgba(217,255,10,0.06), transparent 70%);
   filter: blur(20px);
   z-index: -1;
+  pointer-events: none;
 }
 .hero-bg::after {
   inset: auto auto -25% -10%;
   width: 55vmax;
   height: 55vmax;
   background: radial-gradient(closest-side, rgba(0,0,0,0.04), transparent 65%);
+  pointer-events: none;
 }

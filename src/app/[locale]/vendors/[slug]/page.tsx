@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getVendorBySlug, getSimilarVendors } from '@/lib/db/vendors';
 import { labelForCategory, VALID_CATEGORY_SLUGS } from '@/lib/categories';
 import { capitalizeCity } from '@/lib/utils';
@@ -11,7 +11,6 @@ import VendorMeta from '@/components/vendor/VendorMeta';
 import SimilarVendors from '@/components/vendor/SimilarVendors';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import CategoryVendorsClient from '../[...slug]/client';
 
 interface VendorPageProps {
   params: Promise<{ locale: string; slug: string }>;
@@ -20,19 +19,10 @@ interface VendorPageProps {
 export async function generateMetadata({ params }: VendorPageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  // Check if this is a category page
+  // Check if this is a category page - will be redirected, but provide basic metadata
   if (VALID_CATEGORY_SLUGS.includes(slug as any)) {
-    const categoryLabel = labelForCategory(slug);
     return {
-      title: `${categoryLabel} Vendors in Morocco | Wervice`,
-      description: `Find verified ${categoryLabel.toLowerCase()} vendors in Morocco. Browse professionals by city and budget.`,
-      keywords: ['wedding vendors', categoryLabel.toLowerCase(), 'Morocco', 'wedding planning'],
-      openGraph: {
-        title: `${categoryLabel} Vendors in Morocco | Wervice`,
-        description: `Find verified ${categoryLabel.toLowerCase()} vendors in Morocco. Browse professionals by city and budget.`,
-        images: [{ url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=630&fit=crop' }],
-        type: 'website',
-      },
+      title: 'Redirecting...',
     };
   }
 
@@ -82,9 +72,9 @@ export async function generateMetadata({ params }: VendorPageProps): Promise<Met
 export default async function VendorPage({ params }: VendorPageProps) {
   const { locale, slug } = await params;
 
-  // Check if this is a category page
+  // Check if this is a category page - redirect to new category structure
   if (VALID_CATEGORY_SLUGS.includes(slug as any)) {
-    return <CategoryVendorsClient categorySlug={slug} locale={locale} />;
+    redirect(`/${locale}/categories/${slug}`);
   }
 
   // Otherwise, it's a vendor detail page

@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import Hero from '../components/Hero';
-import CategoryClient from '../components/CategoryClient';
+import NewCategoryClient from '../components/NewCategoryClient';
 import { formatCategoryName } from '@/lib/format';
 
 interface PageProps {
@@ -28,24 +27,15 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   const searchParamsResolved = await searchParams;
 
   // Basic validation
-  const validCategories = ['venues', 'catering', 'photo-video', 'planning', 'beauty', 'decor', 'music', 'dresses'];
+  const validCategories = ['venues', 'catering', 'photography', 'planning', 'beauty', 'decor', 'music', 'dresses'];
   if (!validCategories.includes(categorySlug)) {
     notFound();
   }
 
   return (
-    <main className="min-h-screen bg-wv-gray1">
-      <Hero
-        categorySlug={categorySlug}
-        breadcrumbs={[
-          { label: 'Home', href: '/' },
-          { label: 'Vendors', href: '/vendors' },
-          { label: formatCategoryName(categorySlug) },
-        ]}
-      />
-
-      {/* Client component to handle state */}
-      <CategoryClient
+    <main className="min-h-screen bg-white">
+      {/* New Client component with sidebar layout */}
+      <NewCategoryClient
         category={categorySlug}
         initialSearchParams={searchParamsResolved}
       />
@@ -55,7 +45,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
 
 // Generate static params for all categories
 export async function generateStaticParams() {
-  const validCategories = ['venues', 'catering', 'photo-video', 'planning', 'beauty', 'decor', 'music', 'dresses'];
+  const validCategories = ['venues', 'catering', 'photography', 'planning', 'beauty', 'decor', 'music', 'dresses'];
   return validCategories.map((categorySlug) => ({
     categorySlug,
   }));

@@ -28,7 +28,7 @@ export default function VendorHero({ vendor, locale }: VendorHeroProps) {
         </Link>
         <ChevronRight className="h-4 w-4" />
         <Link 
-          href={`/${locale}/vendors?category=${vendor.category}`} 
+          href={`/${locale}/categories/${vendor.category}`} 
           className="hover:text-zinc-900 transition"
         >
           {categoryLabel}

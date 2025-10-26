@@ -115,139 +115,64 @@ export function StepServicesNeeded({ data, currentStepData, onContinue, isSaving
         e.preventDefault();
         handleContinue();
       }}
-      className="space-y-8"
+      className="max-w-md mx-auto space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto">
-          <Sparkles className="w-8 h-8 text-wervice-ink" />
-        </div>
-        <h3 className="text-xl font-semibold text-wervice-ink">
+      {/* Icon */}
+      <div className="w-16 h-16 bg-gradient-to-br from-wervice-lime to-lime-400 rounded-full flex items-center justify-center mx-auto shadow-lg">
+        <Sparkles className="w-8 h-8 text-wervice-ink" />
+      </div>
+
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-bold text-wervice-ink">
           What services do you need?
         </h3>
-        <p className="text-wervice-taupe max-w-md mx-auto">
-          Select all the services you'll need for your wedding. We'll recommend the best vendors in your area.
+        <p className="text-gray-500">
+          Select all services you'll need for your wedding
         </p>
       </div>
 
-      {/* Essential Services */}
+      {/* Services Grid */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-wervice-lime rounded-full"></div>
-          <h4 className="font-medium text-wervice-ink">Essential Services</h4>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {essentialServices.map((service) => {
+        <div className="grid grid-cols-2 gap-3">
+          {WEDDING_SERVICES.map((service) => {
             const Icon = service.icon;
             const isSelected = selectedServices.includes(service.id);
 
             return (
               <button
                 key={service.id}
+                type="button"
                 onClick={() => handleServiceToggle(service.id)}
-                aria-pressed={isSelected}
-                role="button"
-                className={cn(
-                  'p-6 border rounded-xl text-left transition-all hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wervice-lime h-full',
+                className={`p-4 border-2 rounded-xl text-center transition-all ${
                   isSelected
-                    ? 'bg-wervice-lime text-wervice-ink border-transparent shadow-soft'
-                    : 'border-wv-gray3 bg-white hover:border-wervice-lime/50 text-wervice-ink'
-                )}
+                    ? 'bg-gradient-to-br from-orange-50 to-white border-orange-500 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-orange-200'
+                }`}
               >
-                <div className="flex items-start gap-4 h-full">
-                  <div className={cn(
-                    'w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0',
-                    isSelected ? 'bg-wervice-ink text-wervice-lime' : 'bg-wv-gray2 text-wervice-taupe'
-                  )}>
-                    <Icon className="w-6 h-6" />
+                <Icon className={`w-7 h-7 mx-auto mb-2 ${isSelected ? 'text-orange-500' : 'text-gray-400'}`} />
+                <div className="font-medium text-sm text-wervice-ink">{service.label}</div>
+                {isSelected && (
+                  <div className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center mx-auto mt-2">
+                    <span className="text-xs text-white font-bold">✓</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h5 className="font-semibold mb-1">{service.label}</h5>
-                    <p className={cn(
-                      'text-sm leading-relaxed',
-                      isSelected ? 'text-wervice-ink/80' : 'text-wervice-taupe'
-                    )}>
-                      {service.description}
-                    </p>
-                  </div>
-                  <div className={cn(
-                    'w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0',
-                    isSelected
-                      ? 'border-transparent bg-wervice-ink'
-                      : 'border-wv-gray3'
-                  )}>
-                    {isSelected && (
-                      <span className="text-xs text-wervice-lime font-bold">✓</span>
-                    )}
-                  </div>
-                </div>
+                )}
               </button>
             );
           })}
         </div>
-      </div>
 
-      {/* Additional Services */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-          <h4 className="font-medium text-wervice-ink">Additional Services</h4>
-          <span className="text-sm text-wervice-taupe">Optional enhancements</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {additionalServices.map((service) => {
-            const Icon = service.icon;
-            const isSelected = selectedServices.includes(service.id);
-
-            return (
-              <button
-                key={service.id}
-                onClick={() => handleServiceToggle(service.id)}
-                aria-pressed={isSelected}
-                role="button"
-                className={cn(
-                  'p-4 border rounded-xl text-left transition-all hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wervice-lime',
-                  isSelected
-                    ? 'bg-wervice-lime text-wervice-ink border-transparent shadow-soft'
-                    : 'border-wv-gray3 bg-white hover:border-wervice-lime/50 text-wervice-ink'
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    'w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0',
-                    isSelected ? 'bg-wervice-ink text-wervice-lime' : 'bg-wv-gray2 text-wervice-taupe'
-                  )}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <h5 className="font-medium">{service.label}</h5>
-                    <p className={cn(
-                      'text-xs mt-1',
-                      isSelected ? 'text-wervice-ink/80' : 'text-wervice-taupe'
-                    )}>
-                      {service.description}
-                    </p>
-                  </div>
-                  <div className={cn(
-                    'w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0',
-                    isSelected
-                      ? 'border-transparent bg-wervice-ink'
-                      : 'border-wv-gray3'
-                  )}>
-                    {isSelected && (
-                      <span className="text-xs text-wervice-lime font-bold">✓</span>
-                    )}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        {/* Selected Count */}
+        {selectedServices.length > 0 && (
+          <div className="bg-gradient-to-r from-wv-gray1 to-white border border-wv-gray2 rounded-xl p-4 text-center">
+            <p className="text-sm text-gray-500">
+              <span className="font-bold text-wervice-ink">{selectedServices.length}</span> service{selectedServices.length !== 1 ? 's' : ''} selected
+            </p>
+          </div>
+        )}
       </div>
     </motion.form>
   );

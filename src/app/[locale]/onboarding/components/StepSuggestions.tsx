@@ -110,58 +110,50 @@ export function StepSuggestions({ data, currentStepData, onContinue, isSaving }:
         e.preventDefault();
         handleContinue();
       }}
-      className="space-y-8"
+      className="max-w-md mx-auto space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto">
-          <Sparkles className="w-8 h-8 text-wervice-ink" />
-        </div>
-        <h3 className="text-xl font-semibold text-wervice-ink">
+      {/* Icon */}
+      <div className="w-16 h-16 bg-gradient-to-br from-wervice-lime to-lime-400 rounded-full flex items-center justify-center mx-auto shadow-lg">
+        <Sparkles className="w-8 h-8 text-wervice-ink" />
+      </div>
+
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-bold text-wervice-ink">
           Personalized Suggestions
         </h3>
-        <p className="text-wervice-taupe max-w-md mx-auto">
-          Based on your preferences, here are some amazing vendors that match your wedding vision.
+        <p className="text-gray-500">
+          Based on your preferences, we've curated vendors for you
         </p>
       </div>
 
-      {/* Vendor Carousel */}
-      {relevantVendors.length > 0 ? (
-        <VendorCarousel vendors={relevantVendors} />
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-wervice-taupe">
-            We're gathering the perfect recommendations for you. Continue to see more options in your dashboard.
-          </p>
+      {/* Info Card */}
+      <div className="bg-gradient-to-r from-wv-gray1 to-white border border-wv-gray2 rounded-xl p-6 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Star className="w-6 h-6 text-orange-500" />
+          </div>
+          <div>
+            <h4 className="font-semibold text-wervice-ink mb-2">
+              Ready to explore?
+            </h4>
+            <p className="text-sm text-gray-600">
+              Your dashboard will have personalized recommendations, planning tools, and direct vendor contact.
+            </p>
+          </div>
         </div>
-      )}
 
-      {/* Acknowledgment */}
-      <div className="space-y-4">
-        <div className="bg-wv-gray1 border border-wv-gray3 rounded-lg p-6">
-          <h4 className="font-medium text-wervice-ink mb-2">
-            Ready to explore more?
-          </h4>
-          <p className="text-sm text-wervice-taupe mb-4">
-            Your dashboard will have personalized recommendations, planning tools, and direct vendor contact.
-          </p>
-
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={acknowledged}
-              onChange={(e) => setAcknowledged(e.target.checked)}
-              className="w-5 h-5 text-wervice-lime bg-white border-wv-gray3 rounded focus:ring-wervice-lime focus:ring-2"
-            />
-            <span className="text-sm text-wervice-ink">
-              I understand and want to proceed to my dashboard
-            </span>
-          </label>
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <MapPin className="w-4 h-4 text-orange-500" />
+          <span>Local vendors in {data.city?.city || 'your area'}</span>
         </div>
       </div>
+
+      {/* Hidden checkbox for form validation */}
+      <input type="hidden" value={acknowledged ? 'true' : 'false'} />
     </motion.form>
   );
 }

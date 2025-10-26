@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Minus, Plus } from 'lucide-react';
-import { inputStyles } from '../utils/classes';
+import { Users } from 'lucide-react';
 import type { OnboardingData } from '../schemas/onboarding.schemas';
 
 interface StepGuestsProps {
@@ -14,30 +13,30 @@ interface StepGuestsProps {
   isSaving: boolean;
 }
 
+const GUEST_RANGES = [
+  { min: 50, max: 150, label: '50-150' },
+  { min: 151, max: 500, label: '151-500' },
+  { min: 501, max: 1000, label: '501-1000' },
+  { min: 1001, max: 10000, label: '1000+' },
+];
+
 export function StepGuests({ data, currentStepData, onContinue, isSaving }: StepGuestsProps) {
-  const [guestCount, setGuestCount] = useState(currentStepData?.count || 50);
+  const [selectedRange, setSelectedRange] = useState(() => {
+    const count = currentStepData?.count || 100;
+    const range = GUEST_RANGES.find(r => count >= r.min && count <= r.max);
+    return range || GUEST_RANGES[0];
+  });
 
   const handleContinue = async () => {
-    await onContinue({ count: guestCount });
-  };
-
-  const increment = () => {
-    if (guestCount < 800) {
-      setGuestCount((prev: number) => prev + 10);
+    // Use the middle of the range as the count
+    // For 1000+, use 1500 instead of the midpoint of 1001-10000
+    let count;
+    if (selectedRange.label === '1000+') {
+      count = 1500;
+    } else {
+      count = Math.floor((selectedRange.min + selectedRange.max) / 2);
     }
-  };
-
-  const decrement = () => {
-    if (guestCount > 20) {
-      setGuestCount((prev: number) => Math.max(20, prev - 10));
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 20 && value <= 800) {
-      setGuestCount(value);
-    }
+    await onContinue({ count });
   };
 
   return (
@@ -47,95 +46,73 @@ export function StepGuests({ data, currentStepData, onContinue, isSaving }: Step
         e.preventDefault();
         handleContinue();
       }}
-      className="space-y-8"
+      className="max-w-md mx-auto space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Guest Counter */}
-      <div className="text-center space-y-6">
-        <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto">
-          <Users className="w-8 h-8 text-wervice-ink" />
+      {/* Icon */}
+      <div className="w-16 h-16 bg-gradient-to-br from-wervice-lime to-lime-400 rounded-full flex items-center justify-center mx-auto shadow-lg">
+        <Users className="w-8 h-8 text-wervice-ink" />
+      </div>
+
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-bold text-wervice-ink">
+          How many guests are you expecting?
+        </h3>
+        <p className="text-gray-500">
+          Select your approximate guest count
+        </p>
+      </div>
+
+      {/* Slider */}
+      <div className="space-y-6">
+        <div className="relative pt-1">
+          <div className="flex items-center justify-between mb-4">
+            {GUEST_RANGES.map((range, index) => (
+              <span 
+                key={range.label}
+                className={`text-xs font-medium ${
+                  selectedRange.label === range.label ? 'text-wervice-ink' : 'text-gray-400'
+                }`}
+              >
+                {range.label}
+              </span>
+            ))}
+          </div>
+          
+          {/* Custom Slider */}
+          <div className="relative h-2 bg-gray-200 rounded-full">
+            <div 
+              className="absolute h-full bg-gradient-to-r from-wervice-lime to-lime-500 rounded-full transition-all duration-300"
+              style={{ 
+                width: `${(GUEST_RANGES.findIndex(r => r.label === selectedRange.label) / (GUEST_RANGES.length - 1)) * 100}%` 
+              }}
+            />
+            <input
+              type="range"
+              min="0"
+              max={GUEST_RANGES.length - 1}
+              value={GUEST_RANGES.findIndex(r => r.label === selectedRange.label)}
+              onChange={(e) => setSelectedRange(GUEST_RANGES[parseInt(e.target.value)])}
+              className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
+            />
+            {/* Slider thumb */}
+            <div 
+              className="absolute top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full shadow-lg border-4 border-wervice-lime transition-all duration-300 pointer-events-none"
+              style={{ 
+                left: `calc(${(GUEST_RANGES.findIndex(r => r.label === selectedRange.label) / (GUEST_RANGES.length - 1)) * 100}% - 12px)` 
+              }}
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <h3 className="text-xl font-semibold text-wervice-ink">
-            How many guests are you expecting?
-          </h3>
-          <p className="text-wervice-taupe max-w-md mx-auto">
-            This helps us recommend venues and caterers that can accommodate your group size.
-          </p>
-        </div>
-
-        {/* Counter Controls */}
-        <div className="flex items-center justify-center gap-6">
-          <button
-            type="button"
-            onClick={decrement}
-            disabled={guestCount <= 20}
-            className="w-12 h-12 bg-wv-gray2 hover:bg-wv-gray3 disabled:opacity-50 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-colors"
-          >
-            <Minus className="w-5 h-5 text-wervice-taupe" />
-          </button>
-
-          <div className="text-center">
-            <div className="text-4xl font-bold text-wervice-ink mb-2">
-              {guestCount}
-            </div>
-            <div className="text-sm text-wervice-taupe">guests</div>
-          </div>
-
-          <button
-            type="button"
-            onClick={increment}
-            disabled={guestCount >= 800}
-            className="w-12 h-12 bg-wv-gray2 hover:bg-wv-gray3 disabled:opacity-50 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-colors"
-          >
-            <Plus className="w-5 h-5 text-wervice-taupe" />
-          </button>
-        </div>
-
-        {/* Manual Input */}
-        <div className="max-w-xs mx-auto">
-          <label className="text-sm font-medium text-wervice-ink block mb-2">
-            Or enter exact number
-          </label>
-          <input
-            type="number"
-            value={guestCount}
-            onChange={handleInputChange}
-            min={20}
-            max={800}
-            className={inputStyles.base}
-          />
-        </div>
-
-        {/* Size Categories */}
-        <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto text-sm">
-          <div className={`p-3 rounded-lg border transition-colors ${
-            guestCount <= 100
-              ? 'bg-wervice-lime/10 border-wervice-lime text-wervice-ink'
-              : 'border-wv-gray3 text-wervice-taupe'
-          }`}>
-            <div className="font-medium">Intimate</div>
-            <div className="text-xs">20-100 guests</div>
-          </div>
-          <div className={`p-3 rounded-lg border transition-colors ${
-            guestCount > 100 && guestCount <= 300
-              ? 'bg-wervice-lime/10 border-wervice-lime text-wervice-ink'
-              : 'border-wv-gray3 text-wervice-taupe'
-          }`}>
-            <div className="font-medium">Medium</div>
-            <div className="text-xs">100-300 guests</div>
-          </div>
-          <div className={`p-3 rounded-lg border transition-colors ${
-            guestCount > 300
-              ? 'bg-wervice-lime/10 border-wervice-lime text-wervice-ink'
-              : 'border-wv-gray3 text-wervice-taupe'
-          }`}>
-            <div className="font-medium">Large</div>
-            <div className="text-xs">300+ guests</div>
-          </div>
+        {/* Selected Info */}
+        <div className="bg-gradient-to-r from-wv-gray1 to-white border border-wv-gray2 rounded-xl p-6 text-center">
+          <div className="text-sm text-gray-500 mb-2">Selected range</div>
+          <div className="text-3xl font-bold text-wervice-ink">{selectedRange.label}</div>
+          <div className="text-sm text-gray-500 mt-1">guests</div>
         </div>
       </div>
     </motion.form>

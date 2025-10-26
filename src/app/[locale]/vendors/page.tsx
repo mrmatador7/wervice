@@ -116,6 +116,20 @@ export default function VendorsPage() {
 
   // Initial load
   useEffect(() => {
+    // Redirect to new category page structure if category parameter exists
+    if (filters.category) {
+      const categorySlug = filters.category;
+      const params = new URLSearchParams();
+      if (filters.city) params.set('city', filters.city);
+      if (filters.q) params.set('q', filters.q);
+      if (filters.priceMin) params.set('priceMin', String(filters.priceMin));
+      if (filters.priceMax) params.set('priceMax', String(filters.priceMax));
+      
+      const queryString = params.toString();
+      router.replace(`/en/categories/${categorySlug}${queryString ? `?${queryString}` : ''}`);
+      return;
+    }
+
     fetchVendors();
     fetchCategory();
     fetchCities();

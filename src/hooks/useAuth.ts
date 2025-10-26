@@ -56,6 +56,10 @@ export const useAuth = () => {
             if (response.ok) {
                 setUser(null);
                 console.log('🚪 User signed out');
+                
+                // Redirect to homepage
+                const locale = window.location.pathname.split('/')[1] || 'en';
+                window.location.href = `/${locale}`;
             }
         } catch (error) {
             console.error('❌ Error signing out:', error);

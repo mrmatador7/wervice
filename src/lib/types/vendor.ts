@@ -84,18 +84,18 @@ export const SORT_OPTIONS = [
 
 export type SortOption = typeof SORT_OPTIONS[number]['value'];
 
-// Moroccan cities for filters (matches database schema)
+// Moroccan cities for filters (matches database schema with proper capitalization)
 export const MOROCCAN_CITIES = [
   { value: 'all', label: 'All Cities' },
-  { value: 'marrakech', label: 'Marrakech' },
-  { value: 'casablanca', label: 'Casablanca' },
-  { value: 'rabat', label: 'Rabat' },
-  { value: 'tangier', label: 'Tangier' },
-  { value: 'agadir', label: 'Agadir' },
-  { value: 'fes', label: 'Fès' },
-  { value: 'meknes', label: 'Meknes' },
-  { value: 'elJadida', label: 'El Jadida' },
-  { value: 'kenitra', label: 'Kenitra' }
+  { value: 'Marrakech', label: 'Marrakech' },
+  { value: 'Casablanca', label: 'Casablanca' },
+  { value: 'Rabat', label: 'Rabat' },
+  { value: 'Tangier', label: 'Tangier' },
+  { value: 'Agadir', label: 'Agadir' },
+  { value: 'Fes', label: 'Fès' },
+  { value: 'Meknes', label: 'Meknes' },
+  { value: 'El Jadida', label: 'El Jadida' },
+  { value: 'Kenitra', label: 'Kenitra' }
 ] as const;
 
 export type MoroccanCity = typeof MOROCCAN_CITIES[number];

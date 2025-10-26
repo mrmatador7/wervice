@@ -81,10 +81,10 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
       try {
         const params = new URLSearchParams();
         if (selectedCategory) params.set('category', selectedCategory);
-        if (selectedCity) params.set('city', selectedCity.toLowerCase());
+        if (selectedCity) params.set('city', selectedCity); // Don't convert to lowercase - database has capitalized cities
         if (selectedRating) params.set('rating', selectedRating);
         if (selectedSort) params.set('sort', selectedSort);
-        params.set('limit', '8');
+        params.set('limit', '10');
 
         const res = await fetch(`/api/vendors?${params.toString()}`);
         const data = await res.json();
@@ -110,7 +110,7 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
   const handleViewAll = () => {
     const params = new URLSearchParams();
     if (selectedCategory) params.set('category', selectedCategory);
-    if (selectedCity) params.set('city', selectedCity.toLowerCase());
+    if (selectedCity) params.set('city', selectedCity); // Don't convert to lowercase
     if (selectedSort) params.set('sort', selectedSort);
     
     router.push(`/${locale}/vendors?${params.toString()}`);
@@ -203,8 +203,8 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
 
         {/* Vendor Cards Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {Array.from({ length: 10 }).map((_, i) => (
               <div
                 key={i}
                 className="h-80 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100"
@@ -213,7 +213,7 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
           </div>
         ) : vendors.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
               {vendors.map((vendor) => (
                 <button
                   key={vendor.id}

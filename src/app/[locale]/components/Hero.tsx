@@ -20,7 +20,7 @@ export default async function Hero({ locale = 'en' }: { locale?: string }) {
   const t = await getTranslations({ locale, namespace: 'home' });
 
   return (
-    <section className="hero-bg relative mx-auto w-full max-w-6xl px-4 pt-16 pb-10 sm:pt-20 sm:pb-12 overflow-hidden">
+    <section className="hero-bg relative mx-auto w-full max-w-6xl px-4 pt-16 pb-10 sm:pt-20 sm:pb-12 z-10 isolate">
       {/* Floating Category Icons Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {floatingIcons.map((icon, index) => (
@@ -48,7 +48,7 @@ export default async function Hero({ locale = 'en' }: { locale?: string }) {
       </div>
 
       {/* Content */}
-      <div className="relative z-10">
+      <div className="relative z-20">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-3xl font-extrabold tracking-tight text-[#11190C] sm:text-4xl md:text-5xl">
             {t('hero.title')}

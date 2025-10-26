@@ -20,8 +20,16 @@ const CURRENCIES: Array<{ value: Currency; label: string; symbol: string }> = [
   { value: 'USD', label: 'US Dollar', symbol: '$' },
 ];
 
+// Exchange rates to MAD (Moroccan Dirham)
+const EXCHANGE_RATES: Record<Currency, number> = {
+  'MAD': 1,
+  'USD': 10,  // 1 USD ≈ 10 MAD
+  'EUR': 10,  // 1 EUR ≈ 10 MAD (same as USD)
+};
+
+// Budget ranges in MAD
 const BUDGET_RANGES = [
-  { min: 1000, max: 50000, label: 'Intimate Celebration', description: 'Cozy gathering with essentials' },
+  { min: 10000, max: 50000, label: 'Intimate Celebration', description: 'Cozy gathering with essentials' },
   { min: 50000, max: 150000, label: 'Standard Wedding', description: 'Complete wedding with all services' },
   { min: 150000, max: 300000, label: 'Luxury Affair', description: 'High-end experience with premium services' },
   { min: 300000, max: 1000000, label: 'Grand Celebration', description: 'Extravagant wedding with all luxuries' },
@@ -56,6 +64,9 @@ export function StepBudgetCurrency({ data, currentStepData, onContinue, isSaving
 
   const breakdown = getBudgetBreakdown();
 
+  // Convert budget to MAD for comparison
+  const budgetInMAD = budget * EXCHANGE_RATES[currency];
+
   return (
     <motion.form
       id="step-form"
@@ -63,27 +74,29 @@ export function StepBudgetCurrency({ data, currentStepData, onContinue, isSaving
         e.preventDefault();
         handleContinue();
       }}
-      className="space-y-8"
+      className="max-w-md mx-auto space-y-8"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-wervice-lime rounded-full flex items-center justify-center mx-auto">
-          <DollarSign className="w-8 h-8 text-wervice-ink" />
-        </div>
-        <h3 className="text-xl font-semibold text-wervice-ink">
+      {/* Icon */}
+      <div className="w-16 h-16 bg-gradient-to-br from-wervice-lime to-lime-400 rounded-full flex items-center justify-center mx-auto shadow-lg">
+        <DollarSign className="w-8 h-8 text-wervice-ink" />
+      </div>
+
+      {/* Title */}
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-bold text-wervice-ink">
           What's your wedding budget?
         </h3>
-        <p className="text-wervice-taupe max-w-md mx-auto">
-          This helps us recommend vendors within your price range and show realistic cost estimates.
+        <p className="text-gray-500">
+          This helps us recommend vendors within your price range
         </p>
       </div>
 
       {/* Currency Selection */}
-      <div className="space-y-4">
-        <label className="text-sm font-medium text-wervice-ink">
+      <div className="space-y-3">
+        <label className="block text-sm font-semibold text-gray-700">
           Currency
         </label>
         <div className="grid grid-cols-3 gap-3">
@@ -92,102 +105,71 @@ export function StepBudgetCurrency({ data, currentStepData, onContinue, isSaving
               key={curr.value}
               type="button"
               onClick={() => setCurrency(curr.value)}
-              className={`p-3 border rounded-lg text-center transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-wervice-lime ${
+              className={`p-3 border-2 rounded-xl text-center transition-all ${
                 currency === curr.value
-                  ? 'bg-wervice-lime text-wervice-ink border-transparent'
-                  : 'border-wv-gray3 bg-white hover:border-wervice-lime/50 text-wervice-ink'
+                  ? 'bg-gradient-to-br from-orange-50 to-white border-orange-500 shadow-md'
+                  : 'border-gray-200 bg-white hover:border-orange-200'
               }`}
             >
-              <div className="font-medium text-sm">{curr.symbol}</div>
-              <div className="text-xs text-wervice-taupe mt-1">{curr.label}</div>
+              <div className="font-bold text-base">{curr.symbol}</div>
+              <div className="text-xs text-gray-500 mt-1">{curr.value}</div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Budget Input */}
-      <div className="space-y-4">
-        <label className="text-sm font-medium text-wervice-ink">
-          Total Budget ({currency})
+      <div className="space-y-3">
+        <label className="block text-sm font-semibold text-gray-700">
+          Total Budget
         </label>
-        <input
-          type="number"
-          value={budget}
-          onChange={(e) => setBudget(parseInt(e.target.value) || 0)}
-          min={1000}
-          step={1000}
-          className={inputStyles.base}
-        />
-        <div className="text-sm text-wervice-taupe">
-          Current budget: {formatCurrency(budget)}
+        <div className="relative">
+          <input
+            type="number"
+            value={budget}
+            onChange={(e) => setBudget(parseInt(e.target.value) || 0)}
+            min={1000}
+            step={1000}
+            className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-wervice-lime focus:border-transparent transition-all outline-none text-base bg-white"
+            placeholder="Enter amount"
+          />
+        </div>
+        <div className="text-sm font-medium text-wervice-ink">
+          {formatCurrency(budget)}
         </div>
       </div>
 
-      {/* Budget Ranges */}
-      <div className="space-y-4">
-        <h4 className="font-medium text-wervice-ink">Budget Categories</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {BUDGET_RANGES.map((range) => {
-            const isInRange = budget >= range.min && budget <= range.max;
-            return (
-              <div
-                key={range.label}
-                className={`p-4 border rounded-lg transition-all ${
-                  isInRange
-                    ? 'bg-wervice-lime/5 border-wervice-lime'
-                    : 'border-wv-gray3 bg-white'
-                }`}
-              >
-                <h5 className="font-medium text-wervice-ink">{range.label}</h5>
-                <p className="text-sm text-wervice-taupe mt-1">{range.description}</p>
-                <p className="text-xs text-wervice-taupe mt-2">
-                  {formatCurrency(range.min)} - {formatCurrency(range.max)}
-                </p>
+      {/* Budget Categories */}
+      <div className="bg-gradient-to-r from-wv-gray1 to-white border border-wv-gray2 rounded-xl p-5 space-y-3">
+        <h4 className="font-semibold text-gray-700 text-sm mb-1">Budget Category</h4>
+        <p className="text-xs text-gray-500 mb-3">Based on typical Moroccan wedding costs</p>
+        {BUDGET_RANGES.map((range) => {
+          const isInRange = budgetInMAD >= range.min && budgetInMAD <= range.max;
+          return (
+            <div
+              key={range.label}
+              className={`p-3 rounded-lg border transition-all ${
+                isInRange
+                  ? 'bg-gradient-to-r from-orange-50 to-white border-2 border-orange-400 shadow-sm'
+                  : 'border-gray-200 bg-white/50'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h5 className={`font-medium text-sm ${isInRange ? 'text-orange-600' : 'text-wervice-ink'}`}>
+                    {range.label}
+                  </h5>
+                  <p className="text-xs text-gray-500 mt-0.5">{range.description}</p>
+                </div>
+                {isInRange && (
+                  <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs text-white font-bold">✓</span>
+                  </div>
+                )}
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Budget Breakdown */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-wervice-lime" />
-          <h4 className="font-medium text-wervice-ink">Estimated Breakdown</h4>
-        </div>
-
-        <div className="bg-wv-gray1 rounded-lg p-6 space-y-3">
-          <div className="flex justify-between text-sm">
-            <span className="text-wervice-taupe">Venue</span>
-            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.venue)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-wervice-taupe">Catering</span>
-            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.catering)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-wervice-taupe">Photography</span>
-            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.photography)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-wervice-taupe">Décor & Flowers</span>
-            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.decor)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-wervice-taupe">Other Services</span>
-            <span className="font-medium text-wervice-ink">{formatCurrency(breakdown.other)}</span>
-          </div>
-          <div className="border-t border-wv-gray3 pt-3 mt-4">
-            <div className="flex justify-between font-semibold text-wervice-ink">
-              <span>Total</span>
-              <span>{formatCurrency(budget)}</span>
             </div>
-          </div>
-        </div>
-
-        <p className="text-xs text-wervice-taupe">
-          These are rough estimates. Actual costs may vary based on your location, preferences, and vendor choices.
-        </p>
+          );
+        })}
       </div>
     </motion.form>
   );
