@@ -45,8 +45,8 @@ export default function CategoriesSection() {
     });
 
     return (
-        <section className="pt-12 md:pt-16 px-4 md:px-6 lg:px-8 bg-[#F7F8FB] relative z-0 isolate">
-            <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+            <div className="w-full">
                 {/* Section Title */}
                 <div className="text-center mb-8">
                     <h2 className="font-inter font-bold text-2xl md:text-3xl text-gray-900 mb-4">
@@ -99,8 +99,8 @@ export default function CategoriesSection() {
                     >
                         See all categories →
                     </Link>
-                </div >
-            </div >
-        </section >
+                </div>
+            </div>
+        </div>
     );
 }

@@ -3,12 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { getVendorBySlug, getSimilarVendors } from '@/lib/db/vendors';
 import { labelForCategory, VALID_CATEGORY_SLUGS } from '@/lib/categories';
 import { capitalizeCity } from '@/lib/utils';
-import VendorHero from '@/components/vendor/VendorHero';
-import VendorGallery from '@/components/vendor/VendorGallery';
-import VendorContactCard from '@/components/vendor/VendorContactCard';
-import VendorAbout from '@/components/vendor/VendorAbout';
-import VendorMeta from '@/components/vendor/VendorMeta';
-import SimilarVendors from '@/components/vendor/SimilarVendors';
+import VendorDetailPage from '@/components/vendor/VendorDetailPage';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -111,6 +106,47 @@ export default async function VendorPage({ params }: VendorPageProps) {
     }),
   };
 
+  // Prepare data for VendorDetailPage component
+  const images = [
+    vendor.profile_photo_url,
+    ...(vendor.gallery_photos || [])
+  ].filter(Boolean) as string[];
+
+  // Extract packages, guests, highlights from vendor data
+  const packages = ['Garden Ceremony', 'Full Day Package', 'Reception Only'];
+  const guests = ['50-100', '100-200', '200+'];
+  const highlights = [
+    'Private garden up to 180 guests',
+    'Bridal room included',
+    'On-site parking & security',
+    'Professional sound system',
+    'Customizable decor options'
+  ];
+  const amenities = [
+    'Air conditioning',
+    'Catering kitchen',
+    'Bridal suite',
+    'Outdoor space',
+    'Parking available',
+    'Wheelchair accessible'
+  ];
+  const policies = [
+    '50% deposit required to secure booking',
+    'Cancellation: 30 days notice for full refund',
+    'Final payment due 7 days before event',
+    'Setup available day before event'
+  ];
+
+  // Format phone for WhatsApp (remove spaces and special chars)
+  const whatsappNumber = vendor.phone?.replace(/\D/g, '') || '';
+
+  const badges = [
+    'Garden',
+    'Indoor/Outdoor',
+    'Rooftop',
+    'Pool Area'
+  ];
+
   return (
     <>
       <Header />
@@ -121,26 +157,24 @@ export default async function VendorPage({ params }: VendorPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <VendorHero vendor={vendor} locale={locale} />
-
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Main Content */}
-          <div className="lg:col-span-8 space-y-6">
-            <VendorGallery vendor={vendor} />
-            <VendorAbout vendor={vendor} />
-            <VendorMeta vendor={vendor} />
-            <SimilarVendors items={similar} locale={locale} />
-          </div>
-
-          {/* Right Column: Sticky Contact Card */}
-          <div className="lg:col-span-4">
-            <div className="sticky top-24">
-              <VendorContactCard vendor={vendor} />
-            </div>
-          </div>
-        </div>
-      </main>
+      <VendorDetailPage
+        name={vendor.business_name}
+        city={capitalizeCity(vendor.city)}
+        category={labelForCategory(vendor.category)}
+        priceFrom={vendor.starting_price || 0}
+        phone={vendor.phone || ''}
+        whatsapp={whatsappNumber}
+        packages={packages}
+        guests={guests}
+        highlights={highlights}
+        amenities={amenities}
+        policies={policies}
+        images={images}
+        videoUrl={undefined}
+        mapEmbedUrl={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3323.8!2d-7.6!3d33.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDM2JzAwLjAiTiA3wrAzNicwMC4wIlc!5e0!3m2!1sen!2sma!4v1234567890`}
+        isVerified={true}
+        badges={badges}
+      />
 
       <Footer />
     </>

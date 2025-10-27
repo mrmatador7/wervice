@@ -57,9 +57,19 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-black text-white" suppressHydrationWarning>
+    <footer className="relative text-white overflow-hidden" suppressHydrationWarning>
+      {/* Mesh Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#11190C] via-[#1a2614] to-[#0d1109]">
+        {/* Mesh gradient overlay */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D9FF0A] rounded-full mix-blend-multiply filter blur-[128px] animate-blob"></div>
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#11190C] rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-0 left-1/2 w-[500px] h-[500px] bg-[#8BC34A] rounded-full mix-blend-multiply filter blur-[128px] animate-blob animation-delay-4000"></div>
+        </div>
+      </div>
+
       {/* Main Footer Content */}
-      <div className="py-16">
+      <div className="relative z-10 py-16">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Brand Section */}

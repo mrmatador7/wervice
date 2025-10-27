@@ -10,8 +10,7 @@ export default function TrustBand() {
   const t = useTranslations('home');
 
   return (
-    <section className="py-16 lg:py-20" data-section="trust-band">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8" data-section="trust-band">
         {/* Row 1 */}
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
           {/* Card A: Photo tile */}
@@ -159,6 +158,5 @@ export default function TrustBand() {
           </div>
         </div>
       </div>
-    </section>
   );
 }

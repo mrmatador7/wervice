@@ -117,180 +117,178 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
   };
 
   return (
-    <section className="py-12 bg-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold text-zinc-900 sm:text-4xl">
-            Featured Wedding Vendors
-          </h2>
-          <p className="mt-2 text-lg text-zinc-600">
-            Discover the perfect vendors for your special day
-          </p>
-        </div>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Section Header */}
+      <div className="mb-8 text-center">
+        <h2 className="text-3xl font-bold text-zinc-900 sm:text-4xl">
+          Featured Wedding Vendors
+        </h2>
+        <p className="mt-2 text-lg text-zinc-600">
+          Discover the perfect vendors for your special day
+        </p>
+      </div>
 
-        {/* Category Icons */}
-        <div className="mb-8 flex justify-center">
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            {CATEGORIES.map((category) => (
-              <button
-                key={category.slug}
-                onClick={() => handleCategoryClick(category.slug)}
-                className={`flex flex-col items-center gap-2 transition-all ${
-                  selectedCategory === category.slug ? 'scale-110' : 'hover:scale-105'
+      {/* Category Icons */}
+      <div className="mb-8 flex justify-center">
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+          {CATEGORIES.map((category) => (
+            <button
+              key={category.slug}
+              onClick={() => handleCategoryClick(category.slug)}
+              className={`flex flex-col items-center gap-2 transition-all ${
+                selectedCategory === category.slug ? 'scale-110' : 'hover:scale-105'
+              }`}
+            >
+              <div
+                className={`flex h-20 w-20 items-center justify-center rounded-full border-4 bg-white transition-all ${
+                  selectedCategory === category.slug
+                    ? 'border-[#D9FF0A] shadow-xl shadow-[#D9FF0A]/50'
+                    : 'border-zinc-200 shadow-md hover:border-zinc-300'
                 }`}
               >
-                <div
-                  className={`flex h-20 w-20 items-center justify-center rounded-full border-4 bg-white transition-all ${
-                    selectedCategory === category.slug
-                      ? 'border-[#D9FF0A] shadow-xl shadow-[#D9FF0A]/50'
-                      : 'border-zinc-200 shadow-md hover:border-zinc-300'
-                  }`}
-                >
-                  <Image
-                    src={category.icon}
-                    alt={category.label}
-                    width={40}
-                    height={40}
-                    className="object-contain"
-                  />
-                </div>
-                <span
-                  className={`text-xs font-semibold ${
-                    selectedCategory === category.slug ? 'text-zinc-900' : 'text-zinc-600'
-                  }`}
-                >
-                  {category.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-          <CustomSelect
-            value={selectedCity}
-            onChange={(value) => setSelectedCity(value as string)}
-            options={[
-              { value: '', label: 'All Cities' },
-              ...CITIES.map((city) => ({ value: city, label: city })),
-            ]}
-            placeholder="Location"
-          />
-
-          <CustomSelect
-            value={selectedPrice}
-            onChange={(value) => setSelectedPrice(value as string)}
-            options={PRICE_RANGES}
-            placeholder="Price Range"
-          />
-
-          <CustomSelect
-            value={selectedRating}
-            onChange={(value) => setSelectedRating(value as string)}
-            options={RATINGS}
-            placeholder="Rating"
-          />
-
-          <CustomSelect
-            value={selectedSort}
-            onChange={(value) => setSelectedSort(value as string)}
-            options={SORT_OPTIONS}
-            placeholder="Sort By"
-          />
-        </div>
-
-        {/* Vendor Cards Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-80 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100"
-              />
-            ))}
-          </div>
-        ) : vendors.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-              {vendors.map((vendor) => (
-                <button
-                  key={vendor.id}
-                  onClick={() => handleVendorClick(vendor)}
-                  className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-xl hover:border-zinc-300"
-                >
-                  {/* Image */}
-                  <div className="relative h-48 overflow-hidden bg-zinc-100">
-                    {vendor.profile_photo_url ? (
-                      <Image
-                        src={vendor.profile_photo_url}
-                        alt={vendor.business_name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
-                        <span className="text-4xl text-zinc-400">
-                          {vendor.business_name.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Category Badge */}
-                    <div className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-zinc-900 backdrop-blur-sm">
-                      {labelForCategory(vendor.category)}
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-4">
-                    <h3 className="mb-2 text-lg font-bold text-zinc-900 line-clamp-1">
-                      {vendor.business_name}
-                    </h3>
-                    
-                    <div className="flex items-center gap-2 text-sm text-zinc-600">
-                      <MapPin className="h-4 w-4" />
-                      <span>{capitalizeCity(vendor.city)}</span>
-                    </div>
-
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-semibold text-zinc-900">
-                          {vendor.rating || '5.0'}
-                        </span>
-                      </div>
-
-                      {vendor.starting_price && (
-                        <span className="text-sm font-semibold text-zinc-900">
-                          From {vendor.starting_price.toLocaleString()} MAD
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* View All Button */}
-            <div className="mt-8 text-center">
-              <button
-                onClick={handleViewAll}
-                className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-zinc-800 hover:shadow-xl"
+                <Image
+                  src={category.icon}
+                  alt={category.label}
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
+              </div>
+              <span
+                className={`text-xs font-semibold ${
+                  selectedCategory === category.slug ? 'text-zinc-900' : 'text-zinc-600'
+                }`}
               >
-                View All Vendors
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="py-16 text-center">
-            <p className="text-lg text-zinc-500">No vendors found. Try adjusting your filters.</p>
-          </div>
-        )}
+                {category.label}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
-    </section>
+
+      {/* Filters */}
+      <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+        <CustomSelect
+          value={selectedCity}
+          onChange={(value) => setSelectedCity(value as string)}
+          options={[
+            { value: '', label: 'All Cities' },
+            ...CITIES.map((city) => ({ value: city, label: city })),
+          ]}
+          placeholder="Location"
+        />
+
+        <CustomSelect
+          value={selectedPrice}
+          onChange={(value) => setSelectedPrice(value as string)}
+          options={PRICE_RANGES}
+          placeholder="Price Range"
+        />
+
+        <CustomSelect
+          value={selectedRating}
+          onChange={(value) => setSelectedRating(value as string)}
+          options={RATINGS}
+          placeholder="Rating"
+        />
+
+        <CustomSelect
+          value={selectedSort}
+          onChange={(value) => setSelectedSort(value as string)}
+          options={SORT_OPTIONS}
+          placeholder="Sort By"
+        />
+      </div>
+
+      {/* Vendor Cards Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-80 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100"
+            />
+          ))}
+        </div>
+      ) : vendors.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {vendors.map((vendor) => (
+              <button
+                key={vendor.id}
+                onClick={() => handleVendorClick(vendor)}
+                className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-xl hover:border-zinc-300"
+              >
+                {/* Image */}
+                <div className="relative h-48 overflow-hidden bg-zinc-100">
+                  {vendor.profile_photo_url ? (
+                    <Image
+                      src={vendor.profile_photo_url}
+                      alt={vendor.business_name}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
+                      <span className="text-4xl text-zinc-400">
+                        {vendor.business_name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Category Badge */}
+                  <div className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-zinc-900 backdrop-blur-sm">
+                    {labelForCategory(vendor.category)}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                  <h3 className="mb-2 text-lg font-bold text-zinc-900 line-clamp-1">
+                    {vendor.business_name}
+                  </h3>
+                  
+                  <div className="flex items-center gap-2 text-sm text-zinc-600">
+                    <MapPin className="h-4 w-4" />
+                    <span>{capitalizeCity(vendor.city)}</span>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm font-semibold text-zinc-900">
+                        {vendor.rating || '5.0'}
+                      </span>
+                    </div>
+
+                    {vendor.starting_price && (
+                      <span className="text-sm font-semibold text-zinc-900">
+                        From {vendor.starting_price.toLocaleString()} MAD
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* View All Button */}
+          <div className="mt-8 text-center">
+            <button
+              onClick={handleViewAll}
+              className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-zinc-800 hover:shadow-xl"
+            >
+              View All Vendors
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="py-16 text-center">
+          <p className="text-lg text-zinc-500">No vendors found. Try adjusting your filters.</p>
+        </div>
+      )}
+    </div>
   );
 }
 

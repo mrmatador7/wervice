@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
+import OnboardingOverlay from './components/OnboardingOverlay';
 
 export default function SignPage() {
     const router = useRouter();
@@ -21,6 +22,7 @@ export default function SignPage() {
     const [error, setError] = useState('');
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
 
     const handleCustomSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,31 +72,9 @@ export default function SignPage() {
                 localStorage.setItem('wervice_user', JSON.stringify(userInfo));
             }
 
-            const checkAuthState = async () => {
-                try {
-                    const sessionResponse = await fetch('/api/auth/session', {
-                        method: 'GET',
-                        credentials: 'include',
-                    });
-
-                    if (sessionResponse.ok) {
-                        const sessionData = await sessionResponse.json();
-                        if (sessionData.session) {
-                            window.location.replace(`/${locale}/onboarding`);
-                        } else {
-                            setTimeout(checkAuthState, 500);
-                        }
-                    } else {
-                        setTimeout(checkAuthState, 500);
-                    }
-                } catch (err) {
-                    setTimeout(() => {
-                        window.location.replace(`/${locale}/onboarding`);
-                    }, 1000);
-                }
-            };
-
-            setTimeout(checkAuthState, 1000);
+            // Show onboarding overlay instead of redirecting
+            setIsLoading(false);
+            setShowOnboarding(true);
 
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
@@ -115,7 +95,7 @@ export default function SignPage() {
 
     return (
         <div className="min-h-screen flex flex-col lg:flex-row">
-            {/* Left Side - Mesh Gradient Background */}
+            {/* Left Side - Mesh Gradient Background (always show) */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
                 {/* Mesh Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-wervice-lime via-lime-300 to-yellow-200">
@@ -148,8 +128,19 @@ export default function SignPage() {
                 </div>
             </div>
 
-            {/* Right Side - Sign Up Form */}
+            {/* Right Side - Sign Up Form or Onboarding */}
             <div className="flex-1 flex items-center justify-center p-8 bg-white">
+                {showOnboarding ? (
+                    /* Onboarding Steps (replaces signup form) */
+                    <div className="w-full h-full">
+                        <OnboardingOverlay
+                            userName={signupData.firstName}
+                            userEmail={signupData.email}
+                            locale={locale}
+                        />
+                    </div>
+                ) : (
+                    /* Sign Up Form */
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden mb-8 text-center">
@@ -333,6 +324,7 @@ export default function SignPage() {
                         </button>
                     </div>
                 </div>
+                )}
             </div>
         </div>
     );

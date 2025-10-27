@@ -45,9 +45,9 @@ export default function BecomeVendorSection() {
   ];
 
   return (
-    <section className="relative py-20 overflow-hidden">
+    <div className="relative overflow-hidden">
       {/* Background Decorative Icons */}
-      <div className="absolute inset-0 pointer-events-none opacity-60">
+      <div className="absolute inset-0 pointer-events-none opacity-40">
         {decorativeIcons.map((icon, index) => (
           <div
             key={index}
@@ -186,6 +186,6 @@ export default function BecomeVendorSection() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
