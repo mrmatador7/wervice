@@ -9,7 +9,9 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-export const createClient = async (cookieStore: Awaited<ReturnType<typeof cookies>>) => {
+export const createClient = async () => {
+  const cookieStore = await cookies();
+  
   return createServerClient<Database>(
     supabaseUrl!,
     supabaseKey!,

@@ -68,7 +68,7 @@ export default function AISearchBar({ locale }: AISearchBarProps) {
 
   return (
     <>
-      <div ref={containerRef} className="w-full max-w-[920px] mx-auto">
+      <div ref={containerRef} className="w-full max-w-[920px] mx-auto relative z-10">
         <form onSubmit={handleSubmit} className="relative">
           {/* Main Input Container */}
           <div

@@ -63,21 +63,8 @@ export default function OnboardingGuard({ children, locale }: OnboardingGuardPro
                 return;
             }
 
-            // Check if user needs to complete onboarding
-            const isOnboarded = profile?.onboarded ?? false;
-            const isOnboardingPage = pathname.includes('/onboarding');
-
-            if (isOnboardingPage && isOnboarded) {
-                // User is onboarded but trying to access onboarding, redirect to account
-                router.replace(`/${locale}/account`);
-                return;
-            }
-
-            if (!isOnboardingPage && !isOnboarded) {
-                // User is not onboarded and not on onboarding page, redirect to onboarding
-                router.replace(`/${locale}/onboarding`);
-                return;
-            }
+            // Onboarding is now handled directly in the signup flow
+            // No need to redirect users to a separate onboarding page
         };
 
         checkOnboardingStatus();

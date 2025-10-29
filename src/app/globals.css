@@ -72,6 +72,20 @@
   animation: shake 0.4s ease-in-out;
 }
 
+/* Float up/down animation for idea cards */
+@keyframes floatUpDown {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: floatUpDown 4.5s ease-in-out infinite;
+}
+
 @theme {
   --color-lime-400: #d9ff0a;
   --color-black: #000000;

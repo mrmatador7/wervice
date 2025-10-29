@@ -270,7 +270,7 @@ function DateStep({ onNext, onSkip }: any) {
         </div>
       </div>
       
-      <div className="flex items-center justify-between pb-8">
+      <div className="flex items-center justify-between pb-8 pt-8 mt-8">
         <button
           onClick={onSkip}
           className="text-lg text-gray-600 font-semibold hover:text-gray-900 transition-colors"

@@ -1,136 +1,41 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase-server';
+import DashboardClient from './components/DashboardClient';
 
-import { useUser } from '@/contexts/UserContext';
-import { useLocale } from '@/contexts/LocaleContext';
-import Header from '@/components/layout/Header';
-import Link from 'next/link';
+export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale ?? 'en';
+  
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-export default function DashboardPage() {
-    const { user, profile, isLoading } = useUser();
-    const { locale } = useLocale();
+  if (!user) {
+    redirect(`/${locale}/auth/signin`);
+  }
 
-    // No need for useEffect - data comes from UserContext
+  // Fetch user profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
-            </div>
-        );
-    }
+  // Fetch saved vendors (favorites)
+  const { data: favorites } = await supabase
+    .from('favorites')
+    .select(`
+      *,
+      vendor:vendors(*)
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
-    if (!user) {
-        return null; // Will redirect in useEffect
-    }
-
-    return (
-        <div className="min-h-screen relative">
-            {/* Background Image */}
-            <div className="fixed inset-0 z-0">
-                <img
-                    src="https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-                    alt="Beautiful Moroccan wedding scene with traditional elements"
-                    className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40"></div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10">
-                <Header />
-
-                {/* Add top padding to account for fixed header */}
-                <div className="pt-16 min-h-screen">
-                    <div className="container mx-auto px-6 py-12">
-                        <div className="max-w-6xl mx-auto">
-                            {/* Welcome Section */}
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 mb-8 border border-white/20">
-                                <h1 className="text-4xl font-bold text-white mb-4">
-                                    Welcome back, {user.email?.split('@')[0]}! 👋
-                                </h1>
-                                <p className="text-white/90 text-lg mb-4">
-                                    Let&apos;s plan your perfect Moroccan wedding together.
-                                </p>
-
-                                {/* Profile Debug Info */}
-                                {profile && (
-                                    <div className="bg-black/20 rounded-lg p-4 mt-4">
-                                        <h3 className="text-white font-semibold mb-2">🔍 Profile Information:</h3>
-                                        <div className="text-white/80 text-sm space-y-1">
-                                            <div><strong>User Type:</strong> {profile.user_type || 'Not set'}</div>
-                                            <div><strong>User Status:</strong> {profile.user_status || 'Not set'}</div>
-                                            <div><strong>Onboarded:</strong> {profile.onboarded ? '✅ Yes' : '❌ No'}</div>
-                                            <div><strong>Name:</strong> {profile.first_name} {profile.last_name}</div>
-                                            <div><strong>Email:</strong> {profile.email}</div>
-                                            <div><strong>Phone:</strong> {profile.phone || 'Not set'}</div>
-                                            <div><strong>City:</strong> {profile.city || 'Not set'}</div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Quick Actions Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                                {/* Browse Vendors */}
-                                <Link
-                                    href={`/${locale}`}
-                                    className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
-                                >
-                                    <div className="text-3xl mb-4">💒</div>
-                                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-purple-200">
-                                        Browse Vendors
-                                    </h3>
-                                    <p className="text-white/80">
-                                        Discover the best wedding vendors in Morocco
-                                    </p>
-                                </Link>
-
-                                {/* My Reservations */}
-                                <Link
-                                    href={`/${locale}/reservations`}
-                                    className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
-                                >
-                                    <div className="text-3xl mb-4">📅</div>
-                                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-purple-200">
-                                        My Reservations
-                                    </h3>
-                                    <p className="text-white/80">
-                                        View and manage your bookings
-                                    </p>
-                                </Link>
-
-                                {/* Profile Settings */}
-                                <Link
-                                    href={`/${locale}/profile`}
-                                    className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 group"
-                                >
-                                    <div className="text-3xl mb-4">👤</div>
-                                    <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-purple-200">
-                                        Profile Settings
-                                    </h3>
-                                    <p className="text-white/80">
-                                        Update your account information
-                                    </p>
-                                </Link>
-                            </div>
-
-                            {/* Recent Activity Placeholder */}
-                            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                                <h2 className="text-2xl font-bold text-white mb-6">Recent Activity</h2>
-                                <div className="text-center py-12">
-                                    <div className="text-6xl mb-4">📝</div>
-                                    <p className="text-white/80 text-lg">
-                                        Your wedding planning journey starts here!
-                                    </p>
-                                    <p className="text-white/60 mt-2">
-                                        Browse vendors and start planning your special day.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+  return (
+    <DashboardClient 
+      user={user}
+      profile={profile}
+      favorites={favorites || []}
+      locale={locale}
+    />
+  );
 }

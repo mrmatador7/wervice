@@ -15,38 +15,41 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100">
-        <Hero locale={locale} />
+      <main className="min-h-screen bg-[#f4f4f4]">
+        {/* Hero Section */}
+        <div className="bg-[#f7f7f7]">
+          <Hero locale={locale} />
+        </div>
 
         {/* Categories Section */}
-        <section className="py-12 bg-white/60 backdrop-blur-sm">
+        <section className="py-12 bg-[#f0f0f0]">
           <CategoriesSection />
         </section>
 
         {/* Featured Section - 3 Column Layout */}
-        <section className="py-12 bg-gradient-to-br from-purple-50/30 via-blue-50/20 to-green-50/30">
+        <section className="py-12 bg-[#f6f6f6]">
           <FeaturedSection />
         </section>
 
         {/* Cities Carousel */}
-        <section className="py-12 bg-white/70 backdrop-blur-sm">
+        <section className="py-12 bg-[#f1f1f1]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <CitiesCarousel variant="small" className="-mx-4 md:-mx-6 lg:-mx-8" />
           </div>
         </section>
 
         {/* Featured Vendors Section */}
-        <section className="py-12 bg-gradient-to-br from-blue-50/20 via-purple-50/20 to-pink-50/20">
+        <section className="py-12 bg-[#f3f3f3]">
           <FeaturedVendorsSection locale={locale} />
         </section>
 
         {/* Trust Band */}
-        <section className="py-8 bg-white/60 backdrop-blur-sm">
+        <section className="py-8 bg-[#f6f6f6]">
           <TrustBand />
         </section>
 
         {/* Become Vendor Section */}
-        <section className="py-12 bg-gradient-to-br from-green-50/30 via-lime-50/20 to-yellow-50/30">
+        <section className="py-12 bg-[#f4f4f4]">
           <BecomeVendorSection />
         </section>
       </main>
