@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { fetchCities } from '@/lib/supabase/vendors';
 
+// Force dynamic rendering since we use cookies for Supabase client
+export const dynamic = 'force-dynamic';
 // Revalidate every 300 seconds (5 minutes) - cities change less frequently
 export const revalidate = 300;
 

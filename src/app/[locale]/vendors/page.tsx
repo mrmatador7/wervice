@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -21,7 +21,7 @@ type Category = {
   cover_url: string | null;
 };
 
-export default function VendorsPage() {
+function VendorsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -159,9 +159,7 @@ export default function VendorsPage() {
   const activeCity = filters.city ? capitalizeCity(filters.city) : 'All Cities';
 
   return (
-    <>
-      <Header />
-      <main className="mx-auto max-w-[110rem] px-4 py-6 md:px-6 lg:px-8">
+    <main className="mx-auto max-w-[110rem] px-4 py-6 md:px-6 lg:px-8">
         {/* Category Cover */}
         {category && (
           <CategoryCover
@@ -232,7 +230,25 @@ export default function VendorsPage() {
             </button>
           </div>
         ) : null}
-      </main>
+    </main>
+  );
+}
+
+export default function VendorsPage() {
+  return (
+    <>
+      <Header />
+      <Suspense fallback={
+        <main className="mx-auto max-w-[110rem] px-4 py-6 md:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </main>
+      }>
+        <VendorsPageContent />
+      </Suspense>
       <Footer />
     </>
   );

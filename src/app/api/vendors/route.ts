@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchVendors, type VendorFilters } from '@/lib/supabase/vendors';
 
+// Force dynamic rendering since we use cookies for Supabase client
+export const dynamic = 'force-dynamic';
 // Revalidate every 60 seconds (ISR)
 export const revalidate = 60;
 

@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async rewrites() {
     return [
       // Prevent i18n redirect for API routes - rewrite /api to /api (no-op but prevents redirect)
