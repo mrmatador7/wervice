@@ -532,6 +532,12 @@ export default function EditVendorPage() {
                   onChange={(e) => {
                     if (e.target.value === 'contact') {
                       setFormData(prev => ({ ...prev, startingPrice: '0' }));
+                    } else {
+                      // When switching to fixed, set a default value if it's 0 or empty
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        startingPrice: prev.startingPrice === '0' || prev.startingPrice === '' ? '' : prev.startingPrice 
+                      }));
                     }
                   }}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors mb-3"
@@ -540,7 +546,8 @@ export default function EditVendorPage() {
                   <option value="contact">Contact for Quote</option>
                 </select>
 
-                {(formData.startingPrice !== '0' && formData.startingPrice !== '') && (
+                {/* Show input field when Fixed Starting Price is selected */}
+                {(formData.startingPrice !== '0') && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Starting Price (MAD)
