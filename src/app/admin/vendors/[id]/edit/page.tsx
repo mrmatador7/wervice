@@ -15,7 +15,7 @@ interface VendorFormData {
   phone: string;
   city: string;
   category: string;
-  subcategory: string;
+  subcategories: string[]; // Changed from single to array
   description: string;
   startingPrice: string;
   plan: string;
@@ -63,7 +63,7 @@ export default function EditVendorPage() {
     phone: '',
     city: '',
     category: '',
-    subcategory: '',
+    subcategories: [], // Changed to array
     description: '',
     startingPrice: '',
     plan: 'free',
@@ -85,13 +85,23 @@ export default function EditVendorPage() {
 
         if (result.success && result.vendor) {
           const vendor = result.vendor;
+          // Handle subcategories - can be string, array, or null
+          let subcategoriesArray: string[] = [];
+          if (vendor.subcategory) {
+            if (Array.isArray(vendor.subcategory)) {
+              subcategoriesArray = vendor.subcategory;
+            } else if (typeof vendor.subcategory === 'string') {
+              subcategoriesArray = [vendor.subcategory];
+            }
+          }
+
           setFormData({
             name: vendor.name || '',
             email: vendor.email || '',
             phone: vendor.phone || '',
             city: vendor.city || '',
             category: vendor.category || '',
-            subcategory: vendor.subcategory || '',
+            subcategories: subcategoriesArray,
             description: vendor.description || '',
             startingPrice: vendor.startingPrice?.toString() || '',
             plan: vendor.plan || 'free',
@@ -130,9 +140,12 @@ export default function EditVendorPage() {
     if (formData.category) {
       const subs = getSubcategoriesForCategory(formData.category);
       setSubcategories(subs);
-      // Reset subcategory if it doesn't exist in new category
-      if (formData.subcategory && !subs.find(s => s.slug === formData.subcategory)) {
-        setFormData(prev => ({ ...prev, subcategory: '' }));
+      // Reset subcategories if they don't exist in new category
+      const validSubcategories = formData.subcategories.filter(subcat => 
+        subs.find(s => s.slug === subcat)
+      );
+      if (validSubcategories.length !== formData.subcategories.length) {
+        setFormData(prev => ({ ...prev, subcategories: validSubcategories }));
       }
     } else {
       setSubcategories([]);
@@ -174,6 +187,23 @@ export default function EditVendorPage() {
       ...prev,
       galleryPhotoUrls: prev.galleryPhotoUrls.filter((_, i) => i !== index),
     }));
+  };
+
+  const handleSubcategoryToggle = (subcategorySlug: string) => {
+    setFormData(prev => {
+      const isSelected = prev.subcategories.includes(subcategorySlug);
+      if (isSelected) {
+        return {
+          ...prev,
+          subcategories: prev.subcategories.filter(s => s !== subcategorySlug)
+        };
+      } else {
+        return {
+          ...prev,
+          subcategories: [...prev.subcategories, subcategorySlug]
+        };
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -378,22 +408,32 @@ export default function EditVendorPage() {
 
               {subcategories.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Subcategory
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Subcategories (select all that apply)
                   </label>
-                  <select
-                    name="subcategory"
-                    value={formData.subcategory}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors"
-                  >
-                    <option value="">Select subcategory (optional)</option>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto p-4 bg-gray-50 rounded-xl border border-gray-200">
                     {subcategories.map(sub => (
-                      <option key={sub.slug} value={sub.slug}>
-                        {sub.name}
-                      </option>
+                      <label
+                        key={sub.slug}
+                        className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-[#D9FF0A] hover:bg-[#D9FF0A]/5 transition-colors cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.subcategories.includes(sub.slug)}
+                          onChange={() => handleSubcategoryToggle(sub.slug)}
+                          className="w-5 h-5 rounded border-gray-300 text-[#D9FF0A] focus:ring-[#D9FF0A]"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          {sub.name}
+                        </span>
+                      </label>
                     ))}
-                  </select>
+                  </div>
+                  {formData.subcategories.length > 0 && (
+                    <div className="mt-3 text-sm text-gray-600">
+                      Selected: {formData.subcategories.length} subcategory(ies)
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -484,18 +524,39 @@ export default function EditVendorPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Starting Price (MAD)
+                  Pricing Type
                 </label>
-                <input
-                  type="number"
-                  name="startingPrice"
-                  value={formData.startingPrice}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors"
-                  placeholder="5000"
-                />
+                <select
+                  name="pricingType"
+                  value={formData.startingPrice === '' || formData.startingPrice === '0' ? 'contact' : 'fixed'}
+                  onChange={(e) => {
+                    if (e.target.value === 'contact') {
+                      setFormData(prev => ({ ...prev, startingPrice: '0' }));
+                    }
+                  }}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors mb-3"
+                >
+                  <option value="fixed">Fixed Starting Price</option>
+                  <option value="contact">Contact for Quote</option>
+                </select>
+
+                {(formData.startingPrice !== '0' && formData.startingPrice !== '') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Starting Price (MAD)
+                    </label>
+                    <input
+                      type="number"
+                      name="startingPrice"
+                      value={formData.startingPrice}
+                      onChange={handleChange}
+                      min="0"
+                      step="0.01"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors"
+                      placeholder="5000"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

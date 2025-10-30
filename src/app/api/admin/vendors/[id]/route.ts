@@ -100,7 +100,7 @@ export async function PUT(
     const supabase = await createClient();
 
     // Update the vendor in vendor_leads table
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('vendor_leads')
       .update({
         business_name: body.name,
@@ -108,7 +108,7 @@ export async function PUT(
         phone: body.phone,
         city: body.city,
         category: body.category,
-        subcategory: body.subcategory || null,
+        subcategory: body.subcategories && body.subcategories.length > 0 ? body.subcategories : null,
         description: body.description || null,
         starting_price: body.startingPrice || null,
         plan: body.plan,
