@@ -524,46 +524,23 @@ export default function EditVendorPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pricing Type
+                  Starting Price (MAD)
                 </label>
-                <select
-                  name="pricingType"
-                  value={formData.startingPrice === '' || formData.startingPrice === '0' ? 'contact' : 'fixed'}
-                  onChange={(e) => {
-                    if (e.target.value === 'contact') {
-                      setFormData(prev => ({ ...prev, startingPrice: '0' }));
-                    } else {
-                      // When switching to fixed, set a default value if it's 0 or empty
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        startingPrice: prev.startingPrice === '0' || prev.startingPrice === '' ? '' : prev.startingPrice 
-                      }));
-                    }
-                  }}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors mb-3"
-                >
-                  <option value="fixed">Fixed Starting Price</option>
-                  <option value="contact">Contact for Quote</option>
-                </select>
-
-                {/* Show input field when Fixed Starting Price is selected */}
-                {(formData.startingPrice !== '0') && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Starting Price (MAD)
-                    </label>
-                    <input
-                      type="number"
-                      name="startingPrice"
-                      value={formData.startingPrice}
-                      onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors"
-                      placeholder="5000"
-                    />
-                  </div>
-                )}
+                <input
+                  type="number"
+                  name="startingPrice"
+                  value={formData.startingPrice === '0' ? '' : formData.startingPrice}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors"
+                  placeholder="Leave empty for 'Contact for Quote'"
+                />
+                <p className="text-sm text-gray-500 mt-2">
+                  {formData.startingPrice && formData.startingPrice !== '0' 
+                    ? `Starting from ${formData.startingPrice} MAD` 
+                    : 'Will show "Contact for Quote" to customers'}
+                </p>
               </div>
             </div>
           </div>
