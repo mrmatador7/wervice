@@ -1,21 +1,30 @@
 'use client';
 
 import React from 'react';
-import Dropdown, { DropdownProps } from './Dropdown';
+import WervSelect, { WervSelectOption } from './WervSelect';
 
-const currencyOptions = [
+const currencyOptions: WervSelectOption[] = [
   { value: 'MAD', label: 'DH MAD' },
   { value: 'USD', label: '$ USD' },
   { value: 'EUR', label: '€ EUR' }
 ];
 
-export default function CurrencyDropdown(props: Omit<DropdownProps, 'options'>) {
+interface CurrencyDropdownProps {
+  value: string | null;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+export default function CurrencyDropdown({ value, onChange, disabled = false, className }: CurrencyDropdownProps) {
   return (
-    <Dropdown
-      {...props}
+    <WervSelect
+      value={value}
+      onChange={onChange}
       options={currencyOptions}
       placeholder="Currency"
-      accent="purple"
+      accent="default"
+      className={className}
     />
   );
 }

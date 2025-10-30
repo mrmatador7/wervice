@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase-server'
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const supabase = await createClient()
 
     // Get current session
     const { data: { session }, error } = await supabase.auth.getSession()

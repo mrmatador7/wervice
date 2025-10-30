@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase-server';
-import { downloadImage, uploadToStorage } from '@/lib/supabase/storage';
+// import { downloadImage, uploadToStorage } from '@/lib/supabase/storage';
 import { generateUniqueSlug } from '@/lib/slug';
 import { revalidateTag } from 'next/cache';
 import { normalizeCategory } from '@/lib/categories';
@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
 
     // Create Supabase client
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     // Insert vendors one by one to handle image uploads
     let successful = 0;
@@ -266,20 +266,20 @@ export async function POST(request: NextRequest) {
           for (let j = 0; j < Math.min(imageUrls.gallery.length, 10); j++) {
             const galleryUrl = imageUrls.gallery[j];
             try {
-              const imageData = await downloadImage(galleryUrl);
-              if (imageData) {
-                const path = `vendors/${vendorId}/gallery/${j + 1}.${imageData.extension}`;
-                const uploadResult = await uploadToStorage(imageData.buffer, path, imageData.contentType);
-
-                if (uploadResult.success && uploadResult.url) {
-                  galleryUrls.push(uploadResult.url);
-                  galleryUploaded++;
-                } else {
-                  warnings.push(`Row ${i + 1} (${vendorData.business_name}): Failed to upload gallery image ${j + 1} - ${uploadResult.error}`);
-                }
-              } else {
-                warnings.push(`Row ${i + 1} (${vendorData.business_name}): Failed to download gallery image ${j + 1} from ${galleryUrl}`);
-              }
+              // TODO: Implement image download and upload functionality
+              // const imageData = await downloadImage(galleryUrl);
+              // if (imageData) {
+              //   const path = `vendors/${vendorId}/gallery/${j + 1}.${imageData.extension}`;
+              //   const uploadResult = await uploadToStorage(imageData.buffer, path, imageData.contentType);
+              //
+              //   if (uploadResult.success && uploadResult.url) {
+              //     galleryUrls.push(uploadResult.url);
+              //     galleryUploaded++;
+              //   } else {
+              //     warnings.push(`Row ${i + 1} (${vendorData.business_name}): Failed to upload gallery image ${j + 1} - ${uploadResult.error}`);
+              //   }
+              // }
+              warnings.push(`Row ${i + 1} (${vendorData.business_name}): Gallery image upload not implemented yet`);
             } catch (error) {
               warnings.push(`Row ${i + 1} (${vendorData.business_name}): Gallery image ${j + 1} error - ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
@@ -301,43 +301,46 @@ export async function POST(request: NextRequest) {
           published: true
         };
 
-        const { error: publicError } = await supabase
-          .from("vendors")
-          .insert([publicVendorPayload]);
-
-        if (publicError) {
-          console.error('Failed to insert into public vendors:', publicError);
-          // Don't fail the whole import, just log the error
-        }
+        // TODO: Implement insertion into public vendors table
+        // const { error: publicError } = await supabase
+        //   .from("vendors")
+        //   .insert([publicVendorPayload]);
+        //
+        // if (publicError) {
+        //   console.error('Failed to insert into public vendors:', publicError);
+        //   // Don't fail the whole import, just log the error
+        // }
 
         // Process images
         if (imageUrls.profile) {
           try {
-            const imageData = await downloadImage(imageUrls.profile);
-            if (imageData) {
-              const path = `vendors/${vendorId}/profile.${imageData.extension}`;
-              const uploadResult = await uploadToStorage(imageData.buffer, path, imageData.contentType);
-
-              if (uploadResult.success && uploadResult.url) {
-                // Update vendor with profile photo URL
-                await supabase
-                  .from('vendor_leads')
-                  .update({ logo_url: uploadResult.url })
-                  .eq('id', vendorId);
-
-                // Also update public vendor
-                await supabase
-                  .from('vendors')
-                  .update({ profile_photo_url: uploadResult.url })
-                  .eq('slug', slug);
-
-                profileUploaded++;
-              } else {
-                warnings.push(`Row ${i + 1} (${vendorData.business_name}): Failed to upload profile photo - ${uploadResult.error}`);
-              }
-            } else {
-              warnings.push(`Row ${i + 1} (${vendorData.business_name}): Failed to download profile photo from ${imageUrls.profile}`);
-            }
+            // TODO: Implement image download and upload functionality
+            // const imageData = await downloadImage(imageUrls.profile);
+            // if (imageData) {
+            //   const path = `vendors/${vendorId}/profile.${imageData.extension}`;
+            //   const uploadResult = await uploadToStorage(imageData.buffer, path, imageData.contentType);
+            //
+            //   if (uploadResult.success && uploadResult.url) {
+            //     // Update vendor with profile photo URL
+            //     await supabase
+            //       .from('vendor_leads')
+            //       .update({ logo_url: uploadResult.url })
+            //       .eq('id', vendorId);
+            //
+            //     // Also update public vendor
+            //     await supabase
+            //       .from('vendors')
+            //       .update({ profile_photo_url: uploadResult.url })
+            //       .eq('slug', slug);
+            //
+            //     profileUploaded++;
+            //   } else {
+            //     warnings.push(`Row ${i + 1} (${vendorData.business_name}): Failed to upload profile photo - ${uploadResult.error}`);
+            //   }
+            // } else {
+            //   warnings.push(`Row ${i + 1} (${vendorData.business_name}): Failed to download profile photo from ${imageUrls.profile}`);
+            // }
+            warnings.push(`Row ${i + 1} (${vendorData.business_name}): Profile photo upload not implemented yet`);
           } catch (error) {
             warnings.push(`Row ${i + 1} (${vendorData.business_name}): Profile photo error - ${error instanceof Error ? error.message : 'Unknown error'}`);
           }

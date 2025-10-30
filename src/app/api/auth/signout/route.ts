@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase-server'
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const supabase = await createClient()
 
     // Sign out the user
     const { error } = await supabase.auth.signOut()

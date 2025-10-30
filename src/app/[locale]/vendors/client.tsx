@@ -195,12 +195,7 @@ export default function VendorDirectoryClient({
             >
               <div className="hidden lg:block">
                 <VendorFilters
-                  filters={filters}
-                  onFilterChange={handleFilterChange}
-                  onClearFilters={handleClearFilters}
-                  totalResults={total}
-                  isMobile={false}
-                  isCategoryPage={isCategoryPage}
+                  initialFilters={filters}
                 />
               </div>
             </motion.aside>
@@ -261,13 +256,7 @@ export default function VendorDirectoryClient({
         {/* Mobile Filters Sheet */}
         {showFilters && (
           <VendorFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={handleClearFilters}
-            totalResults={total}
-            isMobile={true}
-            isCategoryPage={isCategoryPage}
-            onClose={() => setShowFilters(false)}
+            initialFilters={filters}
           />
         )}
       </main>

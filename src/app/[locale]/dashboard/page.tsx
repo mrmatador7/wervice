@@ -20,15 +20,17 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     .eq('id', user.id)
     .single();
 
-  // Fetch saved vendors (favorites)
-  const { data: favorites } = await supabase
-    .from('favorites')
-    .select(`
-      *,
-      vendor:vendors(*)
-    `)
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  // Fetch saved vendors (favorites) - TODO: Implement favorites table
+  // const { data: favorites } = await supabase
+  //   .from('favorites')
+  //   .select(`
+  //     *,
+  //     vendor:vendors(*)
+  //   `)
+  //   .eq('user_id', user.id)
+  //   .order('created_at', { ascending: false });
+
+  const favorites: any[] = []; // Temporary empty array
 
   return (
     <DashboardClient 

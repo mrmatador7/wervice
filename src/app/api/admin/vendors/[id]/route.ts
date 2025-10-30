@@ -21,7 +21,7 @@ export async function DELETE(
 
     // Create Supabase client
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     // Delete the vendor from vendor_leads table
     const { error } = await supabase

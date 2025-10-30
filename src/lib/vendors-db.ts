@@ -32,11 +32,11 @@ export type VendorsResult = {
 export async function getVendors(filters: VendorFilters): Promise<VendorsResult> {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     let query = supabase
-      .from('vendors')
-      .select('id, slug, business_name, category, city, starting_price, profile_photo_url, gallery_photos, description, published, created_at', { count: 'exact' })
+      .from('vendor_leads')
+      .select('id, slug, business_name, category, city, starting_price, logo_url as profile_photo_url, gallery_photos, description, published, created_at', { count: 'exact' })
       .eq('published', true);
 
     // Apply category filter
@@ -66,10 +66,10 @@ export async function getVendors(filters: VendorFilters): Promise<VendorsResult>
     const sort = filters.sort || 'newest';
     switch (sort) {
       case 'price_asc':
-        query = query.order('starting_price', { ascending: true, nullsLast: true });
+        query = query.order('starting_price', { ascending: true });
         break;
       case 'price_desc':
-        query = query.order('starting_price', { ascending: false, nullsLast: true });
+        query = query.order('starting_price', { ascending: false });
         break;
       case 'newest':
       default:
@@ -79,13 +79,13 @@ export async function getVendors(filters: VendorFilters): Promise<VendorsResult>
 
     // Get total count
     const { count } = await supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('*', { count: 'exact', head: true })
       .eq('published', true);
 
     // Apply pagination
     const page = filters.page || 1;
-    const pageSize = filters.pageSize || PAGE_SIZE;
+    const pageSize = PAGE_SIZE;
     const offset = (page - 1) * pageSize;
     query = query.range(offset, offset + pageSize - 1);
 
@@ -100,7 +100,7 @@ export async function getVendors(filters: VendorFilters): Promise<VendorsResult>
     const totalPages = Math.ceil(total / pageSize);
 
     return {
-      vendors: vendors || [],
+      vendors: (vendors as unknown as Vendor[]) || [],
       total,
       page,
       pageSize,
@@ -118,11 +118,11 @@ export async function getVendors(filters: VendorFilters): Promise<VendorsResult>
 export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
-      .from('vendors')
-      .select('id, slug, business_name, category, city, starting_price, profile_photo_url, gallery_photos, description, published, created_at')
+      .from('vendor_leads')
+      .select('id, slug, business_name, category, city, starting_price, logo_url as profile_photo_url, gallery_photos, description, published, created_at')
       .eq('slug', slug)
       .eq('published', true)
       .single();
@@ -132,7 +132,7 @@ export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
       return null;
     }
 
-    return data;
+    return data as unknown as Vendor;
   } catch (error) {
     console.error('Database error in getVendorBySlug:', error);
     return null;
@@ -145,10 +145,10 @@ export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
 export async function getVendorCount(): Promise<number> {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     const { count, error } = await supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('*', { count: 'exact', head: true })
       .eq('published', true);
 

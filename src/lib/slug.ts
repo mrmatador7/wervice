@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 export async function generateUniqueSlug(businessName: string): Promise<string> {
   const cookieStore = await cookies();
-  const supabase = await createClient(cookieStore);
+  const supabase = await createClient();
 
   // Convert to kebab-case
   const baseSlug = businessName
@@ -19,7 +19,7 @@ export async function generateUniqueSlug(businessName: string): Promise<string> 
   // Check uniqueness and add hash if needed
   while (true) {
     const { data } = await supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('id')
       .eq('slug', slug)
       .single();

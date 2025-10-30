@@ -32,12 +32,12 @@ export default function DashboardSidebar({ activeTab, onTabChange, userName }: D
   };
 
   const menuItems = [
-    { id: 'overview', label: 'Dashboard', icon: FiHome, href: `${pathname}?tab=overview` },
+    { id: 'overview', label: 'Dashboard', icon: FiHome, badge: null, href: `${pathname}?tab=overview` },
     { id: 'favorites', label: 'Favorites', icon: FiHeart, badge: null, href: `${pathname}?tab=favorites` },
-    { id: 'vendors', label: 'Vendor Manager', icon: FiUsers, href: `${pathname}?tab=vendors` },
-    { id: 'planner', label: 'Wedding Planner', icon: FiCalendar, href: `${pathname}?tab=planner` },
-    { id: 'budget', label: 'Budget', icon: FiDollarSign, href: `${pathname}?tab=budget` },
-    { id: 'recommendations', label: 'Recommendations', icon: FiStar, href: `${pathname}?tab=recommendations` },
+    { id: 'vendors', label: 'Vendor Manager', icon: FiUsers, badge: null, href: `${pathname}?tab=vendors` },
+    { id: 'planner', label: 'Wedding Planner', icon: FiCalendar, badge: null, href: `${pathname}?tab=planner` },
+    { id: 'budget', label: 'Budget', icon: FiDollarSign, badge: null, href: `${pathname}?tab=budget` },
+    { id: 'recommendations', label: 'Recommendations', icon: FiStar, badge: null, href: `${pathname}?tab=recommendations` },
   ];
 
   return (

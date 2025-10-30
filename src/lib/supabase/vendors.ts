@@ -43,10 +43,10 @@ export async function fetchVendors(filters: VendorFilters = {}) {
   try {
     console.log('fetchVendors called with filters:', JSON.stringify(filters, null, 2));
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     let query = supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('*', { count: 'exact' })
       .eq('published', true);
 
@@ -91,10 +91,10 @@ export async function fetchVendors(filters: VendorFilters = {}) {
     // Sorting
     switch (filters.sort) {
       case 'price_asc':
-        query = query.order('starting_price', { ascending: true, nullsFirst: true });
+        query = query.order('starting_price', { ascending: true });
         break;
       case 'price_desc':
-        query = query.order('starting_price', { ascending: false, nullsLast: true });
+        query = query.order('starting_price', { ascending: false });
         break;
       case 'newest':
         query = query.order('created_at', { ascending: false });
@@ -129,7 +129,7 @@ export async function fetchVendors(filters: VendorFilters = {}) {
     });
 
     return {
-      vendors: data as Vendor[],
+      vendors: data as unknown as Vendor[],
       total: count || 0,
       hasMore: (offset + limit) < (count || 0),
     };
@@ -149,7 +149,7 @@ export async function fetchVendors(filters: VendorFilters = {}) {
 export async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('categories')
@@ -163,7 +163,7 @@ export async function fetchCategoryBySlug(slug: string): Promise<Category | null
       return null;
     }
 
-    return data as Category;
+    return data as unknown as Category;
   } catch (error) {
     console.error('Database error in fetchCategoryBySlug:', error);
     return null;
@@ -176,10 +176,10 @@ export async function fetchCategoryBySlug(slug: string): Promise<Category | null
 export async function fetchCities(): Promise<string[]> {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data, error } = await supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('city')
       .eq('published', true);
 

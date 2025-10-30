@@ -11,16 +11,7 @@ import SkeletonCard from '@/components/vendors/SkeletonCard';
 import { Search } from 'lucide-react';
 import { capitalizeCity } from '@/lib/utils';
 
-type Vendor = {
-  id: string;
-  slug: string;
-  business_name: string;
-  category: string;
-  city: string;
-  starting_price?: number | null;
-  profile_photo_url?: string | null;
-  gallery_photos?: string[] | null;
-};
+import { Vendor } from '@/lib/types/vendor';
 
 type Category = {
   id: string;

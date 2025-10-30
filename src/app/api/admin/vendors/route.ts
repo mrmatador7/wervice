@@ -10,7 +10,7 @@ import { normalizeCategory } from '@/lib/categories';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data: vendorLeads, error } = await supabase
       .from('vendor_leads')
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     // Create Supabase client
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     // Map plan to price
     const planPricing = {
@@ -240,24 +240,25 @@ export async function POST(request: NextRequest) {
       profile_photo_url: logoUrl || null
     };
 
-    const { data: publicData, error: publicError } = await supabase
-      .from("vendors")
-      .insert([publicVendorPayload])
-      .select();
+    // TODO: Implement insertion into public vendors table
+    // const { data: publicData, error: publicError } = await supabase
+    //   .from("vendors")
+    //   .insert([publicVendorPayload])
+    //   .select();
 
-    if (publicError) {
-      console.error('Failed to insert into public vendors:', publicError);
-      console.error('Public vendor payload:', publicVendorPayload);
-      // Return error in response
-      return NextResponse.json({
-        success: false,
-        message: 'Vendor created in admin, but failed to publish to public site',
-        vendor: payload,
-        publicError: publicError.message
-      }, { status: 500 });
-    } else {
-      console.log('Successfully inserted into public vendors:', publicData);
-    }
+    // if (publicError) {
+    //   console.error('Failed to insert into public vendors:', publicError);
+    //   console.error('Public vendor payload:', publicVendorPayload);
+    //   // Return error in response
+    //   return NextResponse.json({
+    //     success: false,
+    //     message: 'Vendor created in admin, but failed to publish to public site',
+    //     vendor: payload,
+    //     publicError: publicError.message
+    //   }, { status: 500 });
+    // } else {
+    //   console.log('Successfully inserted into public vendors:', publicData);
+    // }
 
     // Revalidate the vendors cache
     revalidateTag('vendors');
@@ -362,7 +363,7 @@ export async function PUT(request: NextRequest) {
 
     // Create Supabase client
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     // Map plan to price
     const planPricing = {

@@ -49,7 +49,7 @@ export default function DonutBookingsByCategory({ data }: DonutBookingsByCategor
               height={36}
               formatter={(value, entry) => (
                 <span style={{ color: '#111111', fontSize: '12px' }}>
-                  {entry.payload.category}
+                  {value}
                 </span>
               )}
             />

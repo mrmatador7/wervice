@@ -6,7 +6,7 @@ import { getBudgetBandMADValues, type BudgetBandKey } from '@/lib/currency'
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const supabase = await createClient()
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
