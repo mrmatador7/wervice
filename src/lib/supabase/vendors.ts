@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase-server';
-import { cookies } from 'next/headers';
 
 export type VendorFilters = {
   category?: string | string[]; // Support single or multiple categories
@@ -42,7 +41,6 @@ export type Category = {
 export async function fetchVendors(filters: VendorFilters = {}) {
   try {
     console.log('fetchVendors called with filters:', JSON.stringify(filters, null, 2));
-    const cookieStore = await cookies();
     const supabase = await createClient();
 
     let query = supabase
@@ -148,7 +146,6 @@ export async function fetchVendors(filters: VendorFilters = {}) {
  */
 export async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
   try {
-    const cookieStore = await cookies();
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -175,7 +172,6 @@ export async function fetchCategoryBySlug(slug: string): Promise<Category | null
  */
 export async function fetchCities(): Promise<string[]> {
   try {
-    const cookieStore = await cookies();
     const supabase = await createClient();
 
     const { data, error } = await supabase

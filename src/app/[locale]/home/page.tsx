@@ -11,6 +11,10 @@ import CategoriesShowcase, {
   CategoryItem,
 } from "@/components/sections/CategoriesShowcase";
 import { getTranslations } from 'next-intl/server';
+import { fetchVendors } from '@/lib/supabase/vendors';
+
+// Force dynamic rendering since we use cookies for Supabase client
+export const dynamic = 'force-dynamic';
 
 // Feature flag to control Browse by Category section
 const SHOW_BROWSE_BY_CATEGORY = true;
@@ -51,32 +55,19 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const locale = resolvedParams?.locale ?? 'en';
   const t = await getTranslations({ locale, namespace: 'home' });
 
-  // Fetch vendors for the homepage carousel
-  const vendors = await fetch('/api/vendors?limit=12', {
-    next: { tags: ['vendors'] }
-  }).then(res => res.json()).catch(() => []);
+  // Fetch vendors for the homepage carousel directly from the database
+  const { vendors } = await fetchVendors({ limit: 12, sort: 'newest' });
 
   // Convert API response format to ListingItem format expected by ListingsRail
-  const vendorListings = vendors?.length > 0 ? vendors.map((vendor: any) => ({
+  const vendorListings = vendors && vendors.length > 0 ? vendors.map((vendor: any) => ({
     id: vendor.id,
-    name: vendor.name,
+    name: vendor.business_name,
     city: vendor.city,
     category: vendor.category,
     coverImage: vendor.profile_photo_url || '/placeholder-vendor.jpg',
     rating: vendor.rating || 4.5,
     isFavorite: false,
-  })) : [
-    // Fallback test data
-    {
-      id: 'test-1',
-      name: 'Test Wedding Venue',
-      city: 'marrakech',
-      category: 'venues',
-      coverImage: '/placeholder-vendor.jpg',
-      rating: 4.5,
-      isFavorite: false,
-    }
-  ];
+  })) : [];
 
   return (
     <div className="min-h-screen">
