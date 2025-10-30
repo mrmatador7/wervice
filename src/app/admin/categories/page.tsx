@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PageHeader from '@/components/admin/PageHeader';
-import { type Category } from '@/lib/mock';
-import StatusPill from '@/components/admin/StatusPill';
-import { Edit, Eye, Trash2 } from 'lucide-react';
-import CategoryDialog from '@/components/admin/CategoryDialog';
+import { 
+  FiSearch, FiPlus, FiEdit2, FiTrash2, FiEye, FiRefreshCw,
+  FiToggleLeft, FiToggleRight, FiImage, FiTag, FiList
+} from 'react-icons/fi';
+import Link from 'next/link';
+import { getSubcategoriesForCategory } from '@/lib/subcategories';
 
 interface DBCategory {
   id: string;
@@ -20,11 +21,13 @@ interface DBCategory {
 }
 
 export default function CategoriesPage() {
-  const [showDialog, setShowDialog] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<DBCategory | null>(null);
-  const [showViewDialog, setShowViewDialog] = useState(false);
   const [categories, setCategories] = useState<DBCategory[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<DBCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<DBCategory | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   // Fetch categories from API
   const fetchCategories = async () => {
@@ -49,148 +52,306 @@ export default function CategoriesPage() {
     fetchCategories();
   }, []);
 
-  const handleAddCategory = () => {
-    setSelectedCategory(null);
-    setShowDialog(true);
-  };
+  // Filter categories
+  useEffect(() => {
+    let result = [...categories];
 
-  const handleEditCategory = (category: DBCategory) => {
-    setSelectedCategory(category);
-    setShowDialog(true);
-  };
+    // Search filter
+    if (searchQuery) {
+      result = result.filter(cat =>
+        cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cat.slug.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        cat.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-  const handleViewCategory = (category: DBCategory) => {
-    setSelectedCategory(category);
-    setShowViewDialog(true);
-  };
+    // Status filter
+    if (filterStatus === 'active') {
+      result = result.filter(cat => cat.is_active !== false);
+    } else if (filterStatus === 'inactive') {
+      result = result.filter(cat => cat.is_active === false);
+    }
+
+    setFilteredCategories(result);
+  }, [categories, searchQuery, filterStatus]);
 
   const handleDeleteCategory = async (category: DBCategory) => {
-    if (confirm(`Are you sure you want to delete "${category.name}"?`)) {
-      try {
-        const response = await fetch(`/api/admin/categories/${category.id}`, {
-          method: 'DELETE',
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-          // Refresh categories list
-          fetchCategories();
-        } else {
-          alert(`Failed to delete category: ${result.error}`);
-        }
-      } catch (error) {
-        console.error('Error deleting category:', error);
-        alert('An error occurred while deleting the category');
+    if (!confirm(`Are you sure you want to delete "${category.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/categories/${category.id}`, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        fetchCategories();
+      } else {
+        alert(`Failed to delete category: ${result.error}`);
       }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('An error occurred while deleting the category');
     }
   };
 
-  const handleDialogClose = () => {
-    setShowDialog(false);
-    setSelectedCategory(null);
+  const handleToggleStatus = async (category: DBCategory) => {
+    try {
+      const response = await fetch(`/api/admin/categories/${category.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...category,
+          is_active: !category.is_active,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        fetchCategories();
+      } else {
+        alert('Failed to update category status');
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error);
+      alert('Error updating category');
+    }
   };
 
-  const handleDialogSuccess = () => {
-    // Refresh categories list
-    fetchCategories();
-    setShowDialog(false);
-    setSelectedCategory(null);
-  };
+  const activeCount = categories.filter(c => c.is_active !== false).length;
+  const inactiveCount = categories.filter(c => c.is_active === false).length;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Categories"
-        subtitle="Manage wedding service categories"
-      >
-        <button 
-          onClick={handleAddCategory}
-          className="px-4 py-2 bg-wv.lime text-wv.black rounded-lg font-medium hover:bg-wv.limeDark"
-        >
-          Add Category
-        </button>
-      </PageHeader>
-
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
-              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
-            </div>
-            <p className="mt-4 text-wv.sub">Loading categories...</p>
+    <div className="min-h-screen bg-[#f4f4f4] p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-[#11190C]">Categories Management</h1>
+            <p className="text-gray-600 mt-1">Manage wedding service categories and subcategories</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchCategories}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <FiRefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+            <Link
+              href="/admin/categories/new"
+              className="px-4 py-2 bg-[#D9FF0A] text-[#11190C] rounded-xl hover:bg-[#BEE600] transition-colors flex items-center gap-2 font-semibold"
+            >
+              <FiPlus className="w-4 h-4" />
+              Add Category
+            </Link>
           </div>
         </div>
-      ) : categories.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-wv.sub mb-4">No categories found</p>
-          <button 
-            onClick={handleAddCategory}
-            className="px-4 py-2 bg-wv.lime text-wv.black rounded-lg font-medium hover:bg-wv.limeDark"
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">Total Categories</span>
+              <FiList className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="text-3xl font-bold text-[#11190C]">{categories.length}</div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">Active</span>
+              <FiToggleRight className="w-5 h-5 text-green-500" />
+            </div>
+            <div className="text-3xl font-bold text-green-600">{activeCount}</div>
+          </div>
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">Inactive</span>
+              <FiToggleLeft className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="text-3xl font-bold text-gray-600">{inactiveCount}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white rounded-2xl p-6 border border-gray-100 mb-6">
+        <div className="flex items-center gap-4">
+          {/* Search */}
+          <div className="flex-1 relative">
+            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search categories by name, slug, or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
+            className="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#D9FF0A] transition-colors"
           >
-            Create your first category
-          </button>
+            <option value="all">All Status</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive Only</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Categories Grid */}
+      {isLoading ? (
+        <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9FF0A] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading categories...</p>
+        </div>
+      ) : filteredCategories.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
+          <FiSearch className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">No categories found</h3>
+          <p className="text-gray-500 mb-4">Try adjusting your search or filters</p>
+          {categories.length === 0 && (
+            <Link
+              href="/admin/categories/new"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#D9FF0A] text-[#11190C] rounded-xl hover:bg-[#BEE600] transition-colors font-semibold"
+            >
+              <FiPlus className="w-4 h-4" />
+              Create First Category
+            </Link>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category) => (
-            <div key={category.id} className="bg-wv.card rounded-xl p-6 shadow-card">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 bg-wv.lime rounded-lg flex items-center justify-center">
-                  <span className="text-wv.black font-bold text-lg">{category.name[0]}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredCategories.map((category) => {
+            const subcategories = getSubcategoriesForCategory(category.slug);
+            
+            return (
+              <div key={category.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
+                {/* Category Header with Cover */}
+                <div className="relative h-32 bg-gradient-to-br from-[#D9FF0A]/20 to-[#BEE600]/10">
+                  {category.cover_url ? (
+                    <img
+                      src={category.cover_url}
+                      alt={category.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <FiImage className="w-12 h-12 text-gray-300" />
+                    </div>
+                  )}
+                  
+                  {/* Status Toggle */}
+                  <button
+                    onClick={() => handleToggleStatus(category)}
+                    className={`absolute top-3 right-3 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+                      category.is_active !== false
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category.is_active !== false ? (
+                      <>
+                        <FiToggleRight className="w-4 h-4" />
+                        Active
+                      </>
+                    ) : (
+                      <>
+                        <FiToggleLeft className="w-4 h-4" />
+                        Inactive
+                      </>
+                    )}
+                  </button>
                 </div>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => handleEditCategory(category)}
-                    className="p-2 hover:bg-wv.line rounded-lg transition-colors"
-                    title="Edit category"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button 
-                    onClick={() => handleViewCategory(category)}
-                    className="p-2 hover:bg-wv.line rounded-lg transition-colors"
-                    title="View category"
-                  >
-                    <Eye size={16} />
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteCategory(category)}
-                    className="p-2 hover:bg-wv.line rounded-lg text-wv.danger transition-colors"
-                    title="Delete category"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+
+                {/* Category Content */}
+                <div className="p-6">
+                  {/* Name and Slug */}
+                  <div className="mb-4">
+                    <h3 className="text-xl font-bold text-[#11190C] mb-1">{category.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <FiTag className="w-3 h-3" />
+                      <span className="font-mono">{category.slug}</span>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  {category.description && (
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">{category.description}</p>
+                  )}
+
+                  {/* Strapline */}
+                  {category.strapline && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-700 italic">"{category.strapline}"</p>
+                    </div>
+                  )}
+
+                  {/* Subcategories Count */}
+                  <div className="mb-4 p-3 bg-[#D9FF0A]/10 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700 font-medium">Subcategories</span>
+                      <span className="text-sm font-bold text-[#11190C]">{subcategories.length}</span>
+                    </div>
+                    {subcategories.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {subcategories.slice(0, 3).map(sub => (
+                          <span key={sub.slug} className="text-xs px-2 py-1 bg-white rounded-full text-gray-600">
+                            {sub.name}
+                          </span>
+                        ))}
+                        {subcategories.length > 3 && (
+                          <span className="text-xs px-2 py-1 bg-white rounded-full text-gray-500">
+                            +{subcategories.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/en/categories/${category.slug}`}
+                      target="_blank"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm font-medium text-gray-700"
+                    >
+                      <FiEye className="w-4 h-4" />
+                      View
+                    </Link>
+                    <Link
+                      href={`/admin/categories/${category.id}/edit`}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors text-sm font-medium text-blue-700"
+                    >
+                      <FiEdit2 className="w-4 h-4" />
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteCategory(category)}
+                      className="px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg transition-colors text-sm font-medium text-red-700"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <h3 className="font-semibold text-wv.text mb-2">{category.name}</h3>
-              <p className="text-sm text-wv.sub mb-4">{category.description || 'No description'}</p>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-wv.sub">
-                  {category.slug}
-                </span>
-                <StatusPill status={category.is_active === false ? 'Suspended' : 'Active'} />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Edit/Add Category Dialog */}
-      <CategoryDialog
-        isOpen={showDialog}
-        onClose={handleDialogClose}
-        onSuccess={handleDialogSuccess}
-        category={selectedCategory ? {
-          id: selectedCategory.id,
-          name: selectedCategory.name,
-          description: selectedCategory.description || '',
-          slug: selectedCategory.slug,
-          coverUrl: selectedCategory.cover_url || undefined,
-          strapline: selectedCategory.strapline || undefined
-        } : null}
-      />
+      {/* Results Count */}
+      {!isLoading && filteredCategories.length > 0 && (
+        <div className="mt-6 text-center text-sm text-gray-600">
+          Showing {filteredCategories.length} of {categories.length} categories
+        </div>
+      )}
     </div>
   );
 }
