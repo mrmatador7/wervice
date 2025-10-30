@@ -33,11 +33,11 @@ export type SimilarVendor = {
 export async function getVendorBySlug(slug: string): Promise<VendorDetail | null> {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
     
     const { data, error } = await supabase
-      .from('vendors')
-      .select('id, business_name, slug, category, city, phone, email, description, profile_photo_url, gallery_photos, plan, published, starting_price, created_at')
+      .from('vendor_leads')
+      .select('id, business_name, slug, category, city, phone, email, description, logo_url as profile_photo_url, gallery_photos, plan_tier as plan, published, starting_price, created_at')
       .eq('slug', slug)
       .eq('published', true)
       .single();
@@ -53,7 +53,7 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
       return null;
     }
     
-    return data as VendorDetail;
+    return data as unknown as VendorDetail;
   } catch (error) {
     console.error('Database error in getVendorBySlug:', error);
     return null;
@@ -68,12 +68,12 @@ export async function getSimilarVendors(
 ): Promise<SimilarVendor[]> {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
     
     // Fetch more than needed to prioritize same city
     const { data, error } = await supabase
-      .from('vendors')
-      .select('id, business_name, slug, category, city, profile_photo_url, gallery_photos, starting_price, plan')
+      .from('vendor_leads')
+      .select('id, business_name, slug, category, city, logo_url as profile_photo_url, gallery_photos, starting_price, plan_tier as plan')
       .eq('category', category)
       .eq('published', true)
       .neq('id', currentId)
@@ -86,9 +86,10 @@ export async function getSimilarVendors(
     }
     
     // Prioritize same city, then others
+    const typedData = data as unknown as any[];
     const prioritized = [
-      ...data.filter(v => v.city?.toLowerCase() === city?.toLowerCase()),
-      ...data.filter(v => v.city?.toLowerCase() !== city?.toLowerCase()),
+      ...typedData.filter(v => v.city?.toLowerCase() === city?.toLowerCase()),
+      ...typedData.filter(v => v.city?.toLowerCase() !== city?.toLowerCase()),
     ];
     
     return prioritized.slice(0, limit) as SimilarVendor[];

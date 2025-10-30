@@ -9,7 +9,7 @@ export async function POST(
   try {
     const { vendorId } = await params
     const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const supabase = await createClient()
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -36,7 +36,7 @@ export async function DELETE(
   try {
     const { vendorId } = await params
     const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const supabase = await createClient()
 
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()

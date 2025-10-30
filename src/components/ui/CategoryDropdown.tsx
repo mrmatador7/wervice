@@ -1,59 +1,59 @@
 'use client';
 
 import React from 'react';
-import Dropdown, { DropdownProps } from './Dropdown';
+import WervSelect, { WervSelectOption } from './WervSelect';
 
-const categoryOptions = [
+const categoryOptions: WervSelectOption[] = [
   {
     value: 'venues',
-    label: 'Venues',
-    iconSrc: '/categories/venues.png'
+    label: 'Venues'
   },
   {
     value: 'catering',
-    label: 'Catering',
-    iconSrc: '/categories/Catering.png'
+    label: 'Catering'
   },
   {
     value: 'planning',
-    label: 'Planning',
-    iconSrc: '/categories/event planner.png'
+    label: 'Planning'
   },
   {
     value: 'photo-video',
-    label: 'Photo & Video',
-    iconSrc: '/categories/photo.png'
+    label: 'Photo & Video'
   },
   {
     value: 'music',
-    label: 'Music',
-    iconSrc: '/categories/music.png'
+    label: 'Music'
   },
   {
     value: 'decor',
-    label: 'Decor',
-    iconSrc: '/categories/decor.png'
+    label: 'Decor'
   },
   {
     value: 'beauty',
-    label: 'Beauty',
-    iconSrc: '/categories/beauty.png'
+    label: 'Beauty'
   },
   {
     value: 'dresses',
-    label: 'Dresses',
-    iconSrc: '/categories/Dresses.png'
+    label: 'Dresses'
   }
 ];
 
-export default function CategoryDropdown(props: Omit<DropdownProps, 'options'>) {
+interface CategoryDropdownProps {
+  value: string | null;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+export default function CategoryDropdown({ value, onChange, disabled = false, className }: CategoryDropdownProps) {
   return (
-    <Dropdown
-      {...props}
+    <WervSelect
+      value={value}
+      onChange={onChange}
       options={categoryOptions}
       placeholder="Select a category"
       accent="neon"
-      iconSrc="/categories/event planner.png"
+      className={className}
     />
   );
 }

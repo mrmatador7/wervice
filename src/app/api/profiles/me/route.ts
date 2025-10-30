@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     // Get the current user
     const {
@@ -31,8 +31,6 @@ export async function GET() {
 
     return NextResponse.json({
       user: {
-        id: user.id,
-        email: user.email,
         ...profile,
       },
     });

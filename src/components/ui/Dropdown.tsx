@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, ReactNode } from 'react';
 import { ChevronUp } from 'lucide-react';
 
-interface DropdownProps {
+export interface DropdownProps {
   trigger: ReactNode | ((isOpen: boolean) => ReactNode);
   children: ReactNode;
   align?: 'left' | 'right';

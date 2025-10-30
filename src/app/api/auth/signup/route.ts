@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cookieStore = await cookies()
-    const supabase = await createClient(cookieStore)
+    const supabase = await createClient()
 
     // Sign up the user with auto-confirmation for development
     const { data, error } = await supabase.auth.signUp({

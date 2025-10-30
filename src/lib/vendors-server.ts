@@ -119,12 +119,12 @@ function getVendorsFromMock(filters: VendorFilters = {}): VendorSearchResult {
 
 export async function getVendors(filters: VendorFilters = {}): Promise<VendorSearchResult> {
   try {
-    const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
+    const supabase = await createClient();
 
     console.log('Querying vendors from database with filters:', filters);
 
     let query = supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('*', { count: 'exact' })
       .eq('published', true);
 
@@ -162,10 +162,10 @@ export async function getVendors(filters: VendorFilters = {}): Promise<VendorSea
         query = query.order('rating', { ascending: false });
         break;
       case 'price_asc':
-        query = query.order('starting_price', { ascending: true, nullsLast: true });
+        query = query.order('starting_price', { ascending: true });
         break;
       case 'price_desc':
-        query = query.order('starting_price', { ascending: false, nullsLast: true });
+        query = query.order('starting_price', { ascending: false });
         break;
       case 'newest':
         query = query.order('created_at', { ascending: false });
@@ -201,9 +201,9 @@ export async function getVendors(filters: VendorFilters = {}): Promise<VendorSea
     const totalPages = Math.ceil(total / PAGE_SIZE);
 
     // Transform database vendors to match our interface
-    const transformedVendors = (vendors || []).map(vendor => ({
+    const transformedVendors = (vendors || []).map((vendor: any) => ({
       id: vendor.id,
-      slug: vendor.slug,
+      slug: vendor.slug || vendor.business_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
       business_name: vendor.business_name,
       category: vendor.category,
       city: vendor.city,
@@ -314,10 +314,10 @@ export async function getVendors(filters: VendorFilters = {}): Promise<VendorSea
 
 export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
   try {
-    const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
+    const supabase = await createClient();
 
     const { data: vendor, error } = await supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('*')
       .eq('slug', slug)
       .eq('published', true)
@@ -334,23 +334,24 @@ export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
     }
 
     // Transform database vendor to match our interface
+    const vendorData = vendor as any;
     return {
-      id: vendor.id,
-      slug: vendor.slug,
-      business_name: vendor.business_name,
-      category: vendor.category,
-      city: vendor.city,
-      rating: vendor.rating || 0,
-      starting_price: vendor.starting_price || undefined,
-      profile_photo_url: vendor.profile_photo_url,
-      gallery_urls: vendor.gallery_photos || [],
-      description: vendor.description,
-      is_featured: vendor.is_featured || false,
-      phone: vendor.phone,
-      email: vendor.email,
-      plan_tier: vendor.plan || 'basic',
-      published: vendor.published,
-      created_at: vendor.created_at,
+      id: vendorData.id,
+      slug: vendorData.slug || vendorData.business_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      business_name: vendorData.business_name,
+      category: vendorData.category,
+      city: vendorData.city,
+      rating: vendorData.rating || 0,
+      starting_price: vendorData.starting_price || undefined,
+      profile_photo_url: vendorData.logo_url,
+      gallery_urls: vendorData.gallery_photos || [],
+      description: vendorData.description,
+      is_featured: vendorData.is_featured || false,
+      phone: vendorData.phone,
+      email: vendorData.email,
+      plan_tier: vendorData.plan_tier || 'basic',
+      published: vendorData.published,
+      created_at: vendorData.created_at,
     };
   } catch (error) {
     console.warn('Database query failed for vendor:', slug, error);
@@ -359,10 +360,10 @@ export async function getVendorBySlug(slug: string): Promise<Vendor | null> {
 }
 
 export async function getFeaturedVendors(limit: number = 6): Promise<Vendor[]> {
-  const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
+  const supabase = await createClient();
 
   const { data: vendors, error } = await supabase
-    .from('vendors')
+    .from('vendor_leads')
     .select('*')
     .eq('published', true)
     .eq('is_featured', true)
@@ -374,15 +375,35 @@ export async function getFeaturedVendors(limit: number = 6): Promise<Vendor[]> {
     return [];
   }
 
-  return vendors || [];
+  // Transform database vendors to match our interface
+  const transformedVendors = (vendors || []).map((vendor: any) => ({
+    id: vendor.id,
+    slug: vendor.slug || vendor.business_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+    business_name: vendor.business_name,
+    category: vendor.category,
+    city: vendor.city,
+    rating: vendor.rating || 0,
+    starting_price: vendor.starting_price || undefined,
+    profile_photo_url: vendor.logo_url,
+    gallery_urls: vendor.gallery_photos || [],
+    description: vendor.description,
+    is_featured: vendor.is_featured || false,
+    phone: vendor.phone,
+    email: vendor.email,
+    plan_tier: vendor.plan_tier || 'basic',
+    published: vendor.published,
+    created_at: vendor.created_at,
+  }));
+
+  return transformedVendors;
 }
 
 export async function getVendorCount(): Promise<number> {
   try {
-    const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
+    const supabase = await createClient();
 
     const { count, error } = await supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('*', { count: 'exact', head: true })
       .eq('published', true);
 
@@ -400,10 +421,10 @@ export async function getVendorCount(): Promise<number> {
 
 export async function getCategoryVendorCount(category: string): Promise<number> {
   try {
-    const supabase = await createClient(await import('next/headers').then(m => m.cookies()));
+    const supabase = await createClient();
 
     const { count, error } = await supabase
-      .from('vendors')
+      .from('vendor_leads')
       .select('*', { count: 'exact', head: true })
       .eq('published', true)
       .ilike('category', category);

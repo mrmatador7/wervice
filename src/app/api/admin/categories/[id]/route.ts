@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { id } = await params;
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     const { data: category, error } = await supabase
       .from('categories')
@@ -46,7 +46,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
     const body = await request.json();
 
     const { name, description, coverUrl, strapline } = body;
@@ -115,7 +115,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     const cookieStore = await cookies();
-    const supabase = await createClient(cookieStore);
+    const supabase = await createClient();
 
     // Check if category exists
     const { data: existing } = await supabase

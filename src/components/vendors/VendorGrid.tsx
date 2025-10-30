@@ -62,7 +62,6 @@ export default function VendorGrid({
         <VendorPagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={onPageChange}
         />
       )}
     </>

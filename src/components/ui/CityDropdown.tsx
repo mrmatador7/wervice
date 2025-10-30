@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import Dropdown, { DropdownProps } from './Dropdown';
+import WervSelect, { WervSelectOption } from './WervSelect';
 
-const cityOptions = [
+const cityOptions: WervSelectOption[] = [
   { value: 'casablanca', label: 'Casablanca' },
   { value: 'marrakech', label: 'Marrakech' },
   { value: 'rabat', label: 'Rabat' },
@@ -15,14 +15,22 @@ const cityOptions = [
   { value: 'kenitra', label: 'Kenitra' }
 ];
 
-export default function CityDropdown(props: Omit<DropdownProps, 'options'>) {
+interface CityDropdownProps {
+  value: string | null;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+export default function CityDropdown({ value, onChange, disabled = false, className }: CityDropdownProps) {
   return (
-    <Dropdown
-      {...props}
+    <WervSelect
+      value={value}
+      onChange={onChange}
       options={cityOptions}
       placeholder="Select a city"
-      accent="purple"
-      iconSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyczctNS4yIDctMTJhNyA3IDAgMSAwLTE0IDBjMCA2LjggNyAxMiA3IDEyWiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNmI3MjgwIiBzdHJva2Utd2lkdGg9IjIiLz4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMCIgcj0iMiIgZmlsbD0iIzZiNzI4MCIvPgo8L3N2Zz4K"
+      accent="default"
+      className={className}
     />
   );
 }

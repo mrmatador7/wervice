@@ -559,7 +559,6 @@ export default function NewCategoryClient({ category, initialSearchParams }: New
                       >
                         <NewVendorCard
                           vendor={vendor}
-                          currency={currency}
                         />
                       </div>
                     ))}
