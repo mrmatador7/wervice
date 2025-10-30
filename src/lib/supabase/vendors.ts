@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase-server';
 
 export type VendorFilters = {
   category?: string | string[]; // Support single or multiple categories
+  subcategory?: string | string[]; // Support single or multiple subcategories
   city?: string | string[]; // Support single or multiple cities
   q?: string;
   priceMin?: number;
@@ -57,6 +58,17 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       } else if (!Array.isArray(filters.category)) {
         // Single category - use eq with lowercase
         query = query.eq('category', filters.category.toLowerCase());
+      }
+    }
+
+    // Subcategory filter
+    if (filters.subcategory) {
+      if (Array.isArray(filters.subcategory) && filters.subcategory.length > 0) {
+        // Multiple subcategories - use in operator
+        query = query.in('subcategory', filters.subcategory);
+      } else if (!Array.isArray(filters.subcategory)) {
+        // Single subcategory - use eq
+        query = query.eq('subcategory', filters.subcategory);
       }
     }
 

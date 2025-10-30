@@ -11,6 +11,7 @@ import NewVendorCard from './NewVendorCard';
 import { CurrencyCode, MOROCCAN_CITIES } from '@/lib/types/vendor';
 import { labelForCategory } from '@/lib/categories';
 import { formatCategoryName } from '@/lib/format';
+import { getSubcategoriesForCategory } from '@/lib/subcategories';
 
 interface NewCategoryClientProps {
   category: string;
@@ -29,49 +30,13 @@ const FALLBACK_CATEGORY_IMAGES: Record<string, string> = {
   'dresses': 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=1200&h=800&fit=crop',
 };
 
-// Get subcategories for each category
+// Get subcategories for each category from the centralized subcategories file
 function getCategorySubcategories(category: string) {
-  const subcategories: Record<string, Array<{ value: string; label: string }>> = {
-    'venues': [
-      { value: 'ballroom', label: 'Ballroom' },
-      { value: 'garden', label: 'Garden' },
-      { value: 'beach', label: 'Beach' },
-      { value: 'rooftop', label: 'Rooftop' },
-    ],
-    'catering': [
-      { value: 'traditional', label: 'Traditional' },
-      { value: 'international', label: 'International' },
-      { value: 'buffet', label: 'Buffet' },
-    ],
-    'photography': [
-      { value: 'photographer', label: 'Photographer' },
-      { value: 'videographer', label: 'Videographer' },
-      { value: 'drone', label: 'Drone' },
-    ],
-    'planning': [
-      { value: 'full-service', label: 'Full Service' },
-      { value: 'day-of', label: 'Day-of Coordination' },
-    ],
-    'beauty': [
-      { value: 'makeup', label: 'Makeup' },
-      { value: 'hair', label: 'Hair Styling' },
-      { value: 'henna', label: 'Henna' },
-    ],
-    'decor': [
-      { value: 'floral', label: 'Floral' },
-      { value: 'lighting', label: 'Lighting' },
-    ],
-    'music': [
-      { value: 'dj', label: 'DJ' },
-      { value: 'live-band', label: 'Live Band' },
-    ],
-    'dresses': [
-      { value: 'bride', label: 'Bridal Gowns' },
-      { value: 'kaftan', label: 'Kaftan' },
-    ],
-  };
-  
-  return subcategories[category] || [];
+  const subcategories = getSubcategoriesForCategory(category);
+  return subcategories.map(sub => ({
+    value: sub.slug,
+    label: sub.name
+  }));
 }
 
 export default function NewCategoryClient({ category, initialSearchParams }: NewCategoryClientProps) {
