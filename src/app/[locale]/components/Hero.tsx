@@ -1,6 +1,5 @@
 import '../../../styles/gradients.css';
 import AISearchBar from './AISearchBar';
-import HeroIdeaCards from './HeroIdeaCards';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 
@@ -130,7 +129,6 @@ export default async function Hero({ locale = 'en' }: { locale?: string }) {
           </div>
 
           <div className="mt-8 relative">
-            <HeroIdeaCards />
             <AISearchBar locale={locale} />
           </div>
         </div>
