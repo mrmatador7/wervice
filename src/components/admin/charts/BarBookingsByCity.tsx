@@ -59,3 +59,4 @@ export default function BarBookingsByCity({ data }: BarBookingsByCityProps) {
 
 
 
+

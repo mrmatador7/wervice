@@ -2,7 +2,6 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Hero from './components/Hero';
 import CategoriesSection from './categories/components/CategoriesSection';
-import FeaturedSection from '@/components/home/FeaturedSection';
 import CitiesCarousel from '@/components/cities/CitiesCarousel';
 import FeaturedVendorsSection from '@/components/home/FeaturedVendorsSection';
 import TrustBand from './components/TrustBand';
@@ -24,11 +23,6 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         {/* Categories Section */}
         <section className="py-12 bg-[#f0f0f0]">
           <CategoriesSection />
-        </section>
-
-        {/* Featured Section - 3 Column Layout */}
-        <section className="py-12 bg-[#f6f6f6]">
-          <FeaturedSection />
         </section>
 
         {/* Cities Carousel */}
