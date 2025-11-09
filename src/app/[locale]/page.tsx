@@ -4,7 +4,6 @@ import Hero from './components/Hero';
 import CategoriesSection from './categories/components/CategoriesSection';
 import CitiesCarousel from '@/components/cities/CitiesCarousel';
 import FeaturedVendorsSection from '@/components/home/FeaturedVendorsSection';
-import TrustBand from './components/TrustBand';
 import BecomeVendorSection from '@/components/sections/VendorCTA';
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
@@ -35,11 +34,6 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         {/* Featured Vendors Section */}
         <section className="py-12 bg-[#f3f3f3]">
           <FeaturedVendorsSection locale={locale} />
-        </section>
-
-        {/* Trust Band */}
-        <section className="py-8 bg-[#f6f6f6]">
-          <TrustBand />
         </section>
 
         {/* Become Vendor Section */}
