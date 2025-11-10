@@ -25,19 +25,24 @@ export async function GET() {
     const transformedVendors = vendorLeads.map((lead: any) => ({
       id: lead.id,
       name: lead.business_name,
+      slug: lead.slug || '',
       city: lead.city,
       category: lead.category,
-      status: lead.status === 'approved' ? 'Active' as const : lead.status === 'pending_review' ? 'Pending' as const : 'Suspended' as const,
-      bookings: 0, // Placeholder
-      revenue: 0, // Placeholder
-      rating: 0, // Placeholder
+      subcategory: lead.subcategory || '',
+      status: lead.status || 'pending',
       plan: lead.subscription_price_dhs === 200 ? 'style-beauty' :
             lead.subscription_price_dhs === 250 ? 'media-entertainment' :
             'venue-planning',
-      planPrice: lead.subscription_price_dhs,
+      planPrice: lead.subscription_price_dhs || 0,
       profilePhotoUrl: lead.logo_url || '',
       galleryPhotoUrls: lead.gallery_urls || [],
-      lastPayout: lead.submitted_at ? new Date(lead.submitted_at).toLocaleDateString() : ''
+      email: lead.email || '',
+      phone: lead.whatsapp || '',
+      startingPrice: lead.starting_price || 0,
+      description: lead.profile_description || '',
+      published: lead.published || false,
+      createdAt: lead.submitted_at || lead.created_at || new Date().toISOString(),
+      updatedAt: lead.updated_at || ''
     }));
 
     return NextResponse.json({

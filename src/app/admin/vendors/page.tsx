@@ -200,6 +200,54 @@ export default function VendorsPage() {
     }
   };
 
+  // Bulk publish
+  const handleBulkPublish = async () => {
+    if (selectedVendors.size === 0) return;
+    if (!confirm(`Are you sure you want to publish ${selectedVendors.size} vendor(s) to the website?`)) return;
+
+    try {
+      const publishPromises = Array.from(selectedVendors).map(id =>
+        fetch(`/api/admin/vendors/${id}/publish`, { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ published: true })
+        })
+      );
+
+      await Promise.all(publishPromises);
+      setSelectedVendors(new Set());
+      fetchVendors();
+      alert(`Successfully published ${selectedVendors.size} vendor(s)!`);
+    } catch (error) {
+      console.error('Error publishing vendors:', error);
+      alert('Error publishing vendors');
+    }
+  };
+
+  // Bulk unpublish
+  const handleBulkUnpublish = async () => {
+    if (selectedVendors.size === 0) return;
+    if (!confirm(`Are you sure you want to unpublish ${selectedVendors.size} vendor(s) from the website?`)) return;
+
+    try {
+      const unpublishPromises = Array.from(selectedVendors).map(id =>
+        fetch(`/api/admin/vendors/${id}/publish`, { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ published: false })
+        })
+      );
+
+      await Promise.all(unpublishPromises);
+      setSelectedVendors(new Set());
+      fetchVendors();
+      alert(`Successfully unpublished ${selectedVendors.size} vendor(s)!`);
+    } catch (error) {
+      console.error('Error unpublishing vendors:', error);
+      alert('Error unpublishing vendors');
+    }
+  };
+
   // Export to CSV
   const handleExport = () => {
     const headers = ['Name', 'Email', 'Phone', 'City', 'Category', 'Status', 'Plan', 'Price', 'Published'];
@@ -407,13 +455,29 @@ export default function VendorsPage() {
             <span className="text-sm text-gray-600">
               {selectedVendors.size} vendor(s) selected
             </span>
-            <button
-              onClick={handleBulkDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
-            >
-              <FiTrash2 className="w-4 h-4" />
-              Delete Selected
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleBulkPublish}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              >
+                <FiCheckCircle className="w-4 h-4" />
+                Publish to Website
+              </button>
+              <button
+                onClick={handleBulkUnpublish}
+                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors flex items-center gap-2"
+              >
+                <FiXCircle className="w-4 h-4" />
+                Unpublish
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+              >
+                <FiTrash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </div>
           </div>
         )}
       </div>
