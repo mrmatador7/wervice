@@ -5,10 +5,10 @@ import { Sparkles } from 'lucide-react';
 import AIChatModal from '@/components/ai/AIChatModal';
 
 const EXAMPLE_PROMPTS = [
-  { emoji: '💄', text: 'makeup artist in Casablanca' },
-  { emoji: '🏡', text: 'garden venue in Marrakech' },
-  { emoji: '🎵', text: 'DJ for 200 guests in Agadir' },
-  { emoji: '📸', text: 'outdoor photographer in Rabat' },
+  { emoji: '🏛️', text: 'What are the best wedding venues in Marrakech?' },
+  { emoji: '💰', text: 'How much does a photographer cost in Casablanca?' },
+  { emoji: '🎵', text: 'Can you recommend a DJ for 150 guests?' },
+  { emoji: '💄', text: 'Where can I find a makeup artist in Rabat?' },
 ];
 
 interface AISearchBarProps {
@@ -96,7 +96,7 @@ export default function AISearchBar({ locale }: AISearchBarProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setIsFocused(true)}
-              placeholder="Ask anything… e.g. 'Rooftop venue in Marrakech for 120 guests'"
+              placeholder="Ask anything… e.g. 'What are the best venues in Marrakech for 120 guests?'"
               aria-label="AI search"
               className="flex-1 py-4 px-2 text-base md:text-lg text-gray-900 placeholder-gray-400 bg-transparent border-none outline-none focus:ring-0"
             />
