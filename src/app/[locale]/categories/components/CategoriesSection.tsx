@@ -26,7 +26,7 @@ export default function CategoriesSection() {
             venues: { href: 'venues', image: '/categories/venues.png', count: 124, color: 'bg-rose-500', gradient: 'from-[#E8A3A3] to-[#C67373]' },
             catering: { href: 'catering', image: '/categories/Catering.png', count: 87, color: 'bg-blue-500', gradient: 'from-[#7BA8D4] to-[#4A7BA7]' },
             photo_video: { href: 'photo-video', image: '/categories/photo.png', count: 156, color: 'bg-purple-500', gradient: 'from-[#B89FD9] to-[#8B6DB8]' },
-            event_planner: { href: 'planning', image: '/categories/Event Planner.png', count: 92, color: 'bg-amber-500', gradient: 'from-[#E8C47C] to-[#C9A053]' },
+            event_planner: { href: 'planning', image: '/categories/event-planner.png', count: 92, color: 'bg-amber-500', gradient: 'from-[#E8C47C] to-[#C9A053]' },
             beauty: { href: 'beauty', image: '/categories/beauty.png', count: 78, color: 'bg-pink-500', gradient: 'from-[#E8A8C9] to-[#C57BA3]' },
             decor: { href: 'decor', image: '/categories/decor.png', count: 134, color: 'bg-emerald-500', gradient: 'from-[#7BC5A8] to-[#4A9B7F]' },
             music: { href: 'music', image: '/categories/music.png', count: 67, color: 'bg-red-500', gradient: 'from-[#E88F8F] to-[#C95D5D]' },
