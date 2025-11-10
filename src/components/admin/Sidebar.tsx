@@ -23,14 +23,17 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Home', href: '/admin/dashboard', icon: LayoutDashboard },
-  { name: 'Explore', href: '/admin/vendors', icon: Users },
-  { name: 'My Images', href: '/admin/users', icon: UserCheck },
-  { name: 'Collections', href: '/admin/bookings', icon: Calendar },
-  { name: 'History', href: '/admin/payments', icon: CreditCard },
-  { name: 'Styles', href: '/admin/categories', icon: Tag },
-  { name: 'Appearance', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Vendors', href: '/admin/vendors', icon: Users },
+  { name: 'Users', href: '/admin/users', icon: UserCheck },
+  { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
+  { name: 'Payments', href: '/admin/payments', icon: CreditCard },
+  { name: 'Categories', href: '/admin/categories', icon: Tag },
+  { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+  { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
+  { name: 'Blog & SEO', href: '/admin/blog-seo', icon: FileText },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
+  { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
 ];
 
 export default function Sidebar() {

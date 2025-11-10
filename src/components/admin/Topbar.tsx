@@ -9,7 +9,7 @@ export default function Topbar() {
       <div className="h-16 px-8 flex items-center justify-between">
         {/* Left side - Page Title */}
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Home</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Dashboard</h1>
         </div>
 
         {/* Right side - Action Buttons */}
