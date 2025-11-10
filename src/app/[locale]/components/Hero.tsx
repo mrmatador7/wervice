@@ -114,14 +114,19 @@ export default async function Hero({ locale = 'en' }: { locale?: string }) {
         <div className="relative z-20 mx-auto max-w-6xl px-4 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl font-extrabold tracking-tight text-[#11190C] sm:text-4xl md:text-5xl">
-              {t('hero.title').split('wedding').map((part, index, array) => (
-                <span key={index}>
-                  {part}
-                  {index < array.length - 1 && (
-                    <span className="hero-wedding-gradient">wedding</span>
-                  )}
-                </span>
-              ))}
+              {(() => {
+                const title = t('hero.title');
+                const parts = title.split(/(\bwedding\b)/i);
+                return parts.map((part, index) => (
+                  <span key={index}>
+                    {part.toLowerCase() === 'wedding' ? (
+                      <span className="hero-wedding-gradient">{part}</span>
+                    ) : (
+                      part
+                    )}
+                  </span>
+                ));
+              })()}
             </h1>
             <p className="mt-3 text-base text-black/70 sm:text-lg">
               {t('hero.subtitle')}
