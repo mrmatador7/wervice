@@ -362,7 +362,7 @@ export default function NewCategoryClient({ category, initialSearchParams }: New
                   { slug: 'venues', label: 'Venues', image: '/categories/venues.png' },
                   { slug: 'catering', label: 'Catering', image: '/categories/Catering.png' },
                   { slug: 'photography', label: 'Photo & Video', image: '/categories/photo.png' },
-                  { slug: 'planning', label: 'Event Planner', image: '/categories/Event Planner.png' },
+                  { slug: 'planning', label: 'Event Planner', image: '/categories/event-planner.png' },
                   { slug: 'beauty', label: 'Beauty', image: '/categories/beauty.png' },
                   { slug: 'decor', label: 'Decor', image: '/categories/decor.png' },
                   { slug: 'music', label: 'Music', image: '/categories/music.png' },
