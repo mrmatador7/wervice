@@ -6,7 +6,7 @@ import Topbar from '@/components/admin/Topbar';
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <UserProvider>
-      <div className="min-h-screen bg-wv.bg text-wv.text">
+      <div className="min-h-screen bg-gray-50">
         <div className="flex">
           <Sidebar />
           <main className="flex-1 min-w-0">
