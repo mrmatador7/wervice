@@ -104,3 +104,9 @@ export default function AreaRevenue({ data, showBookings = false }: AreaRevenueP
 
 
 
+
+
+
+
+
+

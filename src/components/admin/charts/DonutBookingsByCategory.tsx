@@ -67,3 +67,9 @@ export default function DonutBookingsByCategory({ data }: DonutBookingsByCategor
 
 
 
+
+
+
+
+
+
