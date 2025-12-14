@@ -9,7 +9,25 @@ interface VendorCardProps {
 }
 
 function VendorCard({ vendor }: VendorCardProps) {
-  const imageUrl = vendor.profile_photo_url || '/placeholder-vendor.jpg';
+  // Get all available images (gallery + profile)
+  // Handle both gallery_urls and gallery_photos field names
+  const allImages: string[] = [];
+  const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
+  if (Array.isArray(gallery) && gallery.length > 0) {
+    allImages.push(...gallery.filter((url: string) => url && url.trim()));
+  }
+  if (vendor.profile_photo_url && vendor.profile_photo_url.trim()) {
+    allImages.push(vendor.profile_photo_url);
+  }
+  
+  // Select a random image using vendor ID as seed for consistency
+  const getFeaturedImage = () => {
+    if (allImages.length === 0) return '/placeholder-vendor.jpg';
+    const seed = vendor.id ? vendor.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) : 0;
+    return allImages[seed % allImages.length];
+  };
+  
+  const imageUrl = getFeaturedImage();
   const categoryLabel = labelForCategory(vendor.category);
   const cityName = vendor.city.charAt(0).toUpperCase() + vendor.city.slice(1);
 

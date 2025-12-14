@@ -26,19 +26,40 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
     <div className="bg-white rounded-2xl border border-[#CAC4B7] shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
       {/* Image */}
       <div className="relative h-[200px] md:h-[210px] lg:h-[220px] overflow-hidden">
-        {vendor.profile_photo_url && vendor.profile_photo_url.trim() !== '' ? (
-          <Image
-            src={vendor.profile_photo_url}
-            alt={vendor.business_name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <div className="text-gray-400 text-sm">No image</div>
-          </div>
-        )}
+        {(() => {
+          // Get all available images (gallery + profile)
+          // Handle both gallery_urls and gallery_photos field names
+          const allImages: string[] = [];
+          const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
+          if (Array.isArray(gallery) && gallery.length > 0) {
+            allImages.push(...gallery.filter((url: string) => url && url.trim()));
+          }
+          if (vendor.profile_photo_url && vendor.profile_photo_url.trim() !== '') {
+            allImages.push(vendor.profile_photo_url);
+          }
+          
+          // Select a random image using vendor ID as seed for consistency
+          const featuredImage = allImages.length > 0 
+            ? (() => {
+                const seed = vendor.id ? vendor.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) : 0;
+                return allImages[seed % allImages.length];
+              })()
+            : null;
+          
+          return featuredImage ? (
+            <Image
+              src={featuredImage}
+              alt={vendor.business_name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <div className="text-gray-400 text-sm">No image</div>
+            </div>
+          );
+        })()}
 
         {/* Gradient overlay for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

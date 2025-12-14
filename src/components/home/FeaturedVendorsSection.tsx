@@ -61,6 +61,8 @@ type Vendor = {
   city: string;
   starting_price?: number | null;
   profile_photo_url?: string | null;
+  gallery_urls?: string[] | null;
+  gallery_photos?: string[] | null;
   rating?: number;
 };
 
@@ -104,6 +106,10 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
   };
 
   const handleVendorClick = (vendor: Vendor) => {
+    if (!vendor.slug) {
+      console.warn('Vendor missing slug:', vendor);
+      return;
+    }
     router.push(`/${locale}/vendors/${vendor.slug}`);
   };
 
@@ -221,20 +227,41 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
               >
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden bg-zinc-100">
-                  {vendor.profile_photo_url ? (
-                    <Image
-                      src={vendor.profile_photo_url}
-                      alt={vendor.business_name}
-                      fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
-                      <span className="text-4xl text-zinc-400">
-                        {vendor.business_name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    // Get all available images (gallery + profile)
+                    // Handle both gallery_urls and gallery_photos field names
+                    const allImages: string[] = [];
+                    const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
+                    if (Array.isArray(gallery) && gallery.length > 0) {
+                      allImages.push(...gallery.filter((url: string) => url && url.trim()));
+                    }
+                    if (vendor.profile_photo_url && vendor.profile_photo_url.trim()) {
+                      allImages.push(vendor.profile_photo_url);
+                    }
+                    
+                    // Select a random image using vendor ID as seed for consistency
+                    const featuredImage = allImages.length > 0 
+                      ? (() => {
+                          const seed = vendor.id ? vendor.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) : 0;
+                          return allImages[seed % allImages.length];
+                        })()
+                      : null;
+                    
+                    return featuredImage ? (
+                      <Image
+                        src={featuredImage}
+                        alt={vendor.business_name}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
+                        <span className="text-4xl text-zinc-400">
+                          {vendor.business_name.charAt(0)}
+                        </span>
+                      </div>
+                    );
+                  })()}
                   
                   {/* Category Badge */}
                   <div className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-zinc-900 backdrop-blur-sm">

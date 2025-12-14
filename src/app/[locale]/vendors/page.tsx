@@ -61,7 +61,12 @@ function VendorsPageContent() {
       const data = await res.json();
 
       if (append) {
-        setVendors((prev) => [...prev, ...data.vendors]);
+        // Deduplicate vendors by ID when appending
+        setVendors((prev) => {
+          const existingIds = new Set(prev.map(v => v.id));
+          const newVendors = data.vendors.filter((v: Vendor) => !existingIds.has(v.id));
+          return [...prev, ...newVendors];
+        });
       } else {
         setVendors(data.vendors);
         setOffset(0);
@@ -192,8 +197,8 @@ function VendorsPageContent() {
         ) : vendors.length > 0 ? (
           <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {vendors.map((vendor) => (
-                <VendorCard key={vendor.id} vendor={vendor} />
+              {vendors.map((vendor, index) => (
+                <VendorCard key={`${vendor.id}-${vendor.slug || index}`} vendor={vendor} />
               ))}
             </div>
 

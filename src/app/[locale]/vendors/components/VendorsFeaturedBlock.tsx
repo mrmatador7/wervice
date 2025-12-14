@@ -44,13 +44,36 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
               <div className="bg-white rounded-2xl border border-[#CAC4B7] shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
-                  <Image
-                    src={vendor.profile_photo_url || '/placeholder-vendor.jpg'}
-                    alt={vendor.business_name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
+                  {(() => {
+                    // Get all available images (gallery + profile)
+                    // Handle both gallery_urls and gallery_photos field names
+                    const allImages: string[] = [];
+                    const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
+                    if (Array.isArray(gallery) && gallery.length > 0) {
+                      allImages.push(...gallery.filter((url: string) => url && url.trim()));
+                    }
+                    if (vendor.profile_photo_url && vendor.profile_photo_url.trim()) {
+                      allImages.push(vendor.profile_photo_url);
+                    }
+                    
+                    // Select a random image using vendor ID as seed for consistency
+                    const featuredImage = allImages.length > 0 
+                      ? (() => {
+                          const seed = vendor.id ? vendor.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) : 0;
+                          return allImages[seed % allImages.length];
+                        })()
+                      : '/placeholder-vendor.jpg';
+                    
+                    return (
+                      <Image
+                        src={featuredImage}
+                        alt={vendor.business_name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    );
+                  })()}
 
                   {/* Category badge */}
                   <div className="absolute top-3 left-3">

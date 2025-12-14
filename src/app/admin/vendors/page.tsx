@@ -8,6 +8,9 @@ import {
   FiImage, FiCalendar, FiTrendingUp
 } from 'react-icons/fi';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import { ImportVendorsDialog } from '@/components/admin/AddVendorDialog';
+import { AttachImagesDialog } from '@/components/admin/AttachImagesDialog';
 
 interface Vendor {
   id: string;
@@ -44,6 +47,9 @@ export default function VendorsPage() {
   const [sortBy, setSortBy] = useState<SortType>('newest');
   const [selectedVendors, setSelectedVendors] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showAttachImagesDialog, setShowAttachImagesDialog] = useState(false);
+  const [syncingVendorId, setSyncingVendorId] = useState<string | null>(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -248,6 +254,55 @@ export default function VendorsPage() {
     }
   };
 
+  // Sync attachments for a single vendor
+  const handleSyncAttachments = async (vendorId: string, vendorName: string) => {
+    const folderLink = prompt(
+      `Sync attachments for "${vendorName}"\n\n` +
+      `Enter Google Drive folder link:\n` +
+      `• Master folder (with subfolders named after vendors)\n` +
+      `• Direct vendor folder link\n\n` +
+      `Folder link:`
+    );
+
+    if (!folderLink || !folderLink.trim()) {
+      return;
+    }
+
+    setSyncingVendorId(vendorId);
+    toast.loading(`Syncing attachments for "${vendorName}"...`, { id: `sync-${vendorId}` });
+
+    try {
+      const response = await fetch(`/api/admin/vendors/${vendorId}/sync-attachments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folderLink: folderLink.trim() }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to sync attachments');
+      }
+
+      toast.success(
+        `Successfully synced "${vendorName}"!\n` +
+        `Profile: ${result.profilePhotoUpdated ? 'Updated' : 'No change'} | ` +
+        `Gallery: ${result.uploadedGalleryCount} images`,
+        { id: `sync-${vendorId}`, duration: 5000 }
+      );
+      
+      // Refresh vendors list
+      fetchVendors();
+    } catch (error) {
+      toast.error(
+        `Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { id: `sync-${vendorId}`, duration: 5000 }
+      );
+    } finally {
+      setSyncingVendorId(null);
+    }
+  };
+
   // Export to CSV
   const handleExport = () => {
     const headers = ['Name', 'Email', 'Phone', 'City', 'Category', 'Status', 'Plan', 'Price', 'Published'];
@@ -294,11 +349,24 @@ export default function VendorsPage() {
               Export CSV
             </button>
             <button
-              onClick={() => {/* TODO: Import dialog */}}
+              onClick={() => setShowImportDialog(true)}
               className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <FiUpload className="w-4 h-4" />
               Import CSV
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Attach Images button clicked, setting dialog to true');
+                setShowAttachImagesDialog(true);
+              }}
+              className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2 font-semibold cursor-pointer"
+            >
+              <FiImage className="w-4 h-4" />
+              Attach Images
             </button>
             <Link
               href="/admin/vendors/new"
@@ -511,6 +579,7 @@ export default function VendorsPage() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Contact</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Location</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Category</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Gallery</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Plan</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Joined</th>
@@ -595,6 +664,37 @@ export default function VendorsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
+                      {vendor.galleryPhotoUrls && vendor.galleryPhotoUrls.length > 0 ? (
+                        <div className="flex items-center gap-1">
+                          <div className="flex -space-x-2">
+                            {vendor.galleryPhotoUrls.slice(0, 3).map((url, index) => (
+                              <div
+                                key={index}
+                                className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-gray-200"
+                                title={`Gallery photo ${index + 1}`}
+                              >
+                                <img
+                                  src={url}
+                                  alt={`Gallery ${index + 1}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          {vendor.galleryPhotoUrls.length > 3 && (
+                            <span className="text-xs text-gray-500 ml-1">
+                              +{vendor.galleryPhotoUrls.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">No gallery</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-semibold text-[#11190C] capitalize">
                           {vendor.plan.replace('-', ' ')}
@@ -645,6 +745,14 @@ export default function VendorsPage() {
                           <FiEdit2 className="w-4 h-4 text-blue-600" />
                         </Link>
                         <button
+                          onClick={() => handleSyncAttachments(vendor.id, vendor.name)}
+                          disabled={syncingVendorId === vendor.id}
+                          className="p-2 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Sync Attachments"
+                        >
+                          <FiRefreshCw className={`w-4 h-4 text-blue-600 ${syncingVendorId === vendor.id ? 'animate-spin' : ''}`} />
+                        </button>
+                        <button
                           onClick={() => handleDeleteVendor(vendor.id)}
                           className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                           title="Delete"
@@ -667,6 +775,26 @@ export default function VendorsPage() {
           </div>
         )}
       </div>
+
+      {/* Import Vendors Dialog */}
+      <ImportVendorsDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onSuccess={() => {
+          setShowImportDialog(false);
+          fetchVendors();
+        }}
+      />
+
+      {/* Attach Images Dialog */}
+      <AttachImagesDialog
+        isOpen={showAttachImagesDialog}
+        onClose={() => setShowAttachImagesDialog(false)}
+        onSuccess={() => {
+          setShowAttachImagesDialog(false);
+          fetchVendors();
+        }}
+      />
     </div>
   );
 }

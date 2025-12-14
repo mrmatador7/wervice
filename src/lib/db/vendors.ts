@@ -37,10 +37,20 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
     
     const { data, error } = await supabase
       .from('vendor_leads')
-      .select('id, business_name, slug, category, city, phone, email, description, logo_url as profile_photo_url, gallery_photos, plan_tier as plan, published, starting_price, created_at')
+      .select('id, business_name, slug, category, city, whatsapp, email, profile_description, logo_url, gallery_urls, published, profile_starting_price, starting_price, created_at')
       .eq('slug', slug)
       .eq('published', true)
       .single();
+    
+    // Debug logging
+    if (error && error.code !== 'PGRST116') {
+      console.error('Vendor lookup error:', {
+        slug,
+        errorCode: error.code,
+        errorMessage: error.message,
+        errorDetails: error
+      });
+    }
     
     if (error) {
       // PGRST116 means no rows returned - this is expected when vendor doesn't exist
@@ -53,7 +63,27 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
       return null;
     }
     
-    return data as unknown as VendorDetail;
+    if (!data) {
+      return null;
+    }
+    
+    // Transform database columns to match VendorDetail type
+    return {
+      id: data.id,
+      business_name: data.business_name,
+      slug: data.slug || '',
+      category: data.category,
+      city: data.city,
+      phone: data.whatsapp || null,
+      email: data.email || null,
+      description: data.profile_description || null,
+      profile_photo_url: data.logo_url || null,
+      gallery_photos: data.gallery_urls || null,
+      plan: null, // plan_tier doesn't exist in vendor_leads
+      published: data.published || false,
+      starting_price: data.starting_price || data.profile_starting_price ? parseFloat(data.profile_starting_price || '0') : null,
+      created_at: data.created_at,
+    } as VendorDetail;
   } catch (error) {
     console.error('Database error in getVendorBySlug:', error);
     return null;
@@ -73,7 +103,7 @@ export async function getSimilarVendors(
     // Fetch more than needed to prioritize same city
     const { data, error } = await supabase
       .from('vendor_leads')
-      .select('id, business_name, slug, category, city, logo_url as profile_photo_url, gallery_photos, starting_price, plan_tier as plan')
+      .select('id, business_name, slug, category, city, logo_url, gallery_urls, starting_price, profile_starting_price')
       .eq('category', category)
       .eq('published', true)
       .neq('id', currentId)
@@ -85,8 +115,19 @@ export async function getSimilarVendors(
       return [];
     }
     
-    // Prioritize same city, then others
-    const typedData = data as unknown as any[];
+    // Transform and prioritize same city, then others
+    const typedData = (data || []).map((v: any) => ({
+      id: v.id,
+      business_name: v.business_name,
+      slug: v.slug || '',
+      category: v.category,
+      city: v.city,
+      profile_photo_url: v.logo_url || null,
+      gallery_photos: v.gallery_urls || null,
+      starting_price: v.starting_price || (v.profile_starting_price ? parseFloat(v.profile_starting_price) : null),
+      plan: null, // plan_tier doesn't exist in vendor_leads
+    }));
+    
     const prioritized = [
       ...typedData.filter(v => v.city?.toLowerCase() === city?.toLowerCase()),
       ...typedData.filter(v => v.city?.toLowerCase() !== city?.toLowerCase()),

@@ -56,18 +56,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: 'home' });
 
   // Fetch vendors for the homepage carousel directly from the database
+  // Note: fetchVendors already filters out vendors without images
   const { vendors } = await fetchVendors({ limit: 12, sort: 'newest' });
 
   // Convert API response format to ListingItem format expected by ListingsRail
-  const vendorListings = vendors && vendors.length > 0 ? vendors.map((vendor: any) => ({
-    id: vendor.id,
-    name: vendor.business_name,
-    city: vendor.city,
-    category: vendor.category,
-    coverImage: vendor.profile_photo_url || '/placeholder-vendor.jpg',
-    rating: vendor.rating || 4.5,
-    isFavorite: false,
-  })) : [];
+  // Additional filter to ensure only vendors with images are shown
+  const vendorListings = vendors && vendors.length > 0 ? vendors
+    .filter((vendor: any) => {
+      const hasGallery = Array.isArray(vendor.gallery_urls) && vendor.gallery_urls.length > 0;
+      const hasGalleryPhotos = Array.isArray(vendor.gallery_photos) && vendor.gallery_photos.length > 0;
+      const hasProfilePhoto = vendor.profile_photo_url && vendor.profile_photo_url.trim() && 
+                              vendor.profile_photo_url !== 'null' && vendor.profile_photo_url !== 'undefined';
+      return hasGallery || hasGalleryPhotos || hasProfilePhoto;
+    })
+    .map((vendor: any) => ({
+      id: vendor.id,
+      name: vendor.business_name,
+      city: vendor.city,
+      category: vendor.category,
+      coverImage: vendor.profile_photo_url || (vendor.gallery_urls?.[0]) || (vendor.gallery_photos?.[0]) || '/placeholder-vendor.jpg',
+      rating: vendor.rating || 4.5,
+      isFavorite: false,
+    })) : [];
 
   return (
     <div className="min-h-screen">

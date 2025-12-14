@@ -385,7 +385,7 @@ export async function getFeaturedVendors(limit: number = 6): Promise<Vendor[]> {
     rating: vendor.rating || 0,
     starting_price: vendor.starting_price || undefined,
     profile_photo_url: vendor.logo_url,
-    gallery_urls: vendor.gallery_photos || [],
+    gallery_urls: vendor.gallery_photos || vendor.gallery_urls || [],
     description: vendor.description,
     is_featured: vendor.is_featured || false,
     phone: vendor.phone,
@@ -395,7 +395,16 @@ export async function getFeaturedVendors(limit: number = 6): Promise<Vendor[]> {
     created_at: vendor.created_at,
   }));
 
-  return transformedVendors;
+  // Filter out vendors that don't have any images (gallery or profile photo)
+  const vendorsWithImages = transformedVendors.filter((vendor: any) => {
+    const hasGallery = Array.isArray(vendor.gallery_urls) && vendor.gallery_urls.length > 0;
+    const hasProfilePhoto = vendor.profile_photo_url && vendor.profile_photo_url.trim() && 
+                            vendor.profile_photo_url !== 'null' && vendor.profile_photo_url !== 'undefined';
+    
+    return hasGallery || hasProfilePhoto;
+  });
+
+  return vendorsWithImages;
 }
 
 export async function getVendorCount(): Promise<number> {

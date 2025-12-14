@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Bookmark } from 'lucide-react';
 import { labelForCategory } from '@/lib/categories';
 import { capitalizeCity } from '@/lib/utils';
+import { getFeaturedVendorImage } from '@/lib/utils/vendor-images';
 
 import { Vendor } from '@/lib/types/vendor';
 
@@ -19,7 +20,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
 
   const getImageUrl = () => {
     if (imgError) return null;
-    return vendor.profile_photo_url || (vendor.gallery_urls && vendor.gallery_urls[0]) || null;
+    return getFeaturedVendorImage(vendor, null);
   };
 
   const imageUrl = getImageUrl();

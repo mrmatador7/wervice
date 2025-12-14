@@ -862,14 +862,49 @@ export function EditVendorDialog({ isOpen, onClose, onSuccess, vendor }: EditVen
 export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [folderLink, setFolderLink] = useState('');
+  const [googleDriveStatus, setGoogleDriveStatus] = useState<{
+    configured: boolean;
+    working?: boolean;
+    message?: string;
+  } | null>(null);
   const [importResults, setImportResults] = useState<{
     total: number;
     successful: number;
     failed: number;
     errors: string[];
   } | null>(null);
+  const [masterFolderLink, setMasterFolderLink] = useState('');
+  const [isAttachingImages, setIsAttachingImages] = useState(false);
+  const [attachResults, setAttachResults] = useState<{
+    total: number;
+    matched: number;
+    processed: number;
+    warnings: string[];
+    results: Array<{ vendor: string; folder: string; status: string }>;
+  } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check Google Drive API status when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      checkGoogleDriveStatus();
+    }
+  }, [isOpen]);
+
+  const checkGoogleDriveStatus = async () => {
+    try {
+      const response = await fetch('/api/admin/check-google-drive');
+      const result = await response.json();
+      setGoogleDriveStatus(result);
+    } catch (error) {
+      setGoogleDriveStatus({
+        configured: false,
+        message: 'Failed to check Google Drive API status'
+      });
+    }
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -888,6 +923,11 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
     try {
       const formData = new FormData();
       formData.append("file", file);
+      
+      // Add folder link if provided
+      if (folderLink.trim()) {
+        formData.append("folderLink", folderLink.trim());
+      }
 
       // Simulate progress updates
       const progressInterval = setInterval(() => {
@@ -908,8 +948,21 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
         throw new Error(result.message || "Import failed");
       }
 
-      setImportResults(result);
-      toast.success(`Imported ${result.successful} vendors successfully`);
+      // Ensure result has all required fields
+      const importResult = {
+        total: result.total || 0,
+        successful: result.successful || 0,
+        failed: result.failed || 0,
+        skipped: result.skipped || 0,
+        errors: result.errors || [],
+        warnings: result.warnings || [],
+        hasMoreErrors: result.hasMoreErrors || false,
+        hasMoreWarnings: result.hasMoreWarnings || false
+      };
+
+      console.log('Setting import results:', importResult, 'Step 2 should show:', Number(importResult.successful) > 0);
+      setImportResults(importResult);
+      toast.success(`Imported ${importResult.successful} vendors successfully`);
 
       if (result.failed > 0) {
         toast.warning(`${result.failed} vendors failed to import. Check errors below.`);
@@ -931,12 +984,48 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
   };
 
   const downloadTemplate = () => {
-    // Create a sample CSV template
-    const headers = ["business_name", "category", "city", "email", "phone", "description"];
+    // Create a sample CSV template matching the user's format
+    const headers = [
+      "Vendor", 
+      "Category", 
+      "City", 
+      "Phone", 
+      "Email", 
+      "Description",
+      "Google Maps",
+      "IG"
+    ];
     const sampleData = [
-      ["Beautiful Wedding Venue", "venues", "marrakech", "contact@venue.com", "+212600000000", "Stunning garden venue for weddings"],
-      ["Chef Mohamed Catering", "catering", "casablanca", "info@catering.ma", "+212611111111", "Traditional Moroccan cuisine"],
-      ["Studio Photo Pro", "photography", "rabat", "hello@studiophoto.ma", "+212622222222", "Professional wedding photography"]
+      [
+        "Traiteur El Amane", 
+        "Caterer", 
+        "Fes", 
+        "+212600000000", 
+        "contact@traiteur.ma", 
+        "Traditional Moroccan catering services",
+        "https://maps.app.goo.gl/EXAMPLE",
+        "https://www.instagram.com/traiteur_el_amane"
+      ],
+      [
+        "Dar Makhtara", 
+        "Venue", 
+        "Meknes", 
+        "+212611111111", 
+        "info@darmakhtara.ma", 
+        "Beautiful wedding venue in Meknes",
+        "https://maps.app.goo.gl/EXAMPLE",
+        "https://www.instagram.com/dar_makhtara"
+      ],
+      [
+        "Studio Photo Pro", 
+        "Photographer", 
+        "Rabat", 
+        "+212622222222", 
+        "hello@studiophoto.ma", 
+        "Professional wedding photography",
+        "https://maps.app.goo.gl/EXAMPLE",
+        "https://www.instagram.com/studio_photo_pro"
+      ]
     ];
 
     const csvContent = [headers, ...sampleData]
@@ -957,7 +1046,7 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
+      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-semibold text-wv.text">Import Vendors</h2>
@@ -982,11 +1071,72 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Download the template CSV file below</li>
               <li>• Fill in your vendor data using the exact column names</li>
-              <li>• Required columns: business_name, category, city, phone</li>
-              <li>• Optional columns: email, description</li>
-              <li>• Categories: venues, catering, photography, music, beauty, decor, planning, dresses, eventPlanner</li>
-              <li>• Cities: marrakech, casablanca, rabat, tangier, agadir, fes, meknes, elJadida, kenitra</li>
+              <li>• <strong>Required columns:</strong> Vendor, Category, City, Phone</li>
+              <li>• <strong>Optional columns:</strong> Email, Description, Google Maps, IG (Instagram)</li>
+              <li>• <strong>Two-Step Process:</strong> First import vendors, then attach images from master folder (Step 2)</li>
+              <li>• <strong>Categories:</strong> Venue, Caterer, Photographer, Event Planner, Beauty, Decor, Music, Dresses, Negafa, Spa, Artist</li>
+              <li>• <strong>Cities:</strong> Fes, Meknes, Casablanca, Marrakech, Rabat, Tangier, Agadir, El Jadida, Kenitra, Bouskoura</li>
+              <li>• <strong>Note:</strong> After importing, use Step 2 to attach images from your master Google Drive folder</li>
             </ul>
+          </div>
+
+          {/* Google Drive API Status */}
+          {googleDriveStatus && (
+            <div className={`border rounded-lg p-3 ${
+              googleDriveStatus.configured && googleDriveStatus.working
+                ? 'bg-green-50 border-green-200'
+                : 'bg-yellow-50 border-yellow-200'
+            }`}>
+              <div className="flex items-start gap-2">
+                <div className={`w-2 h-2 rounded-full mt-1.5 ${
+                  googleDriveStatus.configured && googleDriveStatus.working
+                    ? 'bg-green-500'
+                    : 'bg-yellow-500'
+                }`} />
+                <div className="flex-1">
+                  <p className={`text-sm font-medium ${
+                    googleDriveStatus.configured && googleDriveStatus.working
+                      ? 'text-green-900'
+                      : 'text-yellow-900'
+                  }`}>
+                    Google Drive API: {googleDriveStatus.configured && googleDriveStatus.working ? '✅ Configured & Working' : '⚠️ Not Configured'}
+                  </p>
+                  <p className={`text-xs mt-1 ${
+                    googleDriveStatus.configured && googleDriveStatus.working
+                      ? 'text-green-700'
+                      : 'text-yellow-700'
+                  }`}>
+                    {googleDriveStatus.message || 'Checking status...'}
+                  </p>
+                  {(!googleDriveStatus.configured || !googleDriveStatus.working) && (
+                    <p className="text-xs mt-1 text-yellow-700">
+                      To enable automatic image detection from folders, add <code className="bg-yellow-100 px-1 rounded">GOOGLE_DRIVE_API_KEY</code> to your <code className="bg-yellow-100 px-1 rounded">.env.local</code> file.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Folder Link Input */}
+          <div className="space-y-2">
+            <label htmlFor="folderLink" className="block text-sm font-medium text-gray-700">
+              Google Drive Base Folder Link (Optional)
+            </label>
+            <input
+              id="folderLink"
+              type="text"
+              value={folderLink}
+              onChange={(e) => setFolderLink(e.target.value)}
+              placeholder="https://drive.google.com/drive/folders/YOUR_FOLDER_ID"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              disabled={isUploading}
+            />
+            <p className="text-xs text-gray-500">
+              {googleDriveStatus?.configured && googleDriveStatus?.working
+                ? "Paste your main Google Drive folder link. Each vendor should have a subfolder, or add a folder_link column in your CSV. The first image in each folder will be automatically selected as the profile photo."
+                : "Paste your main Google Drive folder link. Each vendor should have a subfolder, or add a folder_link column in your CSV. Note: Automatic image detection requires Google Drive API setup."}
+            </p>
           </div>
 
           {/* Template Download */}
@@ -1047,29 +1197,181 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
           {importResults && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <h3 className="font-medium text-wv.text mb-3">Import Results</h3>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-4 gap-4 mb-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">{importResults.successful}</div>
                   <div className="text-sm text-gray-600">Successful</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">{importResults.failed}</div>
+                  <div className="text-2xl font-bold text-red-600">{importResults.failed || 0}</div>
                   <div className="text-sm text-gray-600">Failed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-orange-600">{importResults.skipped || 0}</div>
+                  <div className="text-sm text-gray-600">Skipped</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">{importResults.total}</div>
                   <div className="text-sm text-gray-600">Total</div>
                 </div>
               </div>
+              {importResults.skipped > 0 && (
+                <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded text-sm text-orange-700">
+                  <strong>Note:</strong> {importResults.skipped} vendors were skipped during validation (check errors below for details)
+                </div>
+              )}
 
               {importResults.errors.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="font-semibold text-red-700 mb-3 flex items-center gap-2">
+                    <span className="text-lg">⚠️</span>
+                    Errors ({importResults.errors.length}):
+                  </h4>
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 max-h-64 overflow-y-auto">
+                    <ul className="text-sm text-red-700 space-y-2">
+                      {importResults.errors.map((error, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-red-500 mt-0.5">•</span>
+                          <span className="flex-1 break-words">{error}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">
+                    💡 Tip: Fix these errors in your CSV and re-import the failed vendors. You can export the current vendors list to see the correct format.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 2: Attach Images from Master Folder - Always show if import completed with any success */}
+          {(() => {
+            const shouldShow = importResults && importResults.total > 0 && Number(importResults.successful) > 0;
+            console.log('Step 2 visibility check:', { 
+              hasResults: !!importResults, 
+              total: importResults?.total, 
+              successful: importResults?.successful, 
+              shouldShow 
+            });
+            return shouldShow;
+          })() && (
+            <div className="mt-6 pt-6 border-t-2 border-wv.lime bg-wv.lime/5 rounded-lg p-4 shadow-lg">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">📸</span>
+                <h3 className="font-semibold text-wv.text text-lg">Step 2: Attach Images from Master Folder</h3>
+              </div>
+              <p className="text-sm text-wv.sub mb-4">
+                You've successfully imported <strong className="text-green-600">{importResults.successful} vendors</strong>. Now paste your master Google Drive folder link to automatically attach images/videos. The system will match vendor names to subfolders.
+              </p>
+              
+              <div className="space-y-3">
                 <div>
-                  <h4 className="font-medium text-red-600 mb-2">Errors:</h4>
-                  <ul className="text-sm text-red-600 space-y-1 max-h-32 overflow-y-auto">
-                    {importResults.errors.map((error, index) => (
-                      <li key={index}>• {error}</li>
-                    ))}
-                  </ul>
+                  <label htmlFor="masterFolderLink" className="block text-sm font-medium text-wv.text mb-2">
+                    Master Google Drive Folder Link
+                  </label>
+                  <input
+                    id="masterFolderLink"
+                    type="text"
+                    value={masterFolderLink}
+                    onChange={(e) => setMasterFolderLink(e.target.value)}
+                    placeholder="https://drive.google.com/drive/folders/YOUR_FOLDER_ID"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    disabled={isAttachingImages}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This folder should contain subfolders named after your vendors (e.g., "Traiteur El Amane", "Dar Makhtara")
+                  </p>
+                </div>
+
+                <button
+                  onClick={async () => {
+                    if (!masterFolderLink.trim()) {
+                      toast.error('Please enter a folder link');
+                      return;
+                    }
+
+                    setIsAttachingImages(true);
+                    setAttachResults(null);
+
+                    try {
+                      const response = await fetch('/api/admin/vendors/attach-images', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ folderLink: masterFolderLink.trim() }),
+                      });
+
+                      const result = await response.json();
+
+                      if (!response.ok) {
+                        throw new Error(result.message || 'Failed to attach images');
+                      }
+
+                      setAttachResults(result);
+                      toast.success(`Matched ${result.matched} vendors and processed ${result.processed} successfully`);
+                      
+                      if (result.warnings.length > 0) {
+                        toast.warning(`${result.warnings.length} warnings. Check details below.`);
+                      }
+
+                      onSuccess();
+                    } catch (error) {
+                      toast.error(error instanceof Error ? error.message : 'Failed to attach images');
+                    } finally {
+                      setIsAttachingImages(false);
+                    }
+                  }}
+                  disabled={isAttachingImages || !masterFolderLink.trim()}
+                  className="w-full px-4 py-3 bg-wv.lime text-wv.text rounded-lg hover:bg-[#BEE600] font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isAttachingImages ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-wv.text"></div>
+                      Attaching Images...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={16} />
+                      Attach Images from Folder
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Attach Results */}
+              {attachResults && (
+                <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-medium text-wv.text mb-3">Attachment Results</h4>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">{attachResults.matched}</div>
+                      <div className="text-sm text-gray-600">Matched</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">{attachResults.processed}</div>
+                      <div className="text-sm text-gray-600">Processed</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-600">{attachResults.total}</div>
+                      <div className="text-sm text-gray-600">Total Vendors</div>
+                    </div>
+                  </div>
+
+                  {attachResults.warnings.length > 0 && (
+                    <div className="mt-4">
+                      <h5 className="font-medium text-yellow-700 mb-2">Warnings:</h5>
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 max-h-32 overflow-y-auto">
+                        <ul className="text-sm text-yellow-700 space-y-1">
+                          {attachResults.warnings.slice(0, 10).map((warning, index) => (
+                            <li key={index}>• {warning}</li>
+                          ))}
+                          {attachResults.warnings.length > 10 && (
+                            <li className="text-xs text-yellow-600">... and {attachResults.warnings.length - 10} more</li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1079,7 +1381,7 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
           <div className="flex justify-end gap-3 pt-4 border-t border-wv.line">
             <button
               onClick={onClose}
-              disabled={isUploading}
+              disabled={isUploading || isAttachingImages}
               className="px-4 py-2 border border-wv.line text-wv.text rounded-lg hover:bg-wv.line font-medium disabled:opacity-50"
             >
               Close

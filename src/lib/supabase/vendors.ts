@@ -21,6 +21,7 @@ export type Vendor = {
   plan: string | null;
   profile_photo_url: string | null;
   gallery_photos: string[] | null;
+  gallery_urls?: string[] | null; // Also support gallery_urls for compatibility
   description: string | null;
   published: boolean;
   created_at: string;
@@ -138,10 +139,48 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       } : null 
     });
 
+    // Transform vendors: ensure slugs and map database fields to expected field names
+    const vendorsWithSlugs = (data || []).map((vendor: any) => {
+      if (!vendor.slug && vendor.business_name) {
+        // Generate slug from business name as fallback
+        const baseSlug = vendor.business_name
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+        vendor.slug = `${baseSlug}-${vendor.id.split('-')[0]}`;
+      }
+      
+      // Map database fields to expected field names
+      return {
+        ...vendor,
+        profile_photo_url: vendor.logo_url || vendor.profile_photo_url || null,
+        gallery_photos: vendor.gallery_urls || vendor.gallery_photos || null,
+        // Keep both field names for compatibility
+        gallery_urls: vendor.gallery_urls || vendor.gallery_photos || null,
+      };
+    });
+
+    // Filter out vendors that don't have any images (gallery or profile photo)
+    const vendorsWithImages = vendorsWithSlugs.filter((vendor: any) => {
+      const hasGallery = Array.isArray(vendor.gallery_urls) && vendor.gallery_urls.length > 0;
+      const hasGalleryPhotos = Array.isArray(vendor.gallery_photos) && vendor.gallery_photos.length > 0;
+      const hasProfilePhoto = vendor.profile_photo_url && vendor.profile_photo_url.trim() && 
+                              vendor.profile_photo_url !== 'null' && vendor.profile_photo_url !== 'undefined';
+      
+      return hasGallery || hasGalleryPhotos || hasProfilePhoto;
+    });
+
+    // Update total count to reflect filtered results
+    const filteredCount = vendorsWithImages.length;
+    const originalCount = count || 0;
+    const adjustedTotal = originalCount - (vendorsWithSlugs.length - filteredCount);
+
     return {
-      vendors: data as unknown as Vendor[],
-      total: count || 0,
-      hasMore: (offset + limit) < (count || 0),
+      vendors: vendorsWithImages as unknown as Vendor[],
+      total: adjustedTotal,
+      hasMore: (offset + limit) < adjustedTotal,
     };
   } catch (error) {
     console.error('Database error in fetchVendors:', error);

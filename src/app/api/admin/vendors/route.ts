@@ -22,28 +22,39 @@ export async function GET() {
     }
 
     // Transform the data to match our Vendor interface
-    const transformedVendors = vendorLeads.map((lead: any) => ({
-      id: lead.id,
-      name: lead.business_name,
-      slug: lead.slug || '',
-      city: lead.city,
-      category: lead.category,
-      subcategory: lead.subcategory || '',
-      status: lead.status || 'pending',
-      plan: lead.subscription_price_dhs === 200 ? 'style-beauty' :
-            lead.subscription_price_dhs === 250 ? 'media-entertainment' :
-            'venue-planning',
-      planPrice: lead.subscription_price_dhs || 0,
-      profilePhotoUrl: lead.logo_url || '',
-      galleryPhotoUrls: lead.gallery_urls || [],
-      email: lead.email || '',
-      phone: lead.whatsapp || '',
-      startingPrice: lead.starting_price || 0,
-      description: lead.profile_description || '',
-      published: lead.published || false,
-      createdAt: lead.submitted_at || lead.created_at || new Date().toISOString(),
-      updatedAt: lead.updated_at || ''
-    }));
+    const transformedVendors = vendorLeads
+      .map((lead: any) => ({
+        id: lead.id,
+        name: lead.business_name,
+        slug: lead.slug || '',
+        city: lead.city,
+        category: lead.category,
+        subcategory: lead.subcategory || '',
+        status: lead.status || 'pending',
+        plan: lead.subscription_price_dhs === 200 ? 'style-beauty' :
+              lead.subscription_price_dhs === 250 ? 'media-entertainment' :
+              'venue-planning',
+        planPrice: lead.subscription_price_dhs || 0,
+        profilePhotoUrl: lead.logo_url || '',
+        galleryPhotoUrls: lead.gallery_urls || [],
+        email: lead.email || '',
+        phone: lead.whatsapp || '',
+        startingPrice: lead.starting_price || 0,
+        description: lead.profile_description || '',
+        published: lead.published || false,
+        createdAt: lead.submitted_at || lead.created_at || new Date().toISOString(),
+        updatedAt: lead.updated_at || ''
+      }))
+      // Filter out vendors that don't have any images (gallery or profile photo)
+      .filter((vendor: any) => {
+        const hasGallery = Array.isArray(vendor.galleryPhotoUrls) && vendor.galleryPhotoUrls.length > 0;
+        const hasProfilePhoto = vendor.profilePhotoUrl && 
+                               vendor.profilePhotoUrl.trim() && 
+                               vendor.profilePhotoUrl !== 'null' && 
+                               vendor.profilePhotoUrl !== 'undefined';
+        
+        return hasGallery || hasProfilePhoto;
+      });
 
     return NextResponse.json({
       success: true,
