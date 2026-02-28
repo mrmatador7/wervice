@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'media.wervice.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.r2.dev',
+      },
     ],
   },
   eslint: {

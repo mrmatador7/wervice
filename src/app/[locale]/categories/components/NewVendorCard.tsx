@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { FiMapPin } from 'react-icons/fi';
 import { formatCategoryName } from '@/lib/format';
 
 interface Vendor {
@@ -49,64 +50,56 @@ const getCategoryIcon = (category: string) => {
 };
 
 export default function NewVendorCard({ vendor }: NewVendorCardProps) {
-  const categoryIcon = getCategoryIcon(vendor.category);
   const categoryName = formatCategoryName(vendor.category);
 
   return (
-    <article className="group bg-white rounded-3xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.06)] hover:-translate-y-1 hover:shadow-lg transition-all duration-300 w-full max-w-[420px]">
-      {/* Image Container - 16:9 aspect ratio for wider look */}
-      <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <article className="group mx-auto w-full max-w-[360px] rounded-[36px] border border-[#D9DFD1] bg-white p-4 shadow-[0_8px_24px_rgba(17,25,12,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(17,25,12,0.12)]">
+      <div className="relative overflow-hidden rounded-[28px] aspect-square bg-neutral-100">
         <Link href={`/vendors/${vendor.slug}`} className="block h-full">
           <img
             src={vendor.cover}
             alt={vendor.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
-          
-          {/* Category Icon - Top Left */}
-          <div className="absolute top-4 left-4 w-12 h-12 bg-white rounded-2xl shadow-md flex items-center justify-center p-2">
-            <Image
-              src={categoryIcon}
-              alt={categoryName}
-              width={32}
-              height={32}
-              className="w-full h-full object-contain"
-            />
-          </div>
-
-          {/* City - Top Right */}
-          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
-            <span className="text-xs font-semibold text-neutral-700">
-              {capitalizeCity(vendor.city)}
-            </span>
-          </div>
         </Link>
+        <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-[#11190C] px-3 py-1.5 shadow-md">
+          <Image
+            src={getCategoryIcon(vendor.category)}
+            alt={categoryName}
+            width={16}
+            height={16}
+            className="h-4 w-4 object-contain"
+          />
+          <span className="text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#D9FF0A]">
+            {categoryName}
+          </span>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="p-6">
-        {/* Vendor Name */}
+      <div className="px-2 pb-2 pt-5">
         <Link href={`/vendors/${vendor.slug}`}>
-          <h3 className="text-2xl font-bold text-[#11190C] mb-1 hover:text-[#D9FF0A] transition-colors line-clamp-1 tracking-tight">
+          <h3 className="line-clamp-2 text-[40px] font-extrabold leading-[1.05] text-[#11190C] transition-colors hover:text-[#2A3322]">
             {vendor.name}
           </h3>
         </Link>
 
-        {/* Category */}
-        <p className="text-sm text-neutral-500 mb-6 font-medium">
-          {categoryName}
-        </p>
+        <div className="mt-5 flex items-center gap-2 rounded-2xl bg-[#F7F8F2] px-4 py-3">
+          <div className="inline-flex min-w-0 items-center gap-2 text-neutral-700">
+            <FiMapPin className="h-5 w-5 shrink-0 text-[#11190C]" />
+            <span className="truncate text-lg font-semibold">
+              {capitalizeCity(vendor.city)}
+            </span>
+          </div>
+        </div>
 
-        {/* CTA Button */}
         <Link
           href={`/vendors/${vendor.slug}`}
-          className="block w-full py-4 bg-[#11190C] text-white rounded-full text-base font-semibold hover:bg-[#2A2F25] transition-all text-center shadow-sm hover:shadow-md"
+          className="mt-5 block w-full rounded-full bg-[#11190C] py-4 text-center text-lg font-black uppercase tracking-[0.14em] text-[#D9FF0A] transition-all hover:bg-[#2A3322]"
         >
-          Get in Touch
+          View Vendor
         </Link>
       </div>
     </article>
   );
 }
-
