@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
 import { VendorFilters as VendorFiltersType } from '@/lib/types/vendor';
 import { MOROCCAN_CITIES, SORT_OPTIONS } from '@/lib/types/vendor';
-import { CATEGORY_MAP, VALID_CATEGORY_SLUGS } from '@/lib/categories';
+import { WERVICE_CATEGORIES } from '@/lib/categories';
 
 interface VendorFiltersProps {
   filters: VendorFiltersType;
@@ -159,9 +159,9 @@ function VendorFilters({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-wervice-lime focus:border-transparent"
           >
             <option value="all">All categories</option>
-            {VALID_CATEGORY_SLUGS.map((category) => (
-              <option key={category} value={category}>
-                {CATEGORY_MAP[category as keyof typeof CATEGORY_MAP]?.label}
+            {WERVICE_CATEGORIES.map((c) => (
+              <option key={c.slug} value={c.dbCategory}>
+                {c.label}
               </option>
             ))}
           </select>

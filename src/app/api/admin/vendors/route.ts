@@ -2,17 +2,23 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createClient } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase-server';
 import { generateUniqueSlug } from '@/lib/slug';
 import { revalidateTag } from 'next/cache';
 import { normalizeCategory } from '@/lib/categories';
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const supabase = await createClient();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabase =
+      supabaseUrl && serviceKey
+        ? createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } })
+        : await createServerClient();
 
-    const { data: vendorLeads, error } = await supabase
+    // Read from vendor_leads (where imports and admin-managed vendors live)
+    const { data: leadsRows, error } = await supabase
       .from('vendor_leads')
       .select('*')
       .order('submitted_at', { ascending: false });
@@ -21,52 +27,61 @@ export async function GET() {
       throw error;
     }
 
-    // Transform the data to match our Vendor interface
-    const transformedVendors = vendorLeads
-      .map((lead: any) => ({
-        id: lead.id,
-        name: lead.business_name,
-        slug: lead.slug || '',
-        city: lead.city,
-        category: lead.category,
-        subcategory: lead.subcategory || '',
-        status: lead.status || 'pending',
-        plan: lead.subscription_price_dhs === 200 ? 'style-beauty' :
-              lead.subscription_price_dhs === 250 ? 'media-entertainment' :
-              'venue-planning',
-        planPrice: lead.subscription_price_dhs || 0,
-        profilePhotoUrl: lead.logo_url || '',
-        galleryPhotoUrls: lead.gallery_urls || [],
-        email: lead.email || '',
-        phone: lead.whatsapp || '',
-        startingPrice: lead.starting_price || 0,
-        description: lead.profile_description || '',
-        published: lead.published || false,
-        createdAt: lead.submitted_at || lead.created_at || new Date().toISOString(),
-        updatedAt: lead.updated_at || ''
-      }))
-      // Filter out vendors that don't have any images (gallery or profile photo)
-      .filter((vendor: any) => {
-        const hasGallery = Array.isArray(vendor.galleryPhotoUrls) && vendor.galleryPhotoUrls.length > 0;
-        const hasProfilePhoto = vendor.profilePhotoUrl && 
-                               vendor.profilePhotoUrl.trim() && 
-                               vendor.profilePhotoUrl !== 'null' && 
-                               vendor.profilePhotoUrl !== 'undefined';
-        
-        return hasGallery || hasProfilePhoto;
-      });
+    const rows = leadsRows ?? [];
+    const transformedVendors = rows.map((row: Record<string, unknown>) => {
+      const planPrice = Number(row.subscription_price_dhs ?? 0);
+      const plan = planPrice >= 350 ? 'venue-planning' : planPrice >= 250 ? 'media-entertainment' : 'style-beauty';
+      const profilePhotoUrl = (row.logo_url ?? '') as string;
+      const galleryUrls = (row.gallery_urls ?? []) as string[];
+      const published = Boolean(row.published);
+      const status = (row.status as string) || 'pending';
+      return {
+        id: (row.id ?? '') as string,
+        name: (row.business_name ?? 'Unnamed') as string,
+        slug: (row.slug ?? '') as string,
+        city: (row.city ?? '') as string,
+        category: (row.category ?? '') as string,
+        subcategory: (row.subcategory ?? '') as string,
+        status: status === 'approved' ? 'active' : status === 'rejected' ? 'inactive' : status,
+        plan,
+        planPrice,
+        profilePhotoUrl: profilePhotoUrl || '',
+        galleryPhotoUrls: Array.isArray(galleryUrls) ? galleryUrls : [],
+        email: (row.email ?? '') as string,
+        phone: (row.whatsapp ?? row.phone ?? '') as string,
+        startingPrice: Number(row.profile_starting_price ?? 0) || 0,
+        description: (row.profile_description ?? row.description ?? '') as string,
+        published,
+        createdAt: (row.submitted_at ?? row.created_at ?? new Date().toISOString()) as string,
+        updatedAt: (row.updated_at ?? row.created_at ?? '') as string,
+      };
+    });
 
     return NextResponse.json({
       success: true,
-      vendors: transformedVendors
+      vendors: transformedVendors,
     });
 
   } catch (error) {
     console.error('Error fetching vendors:', error);
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('Supabase error code:', (error as { code?: string }).code);
+    }
+    // Supabase and other libs often return plain objects with .message, not Error instances
+    const err = error as { message?: string; details?: string; code?: string };
+    const message =
+      typeof err?.message === 'string'
+        ? err.message
+        : error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : 'Failed to fetch vendors';
     return NextResponse.json(
       {
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch vendors'
+        message,
+        ...(process.env.NODE_ENV === 'development' && err?.code && { code: err.code, details: err.details })
       },
       { status: 500 }
     );
@@ -156,7 +171,7 @@ export async function POST(request: NextRequest) {
 
     // Create Supabase client
     const cookieStore = await cookies();
-    const supabase = await createClient();
+    const supabase = await createServerClient();
 
     // Map plan to price
     const planPricing = {
@@ -217,7 +232,7 @@ export async function POST(request: NextRequest) {
       city,
       whatsapp: phone,
       email: email || 'no-email@example.com', // Provide a default email if empty
-      profile_description: description || 'No description provided',
+      profile_description: description || null,
       subscription_cadence: 'monthly' as const,
       subscription_price_dhs: subscriptionPrice,
       logo_url: logoUrl,
@@ -379,7 +394,7 @@ export async function PUT(request: NextRequest) {
 
     // Create Supabase client
     const cookieStore = await cookies();
-    const supabase = await createClient();
+    const supabase = await createServerClient();
 
     // Map plan to price
     const planPricing = {

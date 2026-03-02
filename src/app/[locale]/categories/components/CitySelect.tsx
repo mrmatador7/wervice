@@ -2,25 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { FiMapPin, FiChevronDown } from 'react-icons/fi';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
 
-// Moroccan cities for the dropdown
-const MOROCCAN_CITIES = [
-  'All Cities',
-  'Casablanca',
-  'Marrakech',
-  'Rabat',
-  'Tangier',
-  'Agadir',
-  'Fès',
-  'Meknes',
-  'El Jadida',
-  'Kenitra',
-  'Ouarzazate',
-  'Chefchaouen',
-  'Essaouira',
-  'Salé',
-  'Tétouan',
-];
+const CITY_OPTIONS = ['All Cities', ...MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => c.label)];
 
 interface CitySelectProps {
   value?: string;
@@ -86,7 +70,7 @@ export function CitySelect({
             role="listbox"
             aria-label="City options"
           >
-            {MOROCCAN_CITIES.map((city) => (
+            {CITY_OPTIONS.map((city) => (
               <li key={city}>
                 <button
                   type="button"

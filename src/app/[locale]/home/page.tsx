@@ -80,7 +80,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     })) : [];
 
   return (
-    <div className="min-h-screen">
+    <div className="flex flex-1 flex-col">
       <Header />
 
       <Hero locale={locale} />

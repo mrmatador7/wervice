@@ -20,25 +20,27 @@ export default function CategoriesSection() {
     const { locale } = useLocale();
     const t = useTranslations('home');
 
-    const categories: Category[] = VALID_CATEGORY_SLUGS.map(slug => {
-        // Map slugs to their display URLs, images, and colors (muted, sophisticated gradients)
-        const categoryMappings: Record<string, { href: string; image: string; count: number; color: string; gradient: string }> = {
-            venues: { href: 'venues', image: '/categories/venues.png', count: 124, color: 'bg-rose-500', gradient: 'from-[#E8A3A3] to-[#C67373]' },
-            catering: { href: 'catering', image: '/categories/Catering.png', count: 87, color: 'bg-blue-500', gradient: 'from-[#7BA8D4] to-[#4A7BA7]' },
-            photo_video: { href: 'photo-video', image: '/categories/photo.png', count: 156, color: 'bg-purple-500', gradient: 'from-[#B89FD9] to-[#8B6DB8]' },
-            event_planner: { href: 'planning', image: '/categories/event-planner.png', count: 92, color: 'bg-amber-500', gradient: 'from-[#E8C47C] to-[#C9A053]' },
-            beauty: { href: 'beauty', image: '/categories/beauty.png', count: 78, color: 'bg-pink-500', gradient: 'from-[#E8A8C9] to-[#C57BA3]' },
-            decor: { href: 'decor', image: '/categories/decor.png', count: 134, color: 'bg-emerald-500', gradient: 'from-[#7BC5A8] to-[#4A9B7F]' },
-            music: { href: 'music', image: '/categories/music.png', count: 67, color: 'bg-red-500', gradient: 'from-[#E88F8F] to-[#C95D5D]' },
-            dresses: { href: 'dresses', image: '/categories/Dresses.png', count: 189, color: 'bg-indigo-500', gradient: 'from-[#8B9FD9] to-[#5C6DB8]' },
-        };
+    const categoryMappings: Record<string, { image: string; count: number; color: string; gradient: string }> = {
+        florist: { image: '/categories/decor.png', count: 0, color: 'bg-rose-500', gradient: 'from-[#E8A3A3] to-[#C67373]' },
+        dresses: { image: '/categories/Dresses.png', count: 189, color: 'bg-indigo-500', gradient: 'from-[#8B9FD9] to-[#5C6DB8]' },
+        venue: { image: '/categories/venues.png', count: 124, color: 'bg-rose-500', gradient: 'from-[#E8A3A3] to-[#C67373]' },
+        beauty: { image: '/categories/beauty.png', count: 78, color: 'bg-pink-500', gradient: 'from-[#E8A8C9] to-[#C57BA3]' },
+        'photo-film': { image: '/categories/photo.png', count: 156, color: 'bg-purple-500', gradient: 'from-[#B89FD9] to-[#8B6DB8]' },
+        caterer: { image: '/categories/Catering.png', count: 87, color: 'bg-blue-500', gradient: 'from-[#7BA8D4] to-[#4A7BA7]' },
+        decor: { image: '/categories/decor.png', count: 134, color: 'bg-emerald-500', gradient: 'from-[#7BC5A8] to-[#4A9B7F]' },
+        negafa: { image: '/categories/beauty.png', count: 0, color: 'bg-amber-500', gradient: 'from-[#E8C47C] to-[#C9A053]' },
+        artist: { image: '/categories/music.png', count: 67, color: 'bg-red-500', gradient: 'from-[#E88F8F] to-[#C95D5D]' },
+        'event-planner': { image: '/categories/event-planner.png', count: 92, color: 'bg-amber-500', gradient: 'from-[#E8C47C] to-[#C9A053]' },
+        cakes: { image: '/categories/Catering.png', count: 0, color: 'bg-blue-500', gradient: 'from-[#7BA8D4] to-[#4A7BA7]' },
+    };
 
-        const mapping = categoryMappings[slug];
+    const categories: Category[] = VALID_CATEGORY_SLUGS.map(slug => {
+        const mapping = categoryMappings[slug] ?? { image: '/categories/venues.png', count: 0, color: 'bg-gray-500', gradient: 'from-gray-400 to-gray-600' };
         return {
             name: labelForCategory(slug),
             count: mapping.count,
             image: mapping.image,
-            href: `/${locale}/categories/${mapping.href}`,
+            href: `/${locale}/categories/${slug}`,
             color: mapping.color,
             gradient: mapping.gradient,
         };

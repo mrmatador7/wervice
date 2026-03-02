@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FiSearch, FiHeart, FiCheck, FiPlus, FiX, FiMapPin } from 'react-icons/fi';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface DashboardVendorsProps {
   profile: any;
@@ -392,7 +393,7 @@ export default function DashboardVendors({ profile, locale }: DashboardVendorsPr
                       {searchResults.map((vendor) => (
                         <Link
                           key={vendor.id}
-                          href={`/${locale}/vendors/${vendor.slug}`}
+                          href={vendorUrl(vendor, locale)}
                           onClick={handleCloseModal}
                           className="bg-white border border-gray-200 rounded-2xl p-4 hover:border-[#D9FF0A] hover:shadow-md transition-all group"
                         >

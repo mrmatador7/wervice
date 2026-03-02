@@ -2,17 +2,9 @@
 
 import Link from 'next/link';
 import { useLocale } from '@/contexts/LocaleContext';
+import { WERVICE_CATEGORIES } from '@/lib/categories';
 
-const CATEGORIES = [
-  { slug: 'venues', label: 'Venues' },
-  { slug: 'catering', label: 'Catering' },
-  { slug: 'photography', label: 'Photo & Video' },
-  { slug: 'planning', label: 'Event Planner' },
-  { slug: 'beauty', label: 'Beauty' },
-  { slug: 'decor', label: 'Decor' },
-  { slug: 'music', label: 'Music' },
-  { slug: 'dresses', label: 'Dresses' },
-];
+const CATEGORIES = WERVICE_CATEGORIES.map((c) => ({ slug: c.slug, label: c.label }));
 
 export default function CategoriesBar() {
   const { locale } = useLocale();

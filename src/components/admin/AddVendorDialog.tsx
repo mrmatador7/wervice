@@ -875,6 +875,7 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
     errors: string[];
   } | null>(null);
   const [masterFolderLink, setMasterFolderLink] = useState('');
+  const [fastImport, setFastImport] = useState(true); // Default ON for 500+ vendors - skip images to avoid timeout
   const [isAttachingImages, setIsAttachingImages] = useState(false);
   const [attachResults, setAttachResults] = useState<{
     total: number;
@@ -923,9 +924,10 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("fastImport", String(fastImport));
       
-      // Add folder link if provided
-      if (folderLink.trim()) {
+      // Add folder link if provided (only used when fastImport=false)
+      if (folderLink.trim() && !fastImport) {
         formData.append("folderLink", folderLink.trim());
       }
 
@@ -937,10 +939,26 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
       const response = await fetch("/api/admin/vendors/import", {
         method: "POST",
         body: formData,
+        credentials: 'include', // Important: include cookies for authentication
       });
 
       clearInterval(progressInterval);
       setUploadProgress(100);
+
+      // Handle authentication errors
+      if (response.status === 401) {
+        toast.error("Session expired. Please sign in again.");
+        // Redirect to signin after a short delay
+        setTimeout(() => {
+          window.location.href = '/en/auth/signin';
+        }, 2000);
+        return;
+      }
+
+      if (response.status === 403) {
+        toast.error("You don't have permission to import vendors.");
+        return;
+      }
 
       const result = await response.json();
 
@@ -1000,31 +1018,31 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
         "Traiteur El Amane", 
         "Caterer", 
         "Fes", 
-        "+212600000000", 
+        "212661491997", 
         "contact@traiteur.ma", 
         "Traditional Moroccan catering services",
-        "https://maps.app.goo.gl/EXAMPLE",
+        "14 lot atef mag",
         "https://www.instagram.com/traiteur_el_amane"
       ],
       [
         "Dar Makhtara", 
         "Venue", 
         "Meknes", 
-        "+212611111111", 
+        "06 26869509", 
         "info@darmakhtara.ma", 
         "Beautiful wedding venue in Meknes",
-        "https://maps.app.goo.gl/EXAMPLE",
-        "https://www.instagram.com/dar_makhtara"
+        "43 Boulevard E",
+        "instagram.com/dar_makhtara"
       ],
       [
         "Studio Photo Pro", 
         "Photographer", 
         "Rabat", 
-        "+212622222222", 
-        "hello@studiophoto.ma", 
+        "06 78 43 07 61", 
+        "", 
         "Professional wedding photography",
         "https://maps.app.goo.gl/EXAMPLE",
-        "https://www.instagram.com/studio_photo_pro"
+        "instagram.com/studio_photo_pro"
       ]
     ];
 
@@ -1068,15 +1086,18 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
           {/* Instructions */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-medium text-blue-900 mb-2">Import Instructions</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Download the template CSV file below</li>
-              <li>• Fill in your vendor data using the exact column names</li>
+            <ul className="text-sm text-blue-800 space-y-1.5">
+              <li>• Download the template CSV file below or use your existing spreadsheet</li>
+              <li>• Use these <strong>exact column names</strong> (in this order): Vendor, Category, City, Phone, Email, Description, Google Maps, IG</li>
               <li>• <strong>Required columns:</strong> Vendor, Category, City, Phone</li>
-              <li>• <strong>Optional columns:</strong> Email, Description, Google Maps, IG (Instagram)</li>
-              <li>• <strong>Two-Step Process:</strong> First import vendors, then attach images from master folder (Step 2)</li>
-              <li>• <strong>Categories:</strong> Venue, Caterer, Photographer, Event Planner, Beauty, Decor, Music, Dresses, Negafa, Spa, Artist</li>
+              <li>• <strong>Optional columns:</strong> Email, Description, Google Maps, IG (can be left empty)</li>
+              <li>• <strong>Phone format:</strong> Accepts various formats (e.g., "212661491997", "06 26869509", "06 78 43 07 61", "+212600000000")</li>
+              <li>• <strong>Google Maps:</strong> Can be an address (e.g., "14 lot atef mag") or a URL (e.g., "https://maps.app.goo.gl/...")</li>
+              <li>• <strong>IG:</strong> Instagram link or handle (e.g., "https://www.instagram.com/username" or "instagram.com/username")</li>
+              <li>• <strong>Categories:</strong> Venue, Caterer, Photographer, Event Planner, Decor, Dresses, Negafa, Beauty, Music, Spa, Artist</li>
               <li>• <strong>Cities:</strong> Fes, Meknes, Casablanca, Marrakech, Rabat, Tangier, Agadir, El Jadida, Kenitra, Bouskoura</li>
-              <li>• <strong>Note:</strong> After importing, use Step 2 to attach images from your master Google Drive folder</li>
+              <li>• <strong>500+ vendors?</strong> Enable &quot;Fast import&quot; below to avoid timeout. Attach images in Step 2 after import.</li>
+              <li>• <strong>Include column:</strong> Add &quot;Include&quot; with &quot;yes&quot; for rows to import (e.g. green-highlighted rows)</li>
             </ul>
           </div>
 
@@ -1118,7 +1139,27 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
             </div>
           )}
 
-          {/* Folder Link Input */}
+          {/* Fast Import - for 500+ vendors */}
+          <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <input
+              id="fastImport"
+              type="checkbox"
+              checked={fastImport}
+              onChange={(e) => setFastImport(e.target.checked)}
+              className="mt-1 rounded border-gray-300"
+            />
+            <div>
+              <label htmlFor="fastImport" className="block text-sm font-medium text-amber-900">
+                Fast import (recommended for 500+ vendors)
+              </label>
+              <p className="text-xs text-amber-800 mt-0.5">
+                Skips image processing to import all vendors quickly without timeout. You can attach images later via Step 2.
+              </p>
+            </div>
+          </div>
+
+          {/* Folder Link Input - only when not fast import */}
+          {!fastImport && (
           <div className="space-y-2">
             <label htmlFor="folderLink" className="block text-sm font-medium text-gray-700">
               Google Drive Base Folder Link (Optional)
@@ -1138,6 +1179,7 @@ export function ImportVendorsDialog({ isOpen, onClose, onSuccess }: { isOpen: bo
                 : "Paste your main Google Drive folder link. Each vendor should have a subfolder, or add a folder_link column in your CSV. Note: Automatic image detection requires Google Drive API setup."}
             </p>
           </div>
+          )}
 
           {/* Template Download */}
           <div className="flex justify-center">

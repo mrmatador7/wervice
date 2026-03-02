@@ -1,6 +1,7 @@
 'use client';
 import VenueCard from './VenueCard';
 import { Vendor } from '@/models/vendor';
+import { vendorUrl } from '@/lib/vendor-url';
 
 export type VendorCardProps = {
   name: string;
@@ -34,7 +35,7 @@ export default function VendorCard(props: Props) {
     coverUrl: props.vendor.coverImage || undefined,
     rating: props.vendor.rating,
     price: props.vendor.startingPrice ? `${props.vendor.startingPrice.toLocaleString()} MAD` : undefined,
-    href: `/vendors/${props.vendor.slug}`,
+    href: vendorUrl({ city: props.vendor.city, category: props.vendor.category, slug: props.vendor.slug }, 'en'),
   } : props;
 
   // Extract price number from string like "15,000 MAD"

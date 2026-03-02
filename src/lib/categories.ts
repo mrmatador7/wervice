@@ -1,63 +1,79 @@
-export const CATEGORY_MAP = {
-  venues:        { label: "Venues" },
-  catering:      { label: "Catering" },
-  photo_video:   { label: "Photo & Video" },
-  event_planner: { label: "Event Planner" },
-  beauty:        { label: "Beauty" },
-  decor:         { label: "Decor" },
-  music:         { label: "Music" },
-  dresses:       { label: "Dresses" },
-} as const;
+/**
+ * Canonical Wervice categories (11). Slug is used in URLs; dbCategory is the value in vendor_leads.category.
+ */
+export const WERVICE_CATEGORIES = [
+  { slug: 'florist', label: 'Florist', dbCategory: 'florist' },
+  { slug: 'dresses', label: 'Dresses', dbCategory: 'dresses' },
+  { slug: 'venues', label: 'Venues', dbCategory: 'venues' },
+  { slug: 'beauty', label: 'Beauty', dbCategory: 'beauty' },
+  { slug: 'photo-film', label: 'Photo & Film', dbCategory: 'photography' },
+  { slug: 'caterer', label: 'Caterer', dbCategory: 'catering' },
+  { slug: 'decor', label: 'Decor', dbCategory: 'decor' },
+  { slug: 'negafa', label: 'Negafa', dbCategory: 'negafa' },
+  { slug: 'artist', label: 'Artist', dbCategory: 'music' },
+  { slug: 'event-planner', label: 'Event Planner', dbCategory: 'planning' },
+  { slug: 'cakes', label: 'Cakes', dbCategory: 'cakes' },
+] as const;
 
-export type CategorySlug = keyof typeof CATEGORY_MAP;
-export const VALID_CATEGORY_SLUGS = Object.keys(CATEGORY_MAP) as CategorySlug[];
+export type WerviceCategorySlug = (typeof WERVICE_CATEGORIES)[number]['slug'];
+export const VALID_CATEGORY_SLUGS = WERVICE_CATEGORIES.map((c) => c.slug);
 
-/** Legacy/loose inputs → canonical slug */
-export const LEGACY_CATEGORY_ALIASES: Record<string, CategorySlug> = {
-  venue: "venues",
-  venues: "venues",
+/** URL slug → DB category value (for API/filter) */
+export const SLUG_TO_DB_CATEGORY: Record<string, string> = Object.fromEntries(
+  WERVICE_CATEGORIES.map((c) => [c.slug, c.dbCategory])
+);
 
-  catering: "catering",
-  caterer: "catering",
-  carter: "catering",
-  carterer: "catering",
+/** DB category → display label */
+export const CATEGORY_MAP: Record<string, { label: string }> = Object.fromEntries(
+  WERVICE_CATEGORIES.flatMap((c) => [
+    [c.slug, { label: c.label }],
+    [c.dbCategory, { label: c.label }],
+  ])
+);
 
-  photo: "photo_video",
-  photography: "photo_video",
-  photographer: "photo_video",
-  "photo&video": "photo_video",
-  "photo & video": "photo_video",
-  photo_video: "photo_video",
-
-  eventplanner: "event_planner",
-  event_planner: "event_planner",
-  eventPlanner: "event_planner",
-  planning: "event_planner",
-
-  beauty: "beauty",
-  decor: "decor",
-  music: "music",
-  dresses: "dresses",
+/** Legacy/loose inputs → canonical slug (for normalization) */
+export const LEGACY_CATEGORY_ALIASES: Record<string, string> = {
+  venue: 'venues',
+  venues: 'venues',
+  catering: 'caterer',
+  caterer: 'caterer',
+  photo: 'photo-film',
+  photography: 'photo-film',
+  photo_video: 'photo-film',
+  'photo&video': 'photo-film',
+  'photo & video': 'photo-film',
+  'photo & film': 'photo-film',
+  eventplanner: 'event-planner',
+  event_planner: 'event-planner',
+  planning: 'event-planner',
+  music: 'artist',
+  artist: 'artist',
+  beauty: 'beauty',
+  decor: 'decor',
+  dresses: 'dresses',
+  florist: 'florist',
+  negafa: 'negafa',
+  cakes: 'cakes',
 };
 
-export function normalizeCategory(raw: string | null | undefined): CategorySlug | null {
+export type CategorySlug = string;
+
+export function normalizeCategory(raw: string | null | undefined): string | null {
   if (!raw) return null;
-  const key = String(raw).trim().toLowerCase().replace(/\s+/g, " ").replace(/ /g, "_");
-  return (
-    (LEGACY_CATEGORY_ALIASES[key] as CategorySlug) ||
-    ((VALID_CATEGORY_SLUGS as string[]).includes(key) ? (key as CategorySlug) : null)
-  );
+  const key = String(raw).trim().toLowerCase().replace(/\s+/g, ' ').replace(/ /g, '-').replace(/_/g, '-');
+  return LEGACY_CATEGORY_ALIASES[key] ?? (VALID_CATEGORY_SLUGS.includes(key) ? key : null);
+}
+
+export function slugToDbCategory(slug: string | null | undefined): string | null {
+  if (!slug) return null;
+  const s = String(slug).trim().toLowerCase();
+  return SLUG_TO_DB_CATEGORY[s] ?? (VALID_CATEGORY_SLUGS.includes(s) ? s : null);
 }
 
 export function labelForCategory(slug: string | null | undefined): string {
-  if (!slug) return "";
-
-  // First try to normalize the slug and get the label
+  if (!slug) return '';
   const normalized = normalizeCategory(slug);
-  if (normalized && CATEGORY_MAP[normalized]) {
-    return CATEGORY_MAP[normalized].label;
-  }
-
-  // Fallback to direct lookup or the original slug
-  return CATEGORY_MAP[slug as CategorySlug]?.label ?? slug;
+  if (normalized && CATEGORY_MAP[normalized]) return CATEGORY_MAP[normalized].label;
+  if (CATEGORY_MAP[slug]) return CATEGORY_MAP[slug].label;
+  return slug;
 }

@@ -2,8 +2,11 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { FiMapPin } from 'react-icons/fi';
 import { formatCategoryName } from '@/lib/format';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface Vendor {
   id: string;
@@ -24,82 +27,95 @@ interface NewVendorCardProps {
   vendor: Vendor;
 }
 
-// Capitalize first letter of each word
-const capitalizeCity = (city: string) => {
-  return city
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-};
-
-// Get category icon path
-const getCategoryIcon = (category: string) => {
-  const iconMap: Record<string, string> = {
-    venues: '/categories/venues.png',
-    photography: '/categories/photo.png',
-    'photo-video': '/categories/photo.png',
-    catering: '/categories/Catering.png',
-    music: '/categories/music.png',
-    'event-planner': '/categories/event-planner.png',
-    planning: '/categories/event-planner.png',
-    beauty: '/categories/beauty.png',
-    dresses: '/categories/Dresses.png',
-    decor: '/categories/decor.png',
-  };
-  return iconMap[category.toLowerCase()] || '/categories/venues.png';
-};
+const capitalizeCity = (city: string) =>
+  city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
 export default function NewVendorCard({ vendor }: NewVendorCardProps) {
+  const { locale } = useParams<{ locale: string }>();
+  const href = vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, locale || 'en');
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const images: string[] = [];
+  if (vendor.cover?.trim()) images.push(vendor.cover.trim());
+  if (Array.isArray(vendor.images)) {
+    vendor.images.forEach((img) => {
+      if (img?.trim() && img !== vendor.cover) images.push(img.trim());
+    });
+  }
+  const total = images.length;
+
+  useEffect(() => {
+    if (total <= 1) return;
+    const timer = setInterval(() => setActiveIndex((p) => (p + 1) % total), 3000);
+    return () => clearInterval(timer);
+  }, [total]);
+
   const categoryName = formatCategoryName(vendor.category);
 
   return (
-    <article className="group mx-auto w-full max-w-[360px] rounded-[36px] border border-[#D9DFD1] bg-white p-4 shadow-[0_8px_24px_rgba(17,25,12,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(17,25,12,0.12)]">
-      <div className="relative overflow-hidden rounded-[28px] aspect-square bg-neutral-100">
-        <Link href={`/vendors/${vendor.slug}`} className="block h-full">
-          <img
-            src={vendor.cover}
-            alt={vendor.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading="lazy"
-          />
-        </Link>
-        <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-[#11190C] px-3 py-1.5 shadow-md">
-          <Image
-            src={getCategoryIcon(vendor.category)}
-            alt={categoryName}
-            width={16}
-            height={16}
-            className="h-4 w-4 object-contain"
-          />
-          <span className="text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#D9FF0A]">
-            {categoryName}
-          </span>
-        </div>
-      </div>
+    <Link href={href} className="group block w-full">
+      <article className="bg-white rounded-[20px] border border-neutral-100 shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
 
-      <div className="px-2 pb-2 pt-5">
-        <Link href={`/vendors/${vendor.slug}`}>
-          <h3 className="line-clamp-2 text-[40px] font-extrabold leading-[1.05] text-[#11190C] transition-colors hover:text-[#2A3322]">
+        {/* Image */}
+        <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
+          {total > 0 ? (
+            <div
+              className="flex h-full transition-transform duration-700 ease-in-out"
+              style={{ width: `${total * 100}%`, transform: `translateX(-${(activeIndex * 100) / total}%)` }}
+            >
+              {images.map((src, i) => (
+                <div key={i} className="relative h-full flex-shrink-0" style={{ width: `${100 / total}%` }}>
+                  <Image
+                    src={src}
+                    alt={`${vendor.name} ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    priority={i === 0}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-100">
+              <span className="text-5xl font-bold text-neutral-300">{vendor.name.charAt(0)}</span>
+            </div>
+          )}
+
+          {/* Category badge */}
+          <div className="absolute left-3 top-3">
+            <span className="inline-block rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#11190C] shadow-sm backdrop-blur-sm">
+              {categoryName}
+            </span>
+          </div>
+
+          {/* Dot indicators */}
+          {total > 1 && (
+            <div className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 gap-1.5">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.preventDefault(); setActiveIndex(i); }}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/60'}`}
+                  aria-label={`Image ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Info */}
+        <div className="px-4 py-4">
+          <h3 className="text-[19px] font-bold leading-snug text-[#11190C] line-clamp-1 group-hover:text-[#333] transition-colors">
             {vendor.name}
           </h3>
-        </Link>
-
-        <div className="mt-5 flex items-center gap-2 rounded-2xl bg-[#F7F8F2] px-4 py-3">
-          <div className="inline-flex min-w-0 items-center gap-2 text-neutral-700">
-            <FiMapPin className="h-5 w-5 shrink-0 text-[#11190C]" />
-            <span className="truncate text-lg font-semibold">
-              {capitalizeCity(vendor.city)}
-            </span>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <FiMapPin className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+            <span className="text-sm text-neutral-500">{capitalizeCity(vendor.city)}</span>
           </div>
         </div>
 
-        <Link
-          href={`/vendors/${vendor.slug}`}
-          className="mt-5 block w-full rounded-full bg-[#11190C] py-4 text-center text-lg font-black uppercase tracking-[0.14em] text-[#D9FF0A] transition-all hover:bg-[#2A3322]"
-        >
-          View Vendor
-        </Link>
-      </div>
-    </article>
+      </article>
+    </Link>
   );
 }

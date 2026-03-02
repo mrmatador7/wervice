@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { categoryPricing, getPriceFromCategory, getCategoryData } from '@/lib/categoryPricing';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
 
 // Centralized pricing table (single source of truth)
 const PRICING = {
@@ -18,21 +19,24 @@ const PRICING = {
   },
 } as const;
 
-// Category name to plan family mapping
+// Category name/label to plan family mapping (Wervice 11 categories)
 const CATEGORY_TO_PLAN: Record<string, keyof typeof PRICING> = {
-  'Beauty': 'styleBeauty',
-  'Decor': 'styleBeauty',
-  'Dresses': 'styleBeauty',
-  'Photo & Video': 'mediaEntertainment',
-  'Music': 'mediaEntertainment',
-  'Venues': 'venuePlanning',
-  'Catering': 'venuePlanning',
-  'Planning': 'venuePlanning',
+  Beauty: 'styleBeauty',
+  Decor: 'styleBeauty',
+  Dresses: 'styleBeauty',
+  Florist: 'styleBeauty',
+  Negafa: 'styleBeauty',
+  Cakes: 'styleBeauty',
+  'Photo & Film': 'mediaEntertainment',
+  Artist: 'mediaEntertainment',
+  Venue: 'venuePlanning',
+  Caterer: 'venuePlanning',
+  'Event Planner': 'venuePlanning',
 };
 
-// Helper function to get base monthly price from category name using new pricing system
-const getBaseMonthlyPrice = (categoryName: string): number => {
-  const planFamily = CATEGORY_TO_PLAN[categoryName];
+const getBaseMonthlyPrice = (categorySlugOrName: string): number => {
+  const name = categoryPricing[categorySlugOrName]?.name ?? categorySlugOrName;
+  const planFamily = CATEGORY_TO_PLAN[name];
   return planFamily ? PRICING[planFamily].monthly : 0;
 };
 
@@ -54,9 +58,7 @@ const categorySlugToName: { [key: string]: string } = Object.fromEntries(
   Object.entries(categoryPricing).map(([slug, data]) => [slug, data.name])
 );
 
-const cities = [
-  'Casablanca', 'Marrakech', 'Rabat', 'Tanger', 'Agadir', 'Fes', 'Meknes', 'El Jadida', 'Kenitra'
-];
+const cities = MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => c.label);
 
 interface FormData {
   firstName: string;
@@ -765,7 +767,7 @@ export default function VendorSubscribeForm({
                       {Object.entries(categoryPricing).map(([slug, data]) => {
                         const effectivePrice = getEffectiveMonthlyPrice(data.name, formData.plan);
                         return (
-                          <option key={slug} value={data.name}>
+                          <option key={slug} value={slug}>
                             {data.name} — {effectivePrice.toLocaleString()} MAD/month
                           </option>
                         );

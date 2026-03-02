@@ -1,8 +1,11 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
-import { FiHeart, FiStar } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import Image from 'next/image';
+import { MapPin } from 'lucide-react';
+import { labelForCategory } from '@/lib/categories';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface Vendor {
   id: string;
@@ -79,7 +82,7 @@ export default function CategoryGrid({ vendors, pagination, categorySlug }: Cate
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {vendors.map((vendor) => (
           <VendorCard key={vendor.id} vendor={vendor} />
         ))}
@@ -102,92 +105,100 @@ export default function CategoryGrid({ vendors, pagination, categorySlug }: Cate
 
 function VendorCard({ vendor }: { vendor: Vendor }) {
   const router = useRouter();
+  const { locale } = useParams<{ locale: string }>();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Build image list from available fields
+  const images: string[] = [];
+  if (vendor.cover_image?.trim()) images.push(vendor.cover_image.trim());
+  const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
+  if (Array.isArray(gallery)) {
+    gallery.forEach((img: string) => {
+      if (img?.trim() && img !== vendor.cover_image) images.push(img.trim());
+    });
+  }
+
+  const total = images.length;
+
+  useEffect(() => {
+    if (total <= 1) return;
+    const timer = setInterval(() => setActiveIndex((p) => (p + 1) % total), 3000);
+    return () => clearInterval(timer);
+  }, [total]);
+
+  const cityLabel = vendor.city
+    ? vendor.city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+    : '';
 
   return (
-    <div
-      onClick={() => router.push(`/vendors/${vendor.slug}`)}
-      className="group block rounded-2xl bg-white shadow-sm ring-1 ring-black/5 hover:shadow-md hover:ring-black/10 transition-all duration-300 overflow-hidden cursor-pointer"
-    >
-      {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden">
-        {vendor.cover_image ? (
-          <Image
-            src={vendor.cover_image}
-            alt={vendor.name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          />
+    <article className="group flex flex-col rounded-[28px] border border-zinc-200 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.10),0_1px_4px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,25,12,0.14)] cursor-pointer">
+      {/* Image carousel */}
+      <div
+        className="relative aspect-[4/3] overflow-hidden rounded-[20px] bg-neutral-100"
+        onClick={() => router.push(vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, locale || 'en'))}
+      >
+        {total > 0 ? (
+          <div
+            className="flex h-full transition-transform duration-700 ease-in-out"
+            style={{ width: `${total * 100}%`, transform: `translateX(-${(activeIndex * 100) / total}%)` }}
+          >
+            {images.map((src, i) => (
+              <div key={i} className="relative h-full flex-shrink-0" style={{ width: `${100 / total}%` }}>
+                <Image
+                  src={src}
+                  alt={`${vendor.name} ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                  priority={i === 0}
+                />
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
+            <span className="text-5xl font-bold text-zinc-300">{vendor.name.charAt(0)}</span>
           </div>
         )}
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          {vendor.is_featured && (
-            <span className="px-2 py-1 bg-[#D9FF0A] text-[#11190C] text-xs font-medium rounded-full">
-              Featured
-            </span>
-          )}
+        {/* Category pill */}
+        <div className="absolute left-3 top-3 rounded-2xl bg-white/95 px-3 py-1.5 shadow-sm backdrop-blur-sm">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#11190C]">
+            {labelForCategory(vendor.category)}
+          </span>
         </div>
 
-        {/* Heart icon */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            // TODO: Implement save functionality
-          }}
-          className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors"
-        >
-          <FiHeart className="w-4 h-4 text-neutral-600" />
-        </button>
+        {/* Dot indicators */}
+        {total > 1 && (
+          <div className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => { e.stopPropagation(); setActiveIndex(i); }}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/60'
+                }`}
+                aria-label={`Image ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="mb-3">
-          <h3 className="font-semibold text-[#11190C] text-lg leading-tight line-clamp-2 mb-1">
-            {vendor.name}
-          </h3>
-          <p className="text-sm text-neutral-600 line-clamp-1">
-            {vendor.city} • {vendor.category}
-          </p>
-        </div>
+      <div
+        className="flex flex-1 flex-col px-1 pb-1 pt-5"
+        onClick={() => router.push(vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, locale || 'en'))}
+      >
+        <h3 className="line-clamp-2 text-[22px] font-bold leading-snug text-[#11190C] sm:text-2xl">
+          {vendor.name}
+        </h3>
 
-        {/* Rating */}
-        {vendor.rating && (
-          <div className="flex items-center gap-1 mb-3">
-            <FiStar className="w-4 h-4 fill-[#D9FF0A] text-[#D9FF0A]" />
-            <span className="text-sm font-medium text-[#11190C]">
-              {vendor.rating.toFixed(1)}
-            </span>
-            {vendor.review_count && (
-              <span className="text-sm text-neutral-600">
-                ({vendor.review_count})
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Price and CTA */}
-        <div className="flex items-center justify-between">
-          <div className="text-[#11190C] font-semibold">
-            {vendor.price_min ? (
-              <span>From {vendor.price_min.toLocaleString()} MAD</span>
-            ) : (
-              <span>Contact for pricing</span>
-            )}
-          </div>
-
-          <button className="px-4 py-2 bg-[#11190C] hover:bg-[#11190C]/90 text-white text-sm font-medium rounded-full transition-colors">
-            View Details
-          </button>
+        <div className="mt-3 flex items-center gap-2">
+          <MapPin className="h-4 w-4 shrink-0 text-[#aaa]" />
+          <span className="text-sm font-medium text-[#888]">{cityLabel}</span>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

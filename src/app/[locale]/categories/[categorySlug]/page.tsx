@@ -1,52 +1,74 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import NewCategoryClient from '../components/NewCategoryClient';
+import CategorySeoBlocks from '@/components/category/CategorySeoBlocks';
 import { formatCategoryName } from '@/lib/format';
+import { VALID_CATEGORY_SLUGS } from '@/lib/categories';
 
 interface PageProps {
-  params: Promise<{ categorySlug: string }>;
+  params: Promise<{ locale: string; categorySlug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { categorySlug } = await params;
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
+  const { locale, categorySlug } = await params;
+  const { city } = await searchParams;
   const categoryName = formatCategoryName(categorySlug);
+  const cityLabel = city && city !== 'all' ? ` in ${city}` : ' in Morocco';
+  const canonical = `https://wervice.com/${locale}/categories/${categorySlug}${city && city !== 'all' ? `?city=${encodeURIComponent(city as string)}` : ''}`;
 
   return {
-    title: `Wedding ${categoryName} in Morocco | Wervice`,
-    description: `Find verified ${categoryName.toLowerCase()} professionals in Morocco. Compare prices, ratings, and availability to plan your perfect wedding.`,
+    title: `Wedding ${categoryName}${cityLabel} | Wervice`,
+    description: `Find verified ${categoryName.toLowerCase()} professionals${cityLabel}. Compare prices, view portfolios, and contact vendors directly for your wedding.`,
+    alternates: {
+      canonical,
+    },
     openGraph: {
-      title: `Wedding ${categoryName} | Wervice`,
+      title: `Wedding ${categoryName}${cityLabel} | Wervice`,
       description: `Discover top-rated ${categoryName.toLowerCase()} for your Moroccan wedding.`,
     },
   };
 }
 
 export default async function CategoryPage({ params, searchParams }: PageProps) {
-  const { categorySlug } = await params;
+  const { locale, categorySlug } = await params;
   const searchParamsResolved = await searchParams;
 
-  // Basic validation
-  const validCategories = ['venues', 'catering', 'photography', 'planning', 'beauty', 'decor', 'music', 'dresses'];
-  if (!validCategories.includes(categorySlug)) {
+  // Redirect legacy /venue to /venues
+  if (categorySlug === 'venue') {
+    const qs = new URLSearchParams();
+    Object.entries(searchParamsResolved).forEach(([k, v]) => {
+      if (v === undefined) return;
+      if (Array.isArray(v)) v.forEach((val) => qs.append(k, val));
+      else qs.append(k, v);
+    });
+    const qsStr = qs.toString();
+    redirect(`/${locale}/categories/venues${qsStr ? `?${qsStr}` : ''}`);
+  }
+
+  if (!VALID_CATEGORY_SLUGS.includes(categorySlug as (typeof VALID_CATEGORY_SLUGS)[number])) {
     notFound();
   }
 
+  const city = typeof searchParamsResolved.city === 'string' ? searchParamsResolved.city : undefined;
+
   return (
     <main className="min-h-screen bg-white">
-      {/* New Client component with sidebar layout */}
       <NewCategoryClient
         category={categorySlug}
         initialSearchParams={searchParamsResolved}
+        seoBlocks={
+          <CategorySeoBlocks
+            categorySlug={categorySlug}
+            city={city}
+            locale={locale}
+          />
+        }
       />
     </main>
   );
 }
 
-// Generate static params for all categories
 export async function generateStaticParams() {
-  const validCategories = ['venues', 'catering', 'photography', 'planning', 'beauty', 'decor', 'music', 'dresses'];
-  return validCategories.map((categorySlug) => ({
-    categorySlug,
-  }));
+  return VALID_CATEGORY_SLUGS.map((categorySlug) => ({ categorySlug }));
 }

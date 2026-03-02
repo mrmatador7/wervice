@@ -28,32 +28,42 @@ export default function AccountPage() {
         });
 
         if (!response.ok) {
-          const error = await response.json();
-          console.error('Error fetching recommendations:', error);
+          // Try to get error message, but don't fail if JSON parsing fails
+          try {
+            const error = await response.json();
+            console.error('Error fetching recommendations:', error);
+          } catch (e) {
+            console.error('Error fetching recommendations:', response.statusText);
+          }
           setRecommendations({});
           return;
         }
 
         const data = await response.json();
 
-        // Transform API response to expected format
+        // Ensure recommendations is an array and transform to expected format
         const transformedRecommendations: Record<string, VendorRecommendation[]> = {};
-        data.recommendations.forEach((categoryData: any) => {
-          transformedRecommendations[categoryData.category] = categoryData.vendors.map((vendor: any) => ({
-            vendor: {
-              id: vendor.id,
-              name: vendor.name,
-              slug: vendor.slug,
-              category: vendor.category,
-              city: vendor.city,
-              rating: vendor.rating,
-              reviewsCount: vendor.reviewsCount,
-              startingPrice: vendor.startingPrice,
-            },
-            score: vendor.score,
-            reasons: vendor.reasons
-          }));
-        });
+        
+        if (Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+          data.recommendations.forEach((categoryData: any) => {
+            if (categoryData && categoryData.category && Array.isArray(categoryData.vendors)) {
+              transformedRecommendations[categoryData.category] = categoryData.vendors.map((vendor: any) => ({
+                vendor: {
+                  id: vendor.id,
+                  name: vendor.name,
+                  slug: vendor.slug,
+                  category: vendor.category,
+                  city: vendor.city,
+                  rating: vendor.rating,
+                  reviewsCount: vendor.reviewsCount,
+                  startingPrice: vendor.startingPrice,
+                },
+                score: vendor.score || 0,
+                reasons: Array.isArray(vendor.reasons) ? vendor.reasons : []
+              }));
+            }
+          });
+        }
 
         setRecommendations(transformedRecommendations);
 

@@ -17,16 +17,11 @@ interface VendorGridProps {
 
 function VendorCardSkeleton() {
   return (
-    <div className="rounded-2xl bg-white ring-1 ring-black/5 shadow-sm overflow-hidden animate-pulse">
-      <div className="aspect-[4/3] bg-gray-200" />
-      <div className="p-4 md:p-5 space-y-3">
-        <div className="h-5 bg-gray-200 rounded w-3/4" />
-        <div className="h-4 bg-gray-200 rounded w-1/2" />
-        <div className="h-4 bg-gray-200 rounded w-full" />
-        <div className="flex justify-between items-center pt-2">
-          <div className="h-4 bg-gray-200 rounded w-20" />
-          <div className="h-8 bg-gray-200 rounded w-24" />
-        </div>
+    <div className="animate-pulse rounded-[28px] border border-zinc-200 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.10)]">
+      <div className="aspect-[4/3] rounded-[20px] bg-gray-200" />
+      <div className="space-y-4 px-2 pt-6">
+        <div className="mx-auto h-7 w-3/4 rounded bg-gray-200" />
+        <div className="h-14 rounded-full bg-gray-200" />
       </div>
     </div>
   );

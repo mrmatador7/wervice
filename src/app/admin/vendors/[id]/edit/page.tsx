@@ -27,14 +27,17 @@ interface VendorFormData {
 }
 
 const CATEGORIES = [
-  { value: 'venues', label: 'Venues' },
-  { value: 'catering', label: 'Catering' },
-  { value: 'photography', label: 'Photo & Video' },
-  { value: 'event-planner', label: 'Event Planner' },
-  { value: 'beauty', label: 'Beauty' },
-  { value: 'decor', label: 'Decor' },
-  { value: 'music', label: 'Music' },
+  { value: 'florist', label: 'Florist' },
   { value: 'dresses', label: 'Dresses' },
+  { value: 'venues', label: 'Venue' },
+  { value: 'beauty', label: 'Beauty' },
+  { value: 'photography', label: 'Photo & Film' },
+  { value: 'catering', label: 'Caterer' },
+  { value: 'decor', label: 'Decor' },
+  { value: 'negafa', label: 'Negafa' },
+  { value: 'music', label: 'Artist' },
+  { value: 'planning', label: 'Event Planner' },
+  { value: 'cakes', label: 'Cakes' },
 ];
 
 const PLANS = [

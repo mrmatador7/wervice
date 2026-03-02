@@ -249,3 +249,9 @@ export const FOOTER_LINKS = [
 ];
 
 export const CURRENT_YEAR = new Date().getFullYear();
+
+/** Footer contact – update these to change contact info site-wide */
+export const FOOTER_CONTACT = {
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@wervice.ma',
+  phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || '+212 6XX XXX XXX',
+} as const;

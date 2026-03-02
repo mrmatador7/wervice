@@ -53,7 +53,9 @@ export default async function RootLayout({
             style={{
               fontFamily: isRTL ? "'Readex Pro', system-ui, sans-serif" : "Rubik, system-ui, sans-serif",
               width: '100%',
-              height: '100%'
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
             <OnboardingGuard locale={locale}>

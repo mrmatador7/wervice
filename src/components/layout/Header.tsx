@@ -4,19 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import LanguageCurrencyDropdown from "../ui/LanguageDropdown";
 import { useUser } from "@/contexts/UserContext";
 import { useLocale } from "@/contexts/LocaleContext";
-
-const MOROCCAN_CITIES = [
-  { value: 'all', label: 'All Morocco' },
-  { value: 'Marrakech', label: 'Marrakech' },
-  { value: 'Casablanca', label: 'Casablanca' },
-  { value: 'Rabat', label: 'Rabat' },
-  { value: 'Tangier', label: 'Tangier' },
-  { value: 'Agadir', label: 'Agadir' },
-  { value: 'Fes', label: 'Fès' },
-  { value: 'Meknes', label: 'Meknes' },
-  { value: 'El Jadida', label: 'El Jadida' },
-  { value: 'Kenitra', label: 'Kenitra' }
-];
+import { MOROCCAN_CITIES } from "@/lib/types/vendor";
 
 export default function Header() {
   const { locale: currentLocale } = useLocale();
@@ -54,7 +42,7 @@ export default function Header() {
     setShowLocationDropdown(false);
   };
 
-  const selectedCityLabel = MOROCCAN_CITIES.find(c => c.value === selectedCity)?.label || 'All Morocco';
+  const selectedCityLabel = MOROCCAN_CITIES.find(c => c.value === selectedCity)?.label || 'All Cities';
 
   return (
     <header

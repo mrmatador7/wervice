@@ -1,16 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  FiSearch, FiPlus, FiUpload, FiDownload, FiEdit2, FiTrash2, 
-  FiEye, FiFilter, FiRefreshCw, FiCheckCircle, FiXCircle, 
+import {
+  FiSearch, FiPlus, FiUpload, FiDownload, FiEdit2, FiTrash2,
+  FiEye, FiFilter, FiRefreshCw, FiCheckCircle, FiXCircle,
   FiClock, FiDollarSign, FiMapPin, FiTag, FiPhone, FiMail,
-  FiImage, FiCalendar, FiTrendingUp
+  FiImage, FiCalendar, FiTrendingUp, FiFolder
 } from 'react-icons/fi';
+import { FiVideo } from 'react-icons/fi';
+import { useRef } from 'react';
 import Link from 'next/link';
-import { toast } from 'sonner';
 import { ImportVendorsDialog } from '@/components/admin/AddVendorDialog';
-import { AttachImagesDialog } from '@/components/admin/AttachImagesDialog';
+import { WERVICE_CATEGORIES } from '@/lib/categories';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+
+const UNIDENTIFIED_VALUE = '__unidentified__';
+
+const ADMIN_CATEGORY_OPTIONS = [
+  { value: 'all', label: 'All Categories' },
+  ...WERVICE_CATEGORIES.map((c) => ({ value: c.dbCategory, label: c.label })),
+  { value: UNIDENTIFIED_VALUE, label: 'Unidentified (no category)' },
+];
+
+const ADMIN_CITY_OPTIONS = [
+  { value: 'all', label: 'All Cities' },
+  ...MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => ({ value: c.label, label: c.label })),
+  { value: UNIDENTIFIED_VALUE, label: 'Unidentified (no city)' },
+];
 
 interface Vendor {
   id: string;
@@ -35,6 +51,7 @@ interface Vendor {
 
 type FilterType = 'all' | 'active' | 'pending' | 'inactive';
 type SortType = 'newest' | 'oldest' | 'name' | 'price' | 'plan';
+const ROWS_PER_PAGE = 50;
 
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -45,11 +62,21 @@ export default function VendorsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortType>('newest');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedVendors, setSelectedVendors] = useState<Set<string>>(new Set());
   const [showFilters, setShowFilters] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
-  const [showAttachImagesDialog, setShowAttachImagesDialog] = useState(false);
-  const [syncingVendorId, setSyncingVendorId] = useState<string | null>(null);
+  const [showAttachDialog, setShowAttachDialog] = useState(false);
+  const [attachLoading, setAttachLoading] = useState(false);
+  const [attachResult, setAttachResult] = useState<{ processed: number; uploaded: number; results: { folder: string; vendor: string; profile: boolean; gallery: number; error?: string }[] } | null>(null);
+  const [syncMediaLoading, setSyncMediaLoading] = useState(false);
+  const [publishAllLoading, setPublishAllLoading] = useState(false);
+  const attachFolderRef = useRef<HTMLInputElement>(null);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  const [deleteAllConfirm, setDeleteAllConfirm] = useState('');
+  const [deleteAllLoading, setDeleteAllLoading] = useState(false);
+  const [deleteAllError, setDeleteAllError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     total: 0,
     active: 0,
@@ -58,20 +85,45 @@ export default function VendorsPage() {
     published: 0,
   });
 
+  const isVideoUrl = (url: string) => /\.(mp4|mov|webm|avi|m4v)(\?|$)/i.test(url);
+  const getPreviewUrl = (url: string) => {
+    if (!url) return url;
+    return url;
+  };
+
+  const totalPages = Math.max(1, Math.ceil(filteredVendors.length / ROWS_PER_PAGE));
+  const pageStartIndex = (currentPage - 1) * ROWS_PER_PAGE;
+  const pageEndIndex = pageStartIndex + ROWS_PER_PAGE;
+  const paginatedVendors = filteredVendors.slice(pageStartIndex, pageEndIndex);
+  const isCurrentPageAllSelected =
+    paginatedVendors.length > 0 && paginatedVendors.every((v) => selectedVendors.has(v.id));
+
   // Fetch vendors from API
   const fetchVendors = async () => {
     try {
       setIsLoading(true);
+      setFetchError(null);
       const response = await fetch('/api/admin/vendors');
       const result = await response.json();
 
-      if (result.success) {
+      if (!response.ok) {
+        const message = result?.message || `Request failed (${response.status})`;
+        setFetchError(message);
+        console.error('Failed to fetch vendors:', message);
+        return;
+      }
+
+      if (result.success && Array.isArray(result.vendors)) {
         setVendors(result.vendors);
         calculateStats(result.vendors);
       } else {
-        console.error('Failed to fetch vendors');
+        const message = result?.message || 'Invalid response from server';
+        setFetchError(message);
+        console.error('Failed to fetch vendors:', message);
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Network or unexpected error';
+      setFetchError(message);
       console.error('Error fetching vendors:', error);
     } finally {
       setIsLoading(false);
@@ -95,26 +147,36 @@ export default function VendorsPage() {
 
     // Search filter
     if (searchQuery) {
-      result = result.filter(vendor =>
-        vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        vendor.city.toLowerCase().includes(searchQuery.toLowerCase())
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (vendor) =>
+          vendor.name?.toLowerCase().includes(q) ||
+          vendor.email?.toLowerCase().includes(q) ||
+          (vendor.city && vendor.city.toLowerCase().includes(q))
       );
     }
 
     // Status filter
     if (filterType !== 'all') {
-      result = result.filter(vendor => vendor.status === filterType);
+      result = result.filter((vendor) => vendor.status === filterType);
     }
 
     // Category filter
     if (selectedCategory !== 'all') {
-      result = result.filter(vendor => vendor.category === selectedCategory);
+      if (selectedCategory === UNIDENTIFIED_VALUE) {
+        result = result.filter((v) => !v.category || String(v.category).trim() === '');
+      } else {
+        result = result.filter((v) => v.category === selectedCategory);
+      }
     }
 
     // City filter
     if (selectedCity !== 'all') {
-      result = result.filter(vendor => vendor.city === selectedCity);
+      if (selectedCity === UNIDENTIFIED_VALUE) {
+        result = result.filter((v) => !v.city || String(v.city).trim() === '');
+      } else {
+        result = result.filter((v) => v.city === selectedCity);
+      }
     }
 
     // Sorting
@@ -136,16 +198,19 @@ export default function VendorsPage() {
     });
 
     setFilteredVendors(result);
+    setCurrentPage(1);
   }, [vendors, searchQuery, filterType, selectedCategory, selectedCity, sortBy]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   // Initial load
   useEffect(() => {
     fetchVendors();
   }, []);
-
-  // Get unique categories and cities
-  const categories = Array.from(new Set(vendors.map(v => v.category)));
-  const cities = Array.from(new Set(vendors.map(v => v.city)));
 
   // Toggle vendor selection
   const toggleVendorSelection = (id: string) => {
@@ -160,11 +225,13 @@ export default function VendorsPage() {
 
   // Select all visible vendors
   const toggleSelectAll = () => {
-    if (selectedVendors.size === filteredVendors.length) {
-      setSelectedVendors(new Set());
+    const newSelected = new Set(selectedVendors);
+    if (isCurrentPageAllSelected) {
+      paginatedVendors.forEach((v) => newSelected.delete(v.id));
     } else {
-      setSelectedVendors(new Set(filteredVendors.map(v => v.id)));
+      paginatedVendors.forEach((v) => newSelected.add(v.id));
     }
+    setSelectedVendors(newSelected);
   };
 
   // Delete vendor
@@ -254,52 +321,25 @@ export default function VendorsPage() {
     }
   };
 
-  // Sync attachments for a single vendor
-  const handleSyncAttachments = async (vendorId: string, vendorName: string) => {
-    const folderLink = prompt(
-      `Sync attachments for "${vendorName}"\n\n` +
-      `Enter Google Drive folder link:\n` +
-      `• Master folder (with subfolders named after vendors)\n` +
-      `• Direct vendor folder link\n\n` +
-      `Folder link:`
-    );
-
-    if (!folderLink || !folderLink.trim()) {
-      return;
-    }
-
-    setSyncingVendorId(vendorId);
-    toast.loading(`Syncing attachments for "${vendorName}"...`, { id: `sync-${vendorId}` });
-
+  // Delete all vendors (website + database)
+  const handleDeleteAllVendors = async () => {
+    if (deleteAllConfirm !== 'DELETE') return;
+    setDeleteAllError(null);
+    setDeleteAllLoading(true);
     try {
-      const response = await fetch(`/api/admin/vendors/${vendorId}/sync-attachments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folderLink: folderLink.trim() }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || 'Failed to sync attachments');
+      const res = await fetch('/api/admin/vendors/delete-all', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setDeleteAllError(data?.message || 'Delete failed');
+        return;
       }
-
-      toast.success(
-        `Successfully synced "${vendorName}"!\n` +
-        `Profile: ${result.profilePhotoUpdated ? 'Updated' : 'No change'} | ` +
-        `Gallery: ${result.uploadedGalleryCount} images`,
-        { id: `sync-${vendorId}`, duration: 5000 }
-      );
-      
-      // Refresh vendors list
+      setShowDeleteAllModal(false);
+      setDeleteAllConfirm('');
       fetchVendors();
-    } catch (error) {
-      toast.error(
-        `Sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        { id: `sync-${vendorId}`, duration: 5000 }
-      );
+    } catch (e) {
+      setDeleteAllError(e instanceof Error ? e.message : 'Request failed');
     } finally {
-      setSyncingVendorId(null);
+      setDeleteAllLoading(false);
     }
   };
 
@@ -331,6 +371,101 @@ export default function VendorsPage() {
     a.click();
   };
 
+  const handleAttachFromFolder = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const path = (file as File & { webkitRelativePath?: string }).webkitRelativePath || file.name;
+      if (path.includes('/')) formData.append(path, file);
+    }
+    setAttachLoading(true);
+    setAttachResult(null);
+    setShowAttachDialog(true);
+    try {
+      const res = await fetch('/api/admin/vendors/attach-from-folder', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        setAttachResult({ processed: data.processed, uploaded: data.uploaded, results: data.results ?? [] });
+        fetchVendors();
+      } else {
+        setAttachResult({ processed: 0, uploaded: 0, results: [{ folder: '-', vendor: '-', profile: false, gallery: 0, error: data.message }] });
+      }
+    } catch (err) {
+      setAttachResult({ processed: 0, uploaded: 0, results: [{ folder: '-', vendor: '-', profile: false, gallery: 0, error: err instanceof Error ? err.message : 'Request failed' }] });
+    } finally {
+      setAttachLoading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleSyncR2Media = async () => {
+    if (!confirm('Sync vendor images/videos from media_files (R2) now?')) return;
+    setSyncMediaLoading(true);
+    try {
+      const res = await fetch('/api/admin/vendors/sync-media-files', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data?.message || 'Failed to sync R2 media');
+        return;
+      }
+      fetchVendors();
+      alert(
+        `R2 sync complete.\nProcessed: ${data.processed}\nUpdated: ${data.updated}\nMatched: ${data.matched}\nSkipped: ${data.skipped}`
+      );
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to sync R2 media');
+    } finally {
+      setSyncMediaLoading(false);
+    }
+  };
+
+  const handlePublishAll = async () => {
+    if (!confirm('Publish ALL vendors to website now?')) return;
+    setPublishAllLoading(true);
+    try {
+      if (!vendors.length) {
+        alert('No vendors available to publish.');
+        return;
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+      const batchSize = 40;
+      const ids = vendors.map((v) => v.id).filter(Boolean);
+
+      for (let i = 0; i < ids.length; i += batchSize) {
+        const batch = ids.slice(i, i + batchSize);
+        const batchResults = await Promise.all(
+          batch.map((id) =>
+            fetch(`/api/admin/vendors/${id}/publish`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ published: true }),
+            })
+          )
+        );
+
+        for (const res of batchResults) {
+          if (res.ok) successCount++;
+          else failCount++;
+        }
+      }
+
+      await fetchVendors();
+      if (failCount > 0) {
+        alert(`Publish finished. Success: ${successCount}, Failed: ${failCount}`);
+      } else {
+        alert(`Published ${successCount} vendors successfully.`);
+      }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to publish all vendors');
+    } finally {
+      setPublishAllLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f4f4f4] p-6">
       {/* Header */}
@@ -348,25 +483,46 @@ export default function VendorsPage() {
               <FiDownload className="w-4 h-4" />
               Export CSV
             </button>
+            <input
+              ref={(el) => {
+                attachFolderRef.current = el;
+                if (el) el.setAttribute('webkitdirectory', '');
+              }}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleAttachFromFolder}
+            />
+            <button
+              onClick={() => attachFolderRef.current?.click()}
+              disabled={attachLoading}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-60"
+            >
+              <FiFolder className="w-4 h-4" />
+              {attachLoading ? 'Attaching…' : 'Attach images'}
+            </button>
+            <button
+              onClick={handleSyncR2Media}
+              disabled={syncMediaLoading}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-60"
+            >
+              <FiRefreshCw className={`w-4 h-4 ${syncMediaLoading ? 'animate-spin' : ''}`} />
+              {syncMediaLoading ? 'Syncing R2…' : 'Sync R2 Media'}
+            </button>
+            <button
+              onClick={handlePublishAll}
+              disabled={publishAllLoading}
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-60"
+            >
+              <FiCheckCircle className={`w-4 h-4 ${publishAllLoading ? 'animate-pulse' : ''}`} />
+              {publishAllLoading ? 'Publishing…' : 'Publish All'}
+            </button>
             <button
               onClick={() => setShowImportDialog(true)}
               className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <FiUpload className="w-4 h-4" />
               Import CSV
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Attach Images button clicked, setting dialog to true');
-                setShowAttachImagesDialog(true);
-              }}
-              className="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors flex items-center gap-2 font-semibold cursor-pointer"
-            >
-              <FiImage className="w-4 h-4" />
-              Attach Images
             </button>
             <Link
               href="/admin/vendors/new"
@@ -477,9 +633,10 @@ export default function VendorsPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#D9FF0A]"
               >
-                <option value="all">All Categories</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {ADMIN_CATEGORY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -492,9 +649,10 @@ export default function VendorsPage() {
                 onChange={(e) => setSelectedCity(e.target.value)}
                 className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#D9FF0A]"
               >
-                <option value="all">All Cities</option>
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
+                {ADMIN_CITY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -550,11 +708,63 @@ export default function VendorsPage() {
         )}
       </div>
 
+      {/* Danger zone: Delete all vendors */}
+      <div className="mb-6 p-6 bg-white rounded-2xl border border-red-200 border-dashed">
+        <h3 className="text-sm font-semibold text-red-700 mb-1">Danger zone</h3>
+        <p className="text-sm text-gray-600 mb-3">
+          Permanently remove all vendors from the website and database (public.vendors, vendor_leads, vendor_gallery). This cannot be undone.
+        </p>
+        <button
+          type="button"
+          onClick={() => { setShowDeleteAllModal(true); setDeleteAllError(null); setDeleteAllConfirm(''); }}
+          className="px-4 py-2 text-red-700 border border-red-300 rounded-xl hover:bg-red-50 transition-colors text-sm font-medium"
+        >
+          Delete all vendors
+        </button>
+      </div>
+
+      {/* Fetch error banner */}
+      {fetchError && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-center justify-between gap-4">
+          <p className="text-red-800 text-sm">
+            <strong>Could not load vendors:</strong> {fetchError}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setFetchError(null)}
+              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
+              aria-label="Dismiss"
+            >
+              <FiXCircle className="w-5 h-5" />
+            </button>
+            <button
+              onClick={fetchVendors}
+              className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors flex items-center gap-2 text-sm"
+            >
+              <FiRefreshCw className="w-4 h-4" />
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Vendors Table */}
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D9FF0A]"></div>
+          </div>
+        ) : fetchError ? (
+          <div className="text-center py-12">
+            <FiXCircle className="w-12 h-12 text-red-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">Unable to load vendors</h3>
+            <p className="text-gray-500 mb-4">{fetchError}</p>
+            <button
+              onClick={fetchVendors}
+              className="px-4 py-2 bg-[#D9FF0A] text-[#11190C] rounded-xl hover:bg-[#BEE600] transition-colors font-medium"
+            >
+              Retry
+            </button>
           </div>
         ) : filteredVendors.length === 0 ? (
           <div className="text-center py-12">
@@ -570,7 +780,7 @@ export default function VendorsPage() {
                   <th className="px-6 py-4 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedVendors.size === filteredVendors.length && filteredVendors.length > 0}
+                      checked={isCurrentPageAllSelected}
                       onChange={toggleSelectAll}
                       className="rounded border-gray-300"
                     />
@@ -579,7 +789,6 @@ export default function VendorsPage() {
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Contact</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Location</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Category</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Gallery</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Plan</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Joined</th>
@@ -587,7 +796,7 @@ export default function VendorsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredVendors.map((vendor) => (
+                {paginatedVendors.map((vendor) => (
                   <tr key={vendor.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <input
@@ -599,16 +808,47 @@ export default function VendorsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                          {vendor.profilePhotoUrl ? (
-                            <img
-                              src={vendor.profilePhotoUrl}
-                              alt={vendor.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
-                              {vendor.name.charAt(0).toUpperCase()}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Profile photo */}
+                          <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                            {vendor.profilePhotoUrl ? (
+                              <img
+                                src={getPreviewUrl(vendor.profilePhotoUrl)}
+                                alt={vendor.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold">
+                                {vendor.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                          {/* Gallery thumbnails */}
+                          {vendor.galleryPhotoUrls && vendor.galleryPhotoUrls.length > 0 && (
+                            <div className="flex gap-1">
+                              {vendor.galleryPhotoUrls.slice(0, 4).map((url, idx) => (
+                                <div
+                                  key={idx}
+                                  className="w-8 h-8 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200"
+                                >
+                                  {isVideoUrl(url) ? (
+                                    <div className="w-full h-full bg-gray-900 text-white flex items-center justify-center">
+                                      <FiVideo className="w-3 h-3" />
+                                    </div>
+                                  ) : (
+                                    <img
+                                      src={getPreviewUrl(url)}
+                                      alt={`Gallery ${idx + 1}`}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  )}
+                                </div>
+                              ))}
+                              {vendor.galleryPhotoUrls.length > 4 && (
+                                <div className="w-8 h-8 rounded-md bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 flex-shrink-0 border border-gray-200">
+                                  +{vendor.galleryPhotoUrls.length - 4}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -619,17 +859,25 @@ export default function VendorsPage() {
                               {vendor.subcategory}
                             </div>
                           )}
-                          {vendor.published ? (
-                            <span className="inline-flex items-center gap-1 text-xs text-green-600 mt-1">
-                              <FiCheckCircle className="w-3 h-3" />
-                              Published
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-500 mt-1">
-                              <FiXCircle className="w-3 h-3" />
-                              Draft
-                            </span>
-                          )}
+                          <div className="flex items-center gap-2 mt-1">
+                            {vendor.published ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-green-600">
+                                <FiCheckCircle className="w-3 h-3" />
+                                Published
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-xs text-gray-500">
+                                <FiXCircle className="w-3 h-3" />
+                                Draft
+                              </span>
+                            )}
+                            {vendor.galleryPhotoUrls && vendor.galleryPhotoUrls.length > 0 && (
+                              <span className="text-xs text-gray-500">
+                                <FiImage className="w-3 h-3 inline mr-0.5" />
+                                {vendor.galleryPhotoUrls.length} photos
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -662,37 +910,6 @@ export default function VendorsPage() {
                           {vendor.category.replace('-', ' ')}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {vendor.galleryPhotoUrls && vendor.galleryPhotoUrls.length > 0 ? (
-                        <div className="flex items-center gap-1">
-                          <div className="flex -space-x-2">
-                            {vendor.galleryPhotoUrls.slice(0, 3).map((url, index) => (
-                              <div
-                                key={index}
-                                className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-gray-200"
-                                title={`Gallery photo ${index + 1}`}
-                              >
-                                <img
-                                  src={url}
-                                  alt={`Gallery ${index + 1}`}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).style.display = 'none';
-                                  }}
-                                />
-                              </div>
-                            ))}
-                          </div>
-                          {vendor.galleryPhotoUrls.length > 3 && (
-                            <span className="text-xs text-gray-500 ml-1">
-                              +{vendor.galleryPhotoUrls.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400">No gallery</span>
-                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div>
@@ -745,14 +962,6 @@ export default function VendorsPage() {
                           <FiEdit2 className="w-4 h-4 text-blue-600" />
                         </Link>
                         <button
-                          onClick={() => handleSyncAttachments(vendor.id, vendor.name)}
-                          disabled={syncingVendorId === vendor.id}
-                          className="p-2 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Sync Attachments"
-                        >
-                          <FiRefreshCw className={`w-4 h-4 text-blue-600 ${syncingVendorId === vendor.id ? 'animate-spin' : ''}`} />
-                        </button>
-                        <button
                           onClick={() => handleDeleteVendor(vendor.id)}
                           className="p-2 hover:bg-red-50 rounded-lg transition-colors"
                           title="Delete"
@@ -770,29 +979,124 @@ export default function VendorsPage() {
 
         {/* Results Count */}
         {!isLoading && filteredVendors.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-100 text-sm text-gray-600">
-            Showing {filteredVendors.length} of {vendors.length} vendors
+          <div className="px-6 py-4 border-t border-gray-100 text-sm text-gray-600 flex items-center justify-between">
+            <span>
+              Showing {pageStartIndex + 1}–{Math.min(pageEndIndex, filteredVendors.length)} of {filteredVendors.length} vendors
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Prev
+              </button>
+              <span className="text-xs text-gray-500 min-w-[86px] text-center">
+                Page {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Import Vendors Dialog */}
+      {/* Delete all confirmation modal */}
+      {showDeleteAllModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-red-700 mb-2">Delete all vendors</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              This will remove every vendor from the website and database. Type <strong>DELETE</strong> below to confirm.
+            </p>
+            <input
+              type="text"
+              value={deleteAllConfirm}
+              onChange={(e) => setDeleteAllConfirm(e.target.value)}
+              placeholder="Type DELETE"
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl mb-4 focus:outline-none focus:border-red-500"
+            />
+            {deleteAllError && (
+              <p className="text-sm text-red-600 mb-4">{deleteAllError}</p>
+            )}
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => { setShowDeleteAllModal(false); setDeleteAllConfirm(''); setDeleteAllError(null); }}
+                className="px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAllVendors}
+                disabled={deleteAllConfirm !== 'DELETE' || deleteAllLoading}
+                className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleteAllLoading ? 'Deleting…' : 'Delete all'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attach images dialog */}
+      {showAttachDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100">
+              <h2 className="text-xl font-bold text-[#11190C]">Attach images from folder</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Subfolders must match vendor names exactly (e.g. MyFolder/<strong>Vendor Name</strong>/image.jpg). First image = profile, rest = gallery.
+              </p>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              {attachLoading ? (
+                <div className="text-center py-8 text-gray-500">Uploading and attaching images…</div>
+              ) : attachResult ? (
+                <div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {attachResult.processed} vendor(s) updated, {attachResult.uploaded} files uploaded.
+                  </p>
+                  <div className="space-y-1 max-h-48 overflow-y-auto text-sm">
+                    {attachResult.results.map((r, i) => (
+                      <div key={i} className="flex justify-between gap-2 py-1 border-b border-gray-50 last:border-0">
+                        <span className="font-medium truncate">{r.folder}</span>
+                        <span className={r.error ? 'text-red-500' : 'text-green-600'}>
+                          {r.error ?? (r.profile || r.gallery ? `✓ ${r.vendor}` : r.vendor)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">Select a folder to attach images to vendors.</p>
+              )}
+            </div>
+            <div className="p-4 border-t border-gray-100">
+              <button
+                onClick={() => { setShowAttachDialog(false); setAttachResult(null); }}
+                className="w-full py-2.5 bg-[#11190C] text-white rounded-xl hover:bg-[#1a2610]"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Dialog */}
       <ImportVendorsDialog
         isOpen={showImportDialog}
         onClose={() => setShowImportDialog(false)}
         onSuccess={() => {
           setShowImportDialog(false);
-          fetchVendors();
-        }}
-      />
-
-      {/* Attach Images Dialog */}
-      <AttachImagesDialog
-        isOpen={showAttachImagesDialog}
-        onClose={() => setShowAttachImagesDialog(false)}
-        onSuccess={() => {
-          setShowAttachImagesDialog(false);
-          fetchVendors();
+          fetchVendors(); // Refresh the vendors list after successful import
         }}
       />
     </div>

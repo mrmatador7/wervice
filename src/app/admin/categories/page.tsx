@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
+import {
   FiSearch, FiPlus, FiEdit2, FiTrash2, FiEye, FiRefreshCw,
-  FiToggleLeft, FiToggleRight, FiImage, FiTag, FiList
+  FiToggleLeft, FiToggleRight, FiImage, FiTag, FiList,
 } from 'react-icons/fi';
 import Link from 'next/link';
 import { getSubcategoriesForCategory } from '@/lib/subcategories';
@@ -20,14 +20,37 @@ interface DBCategory {
   created_at?: string;
 }
 
+type CategoryStat = {
+  slug: string;
+  label: string;
+  dbCategory: string;
+  vendorCount: number;
+  publishedCount: number;
+};
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<DBCategory[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<DBCategory[]>([]);
+  const [categoryStats, setCategoryStats] = useState<CategoryStat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
   const [selectedCategory, setSelectedCategory] = useState<DBCategory | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+
+  const fetchCategoryStats = async () => {
+    try {
+      setIsLoadingStats(true);
+      const res = await fetch('/api/admin/categories/stats');
+      const data = await res.json();
+      if (data.success) setCategoryStats(data.categories);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
 
   // Fetch categories from API
   const fetchCategories = async () => {
@@ -50,6 +73,10 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    fetchCategoryStats();
   }, []);
 
   // Filter categories
@@ -126,12 +153,72 @@ export default function CategoriesPage() {
 
   return (
     <div className="min-h-screen bg-[#f4f4f4] p-6">
+      {/* Wervice categories (11) with vendor counts */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-bold text-[#11190C]">Wervice categories</h2>
+            <p className="text-gray-600 mt-1">The 11 categories available on Wervice and vendor counts per category</p>
+          </div>
+          <button
+            onClick={fetchCategoryStats}
+            disabled={isLoadingStats}
+            className="px-4 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50"
+          >
+            <FiRefreshCw className="w-4 h-4" />
+            Refresh
+          </button>
+        </div>
+        {isLoadingStats ? (
+          <div className="bg-white rounded-2xl p-8 border border-gray-100 text-center text-gray-500">Loading…</div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50/80">
+                    <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Category</th>
+                    <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Vendors</th>
+                    <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Published</th>
+                    <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {categoryStats.map((row) => (
+                    <tr key={row.slug} className="border-b border-gray-100 hover:bg-gray-50/50">
+                      <td className="py-4 px-6 font-medium text-[#11190C]">{row.label}</td>
+                      <td className="py-4 px-6 text-right text-gray-700">{row.vendorCount}</td>
+                      <td className="py-4 px-6 text-right">
+                        <span className={row.publishedCount === row.vendorCount ? 'text-green-600 font-medium' : 'text-gray-700'}>
+                          {row.publishedCount}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <Link
+                          href={`/en/categories/${row.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700"
+                        >
+                          <FiEye className="w-4 h-4" />
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-[#11190C]">Categories Management</h1>
-            <p className="text-gray-600 mt-1">Manage wedding service categories and subcategories</p>
+            <p className="text-gray-600 mt-1">Manage wedding service categories and subcategories (database)</p>
           </div>
           <div className="flex items-center gap-3">
             <button

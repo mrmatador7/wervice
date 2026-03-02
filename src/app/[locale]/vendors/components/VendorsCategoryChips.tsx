@@ -4,49 +4,27 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import Image from 'next/image';
 import { FiX } from 'react-icons/fi';
+import { WERVICE_CATEGORIES } from '@/lib/categories';
 
-const categories = [
-  {
-    value: 'venues',
-    label: 'Venues',
-    iconSrc: '/categories/venues.png'
-  },
-  {
-    value: 'dresses',
-    label: 'Dresses',
-    iconSrc: '/categories/dresses.png'
-  },
-  {
-    value: 'catering',
-    label: 'Catering',
-    iconSrc: '/categories/catering.png'
-  },
-  {
-    value: 'photo-video',
-    label: 'Photo & Video',
-    iconSrc: '/categories/photo.png'
-  },
-  {
-    value: 'planning',
-    label: 'Planning',
-    iconSrc: '/categories/event planner.png'
-  },
-  {
-    value: 'beauty',
-    label: 'Beauty',
-    iconSrc: '/categories/beauty.png'
-  },
-  {
-    value: 'decor',
-    label: 'Decor',
-    iconSrc: '/categories/decor.png'
-  },
-  {
-    value: 'music',
-    label: 'Music',
-    iconSrc: '/categories/music.png'
-  }
-];
+const CATEGORY_ICONS: Record<string, string> = {
+  florist: '/categories/decor.png',
+  dresses: '/categories/Dresses.png',
+  venue: '/categories/venues.png',
+  beauty: '/categories/beauty.png',
+  'photo-film': '/categories/photo.png',
+  caterer: '/categories/Catering.png',
+  decor: '/categories/decor.png',
+  negafa: '/categories/beauty.png',
+  artist: '/categories/music.png',
+  'event-planner': '/categories/event-planner.png',
+  cakes: '/categories/Catering.png',
+};
+
+const categories = WERVICE_CATEGORIES.map((c) => ({
+  value: c.dbCategory,
+  label: c.label,
+  iconSrc: CATEGORY_ICONS[c.slug] || '/categories/venues.png',
+}));
 
 interface VendorsCategoryChipsProps {
   activeCategory?: string;

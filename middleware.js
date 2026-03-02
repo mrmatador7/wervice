@@ -15,8 +15,10 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // Default redirect to /en
-  return NextResponse.redirect(new URL('/en', request.url));
+  // Prepend default locale so /vendors/slug -> /en/vendors/slug
+  const url = new URL(request.url);
+  url.pathname = `/en${pathname}`;
+  return NextResponse.redirect(url, 308);
 }
 
 export const config = {

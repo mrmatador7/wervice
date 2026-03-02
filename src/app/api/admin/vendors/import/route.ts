@@ -1,8 +1,7 @@
-'use server';
-
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createClient } from '@/lib/supabase-server';
+import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase-server';
 import { downloadAndUploadImage, findVendorImagesInFolder, findVendorMediaInFolder, getGoogleDriveFolderId, isGoogleDriveApiConfigured } from '@/lib/supabase/image-utils';
 import { generateUniqueSlug } from '@/lib/slug';
 import { revalidateTag } from 'next/cache';
@@ -13,6 +12,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const folderLink = formData.get('folderLink') as string | null;
+    const fastImport = formData.get('fastImport') === 'true'; // Skip image processing - import 500+ without timeout
 
     if (!file) {
       return NextResponse.json(
@@ -114,7 +114,41 @@ export async function POST(request: NextRequest) {
 
     // Create Supabase client early for category/city operations
     const cookieStore = await cookies();
-    const supabase = await createClient();
+    const supabase = await createServerClient();
+
+    // Check authentication and admin access
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized. Please sign in.' },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is admin or super_admin
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_type')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      return NextResponse.json(
+        { success: false, message: 'Failed to verify admin access' },
+        { status: 500 }
+      );
+    }
+
+    const userType = profile?.user_type;
+    const isAdmin = userType === 'admin' || userType === 'super_admin';
+
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, message: 'Forbidden. Admin access required.' },
+        { status: 403 }
+      );
+    }
 
     // Parse data rows
     const vendors = [];
@@ -128,15 +162,26 @@ export async function POST(request: NextRequest) {
       try {
         const values = parseCSVLine(lines[i]);
 
-        if (values.length !== headers.length) {
-          errors.push(`Row ${i + 1}: Incorrect number of columns (${values.length} found, ${headers.length} expected)`);
-          continue;
-        }
+        // Be lenient with column count - pad with empty or truncate (commas in fields can cause mismatch)
+        const paddedValues = [...values];
+        while (paddedValues.length < headers.length) paddedValues.push('');
+        const valuesToUse = paddedValues.slice(0, headers.length);
 
         const vendorData: any = {};
         headers.forEach((header, index) => {
-          vendorData[header] = values[index] || '';
+          vendorData[header] = valuesToUse[index] || '';
         });
+
+        // Filter by Include/Selected column (for green-background rows: add "Include" column with "yes")
+        const includeColumnNames = ['Include', 'include', 'Selected', 'selected', 'Green', 'green', 'Import', 'import'];
+        const includeHeader = headers.find(h => includeColumnNames.includes(h));
+        if (includeHeader) {
+          const includeVal = String(vendorData[includeHeader] || '').trim().toLowerCase();
+          const includeValues = ['yes', '1', 'x', 'true', 'green', 'oui', 'y', '✓', 'ok'];
+          if (!includeValues.includes(includeVal)) {
+            continue; // Skip rows not marked for import
+          }
+        }
 
         // Map user-friendly column names to internal field names
         // Support both formats: "Vendor" or "business_name", etc.
@@ -197,47 +242,39 @@ export async function POST(request: NextRequest) {
         // Store image URLs for processing after vendor creation
         vendorData.imageUrls = imageUrls;
 
-        // Validate required fields (after mapping)
-        const missingFields: string[] = [];
-        if (!vendorData.business_name?.trim()) missingFields.push('Vendor/business_name');
-        if (!vendorData.category?.trim()) missingFields.push('Category');
-        if (!vendorData.city?.trim()) missingFields.push('City');
-        if (!vendorData.phone?.trim()) missingFields.push('Phone');
-        
-        if (missingFields.length > 0) {
-          errors.push(`Row ${i + 1}: Missing required fields: ${missingFields.join(', ')}`);
+        // Validate required fields (after mapping) - be lenient: use placeholder for missing phone
+        if (!vendorData.business_name?.trim()) {
+          errors.push(`Row ${i + 1}: Missing Vendor/business_name`);
           continue;
         }
+        if (!vendorData.category?.trim()) {
+          errors.push(`Row ${i + 1}: Missing Category`);
+          continue;
+        }
+        if (!vendorData.city?.trim()) {
+          errors.push(`Row ${i + 1}: Missing City`);
+          continue;
+        }
+        // Use placeholder if phone missing (many sheets have empty phone)
+        if (!vendorData.phone?.trim()) {
+          vendorData.phone = vendorData.email?.trim() || 'To be confirmed';
+        }
 
-        // Normalize category (handle user-friendly names like "Caterer", "Venue", etc.)
+        // Normalize category (handle user-friendly names - expand for 500+ vendor imports)
         const categoryMapping: { [key: string]: string } = {
-          'Caterer': 'catering',
-          'caterer': 'catering',
-          'Catering': 'catering',
-          'Venue': 'venues',
-          'venue': 'venues',
-          'Venues': 'venues',
-          'Photographer': 'photo_video',
-          'photographer': 'photo_video',
-          'Photo & Video': 'photo_video',
-          'Photo and Video': 'photo_video',
-          'Event Planner': 'event_planner',
-          'event planner': 'event_planner',
-          'Event Planning': 'event_planner',
-          'Beauty': 'beauty',
-          'beauty': 'beauty',
-          'Decor': 'decor',
-          'decor': 'decor',
-          'Music': 'music',
-          'music': 'music',
-          'Dresses': 'dresses',
-          'dresses': 'dresses',
-          'Negafa': 'beauty',
-          'negafa': 'beauty',
-          'Spa': 'beauty',
-          'spa': 'beauty',
-          'Artist': 'music',
-          'artist': 'music'
+          'Caterer': 'catering', 'caterer': 'catering', 'Catering': 'catering', 'Traiteur': 'catering', 'traiteur': 'catering',
+          'Venue': 'venues', 'venue': 'venues', 'Venues': 'venues', 'Lieu': 'venues', 'lieu': 'venues', 'Salle': 'venues',
+          'Photographer': 'photo_video', 'photographer': 'photo_video', 'Photo': 'photo_video', 'photo': 'photo_video',
+          'Photo & Video': 'photo_video', 'Photo and Video': 'photo_video', 'Videographer': 'photo_video', 'Vidéo': 'photo_video',
+          'Event Planner': 'event_planner', 'event planner': 'event_planner', 'Event Planning': 'event_planner',
+          'Planner': 'event_planner', 'planner': 'event_planner', 'Organisateur': 'event_planner',
+          'Beauty': 'beauty', 'beauty': 'beauty', 'Negafa': 'beauty', 'negafa': 'beauty', 'Spa': 'beauty', 'spa': 'beauty',
+          'Makeup': 'beauty', 'makeup': 'beauty', 'Coiffure': 'beauty', 'coiffure': 'beauty', 'Hair': 'beauty',
+          'Decor': 'decor', 'decor': 'decor', 'Décoration': 'decor', 'décoration': 'decor', 'Decoration': 'decor',
+          'Flowers': 'decor', 'flowers': 'decor', 'Fleurs': 'decor', 'fleurs': 'decor',
+          'Music': 'music', 'music': 'music', 'Artist': 'music', 'artist': 'music', 'DJ': 'music', 'dj': 'music',
+          'Band': 'music', 'band': 'music', 'Orchestra': 'music', 'Musique': 'music',
+          'Dresses': 'dresses', 'dresses': 'dresses', 'Robe': 'dresses', 'robe': 'dresses', 'Wedding Dress': 'dresses',
         };
 
         let categoryToNormalize = vendorData.category.trim();
@@ -291,30 +328,22 @@ export async function POST(request: NextRequest) {
         
         vendorData.category = normalizedCategory;
 
-        // Normalize city (accept any city, just normalize the format)
+        // Normalize city (accept any city - expand for 500+ imports)
         const cityMapping: { [key: string]: string } = {
-          'Fes': 'Fes',
-          'Meknes': 'Meknes',
-          'Casablanca': 'Casablanca',
-          'Marrakech': 'Marrakech',
-          'Rabat': 'Rabat',
-          'Tangier': 'Tangier',
-          'Agadir': 'Agadir',
-          'El Jadida': 'El Jadida',
-          'ElJadida': 'El Jadida',
-          'Kenitra': 'Kenitra',
-          'Bouskoura': 'Casablanca', // Map Bouskoura to Casablanca
-          'fes': 'Fes',
-          'meknes': 'Meknes',
-          'casablanca': 'Casablanca',
-          'marrakech': 'Marrakech',
-          'rabat': 'Rabat',
-          'tangier': 'Tangier',
-          'agadir': 'Agadir',
-          'eljadida': 'El Jadida',
-          'elJadida': 'El Jadida',
-          'kenitra': 'Kenitra',
-          'bouskoura': 'Casablanca'
+          'Fes': 'Fes', 'Fès': 'Fes', 'fes': 'Fes', 'FEZ': 'Fes',
+          'Meknes': 'Meknes', 'Meknès': 'Meknes', 'meknes': 'Meknes',
+          'Casablanca': 'Casablanca', 'casablanca': 'Casablanca', 'Casa': 'Casablanca',
+          'Marrakech': 'Marrakech', 'marrakech': 'Marrakech', 'Marrakesh': 'Marrakech',
+          'Rabat': 'Rabat', 'rabat': 'Rabat',
+          'Tangier': 'Tangier', 'Tanger': 'Tangier', 'tangier': 'Tangier', 'tanger': 'Tangier',
+          'Agadir': 'Agadir', 'agadir': 'Agadir',
+          'El Jadida': 'El Jadida', 'ElJadida': 'El Jadida', 'eljadida': 'El Jadida', 'El jadida': 'El Jadida',
+          'Kenitra': 'Kenitra', 'kenitra': 'Kenitra',
+          'Bouskoura': 'Casablanca', 'bouskoura': 'Casablanca',
+          'Mohammedia': 'Mohammedia', 'mohammedia': 'Mohammedia',
+          'Oujda': 'Oujda', 'oujda': 'Oujda',
+          'Tétouan': 'Tetouan', 'Tetouan': 'Tetouan', 'tetouan': 'Tetouan',
+          'Essaouira': 'Essaouira', 'essaouira': 'Essaouira',
         };
 
         let cityToNormalize = vendorData.city.trim();
@@ -368,7 +397,7 @@ export async function POST(request: NextRequest) {
           whatsapp: vendorData.phone.trim(),
           email: vendorData.email?.trim() || null,
           instagram: vendorData.instagram?.trim() || null,
-          profile_description: vendorData.description?.trim() || 'No description provided',
+          profile_description: vendorData.description?.trim() || null,
           subscription_cadence: 'monthly' as const,
           subscription_price_dhs: subscriptionPrice,
           logo_url: '',
@@ -378,6 +407,7 @@ export async function POST(request: NextRequest) {
           source: 'admin_csv_import',
           status: 'approved', // Set as approved (not pending_review) - valid values: 'pending_review', 'approved', 'rejected', 'contacted'
           published: true, // Automatically publish imported vendors
+          google_maps: vendorData.google_maps?.trim() || null,
           imageUrls: vendorData.imageUrls // Store for later processing
         };
 
@@ -447,6 +477,35 @@ export async function POST(request: NextRequest) {
 
         const vendorId = insertedVendor.id;
         successful++;
+
+        // Skip image processing in fast mode (import 500+ vendors without timeout)
+        if (fastImport) {
+          try {
+            const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+            const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+            if (serviceKey && supabaseUrl) {
+              const serviceSupabase = createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } });
+              const cat = String(vendorData.category || '').toLowerCase();
+              const cityVal = String(vendorData.city || '').toLowerCase();
+              const plan = vendorData.subscription_price_dhs >= 350 ? 'premium' : vendorData.subscription_price_dhs >= 250 ? 'pro' : 'basic';
+              await serviceSupabase.from('vendors').upsert({
+                slug,
+                business_name: vendorData.business_name,
+                category: cat,
+                city: cityVal,
+                phone: vendorData.whatsapp || '',
+                email: vendorData.email || null,
+                description: vendorData.profile_description || null,
+                profile_photo_url: null,
+                gallery_photos: null,
+                plan,
+                published: true,
+                created_at: new Date().toISOString(),
+              }, { onConflict: 'slug', ignoreDuplicates: false });
+            }
+          } catch (_) { /* best effort sync to vendors */ }
+          continue; // Skip to next vendor
+        }
 
         // Process folder link FIRST if provided (before uploading images)
         if (imageUrls.folderLink && (!imageUrls.profile || imageUrls.gallery.length === 0)) {
@@ -542,6 +601,37 @@ export async function POST(request: NextRequest) {
             .from('vendor_leads')
             .update({ gallery_urls: galleryUrls })
             .eq('id', vendorId);
+        }
+
+        // Insert into public.vendors so vendor appears on website (uses service role for RLS)
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (serviceKey && supabaseUrl) {
+          try {
+            const serviceSupabase = createClient(supabaseUrl, serviceKey, {
+              auth: { autoRefreshToken: false, persistSession: false },
+            });
+            const cat = String(vendorData.category || '').toLowerCase();
+            const cityVal = String(vendorData.city || '').toLowerCase();
+            const plan = vendorData.subscription_price_dhs >= 350 ? 'premium' : vendorData.subscription_price_dhs >= 250 ? 'pro' : 'basic';
+            const publicVendor = {
+              slug,
+              business_name: vendorData.business_name,
+              category: cat,
+              city: cityVal,
+              phone: vendorData.whatsapp || '',
+              email: vendorData.email || null,
+              description: vendorData.profile_description || null,
+              profile_photo_url: profilePhotoUrl || null,
+              gallery_photos: galleryUrls.length > 0 ? galleryUrls : null,
+              plan,
+              published: true,
+              created_at: new Date().toISOString(),
+            };
+            await serviceSupabase.from('vendors').upsert(publicVendor, { onConflict: 'slug', ignoreDuplicates: false });
+          } catch (vendorSyncErr) {
+            warnings.push(`Row ${i + 1} (${vendorData.business_name}): Synced to admin but failed to publish to website - ${vendorSyncErr instanceof Error ? vendorSyncErr.message : 'Unknown error'}`);
+          }
         }
 
         // Handle video URL (store directly, don't upload to storage)

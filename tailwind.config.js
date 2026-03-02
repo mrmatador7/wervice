@@ -42,7 +42,7 @@ module.exports = {
         'price-warm': '#FFF8D9',
       },
       boxShadow: {
-        card: '0 6px 24px rgba(0,0,0,0.06)',
+        card: '0 4px 16px rgba(0,0,0,0.10)',
         soft: '0 2px 10px rgba(0,0,0,0.05)',
         cardHover: '0 12px 28px rgba(17, 25, 12, 0.10)',
         'venue-card': '0 6px 20px rgba(0,0,0,0.08)',

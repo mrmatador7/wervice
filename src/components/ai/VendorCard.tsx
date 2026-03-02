@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ExternalLink, MessageCircle } from 'lucide-react';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface VendorCardProps {
   vendor: {
@@ -52,7 +53,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
         {/* Actions */}
         <div className="flex gap-2">
           <Link
-            href={`/en/vendors/${vendor.slug}`}
+            href={vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, 'en')}
             className="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1"
           >
             <ExternalLink className="w-3 h-3" />

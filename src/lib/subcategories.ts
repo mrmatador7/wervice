@@ -1,3 +1,5 @@
+import { slugToDbCategory } from './categories';
+
 export interface Subcategory {
   name: string;
   slug: string;
@@ -8,6 +10,7 @@ export interface CategoryWithSubcategories {
   subcategories: Subcategory[];
 }
 
+/** URL slug or DB category → subcategories. Keys are DB category values for lookup. */
 export const SUBCATEGORIES: CategoryWithSubcategories[] = [
   {
     category: 'venues',
@@ -109,11 +112,15 @@ export const SUBCATEGORIES: CategoryWithSubcategories[] = [
       { name: 'Accessories & Jewelry', slug: 'accessories-jewelry' },
     ],
   },
+  { category: 'florist', subcategories: [] },
+  { category: 'negafa', subcategories: [] },
+  { category: 'cakes', subcategories: [] },
 ];
 
-// Helper function to get subcategories for a specific category
+// Helper: URL slug → subcategories (maps slug to DB category for lookup)
 export function getSubcategoriesForCategory(categorySlug: string): Subcategory[] {
-  const categoryData = SUBCATEGORIES.find(c => c.category === categorySlug);
+  const dbCategory = slugToDbCategory(categorySlug) || categorySlug;
+  const categoryData = SUBCATEGORIES.find((c) => c.category === dbCategory);
   return categoryData?.subcategories || [];
 }
 

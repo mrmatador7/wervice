@@ -114,9 +114,6 @@ export default function DashboardRecommendations({ profile, locale }: DashboardR
                   <FiStar className="w-4 h-4 text-[#D9FF0A]" />
                   <span className="text-xs text-gray-600">{vendor.reason}</span>
                 </div>
-                <button className="w-full py-3 bg-[#11190C] text-white rounded-full text-sm font-semibold hover:bg-[#2A2F25] transition-all">
-                  View Details
-                </button>
               </div>
             </div>
           ))}

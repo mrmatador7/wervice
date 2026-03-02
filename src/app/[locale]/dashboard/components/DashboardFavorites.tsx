@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { FiSearch, FiFilter, FiMapPin, FiArrowRight } from 'react-icons/fi';
+import { WERVICE_CATEGORIES } from '@/lib/categories';
 
 interface DashboardFavoritesProps {
   favorites: any[];
@@ -13,7 +14,7 @@ export default function DashboardFavorites({ favorites, locale }: DashboardFavor
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
 
-  const categories = ['all', 'venues', 'photography', 'catering', 'music', 'beauty', 'dresses', 'decor'];
+  const categoryOptions = [{ value: 'all', label: 'All' }, ...WERVICE_CATEGORIES.map((c) => ({ value: c.dbCategory, label: c.label }))];
 
   const filteredFavorites = favorites.filter((fav) => {
     const matchesSearch = fav.vendor?.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -51,17 +52,17 @@ export default function DashboardFavorites({ favorites, locale }: DashboardFavor
 
       {/* Category Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        {categories.map((cat) => (
+        {categoryOptions.map((cat) => (
           <button
-            key={cat}
-            onClick={() => setFilterCategory(cat)}
+            key={cat.value}
+            onClick={() => setFilterCategory(cat.value)}
             className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
-              filterCategory === cat
+              filterCategory === cat.value
                 ? 'bg-[#11190C] text-white'
                 : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
             }`}
           >
-            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            {cat.label}
           </button>
         ))}
       </div>
@@ -100,12 +101,6 @@ export default function DashboardFavorites({ favorites, locale }: DashboardFavor
                 <p className="text-sm text-gray-500 mb-4">
                   {fav.vendor?.priceFromMAD ? `From ${fav.vendor.priceFromMAD} MAD` : 'Price on request'}
                 </p>
-                <Link
-                  href={`/${locale}/vendors/${fav.vendor?.slug}`}
-                  className="w-full block py-3 bg-[#11190C] text-white rounded-full text-sm font-semibold hover:bg-[#2A2F25] transition-all text-center"
-                >
-                  View Details
-                </Link>
               </div>
             </div>
           ))}

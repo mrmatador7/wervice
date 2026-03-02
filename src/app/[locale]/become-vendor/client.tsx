@@ -13,7 +13,7 @@ const benefits = [
 ];
 
 const businessTypes = [
-  'Venue',
+  'Venues',
   'Catering',
   'Photography & Video',
   'Event Planning',

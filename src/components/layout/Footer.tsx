@@ -2,13 +2,11 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useLocale } from '@/contexts/LocaleContext';
-import { CURRENT_YEAR } from '@/lib/config';
+import { CURRENT_YEAR, FOOTER_CONTACT } from '@/lib/config';
 
 export default function Footer() {
   // Suppress hydration warnings for this component as it may be affected by browser extensions
-  const router = useRouter();
   const { locale: currentLocale } = useLocale();
   const t = useTranslations('footer');
 
@@ -17,12 +15,12 @@ export default function Footer() {
       title: 'Wedding Services',
       links: [
         { name: 'Wedding Venues', href: '/categories/venues' },
-        { name: 'Catering Services', href: '/categories/catering' },
-        { name: 'Photography & Video', href: '/categories/photo-video' },
-        { name: 'Wedding Planning', href: '/categories/planning' },
+        { name: 'Catering Services', href: '/categories/caterer' },
+        { name: 'Photography & Video', href: '/categories/photo-film' },
+        { name: 'Wedding Planning', href: '/categories/event-planner' },
         { name: 'Beauty & Henna', href: '/categories/beauty' },
         { name: 'Decor & Styling', href: '/categories/decor' },
-        { name: 'Music & Entertainment', href: '/categories/music' },
+        { name: 'Music & Entertainment', href: '/categories/artist' },
         { name: 'Wedding Dresses', href: '/categories/dresses' }
       ]
     },
@@ -31,19 +29,10 @@ export default function Footer() {
       links: [
         { name: 'Wedding Articles', href: '/blog' },
         { name: 'Planning Guide', href: '/guides/planning' },
-        { name: 'Vendor Directory', href: '/vendors' },
         { name: 'Wedding Checklist', href: '/checklist' },
         { name: 'Budget Calculator', href: '/budget-calculator' },
         { name: 'Wedding Timeline', href: '/timeline' },
         { name: 'Moroccan Traditions', href: '/traditions' }
-      ]
-    },
-    {
-      title: 'For Vendors',
-      links: [
-        { name: 'Become a Vendor', href: '/become-vendor' },
-        { name: 'Vendor Login', href: '/vendor-login' },
-        { name: 'Vendor Dashboard', href: '/vendor-dashboard' }
       ]
     },
     {
@@ -85,14 +74,14 @@ export default function Footer() {
 
               {/* Contact Info */}
               <div className="space-y-2 text-sm text-white/60">
-                <div className="flex items-center gap-2">
+                <a href={`mailto:${FOOTER_CONTACT.email}`} className="flex items-center gap-2 hover:text-[#d9ff0a] transition-colors">
                   <span>📧</span>
-                  <span>hello@wervice.ma</span>
-                </div>
-                <div className="flex items-center gap-2">
+                  <span>{FOOTER_CONTACT.email}</span>
+                </a>
+                <a href={`tel:${FOOTER_CONTACT.phone.replace(/\s/g, '')}`} className="flex items-center gap-2 hover:text-[#d9ff0a] transition-colors">
                   <span>📞</span>
-                  <span>+212 6XX XXX XXX</span>
-                </div>
+                  <span>{FOOTER_CONTACT.phone}</span>
+                </a>
               </div>
             </div>
 
@@ -103,30 +92,16 @@ export default function Footer() {
                 <ul className="space-y-2">
                   {section.links.map((link, linkIndex) => (
                     <li key={linkIndex}>
-                      {link.name === 'Planning Guide' || link.name === 'Vendor Directory' ? (
-                        <button
-                          onClick={() => {
-                            const path = link.name === 'Planning Guide' ? 'guides/planning' :
-                              link.name === 'Vendor Directory' ? 'vendors' : '';
-                            router.push(`/${currentLocale}/${path}`);
-                          }}
-                          className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm text-left"
-                        >
-                          {link.name}
-                        </button>
-                      ) : (
-                        <Link
-                          href={
-                            link.name === 'Wedding Checklist' ? `/${currentLocale}/checklist` :
-                              link.name === 'How It Works' ? `/${currentLocale}/how-it-works` :
-                                link.href.startsWith('/vendors?') ? `/${currentLocale}${link.href}` :
-                                  `/${currentLocale}${link.href}`
-                          }
-                          className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm"
-                        >
-                          {link.name}
-                        </Link>
-                      )}
+                      <Link
+                        href={
+                          link.name === 'Wedding Checklist' ? `/${currentLocale}/checklist` :
+                            link.name === 'How It Works' ? `/${currentLocale}/how-it-works` :
+                              `/${currentLocale}${link.href}`
+                        }
+                        className="text-white/70 hover:text-[#d9ff0a] transition-colors duration-200 text-sm"
+                      >
+                        {link.name}
+                      </Link>
                     </li>
                   ))}
                 </ul>

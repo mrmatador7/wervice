@@ -3,19 +3,9 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { FiMapPin } from 'react-icons/fi';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
 
-const MOROCCAN_CITIES = [
-  'All Cities',
-  'Casablanca',
-  'Marrakech',
-  'Rabat',
-  'Tangier',
-  'Agadir',
-  'Fes',
-  'Meknes',
-  'El Jadida',
-  'Kenitra',
-];
+const CITY_OPTIONS = ['All Cities', ...MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => c.label)];
 
 interface CitySelectProps {
   selectedCity?: string;
@@ -80,7 +70,7 @@ export default function CitySelect({ selectedCity, onCityChange }: CitySelectPro
 
           {/* Dropdown */}
           <div className="absolute top-full mt-2 w-48 bg-white border border-[#E9E6E2] rounded-xl shadow-lg z-20 py-2">
-            {MOROCCAN_CITIES.map((city) => (
+            {CITY_OPTIONS.map((city) => (
               <button
                 key={city}
                 onClick={() => handleCityChange(city)}

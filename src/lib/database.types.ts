@@ -236,6 +236,7 @@ export interface Database {
                     city: string
                     whatsapp: string
                     email: string
+                    google_maps: string | null
                     instagram: string | null
                     profile_starting_price: string | null
                     profile_description: string
@@ -268,6 +269,7 @@ export interface Database {
                     city: string
                     whatsapp: string
                     email: string
+                    google_maps?: string | null
                     instagram?: string | null
                     profile_starting_price?: string | null
                     profile_description: string
@@ -300,6 +302,7 @@ export interface Database {
                     city?: string
                     whatsapp?: string
                     email?: string
+                    google_maps?: string | null
                     instagram?: string | null
                     profile_starting_price?: string | null
                     profile_description?: string

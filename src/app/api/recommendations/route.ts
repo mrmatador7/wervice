@@ -14,33 +14,42 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user profile for personalization
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('city, onboarding_data')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (!profile) {
-      return NextResponse.json({ recommendations: {} })
+    // If no profile or error, return empty recommendations
+    if (profileError || !profile) {
+      return NextResponse.json({ recommendations: [] })
     }
 
-    // Call the existing recommendation API with the user's data
+    // Call the existing recommendation API (it uses GET and gets user data from session)
+    // Get all cookies from the request to pass to internal API call
+    const cookieHeader = request.headers.get('cookie') || ''
+    
     const recommendationResponse = await fetch(`${request.nextUrl.origin}/api/recommend/vendors`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Cookie': cookieHeader,
       },
-      body: JSON.stringify({
-        city: profile.city,
-        onboardingData: profile.onboarding_data
-      })
+      // Don't cache internal API calls
+      cache: 'no-store',
     })
 
     if (!recommendationResponse.ok) {
-      throw new Error('Failed to get recommendations')
+      // If recommendation API fails, return empty array instead of throwing
+      console.error('Failed to get recommendations:', recommendationResponse.statusText)
+      return NextResponse.json({ recommendations: [] })
     }
 
-    const recommendations = await recommendationResponse.json()
+    const recommendationData = await recommendationResponse.json()
+    
+    // Ensure recommendations is an array
+    const recommendations = Array.isArray(recommendationData.recommendations) 
+      ? recommendationData.recommendations 
+      : []
 
     return NextResponse.json({ recommendations })
   } catch (error) {

@@ -3,32 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+import { categoryPricing, getPriceFromCategory, getCategoryData } from '@/lib/categoryPricing';
 
-// Authoritative category to price mapping (single source of truth)
-const categoryPricing: { [key: string]: { name: string; price: number; icon: string } } = {
-  'venues': { name: 'Venues', price: 250, icon: '/categories/venues.png' },
-  'catering': { name: 'Catering', price: 250, icon: '/categories/Catering.png' },
-  'planning': { name: 'Planning', price: 250, icon: '/categories/event planner.png' },
-  'photo-video': { name: 'Photo & Video', price: 200, icon: '/categories/photo.png' },
-  'music': { name: 'Music', price: 200, icon: '/categories/music.png' },
-  'decor': { name: 'Decor', price: 150, icon: '/categories/decor.png' },
-  'beauty': { name: 'Beauty', price: 150, icon: '/categories/beauty.png' },
-  'dresses': { name: 'Dresses', price: 150, icon: '/categories/Dresses.png' }
-};
-
-const cities = [
-  'Casablanca', 'Marrakech', 'Rabat', 'Tanger', 'Agadir', 'Fes', 'Meknes', 'El Jadida', 'Kenitra'
-];
-
-// Helper function to get price from category slug
-const getPriceFromCategory = (categorySlug: string): number => {
-  return categoryPricing[categorySlug]?.price || 0;
-};
-
-// Helper function to get category data from slug
-const getCategoryData = (categorySlug: string) => {
-  return categoryPricing[categorySlug];
-};
+const cities = MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => c.label);
 
 interface FormData {
   businessName: string;
@@ -66,17 +44,13 @@ export default function VendorSubscribeForm({
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Helper function to get current price based on selected category
   const getCurrentPrice = (): number => {
-    const categorySlug = Object.keys(categoryPricing).find(
-      slug => categoryPricing[slug].name === formData.category
-    );
-    return categorySlug ? getPriceFromCategory(categorySlug) : 0;
+    return formData.category ? getPriceFromCategory(formData.category) : 0;
   };
 
   const [formData, setFormData] = useState<FormData>({
     businessName: '',
-    category: defaultCategory ? categoryPricing[defaultCategory]?.name || defaultCategory : '',
+    category: defaultCategory && categoryPricing[defaultCategory] ? defaultCategory : '',
     city: '',
     whatsapp: '',
     email: '',
@@ -412,7 +386,7 @@ export default function VendorSubscribeForm({
                     >
                       <option value="">Select a category</option>
                       {Object.entries(categoryPricing).map(([slug, data]) => (
-                        <option key={slug} value={data.name}>
+                        <option key={slug} value={slug}>
                           {data.name} — {data.price} DHS/month
                         </option>
                       ))}

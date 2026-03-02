@@ -59,19 +59,22 @@ export interface CityInfo {
   vendorCount?: number;
 }
 
-// Vendor categories
+// Wervice categories (11) – slugs used in URLs
 export const VENDOR_CATEGORIES = [
+  'florist',
+  'dresses',
   'venues',
-  'catering',
-  'photo-video',
-  'planning',
   'beauty',
+  'photo-film',
+  'caterer',
   'decor',
-  'music',
-  'dresses'
+  'negafa',
+  'artist',
+  'event-planner',
+  'cakes',
 ] as const;
 
-export type VendorCategory = typeof VENDOR_CATEGORIES[number];
+export type VendorCategory = (typeof VENDOR_CATEGORIES)[number];
 
 // Sort options
 export const SORT_OPTIONS = [
@@ -84,18 +87,24 @@ export const SORT_OPTIONS = [
 
 export type SortOption = typeof SORT_OPTIONS[number]['value'];
 
-// Moroccan cities for filters (matches database schema with proper capitalization)
+// Cities available on Wervice (canonical list for filters, forms, and admin)
 export const MOROCCAN_CITIES = [
   { value: 'all', label: 'All Cities' },
   { value: 'Marrakech', label: 'Marrakech' },
   { value: 'Casablanca', label: 'Casablanca' },
+  { value: 'Fes', label: 'Fes' },
   { value: 'Rabat', label: 'Rabat' },
-  { value: 'Tangier', label: 'Tangier' },
+  { value: 'Tanger', label: 'Tanger' },
+  { value: 'Oujda', label: 'Oujda' },
   { value: 'Agadir', label: 'Agadir' },
-  { value: 'Fes', label: 'Fès' },
   { value: 'Meknes', label: 'Meknes' },
+  { value: 'Tetouan', label: 'Tetouan' },
+  { value: 'Kenitra', label: 'Kenitra' },
   { value: 'El Jadida', label: 'El Jadida' },
-  { value: 'Kenitra', label: 'Kenitra' }
+  { value: 'Safi', label: 'Safi' },
+  { value: 'Laayoune', label: 'Laayoune' },
+  { value: 'El Hoceima', label: 'El Hoceima' },
+  { value: 'Beni Mellal', label: 'Beni Mellal' },
 ] as const;
 
 export type MoroccanCity = typeof MOROCCAN_CITIES[number];

@@ -1,80 +1,64 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { MOROCCAN_CITIES } from '@/lib/types/vendor';
-
 interface CategoryBannerProps {
   categoryName: string;
   imageUrl?: string;
   category?: string;
 }
 
-export default function CategoryBanner({ categoryName, imageUrl, category }: CategoryBannerProps) {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
+/** Per-category taglines shown below the title in the hero */
+const CATEGORY_TAGLINES: Record<string, string> = {
+  florist:        'Discover the most beautiful wedding florists across Morocco',
+  dresses:        'Find your perfect bridal gown or traditional kaftan in Morocco',
+  venues:         'Explore the finest wedding venues across Morocco',
+  beauty:         'Discover top bridal makeup artists and hair stylists in Morocco',
+  'photo-film':   'Capture every unforgettable moment with Morocco\'s best photographers',
+  caterer:        'Taste excellence — discover the finest wedding caterers in Morocco',
+  decor:          'Transform your celebration with stunning wedding décor in Morocco',
+  negafa:         'Honour Moroccan tradition with the finest Negafas in Morocco',
+  artist:         'Set the perfect mood with exceptional wedding entertainment in Morocco',
+  'event-planner':'Plan your perfect wedding with expert event planners across Morocco',
+  cakes:          'Discover the most exquisite wedding cake vendors across Morocco',
+};
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Navigate with search params
-    const params = new URLSearchParams();
-    if (searchQuery) params.set('q', searchQuery);
-    router.push(`?${params.toString()}`);
-  };
+export default function CategoryBanner({ categoryName, imageUrl, category }: CategoryBannerProps) {
+  const tagline = (category && CATEGORY_TAGLINES[category]) || `Discover the best ${categoryName.toLowerCase()} vendors in Morocco`;
 
   return (
-    <div className="w-full px-4 md:px-6 pt-6 pb-2">
-      <div className="relative w-full h-[300px] md:h-[350px] bg-gradient-to-br from-neutral-900 to-neutral-700 overflow-hidden rounded-3xl">
-        {/* Background Image with Overlay */}
+    <div className="w-full">
+      <div className="relative w-full h-[280px] md:h-[320px] bg-[#0a0a0a] overflow-hidden">
+
+        {/* Background image — fades in from center-right */}
         {imageUrl && (
           <>
-            <img 
-              src={imageUrl} 
+            <img
+              src={imageUrl}
               alt={categoryName}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover object-right"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+            {/* Left-heavy dark gradient so text stays legible */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20" />
+            {/* Bottom fade for cleaner transition to page */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
           </>
         )}
-        
-        {/* Content */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 md:px-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center max-w-4xl mb-3 drop-shadow-lg">
+
+        {/* Fallback dark gradient when no image */}
+        {!imageUrl && (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#11190C] via-neutral-900 to-neutral-800" />
+        )}
+
+        {/* Content — left-aligned on large screens, centered on mobile */}
+        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 md:px-12 max-w-5xl mx-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight mb-4"
+              style={{ fontFamily: '"Georgia", "Times New Roman", serif' }}>
             {categoryName}
           </h1>
-          <p className="text-white/90 text-sm md:text-base text-center max-w-2xl mb-6 drop-shadow-md">
-            Discover the best wedding vendors in Morocco
+          <p className="text-white/75 text-sm md:text-base max-w-xl leading-relaxed">
+            {tagline}
           </p>
-
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="w-full max-w-3xl">
-            <div className="flex flex-col sm:flex-row gap-2 bg-white rounded-2xl shadow-2xl p-2">
-              {/* Search Input */}
-              <div className="flex-1 relative">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={`Search ${categoryName.toLowerCase()} name...`}
-                  className="w-full pl-12 pr-4 py-3 text-neutral-900 placeholder-neutral-500 focus:outline-none rounded-xl"
-                />
-              </div>
-
-              {/* Search Button */}
-              <button
-                type="submit"
-                className="px-8 py-3 bg-[#D9FF0A] text-[#11190C] font-semibold rounded-xl hover:bg-[#11190C] hover:text-[#D9FF0A] transition-all duration-300 shadow-lg hover:shadow-xl whitespace-nowrap"
-              >
-                Find {categoryName}
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>
   );
 }
-

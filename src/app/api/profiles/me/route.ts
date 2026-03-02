@@ -22,10 +22,15 @@ export async function GET() {
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError) {
       console.error('Error fetching profile:', profileError);
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    }
+
+    // If no profile exists, return 404
+    if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 

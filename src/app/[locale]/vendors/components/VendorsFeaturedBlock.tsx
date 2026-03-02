@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiStar, FiMapPin } from 'react-icons/fi';
 import { Vendor } from '@/lib/types/vendor';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface VendorsFeaturedBlockProps {
   vendors: Vendor[];
@@ -38,7 +39,7 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
           {displayVendors.map((vendor) => (
             <Link
               key={vendor.slug}
-              href={`/${currentLocale}/vendors/${vendor.slug}`}
+              href={vendorUrl(vendor, currentLocale)}
               className="group block"
             >
               <div className="bg-white rounded-2xl border border-[#CAC4B7] shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">

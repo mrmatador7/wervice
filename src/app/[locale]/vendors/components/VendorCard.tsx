@@ -1,124 +1,114 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, MapPin, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { MapPin } from 'lucide-react';
 import { Vendor } from '@/lib/types/vendor';
 import { labelForCategory } from '@/lib/categories';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface VendorCardProps {
   vendor: Vendor;
 }
 
 function VendorCard({ vendor }: VendorCardProps) {
-  // Get all available images (gallery + profile)
-  // Handle both gallery_urls and gallery_photos field names
-  const allImages: string[] = [];
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Build image list
+  const images: string[] = [];
   const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
   if (Array.isArray(gallery) && gallery.length > 0) {
-    allImages.push(...gallery.filter((url: string) => url && url.trim()));
+    images.push(...gallery.filter((url: string) => url && url.trim()));
   }
-  if (vendor.profile_photo_url && vendor.profile_photo_url.trim()) {
-    allImages.push(vendor.profile_photo_url);
+  if (vendor.profile_photo_url?.trim()) {
+    images.push(vendor.profile_photo_url.trim());
   }
-  
-  // Select a random image using vendor ID as seed for consistency
-  const getFeaturedImage = () => {
-    if (allImages.length === 0) return '/placeholder-vendor.jpg';
-    const seed = vendor.id ? vendor.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) : 0;
-    return allImages[seed % allImages.length];
-  };
-  
-  const imageUrl = getFeaturedImage();
+
+  const total = images.length;
+  const hasImages = total > 0;
+
+  useEffect(() => {
+    if (total <= 1) return;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % total);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [total]);
+
   const categoryLabel = labelForCategory(vendor.category);
   const cityName = vendor.city.charAt(0).toUpperCase() + vendor.city.slice(1);
+  const vendorHref = vendorUrl(vendor, 'en');
 
   return (
-    <article className="group relative rounded-2xl bg-white ring-1 ring-black/5 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-      {/* Image Container */}
-      <div className="relative overflow-hidden rounded-t-2xl aspect-[4/3]">
-        <Link href={`/vendors/${vendor.slug}`}>
-          <Image
-            src={imageUrl}
-            alt={vendor.business_name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          />
+    <article className="group flex flex-col rounded-[28px] border border-zinc-200 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.10),0_1px_4px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,25,12,0.14)]">
+      {/* Image carousel */}
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] bg-neutral-100">
+        <Link href={vendorHref} className="block h-full">
+          {hasImages ? (
+            <div
+              className="flex h-full transition-transform duration-700 ease-in-out"
+              style={{ width: `${total * 100}%`, transform: `translateX(-${(activeIndex * 100) / total}%)` }}
+            >
+              {images.map((src, i) => (
+                <div key={i} className="relative h-full flex-shrink-0" style={{ width: `${100 / total}%` }}>
+                  <Image
+                    src={src}
+                    alt={`${vendor.business_name} ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    priority={i === 0}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
+              <span className="text-5xl font-bold text-zinc-300">
+                {vendor.business_name.charAt(0)}
+              </span>
+            </div>
+          )}
         </Link>
 
-        {/* Featured Badge */}
-        {vendor.is_featured && (
-          <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2 py-1 text-[11px] font-medium ring-1 ring-black/5">
-            Featured
+        {/* Category pill */}
+        <div className="absolute left-3 top-3 rounded-2xl bg-white/95 px-3 py-1.5 shadow-sm backdrop-blur-sm">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#11190C]">
+            {categoryLabel}
           </span>
-        )}
-
-        {/* Category Icon */}
-        <div className="absolute right-3 top-3 rounded-full bg-white/90 p-1.5 ring-1 ring-black/5">
-          <div className="w-4 h-4 bg-gray-400 rounded" /> {/* Placeholder for category icon */}
         </div>
 
-        {/* Image Carousel Dots (if multiple images) */}
-        {vendor.gallery_urls && vendor.gallery_urls.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-1">
-            <div className="w-1.5 h-1.5 bg-white rounded-full opacity-50" />
-            <div className="w-1.5 h-1.5 bg-white rounded-full" />
-            <div className="w-1.5 h-1.5 bg-white rounded-full opacity-50" />
+        {/* Dot indicators */}
+        {total > 1 && (
+          <div className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => { e.preventDefault(); setActiveIndex(i); }}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/60'
+                }`}
+                aria-label={`Image ${i + 1}`}
+              />
+            ))}
           </div>
         )}
       </div>
 
       {/* Content */}
-      <Link href={`/vendors/${vendor.slug}`} className="block p-4 md:p-5">
-        {/* Business Name */}
-        <h3 className="font-semibold text-wv-text text-lg leading-tight mb-2 group-hover:text-wervice-lime transition-colors line-clamp-2">
-          {vendor.business_name}
-        </h3>
+      <div className="flex flex-1 flex-col px-1 pb-1 pt-5">
+        <Link href={vendorHref}>
+          <h3 className="line-clamp-2 text-[22px] font-bold leading-snug text-[#11190C] sm:text-2xl">
+            {vendor.business_name}
+          </h3>
+        </Link>
 
-        {/* Meta Line */}
-        <div className="flex items-center gap-2 text-sm text-wv-sub mb-3">
-          <span>{categoryLabel}</span>
-          <span>•</span>
-          <div className="flex items-center gap-1">
-            <MapPin className="w-3 h-3" />
-            <span>{cityName}</span>
-          </div>
+        <div className="mt-3 flex items-center gap-2">
+          <MapPin className="h-4 w-4 shrink-0 text-[#aaa]" />
+          <span className="text-sm font-medium text-[#888]">{cityName}</span>
         </div>
-
-        {/* Description */}
-        {vendor.description && (
-          <p className="text-sm text-wv-sub line-clamp-2 mb-4" title={vendor.description}>
-            {vendor.description}
-          </p>
-        )}
-
-        {/* Footer */}
-        <div className="flex items-center justify-between">
-          {/* Rating */}
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 fill-wervice-lime text-wervice-lime" />
-            <span className="text-sm font-medium text-wv-text">
-              {vendor.rating.toFixed(1)}
-            </span>
-          </div>
-
-          {/* Price */}
-          {vendor.starting_price && (
-            <span className="text-sm text-wv-sub">
-              From MAD {vendor.starting_price.toLocaleString()}
-            </span>
-          )}
-        </div>
-      </Link>
-
-      {/* Hover CTA */}
-      <Link
-        href={`/vendors/${vendor.slug}`}
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center bg-black/20"
-      >
-        <div className="bg-white rounded-full p-3 shadow-lg">
-          <ChevronRight className="w-5 h-5 text-wv-text" />
-        </div>
-      </Link>
+      </div>
     </article>
   );
 }

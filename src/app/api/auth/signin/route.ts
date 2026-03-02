@@ -37,10 +37,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fetch user profile to check user_type
+    // Use maybeSingle() instead of single() to avoid errors when profile doesn't exist
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_type, id, email')
+      .eq('id', data.user.id)
+      .maybeSingle()
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError)
+      console.error('Profile error details:', {
+        code: profileError.code,
+        message: profileError.message,
+        details: profileError.details,
+        hint: profileError.hint
+      })
+      // Continue even if profile fetch fails - user_type will be null
+    }
+
+    const userType = profile?.user_type || null
+    
+    console.log('Signin - Profile check:', {
+      hasProfile: !!profile,
+      userType,
+      userId: data.user.id,
+      email: data.user.email,
+      profileError: profileError ? {
+        code: profileError.code,
+        message: profileError.message
+      } : null
+    })
+
     return NextResponse.json({
       success: true,
       user: data.user,
       session: data.session,
+      user_type: userType,
       message: 'Signed in successfully'
     })
 

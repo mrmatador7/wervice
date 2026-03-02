@@ -81,16 +81,23 @@ export const STEP_LABELS: Record<OnboardingStep, string> = {
   summary: 'Summary & Finish'
 };
 
-// Moroccan cities for onboarding
+// Cities available on Wervice (matches canonical list in lib/types/vendor)
 export const MOROCCAN_CITIES = [
   { id: 'marrakech', name: 'Marrakech', description: 'The Red City - Traditional and magical', popular: true },
   { id: 'casablanca', name: 'Casablanca', description: 'Modern cosmopolitan city', popular: true },
+  { id: 'fes', name: 'Fes', description: 'Ancient medina and cultural heritage', popular: true },
   { id: 'rabat', name: 'Rabat', description: 'Capital city with royal charm', popular: true },
-  { id: 'fes', name: 'Fes', description: 'Ancient medina and cultural heritage', popular: false },
-  { id: 'tangier', name: 'Tangier', description: 'Coastal city with European influence', popular: false },
+  { id: 'tanger', name: 'Tanger', description: 'Coastal city with European influence', popular: false },
+  { id: 'oujda', name: 'Oujda', description: 'Eastern gateway city', popular: false },
+  { id: 'agadir', name: 'Agadir', description: 'Beach and sun destination', popular: false },
   { id: 'meknes', name: 'Meknes', description: 'Historic imperial city', popular: false },
-  { id: 'el-jadida', name: 'El Jadida', description: 'Portuguese colonial architecture', popular: false },
+  { id: 'tetouan', name: 'Tetouan', description: 'Mediterranean and historic medina', popular: false },
   { id: 'kenitra', name: 'Kenitra', description: 'Modern city on the Atlantic coast', popular: false },
+  { id: 'el-jadida', name: 'El Jadida', description: 'Portuguese colonial architecture', popular: false },
+  { id: 'safi', name: 'Safi', description: 'Coastal port and ceramics', popular: false },
+  { id: 'laayoune', name: 'Laayoune', description: 'Southern Morocco', popular: false },
+  { id: 'el-hoceima', name: 'El Hoceima', description: 'Mediterranean coast', popular: false },
+  { id: 'beni-mellal', name: 'Beni Mellal', description: 'Atlas gateway and agriculture', popular: false },
 ];
 
 // Wedding styles options

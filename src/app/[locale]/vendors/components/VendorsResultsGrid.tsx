@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { FiStar, FiMessageCircle, FiHeart } from 'react-icons/fi';
 import { Vendor } from '@/lib/types/vendor';
 import { labelForCategory } from '@/lib/categories';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface VendorsResultsGridProps {
   vendors: Vendor[];
@@ -99,7 +100,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
       <div className="p-4">
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1 min-w-0">
-            <Link href={`/${currentLocale}/vendors/${vendor.slug}`}>
+            <Link href={vendorUrl(vendor, currentLocale)}>
               <h3 className="font-semibold text-[#11190C] text-lg mb-1 hover:text-[#D9FF0A] transition-colors truncate">
                 {vendor.business_name}
               </h3>
@@ -133,15 +134,8 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
           </p>
         )}
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/${currentLocale}/vendors/${vendor.slug}`}
-            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#D9FF0A] hover:bg-[#D9FF0A]/90 text-[#11190C] font-medium rounded-xl transition-colors text-sm"
-          >
-            View Details
-          </Link>
-          {whatsappUrl && (
+        {whatsappUrl && (
+          <div className="flex items-center gap-2">
             <a
               href={whatsappUrl}
               target="_blank"
@@ -151,8 +145,8 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
             >
               <FiMessageCircle className="w-4 h-4" />
             </a>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

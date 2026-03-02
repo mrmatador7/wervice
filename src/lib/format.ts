@@ -40,24 +40,15 @@ export function formatVendorName(name: string): string {
     .join(' ');
 }
 
+import { labelForCategory } from './categories';
+
 /**
- * Format category name for display
+ * Format category name for display (uses canonical Wervice categories)
  */
 export function formatCategoryName(slug: string): string {
-  const categoryNames: Record<string, string> = {
-    'venues': 'Venues',
-    'catering': 'Catering',
-    'photography': 'Photo & Video',
-    'planning': 'Event Planner',
-    'beauty': 'Beauty',
-    'decor': 'Decor',
-    'music': 'Music',
-    'dresses': 'Dresses',
-  };
-  
-  return categoryNames[slug] || slug
+  return labelForCategory(slug) || slug
     .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
 

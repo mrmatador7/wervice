@@ -11,9 +11,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
   const locale = resolvedParams?.locale ?? 'en';
 
   return (
-    <>
+    <div className="flex flex-1 flex-col">
       <Header />
-      <main className="min-h-screen bg-[#f4f4f4]">
+      <main className="flex-1 bg-[#f4f4f4]">
         {/* Hero Section */}
         <div className="bg-[#f7f7f7]">
           <Hero locale={locale} />
@@ -42,6 +42,6 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

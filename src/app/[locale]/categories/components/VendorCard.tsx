@@ -3,6 +3,7 @@ import { FiStar, FiHeart } from 'react-icons/fi';
 import { formatPrice, formatRating } from '@/lib/format';
 import { convert } from '@/lib/currency';
 import { CurrencyCode } from '@/lib/types/vendor';
+import { vendorUrl } from '@/lib/vendor-url';
 
 interface Vendor {
   id: string;
@@ -26,12 +27,13 @@ interface VendorCardProps {
 
 export default function VendorCard({ vendor, currency = 'MAD' }: VendorCardProps) {
   const convertedPrice = vendor.priceFromMAD ? convert(vendor.priceFromMAD, currency) : undefined;
+  const href = vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, 'en');
 
   return (
     <article className="group overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-card hover:shadow-cardHover hover:-translate-y-1 transition-all duration-200 will-change-transform">
       {/* Image Container */}
       <div className="relative overflow-hidden rounded-t-xl aspect-[4/3]">
-        <Link href={`/vendors/${vendor.slug}`}>
+        <Link href={href}>
           <img
             src={vendor.cover}
             alt={vendor.name}
@@ -67,7 +69,7 @@ export default function VendorCard({ vendor, currency = 'MAD' }: VendorCardProps
       <div className="p-4 md:p-5">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 mb-2">
-          <Link href={`/vendors/${vendor.slug}`}>
+          <Link href={href}>
             <h3 className="text-base font-medium text-wv-black line-clamp-2 hover:text-wv-lime transition-colors">
               {vendor.name}
             </h3>
@@ -108,12 +110,6 @@ export default function VendorCard({ vendor, currency = 'MAD' }: VendorCardProps
             )}
           </div>
 
-          <Link
-            href={`/vendors/${vendor.slug}`}
-            className="inline-flex h-9 items-center rounded-full bg-wv-lime px-4 text-sm font-medium text-wv-black shadow-sm hover:shadow-md transition-all"
-          >
-            View Details
-          </Link>
         </div>
       </div>
     </article>

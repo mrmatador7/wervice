@@ -50,10 +50,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
             if (!profileResponse.ok) {
                 if (profileResponse.status === 401) {
-                    // Clear cached data on authentication failure
-                    authStorage.clear();
-                    setUser(null);
-                    setProfile(null);
+                    // Only clear if this is not the initial load (give cookies time to be set)
+                    // Check if we have cached data - if so, this might be a timing issue
+                    const cachedData = authStorage.get();
+                    if (!cachedData) {
+                        // No cache, this is a real auth failure
+                        authStorage.clear();
+                        setUser(null);
+                        setProfile(null);
+                    } else {
+                        // Have cache, might be timing issue - keep cached data and retry later
+                        console.log('Profile fetch returned 401 but we have cached data, might be timing issue');
+                        // Don't clear, just return - will retry on next refresh
+                    }
                 } else {
                     throw new Error(`Failed to fetch profile: ${profileResponse.statusText}`);
                 }
@@ -120,6 +129,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
             if (response.ok) {
                 // Clear localStorage immediately
                 authStorage.clear();
+                localStorage.removeItem('wervice_user');
+                localStorage.removeItem('wervice_profile');
                 setUser(null);
                 setProfile(null);
                 console.log('✅ User signed out successfully');

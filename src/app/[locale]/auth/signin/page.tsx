@@ -52,6 +52,12 @@ export default function SignInPage() {
                 return;
             }
 
+            console.log('Signin response data:', { 
+                hasUser: !!data.user, 
+                user_type: data.user_type,
+                userId: data.user?.id 
+            });
+
             if (data.user) {
                 const userInfo = {
                     id: data.user.id,
@@ -59,9 +65,38 @@ export default function SignInPage() {
                     signedInAt: new Date().toISOString()
                 };
                 localStorage.setItem('wervice_user', JSON.stringify(userInfo));
+                
+                // Store user_type in localStorage for immediate access
+                if (data.user_type) {
+                    const profileInfo = {
+                        user_type: data.user_type,
+                        id: data.user.id,
+                        email: data.user.email
+                    };
+                    localStorage.setItem('wervice_profile', JSON.stringify(profileInfo));
+                }
             }
 
-            window.location.replace(`/${locale}/account`);
+            // Redirect admins to admin dashboard, others to account page
+            const isAdmin = data.user_type === 'admin' || data.user_type === 'super_admin';
+            console.log('Redirect check:', { 
+                user_type: data.user_type, 
+                isAdmin,
+                email: data.user?.email,
+                userId: data.user?.id
+            });
+            
+            if (isAdmin) {
+                console.log('Redirecting admin to /admin/dashboard');
+                // Clear any previous state and redirect
+                // Small delay to ensure cookies are set and localStorage is updated
+                setTimeout(() => {
+                    window.location.href = '/admin/dashboard';
+                }, 200);
+            } else {
+                console.log('Redirecting user to account page');
+                window.location.replace(`/${locale}/account`);
+            }
 
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';

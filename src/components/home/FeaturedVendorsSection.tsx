@@ -3,32 +3,112 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Star, MapPin, ArrowRight } from 'lucide-react';
+import { MapPin, ArrowRight } from 'lucide-react';
 import CustomSelect from '@/components/vendors/CustomSelect';
 import { capitalizeCity } from '@/lib/utils';
-import { labelForCategory } from '@/lib/categories';
+import { vendorUrl } from '@/lib/vendor-url';
+import { labelForCategory, WERVICE_CATEGORIES, slugToDbCategory } from '@/lib/categories';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
 
-const CATEGORIES = [
-  { slug: 'venues', label: 'Venues', icon: '/categories/venues.png' },
-  { slug: 'catering', label: 'Catering', icon: '/categories/Catering.png' },
-  { slug: 'photo_video', label: 'Photo & Video', icon: '/categories/photo.png' },
-  { slug: 'event_planner', label: 'Event Planner', icon: '/categories/Event Planner.png' },
-  { slug: 'beauty', label: 'Beauty', icon: '/categories/beauty.png' },
-  { slug: 'decor', label: 'Decor', icon: '/categories/decor.png' },
-  { slug: 'music', label: 'Music', icon: '/categories/music.png' },
-  { slug: 'dresses', label: 'Dresses', icon: '/categories/Dresses.png' },
-];
+// Mini card with auto-sliding carousel used inside this section
+function FeaturedVendorCard({ vendor, onClick }: { vendor: any; onClick: () => void }) {
+  const [activeIndex, setActiveIndex] = useState(0);
 
-const CITIES = [
-  'Casablanca',
-  'Marrakech',
-  'Rabat',
-  'Fez',
-  'Tangier',
-  'Agadir',
-  'Meknes',
-  'El Jadida',
-];
+  const images: string[] = [];
+  const gallery = vendor.gallery_urls || vendor.gallery_photos || [];
+  if (Array.isArray(gallery) && gallery.length > 0) {
+    images.push(...gallery.filter((url: string) => url && url.trim()));
+  }
+  if (vendor.profile_photo_url?.trim()) images.push(vendor.profile_photo_url.trim());
+
+  const total = images.length;
+
+  useEffect(() => {
+    if (total <= 1) return;
+    const timer = setInterval(() => setActiveIndex((p) => (p + 1) % total), 3000);
+    return () => clearInterval(timer);
+  }, [total]);
+
+  return (
+    <button
+      onClick={onClick}
+      className="group flex flex-col rounded-[28px] border border-zinc-200 bg-white p-4 text-left shadow-[0_4px_20px_rgba(0,0,0,0.10),0_1px_4px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,25,12,0.14)]"
+    >
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[20px] bg-neutral-100">
+        {total > 0 ? (
+          <div
+            className="flex h-full transition-transform duration-700 ease-in-out"
+            style={{ width: `${total * 100}%`, transform: `translateX(-${(activeIndex * 100) / total}%)` }}
+          >
+            {images.map((src, i) => (
+              <div key={i} className="relative h-full flex-shrink-0" style={{ width: `${100 / total}%` }}>
+                <Image
+                  src={src}
+                  alt={`${vendor.business_name} ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, 25vw"
+                  priority={i === 0}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
+            <span className="text-4xl font-bold text-zinc-300">{vendor.business_name.charAt(0)}</span>
+          </div>
+        )}
+
+        <div className="absolute left-3 top-3 rounded-2xl bg-white/95 px-3 py-1.5 shadow-sm backdrop-blur-sm">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#11190C]">
+            {labelForCategory(vendor.category)}
+          </span>
+        </div>
+
+        {total > 1 && (
+          <div className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 gap-1.5">
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={`block h-1.5 rounded-full transition-all duration-300 ${
+                  i === activeIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/60'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col px-1 pb-1 pt-5">
+        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-[#11190C] sm:text-xl">
+          {vendor.business_name}
+        </h3>
+        <div className="mt-2 flex items-center gap-2">
+          <MapPin className="h-4 w-4 shrink-0 text-[#aaa]" />
+          <span className="text-sm font-medium text-[#888]">{capitalizeCity(vendor.city)}</span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+
+const CITIES = MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => c.label);
+
+const CATEGORY_ICONS: Record<string, string> = {
+  florist: '/categories/decor.png',
+  dresses: '/categories/Dresses.png',
+  venue: '/categories/venues.png',
+  beauty: '/categories/beauty.png',
+  'photo-film': '/categories/photo.png',
+  caterer: '/categories/Catering.png',
+  decor: '/categories/decor.png',
+  negafa: '/categories/beauty.png',
+  artist: '/categories/music.png',
+  'event-planner': '/categories/event-planner.png',
+  cakes: '/categories/Catering.png',
+};
+const CATEGORIES = WERVICE_CATEGORIES.map((c) => ({ slug: c.slug, label: c.label, icon: CATEGORY_ICONS[c.slug] || '/categories/venues.png' }));
 
 const PRICE_RANGES = [
   { value: '', label: 'Any Price' },
@@ -82,7 +162,7 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
       setLoading(true);
       try {
         const params = new URLSearchParams();
-        if (selectedCategory) params.set('category', selectedCategory);
+        if (selectedCategory) params.set('category', slugToDbCategory(selectedCategory) || selectedCategory);
         if (selectedCity) params.set('city', selectedCity); // Don't convert to lowercase - database has capitalized cities
         if (selectedRating) params.set('rating', selectedRating);
         if (selectedSort) params.set('sort', selectedSort);
@@ -110,7 +190,7 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
       console.warn('Vendor missing slug:', vendor);
       return;
     }
-    router.push(`/${locale}/vendors/${vendor.slug}`);
+    router.push(vendorUrl(vendor, locale));
   };
 
   const handleViewAll = () => {
@@ -208,94 +288,26 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
 
       {/* Vendor Cards Grid */}
       {loading ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-80 animate-pulse rounded-2xl border border-zinc-200 bg-zinc-100"
-            />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="animate-pulse rounded-[28px] border border-zinc-200 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.10)]">
+              <div className="aspect-[4/3] rounded-[20px] bg-gray-200" />
+              <div className="space-y-3 px-1 pt-5">
+                <div className="h-6 w-3/4 rounded bg-gray-200" />
+                <div className="h-12 rounded-2xl bg-gray-200" />
+              </div>
+            </div>
           ))}
         </div>
       ) : vendors.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {vendors.map((vendor) => (
-              <button
+              <FeaturedVendorCard
                 key={vendor.id}
+                vendor={vendor}
                 onClick={() => handleVendorClick(vendor)}
-                className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all hover:shadow-xl hover:border-zinc-300"
-              >
-                {/* Image */}
-                <div className="relative h-48 overflow-hidden bg-zinc-100">
-                  {(() => {
-                    // Get all available images (gallery + profile)
-                    // Handle both gallery_urls and gallery_photos field names
-                    const allImages: string[] = [];
-                    const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
-                    if (Array.isArray(gallery) && gallery.length > 0) {
-                      allImages.push(...gallery.filter((url: string) => url && url.trim()));
-                    }
-                    if (vendor.profile_photo_url && vendor.profile_photo_url.trim()) {
-                      allImages.push(vendor.profile_photo_url);
-                    }
-                    
-                    // Select a random image using vendor ID as seed for consistency
-                    const featuredImage = allImages.length > 0 
-                      ? (() => {
-                          const seed = vendor.id ? vendor.id.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) : 0;
-                          return allImages[seed % allImages.length];
-                        })()
-                      : null;
-                    
-                    return featuredImage ? (
-                      <Image
-                        src={featuredImage}
-                        alt={vendor.business_name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
-                        <span className="text-4xl text-zinc-400">
-                          {vendor.business_name.charAt(0)}
-                        </span>
-                      </div>
-                    );
-                  })()}
-                  
-                  {/* Category Badge */}
-                  <div className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-zinc-900 backdrop-blur-sm">
-                    {labelForCategory(vendor.category)}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="mb-2 text-lg font-bold text-zinc-900 line-clamp-1">
-                    {vendor.business_name}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 text-sm text-zinc-600">
-                    <MapPin className="h-4 w-4" />
-                    <span>{capitalizeCity(vendor.city)}</span>
-                  </div>
-
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-semibold text-zinc-900">
-                        {vendor.rating || '5.0'}
-                      </span>
-                    </div>
-
-                    {vendor.starting_price && (
-                      <span className="text-sm font-semibold text-zinc-900">
-                        From {vendor.starting_price.toLocaleString()} MAD
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </button>
+              />
             ))}
           </div>
 
@@ -303,7 +315,7 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
           <div className="mt-8 text-center">
             <button
               onClick={handleViewAll}
-              className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-8 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-zinc-800 hover:shadow-xl"
+              className="inline-flex items-center gap-2 rounded-full bg-[#11190C] px-8 py-3 text-sm font-bold uppercase tracking-wide text-[#D9FF0A] shadow-lg transition-all hover:opacity-90 hover:shadow-xl"
             >
               View All Vendors
               <ArrowRight className="h-4 w-4" />
