@@ -10,6 +10,8 @@ export type VendorFilters = {
   sort?: 'relevance' | 'rating_desc' | 'price_asc' | 'price_desc' | 'newest';
   limit?: number;
   offset?: number;
+  /** When true, do not filter out vendors that have no images (e.g. for AI search) */
+  allowNoImage?: boolean;
 };
 
 export type Vendor = {
@@ -97,14 +99,13 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       }
     }
 
-    // Subcategory filter
+    // Subcategory filter (subcategory is text[] in DB — use overlaps)
     if (filters.subcategory) {
-      if (Array.isArray(filters.subcategory) && filters.subcategory.length > 0) {
-        // Multiple subcategories - use in operator
-        query = query.in('subcategory', filters.subcategory);
-      } else if (!Array.isArray(filters.subcategory)) {
-        // Single subcategory - use eq
-        query = query.eq('subcategory', filters.subcategory);
+      const slugs = Array.isArray(filters.subcategory)
+        ? filters.subcategory
+        : [filters.subcategory];
+      if (slugs.length > 0) {
+        query = query.overlaps('subcategory', slugs);
       }
     }
 
@@ -119,10 +120,11 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       }
     }
 
-    // Search filter
+    // Search filter (vendor_leads has profile_description, not description)
     if (filters.q) {
+      const term = (filters.q || '').replace(/%/g, '\\%').replace(/_/g, '\\_');
       query = query.or(
-        `business_name.ilike.%${filters.q}%,description.ilike.%${filters.q}%`
+        `business_name.ilike.%${term}%,profile_description.ilike.%${term}%`
       );
     }
 
@@ -230,25 +232,25 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       };
     });
 
-    // Filter out vendors that don't have any images (gallery or profile photo)
-    const vendorsWithImages = vendorsWithMedia.filter((vendor) => {
-      const hasGallery = Array.isArray(vendor.gallery_urls) && vendor.gallery_urls.length > 0;
-      const hasGalleryPhotos = Array.isArray(vendor.gallery_photos) && vendor.gallery_photos.length > 0;
-      const hasProfilePhoto = vendor.profile_photo_url && vendor.profile_photo_url.trim() && 
-                              vendor.profile_photo_url !== 'null' && vendor.profile_photo_url !== 'undefined';
-      
-      return hasGallery || hasGalleryPhotos || hasProfilePhoto;
-    });
+    // Optionally filter out vendors that don't have any images (skip for AI/search when allowNoImage)
+    const finalList = filters.allowNoImage
+      ? vendorsWithMedia
+      : vendorsWithMedia.filter((vendor) => {
+          const hasGallery = Array.isArray(vendor.gallery_urls) && vendor.gallery_urls.length > 0;
+          const hasGalleryPhotos = Array.isArray(vendor.gallery_photos) && vendor.gallery_photos.length > 0;
+          const hasProfilePhoto = vendor.profile_photo_url && vendor.profile_photo_url.trim() &&
+                                  vendor.profile_photo_url !== 'null' && vendor.profile_photo_url !== 'undefined';
+          return hasGallery || hasGalleryPhotos || hasProfilePhoto;
+        });
 
-    // Update total count to reflect filtered results
-    const filteredCount = vendorsWithImages.length;
-    const originalCount = count || 0;
-    const adjustedTotal = originalCount - (vendorsWithMedia.length - filteredCount);
+    const totalCount = filters.allowNoImage
+      ? (count ?? finalList.length)
+      : Math.max(0, (count ?? 0) - (vendorsWithMedia.length - finalList.length));
 
     return {
-      vendors: vendorsWithImages as unknown as Vendor[],
-      total: adjustedTotal,
-      hasMore: (offset + limit) < adjustedTotal,
+      vendors: finalList as unknown as Vendor[],
+      total: totalCount,
+      hasMore: (offset + limit) < totalCount,
     };
   } catch (error) {
     console.error('Database error in fetchVendors:', error);
@@ -308,6 +310,84 @@ export async function fetchCities(): Promise<string[]> {
     return cities.sort();
   } catch (error) {
     console.error('Database error in fetchCities:', error);
+    return [];
+  }
+}
+
+/**
+ * Count published vendors for SEO/indexability checks.
+ */
+export async function fetchPublishedVendorCount(filters: {
+  city?: string;
+  category?: string;
+} = {}): Promise<number> {
+  try {
+    const supabase = await createClient();
+
+    let query = supabase
+      .from('vendor_leads')
+      .select('id', { count: 'exact', head: true })
+      .eq('published', true);
+
+    if (filters.city && filters.city !== 'all') {
+      query = query.eq('city', filters.city);
+    }
+
+    if (filters.category) {
+      query = query.eq('category', filters.category.toLowerCase());
+    }
+
+    const { count, error } = await query;
+
+    if (error) {
+      console.error('Error fetching published vendor count:', error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error('Database error in fetchPublishedVendorCount:', error);
+    return 0;
+  }
+}
+
+export type CityCategoryVendorCount = {
+  city: string;
+  category: string;
+  vendorCount: number;
+};
+
+/**
+ * City/category groups with published vendor counts.
+ */
+export async function fetchCityCategoryVendorCounts(): Promise<CityCategoryVendorCount[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('vendor_leads')
+      .select('city, category')
+      .eq('published', true);
+
+    if (error) {
+      console.error('Error fetching city/category vendor counts:', error);
+      return [];
+    }
+
+    const counts = new Map<string, number>();
+    for (const row of data || []) {
+      const city = (row as { city: string }).city;
+      const category = ((row as { category: string }).category || '').toLowerCase().trim();
+      if (!city || !category) continue;
+      const key = `${city}::${category}`;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+
+    return Array.from(counts.entries()).map(([key, vendorCount]) => {
+      const [city, category] = key.split('::');
+      return { city, category, vendorCount };
+    });
+  } catch (error) {
+    console.error('Database error in fetchCityCategoryVendorCounts:', error);
     return [];
   }
 }

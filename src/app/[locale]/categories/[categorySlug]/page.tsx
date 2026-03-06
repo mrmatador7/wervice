@@ -3,7 +3,10 @@ import { Metadata } from 'next';
 import NewCategoryClient from '../components/NewCategoryClient';
 import CategorySeoBlocks from '@/components/category/CategorySeoBlocks';
 import { formatCategoryName } from '@/lib/format';
-import { VALID_CATEGORY_SLUGS } from '@/lib/categories';
+import { slugToDbCategory, VALID_CATEGORY_SLUGS } from '@/lib/categories';
+import { cityToSlug } from '@/lib/vendor-url';
+import { getListingIndexingDecision } from '@/lib/seo/indexing';
+import { fetchPublishedVendorCount } from '@/lib/supabase/vendors';
 
 interface PageProps {
   params: Promise<{ locale: string; categorySlug: string }>;
@@ -12,16 +15,34 @@ interface PageProps {
 
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { locale, categorySlug } = await params;
-  const { city } = await searchParams;
+  const resolvedSearchParams = await searchParams;
+  const city = typeof resolvedSearchParams.city === 'string' ? resolvedSearchParams.city : undefined;
   const categoryName = formatCategoryName(categorySlug);
-  const cityLabel = city && city !== 'all' ? ` in ${city}` : ' in Morocco';
-  const canonical = `https://wervice.com/${locale}/categories/${categorySlug}${city && city !== 'all' ? `?city=${encodeURIComponent(city as string)}` : ''}`;
+  const hasCity = Boolean(city && city !== 'all');
+  const cityLabel = hasCity ? ` in ${city}` : ' in Morocco';
+  const canonical = hasCity
+    ? `https://wervice.com/${locale}/${cityToSlug(city as string)}/${categorySlug}`
+    : `https://wervice.com/${locale}/categories/${categorySlug}`;
+  const vendorCount = await fetchPublishedVendorCount({
+    city: hasCity ? city : undefined,
+    category: slugToDbCategory(categorySlug) || categorySlug,
+  });
+  const indexing = getListingIndexingDecision({
+    searchParams: resolvedSearchParams,
+    vendorCount,
+    // This legacy query-based category page should not be indexed as primary URL.
+    forceNoindex: !hasCity,
+  });
 
   return {
     title: `Wedding ${categoryName}${cityLabel} | Wervice`,
     description: `Find verified ${categoryName.toLowerCase()} professionals${cityLabel}. Compare prices, view portfolios, and contact vendors directly for your wedding.`,
     alternates: {
       canonical,
+    },
+    robots: {
+      index: indexing.shouldIndex,
+      follow: indexing.shouldFollow,
     },
     openGraph: {
       title: `Wedding ${categoryName}${cityLabel} | Wervice`,

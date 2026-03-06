@@ -192,7 +192,7 @@ export default function Footer() {
                 <Link href={`/${currentLocale}/cookies`} className="hover:text-[#d9ff0a] transition-colors duration-200">
                   Cookie Policy
                 </Link>
-                <Link href="/sitemap" className="hover:text-[#d9ff0a] transition-colors duration-200">
+                <Link href="/sitemap.xml" className="hover:text-[#d9ff0a] transition-colors duration-200">
                   Sitemap
                 </Link>
               </div>
