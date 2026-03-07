@@ -35,10 +35,41 @@ export async function middleware(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  const isAdminPage = pathname === '/admin' || pathname.startsWith('/admin/');
+  const isAdminApi = pathname === '/api/admin' || pathname.startsWith('/api/admin/');
+
+  if (isAdminPage || isAdminApi) {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      if (isAdminApi) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL('/en/dashboard', request.url), 307);
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_type')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    const isAdmin = !profileError && (profile?.user_type === 'admin' || profile?.user_type === 'super_admin');
+
+    if (!isAdmin) {
+      if (isAdminApi) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      return NextResponse.redirect(new URL('/en/dashboard', request.url), 307);
+    }
+  }
+
   // While auth UI is disabled, block direct access to auth and account-creation entry points.
   if (!authUiEnabled) {
     const blockedPatterns = [
-      /^\/(en|fr|ar)\/auth(?:\/|$)/,
       /^\/(en|fr|ar)\/become-vendor(?:\/|$)/,
       /^\/(en|fr|ar)\/vendors\/subscribe(?:\/|$)/,
       /^\/vendor-login(?:\/|$)/,
@@ -77,5 +108,6 @@ export const config = {
      * - favicon.ico (favicon file)
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/api/admin/:path*',
   ],
 };

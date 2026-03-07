@@ -13,6 +13,13 @@ interface UserProfile {
     email?: string;
     phone?: string;
     city?: string;
+    wedding_date?: string;
+    guest_count?: number | string;
+    budget?: string;
+    language?: string;
+    currency?: string;
+    email_notifications?: boolean;
+    whatsapp_notifications?: boolean;
     [key: string]: any;
 }
 
@@ -69,7 +76,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            const profileData = await profileResponse.json();
+            const payload = await profileResponse.json();
+            const profileData = payload?.user ?? payload;
 
             // Construct user object from personal info (minimal user data)
             const userObj = {
@@ -85,8 +93,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 first_name: profileData.first_name,
                 last_name: profileData.last_name,
                 city: profileData.city,
+                phone: profileData.phone,
                 user_type: profileData.user_type,
                 onboarded: profileData.onboarded,
+                wedding_date: profileData.wedding_date,
+                guest_count: profileData.guest_count,
+                budget: profileData.budget,
+                language: profileData.language,
+                currency: profileData.currency,
+                email_notifications: profileData.email_notifications,
+                whatsapp_notifications: profileData.whatsapp_notifications,
             };
 
             // Update state

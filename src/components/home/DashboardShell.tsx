@@ -409,7 +409,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 <div className="flex items-center gap-2 rounded-xl px-1 py-0.5">
                   <button
                     type="button"
-                    onClick={() => router.push(`/${locale}/dashboard?view=auth`)}
+                    onClick={() => router.push(`/${locale}/dashboard?view=auth&mode=signin`)}
                     className="rounded-lg bg-[#11190C] px-3 py-1.5 text-xs font-semibold text-[#D9FF0A]"
                   >
                     {copy.topbar.signIn}
@@ -419,7 +419,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
 
               <button
                 type="button"
-                onClick={() => router.push(user ? `/${locale}/dashboard?view=settings` : `/${locale}/dashboard?view=auth`)}
+                onClick={() =>
+                  router.push(user ? `/${locale}/dashboard?view=settings` : `/${locale}/dashboard?view=auth&mode=signin`)
+                }
                 className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8fa2bf] hover:bg-white/70"
                 aria-label={copy.topbar.accountSettings}
               >

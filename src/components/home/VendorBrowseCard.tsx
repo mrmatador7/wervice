@@ -84,7 +84,7 @@ export default function VendorBrowseCard({
     if (!user?.id) {
       const localeMatch = href.match(/^\/(en|fr|ar)(\/|$)/);
       const locale = localeMatch?.[1] || 'en';
-      router.push(`/${locale}/dashboard?view=auth`);
+      router.push(`/${locale}/dashboard?view=auth&mode=signin`);
       return;
     }
 
