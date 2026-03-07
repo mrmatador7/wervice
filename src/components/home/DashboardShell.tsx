@@ -14,6 +14,7 @@ import {
   Globe,
   Grid2X2,
   Heart,
+  LogOut,
   MapPin,
   Search,
   Settings,
@@ -21,7 +22,10 @@ import {
   Users,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
+import { useUser } from '@/contexts/UserContext';
+import { CHECKLIST } from '@/data/checklist';
+import { getDashboardCopy } from '@/components/home/dashboard-i18n';
 
 export type ShellCard = {
   id: string;
@@ -54,8 +58,9 @@ type VendorSearchItem = {
 };
 
 function toShellVendorHref(locale: string, href: string) {
-  if (!href) return `/${locale}/vendors?view=overview`;
-  if (href.startsWith(`/${locale}/vendors`)) return href;
+  if (!href) return `/${locale}/dashboard?view=overview`;
+  if (href.startsWith(`/${locale}/dashboard`)) return href;
+  if (href.startsWith(`/${locale}/vendors`)) return href.replace(`/${locale}/vendors`, `/${locale}/dashboard`);
 
   const clean = href.split('?')[0].split('#')[0];
   const parts = clean.split('/').filter(Boolean);
@@ -64,7 +69,7 @@ function toShellVendorHref(locale: string, href: string) {
   if (parts.length >= 4 && parts[0] === locale) {
     const slug = parts[parts.length - 1];
     if (slug) {
-      return `/${locale}/vendors?view=overview&vendor=${encodeURIComponent(slug)}`;
+      return `/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(slug)}`;
     }
   }
 
@@ -72,25 +77,27 @@ function toShellVendorHref(locale: string, href: string) {
 }
 
 const dashboardNav = [
-  { id: 'overview', label: 'Home', icon: Grid2X2, href: '' },
-  { id: 'favorites', label: 'Favorites', icon: Heart, href: '/vendors?view=favorites' },
-  { id: 'wedding-date', label: 'Wedding Date', icon: Calendar, href: '/vendors?view=wedding-date' },
-  { id: 'checklist', label: 'Wedding Checklist', icon: CheckSquare, href: '/vendors?view=checklist' },
-  { id: 'guest-list', label: 'Guest List', icon: Users, href: '/vendors?view=guest-list' },
-  { id: 'budget-planner', label: 'Budget Planner', icon: CreditCard, href: '/vendors?view=budget-planner' },
-  { id: 'planning-tools', label: 'Planning Tools', icon: BookOpen, href: '/vendors?view=planning-tools' },
+  { id: 'overview', labelKey: 'home', icon: Grid2X2, href: '' },
+  { id: 'favorites', labelKey: 'favorites', icon: Heart, href: '/dashboard?view=favorites' },
+  { id: 'wedding-date', labelKey: 'weddingDate', icon: Calendar, href: '/dashboard?view=wedding-date' },
+  { id: 'checklist', labelKey: 'checklist', icon: CheckSquare, href: '/dashboard?view=checklist' },
+  { id: 'guest-list', labelKey: 'guestList', icon: Users, href: '/dashboard?view=guest-list' },
+  { id: 'budget-planner', labelKey: 'budgetPlanner', icon: CreditCard, href: '/dashboard?view=budget-planner' },
+  { id: 'planning-tools', labelKey: 'planningTools', icon: BookOpen, href: '/dashboard?view=planning-tools' },
 ];
 
 const marketplaceNav = [
-  { id: 'all-vendors', label: 'All Vendors', icon: Store, href: '/vendors?view=overview' },
-  { id: 'venues', label: 'Venues', icon: MapPin, href: '/vendors?view=overview&category=venues' },
-  { id: 'inspiration', label: 'Inspiration', icon: Compass, href: '/vendors?view=inspiration' },
+  { id: 'all-vendors', labelKey: 'allVendors', icon: Store, href: '/dashboard?view=overview' },
+  { id: 'venues', labelKey: 'venues', icon: MapPin, href: '/dashboard?view=overview&category=venues' },
+  { id: 'inspiration', labelKey: 'inspiration', icon: Compass, href: '/dashboard?view=inspiration' },
 ];
 
 export default function DashboardShell({ locale, children, savedCards = [], activeItem }: DashboardShellProps) {
+  const copy = getDashboardCopy(locale);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { user, profile, signOut } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<VendorSearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -98,6 +105,8 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
   const searchWrapRef = useRef<HTMLDivElement | null>(null);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langWrapRef = useRef<HTMLDivElement | null>(null);
+  const [sidebarFavorites, setSidebarFavorites] = useState<ShellCard[]>(savedCards);
+  const [checklistCompletedMap, setChecklistCompletedMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
@@ -162,13 +171,85 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     };
   }, [searchQuery]);
 
+  useEffect(() => {
+    if (!user?.id) {
+      setSidebarFavorites([]);
+      return;
+    }
+
+    const key = `wervice_favorites_${user.id}`;
+    const load = () => {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? (JSON.parse(raw) as ShellCard[]) : [];
+        const sorted = [...parsed].sort((a, b) => {
+          const aTs = Number((a as ShellCard & { savedAt?: number }).savedAt || 0);
+          const bTs = Number((b as ShellCard & { savedAt?: number }).savedAt || 0);
+          return bTs - aTs;
+        });
+        setSidebarFavorites(sorted);
+      } catch {
+        setSidebarFavorites([]);
+      }
+    };
+
+    load();
+    const onUpdate = () => load();
+    window.addEventListener('wervice:favorites-updated', onUpdate);
+    window.addEventListener('storage', onUpdate);
+    return () => {
+      window.removeEventListener('wervice:favorites-updated', onUpdate);
+      window.removeEventListener('storage', onUpdate);
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setChecklistCompletedMap({});
+      return;
+    }
+
+    const key = `wervice_shell_checklist_${user.id}`;
+    const load = () => {
+      try {
+        const raw = localStorage.getItem(key);
+        const parsed = raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+        setChecklistCompletedMap(parsed);
+      } catch {
+        setChecklistCompletedMap({});
+      }
+    };
+
+    load();
+    const onUpdate = () => load();
+    window.addEventListener('wervice:checklist-updated', onUpdate);
+    window.addEventListener('storage', onUpdate);
+    return () => {
+      window.removeEventListener('wervice:checklist-updated', onUpdate);
+      window.removeEventListener('storage', onUpdate);
+    };
+  }, [user?.id]);
+
   const showSearchDropdown = useMemo(() => {
     return isSearchFocused && searchQuery.trim().length >= 3;
   }, [isSearchFocused, searchQuery]);
 
+  const checklistCards = useMemo(() => {
+    const allItems = CHECKLIST.flatMap((section) =>
+      section.items.map((item) => ({
+        id: item.id,
+        label: item.label,
+        completed: Boolean(checklistCompletedMap[item.id]),
+      }))
+    );
+    const remaining = allItems.filter((item) => !item.completed);
+    const done = allItems.filter((item) => item.completed);
+    return [...remaining.slice(0, 3), ...done.slice(0, 3)].slice(0, 3);
+  }, [checklistCompletedMap]);
+
   function openVendorFromSearch(slug: string) {
     setIsSearchFocused(false);
-    router.push(`/${locale}/vendors?view=overview&vendor=${encodeURIComponent(slug)}`);
+    router.push(`/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(slug)}`);
   }
 
   function switchLocale(nextLocale: string) {
@@ -180,6 +261,18 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     setIsLangOpen(false);
     router.push(`${nextPath}${qs ? `?${qs}` : ''}`);
   }
+
+  const displayName =
+    [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim() ||
+    profile?.full_name ||
+    user?.email?.split('@')[0] ||
+    'Guest';
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('') || 'G';
 
   return (
     <div className="h-screen w-full overflow-hidden bg-[#F3F1EE]">
@@ -200,10 +293,10 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
             {MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => (
               <Link
                 key={city.value}
-                href={`/${locale}/vendors?view=overview&city=${encodeURIComponent(city.value)}`}
+                href={`/${locale}/dashboard?view=overview&city=${encodeURIComponent(city.value)}`}
                 className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-sm font-semibold text-[#33475f] transition hover:bg-[#F3EFE7]"
               >
-                {city.label}
+                {localizeCityLabel(city.label, locale)}
               </Link>
             ))}
           </nav>
@@ -213,7 +306,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-black/35" />
               <input
                 className="h-14 w-full rounded-2xl border border-black/10 bg-[#EFECE7] pl-12 pr-4 text-lg outline-none transition focus:border-[#11190C]"
-                placeholder="Search for vendors or locations..."
+                placeholder={copy.topbar.searchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
@@ -223,7 +316,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                     const q = searchQuery.trim();
                     if (!q) return;
                     setIsSearchFocused(false);
-                    router.push(`/${locale}/vendors?view=overview&q=${encodeURIComponent(q)}`);
+                    router.push(`/${locale}/dashboard?view=overview&q=${encodeURIComponent(q)}`);
                   }
                 }}
               />
@@ -231,9 +324,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               {showSearchDropdown && (
                 <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-xl">
                   {isSearching ? (
-                    <p className="px-4 py-3 text-sm text-[#5f6f84]">Searching vendors...</p>
+                    <p className="px-4 py-3 text-sm text-[#5f6f84]">{copy.topbar.searchingVendors}</p>
                   ) : searchResults.length === 0 ? (
-                    <p className="px-4 py-3 text-sm text-[#5f6f84]">No vendors found.</p>
+                    <p className="px-4 py-3 text-sm text-[#5f6f84]">{copy.topbar.noVendorsFound}</p>
                   ) : (
                     <div className="max-h-96 overflow-y-auto py-1">
                       {searchResults.map((vendor) => {
@@ -276,7 +369,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-[#33475f] hover:bg-white/50"
                   aria-haspopup="menu"
                   aria-expanded={isLangOpen}
-                  aria-label="Language"
+                  aria-label={copy.topbar.language}
                 >
                   <Globe className="h-4 w-4" />
                   <span className="text-base font-semibold">{locale.toUpperCase()}</span>
@@ -302,29 +395,52 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
 
               <div className="mx-2 h-8 w-px bg-[#ccd4e1]" />
 
-              <div className="flex items-center gap-2.5 rounded-xl px-1 py-0.5">
-                <div className="grid h-9 w-9 place-items-center rounded-lg border border-[#cfd8e6] bg-white text-sm font-bold text-[#33475f]">
-                  LB
+              {user ? (
+                <div className="flex items-center gap-2.5 rounded-xl px-1 py-0.5">
+                  <div className="grid h-9 w-9 place-items-center rounded-lg border border-[#cfd8e6] bg-white text-sm font-bold text-[#33475f]">
+                    {initials}
+                  </div>
+                  <div className="min-w-[110px]">
+                    <p className="text-base font-semibold leading-tight text-[#1f2d44] line-clamp-1">{displayName}</p>
+                    <p className="text-xs text-[#6a7f9d]">{copy.topbar.member}</p>
+                  </div>
                 </div>
-                <div className="min-w-[110px]">
-                  <p className="text-base font-semibold leading-tight text-[#1f2d44]">Lina B.</p>
-                  <p className="text-xs text-[#6a7f9d]">Member</p>
+              ) : (
+                <div className="flex items-center gap-2 rounded-xl px-1 py-0.5">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/${locale}/dashboard?view=auth`)}
+                    className="rounded-lg bg-[#11190C] px-3 py-1.5 text-xs font-semibold text-[#D9FF0A]"
+                  >
+                    {copy.topbar.signIn}
+                  </button>
                 </div>
-              </div>
+              )}
 
               <button
                 type="button"
-                onClick={() => router.push(`/${locale}/vendors?view=settings`)}
+                onClick={() => router.push(user ? `/${locale}/dashboard?view=settings` : `/${locale}/dashboard?view=auth`)}
                 className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8fa2bf] hover:bg-white/70"
-                aria-label="Account settings"
+                aria-label={copy.topbar.accountSettings}
               >
                 <Settings className="h-4.5 w-4.5" />
               </button>
+              {user && (
+                <button
+                  type="button"
+                  onClick={() => signOut()}
+                  className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8fa2bf] hover:bg-white/70"
+                  aria-label={copy.topbar.disconnect}
+                  title={copy.topbar.disconnect}
+                >
+                  <LogOut className="h-4.5 w-4.5" />
+                </button>
+              )}
             </div>
           </div>
         </header>
 
-        <div className="grid h-[calc(100vh-85px)] xl:grid-cols-[260px_1fr_330px]">
+        <div className={`grid h-[calc(100vh-85px)] ${user ? 'xl:grid-cols-[260px_1fr_330px]' : 'xl:grid-cols-[260px_1fr]'}`}>
           <aside className="hidden overflow-y-auto border-r border-black/10 bg-[#F1EEE9] px-5 py-6 xl:block">
             <div className="mt-3 space-y-1.5">
               {dashboardNav.map((item) => {
@@ -332,34 +448,34 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 const active = activeItem === item.id;
                 return (
                   <Link
-                    key={item.label}
+                    key={item.labelKey}
                     href={`/${locale}${item.href}`}
                     className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-xl font-semibold transition ${
                       active ? 'bg-[#D9FF0A] text-[#11190C] shadow-sm' : 'text-[#354860] hover:bg-[#E8E2D8]'
                     }`}
                   >
                     <Icon className="h-5 w-5" />
-                    {item.label}
+                    {copy.nav[item.labelKey as keyof typeof copy.nav]}
                   </Link>
                 );
               })}
             </div>
 
-            <p className="mt-8 px-2 text-sm font-bold uppercase tracking-[0.16em] text-[#787664]">Marketplace</p>
+            <p className="mt-8 px-2 text-sm font-bold uppercase tracking-[0.16em] text-[#787664]">{copy.nav.marketplace}</p>
             <div className="mt-3 space-y-1.5">
               {marketplaceNav.map((item) => {
                 const Icon = item.icon;
                 const active = activeItem === item.id;
                 return (
                   <Link
-                    key={item.label}
+                    key={item.labelKey}
                     href={`/${locale}${item.href}`}
                     className={`flex items-center gap-3 rounded-xl px-4 py-3 text-xl font-semibold transition ${
                       active ? 'bg-[#D9FF0A] text-[#11190C] shadow-sm' : 'text-[#354860] hover:bg-[#E8E2D8]'
                     }`}
                   >
                     <Icon className="h-5 w-5" />
-                    {item.label}
+                    {copy.nav[item.labelKey as keyof typeof copy.nav]}
                   </Link>
                 );
               })}
@@ -368,48 +484,47 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
 
           <main className="space-y-9 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">{children}</main>
 
-          <aside className="hidden space-y-6 overflow-y-auto border-l border-black/10 bg-[#F7F5F2] px-4 py-6 lg:block sm:px-6">
-            <section>
-              <h3 className="mb-3 text-5xl font-black text-[#11190C]">Wedding Checklist</h3>
-              <div className="space-y-3">
-                <div className="rounded-2xl border border-[#D9FF0A]/40 bg-[#F7FFD9] p-4">
-                  <p className="text-2xl font-bold text-[#11190C]">Book Venue</p>
-                  <p className="text-base text-[#6a7f9d]">Completed 2 weeks ago</p>
-                </div>
-                <div className="rounded-2xl border border-black/10 bg-white p-4">
-                  <p className="text-2xl font-bold text-[#11190C]">Find a Negafa</p>
-                  <p className="text-base text-[#6a7f9d]">Suggested for this month</p>
-                </div>
-                <div className="rounded-2xl border border-black/10 bg-white p-4">
-                  <p className="text-2xl font-bold text-[#11190C]">Choose Catering</p>
-                  <p className="text-base text-[#6a7f9d]">Due in 15 days</p>
-                </div>
-                <Link
-                  href={`/${locale}/checklist`}
-                  className="block rounded-2xl border border-black/10 bg-[#ECE7DE] p-3 text-center text-xl font-bold text-[#3E4C37]"
-                >
-                  View All Tasks
-                </Link>
-              </div>
-            </section>
-
-            <section>
-              <h3 className="mb-3 text-5xl font-black text-[#11190C]">Saved Vendors</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {savedCards.slice(0, 4).map((card) => (
-                  <Link key={card.id} href={toShellVendorHref(locale, card.href)} className="relative block h-32 overflow-hidden rounded-xl border border-black/10 bg-zinc-200">
-                    <Image src={card.image} alt={card.title} fill sizes="160px" className="object-cover" />
+          {user && (
+            <aside className="hidden space-y-6 overflow-y-auto border-l border-black/10 bg-[#F7F5F2] px-4 py-6 lg:block sm:px-6">
+              <section>
+                <h3 className="mb-3 text-5xl font-black text-[#11190C]">{copy.rightSidebar.checklistTitle}</h3>
+                <div className="space-y-3">
+                  {checklistCards.map((task) => (
+                    <div
+                      key={task.id}
+                      className={`rounded-2xl border p-4 ${task.completed ? 'border-[#D9FF0A]/40 bg-[#F7FFD9]' : 'border-black/10 bg-white'}`}
+                    >
+                      <p className="text-xl font-bold text-[#11190C] line-clamp-2">{task.label}</p>
+                      <p className="text-sm text-[#6a7f9d]">{task.completed ? copy.rightSidebar.completed : copy.rightSidebar.pending}</p>
+                    </div>
+                  ))}
+                  <Link
+                    href={`/${locale}/dashboard?view=checklist`}
+                    className="block rounded-2xl border border-black/10 bg-[#ECE7DE] p-3 text-center text-xl font-bold text-[#3E4C37]"
+                  >
+                    {copy.rightSidebar.viewAllTasks}
                   </Link>
-                ))}
-                <button
-                  type="button"
-                  className="grid h-32 place-items-center rounded-xl border-2 border-dashed border-[#C7C1B4] bg-[#F3EEE4] text-5xl font-light text-[#787664]"
-                >
-                  +
-                </button>
-              </div>
-            </section>
-          </aside>
+                </div>
+              </section>
+
+              <section>
+                <h3 className="mb-3 text-5xl font-black text-[#11190C]">{copy.rightSidebar.savedVendors}</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {sidebarFavorites.slice(0, 4).map((card) => (
+                    <Link key={card.id} href={toShellVendorHref(locale, card.href)} className="relative block h-32 overflow-hidden rounded-xl border border-black/10 bg-zinc-200">
+                      <Image src={card.image} alt={card.title} fill sizes="160px" className="object-cover" />
+                    </Link>
+                  ))}
+                  <Link
+                    href={`/${locale}/dashboard?view=favorites`}
+                    className="grid h-32 place-items-center rounded-xl border-2 border-dashed border-[#C7C1B4] bg-[#F3EEE4] text-5xl font-light text-[#787664]"
+                  >
+                    +
+                  </Link>
+                </div>
+              </section>
+            </aside>
+          )}
         </div>
       </div>
     </div>

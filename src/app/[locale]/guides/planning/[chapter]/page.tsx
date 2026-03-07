@@ -6,5 +6,5 @@ export default async function PlanningGuideChapterPage({
   params: Promise<{ locale: string; chapter: string }>;
 }) {
   const { locale, chapter } = await params;
-  redirect(`/${locale}/vendors?view=planning-tools&chapter=${encodeURIComponent(chapter)}`);
+  redirect(`/${locale}/dashboard?view=planning-tools&chapter=${encodeURIComponent(chapter)}`);
 }

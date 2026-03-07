@@ -1,11 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRight, Heart, MapPin } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/contexts/UserContext';
 
 interface VendorBrowseCardProps {
+  vendorId?: string;
   href: string;
   title: string;
   location: string;
@@ -16,6 +19,7 @@ interface VendorBrowseCardProps {
 }
 
 export default function VendorBrowseCard({
+  vendorId,
   href,
   title,
   location,
@@ -24,6 +28,8 @@ export default function VendorBrowseCard({
   galleryImages,
   onCardClick,
 }: VendorBrowseCardProps) {
+  const router = useRouter();
+  const { user } = useUser();
   const images = useMemo(() => {
     const unique = new Set<string>();
     for (const image of galleryImages) {
@@ -38,11 +44,84 @@ export default function VendorBrowseCard({
   const displayImages = images.length > 0 ? images : ['/images/sample/venues-1.jpg'];
   const currentImage = displayImages[imageIndex] || '/images/sample/venues-1.jpg';
   const safeLogo = logoUrl || displayImages[0] || '/images/sample/venues-1.jpg';
+  const favoritesKey = user?.id ? `wervice_favorites_${user.id}` : '';
+
+  const [isFavorite, setIsFavorite] = useState<boolean>(() => {
+    if (!user?.id || !vendorId || typeof window === 'undefined') return false;
+    try {
+      const raw = localStorage.getItem(`wervice_favorites_${user.id}`);
+      const list = raw ? (JSON.parse(raw) as Array<{ id: string }>) : [];
+      return list.some((item) => item.id === vendorId);
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (!user?.id || !vendorId || typeof window === 'undefined') {
+      setIsFavorite(false);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(`wervice_favorites_${user.id}`);
+      const list = raw ? (JSON.parse(raw) as Array<{ id: string }>) : [];
+      setIsFavorite(list.some((item) => item.id === vendorId));
+    } catch {
+      setIsFavorite(false);
+    }
+  }, [user?.id, vendorId]);
 
   function showNextImage(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
     setImageIndex((prev) => (prev + 1) % displayImages.length);
+  }
+
+  function toggleFavorite(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!user?.id) {
+      const localeMatch = href.match(/^\/(en|fr|ar)(\/|$)/);
+      const locale = localeMatch?.[1] || 'en';
+      router.push(`/${locale}/dashboard?view=auth`);
+      return;
+    }
+
+    if (!vendorId || !favoritesKey) return;
+
+    try {
+      const raw = localStorage.getItem(favoritesKey);
+      const list = raw ? (JSON.parse(raw) as Array<Record<string, unknown>>) : [];
+      const exists = list.some((item) => item.id === vendorId);
+      let nextList: Array<Record<string, unknown>> = [];
+
+      if (exists) {
+        nextList = list.filter((item) => item.id !== vendorId);
+        setIsFavorite(false);
+      } else {
+        nextList = [
+          ...list,
+          {
+            id: vendorId,
+            title,
+            image: currentImage,
+            href,
+            location,
+            categoryLabel,
+            logoUrl: safeLogo,
+            galleryImages: displayImages,
+            savedAt: Date.now(),
+          },
+        ];
+        setIsFavorite(true);
+      }
+
+      localStorage.setItem(favoritesKey, JSON.stringify(nextList));
+      window.dispatchEvent(new CustomEvent('wervice:favorites-updated'));
+    } catch {
+      // no-op
+    }
   }
 
   return (
@@ -67,13 +146,12 @@ export default function VendorBrowseCard({
         <button
           type="button"
           aria-label="Save vendor"
-          className="absolute right-2.5 top-2.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#F3EFE7] text-[#11190C] shadow-sm"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
+          className={`absolute right-2.5 top-2.5 inline-flex h-9 w-9 items-center justify-center rounded-full shadow-sm ${
+            isFavorite ? 'bg-[#11190C] text-[#D9FF0A]' : 'bg-[#F3EFE7] text-[#11190C]'
+          }`}
+          onClick={toggleFavorite}
         >
-          <Heart className="h-4.5 w-4.5" />
+          <Heart className={`h-4.5 w-4.5 ${isFavorite ? 'fill-current' : ''}`} />
         </button>
 
         {displayImages.length > 1 && (

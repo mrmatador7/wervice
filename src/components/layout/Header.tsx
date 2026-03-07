@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import LanguageCurrencyDropdown from "../ui/LanguageDropdown";
 import { useUser } from "@/contexts/UserContext";
 import { useLocale } from "@/contexts/LocaleContext";
-import { MOROCCAN_CITIES } from "@/lib/types/vendor";
+import { MOROCCAN_CITIES, localizeCityLabel } from "@/lib/types/vendor";
 import { AUTH_UI_ENABLED } from "@/lib/config";
 
 export default function Header() {
@@ -43,7 +43,10 @@ export default function Header() {
     setShowLocationDropdown(false);
   };
 
-  const selectedCityLabel = MOROCCAN_CITIES.find(c => c.value === selectedCity)?.label || 'All Cities';
+  const selectedCityLabel = localizeCityLabel(
+    MOROCCAN_CITIES.find((c) => c.value === selectedCity)?.label || 'All Cities',
+    currentLocale
+  );
 
   return (
     <header
@@ -103,7 +106,7 @@ export default function Header() {
                               : 'text-gray-700'
                           }`}
                         >
-                          {city.label}
+                          {localizeCityLabel(city.label, currentLocale)}
                         </button>
                       ))}
                     </div>

@@ -108,3 +108,39 @@ export const MOROCCAN_CITIES = [
 ] as const;
 
 export type MoroccanCity = typeof MOROCCAN_CITIES[number];
+
+type UiLocale = 'en' | 'fr' | 'ar';
+
+const CITY_TRANSLATIONS: Record<string, { fr: string; ar: string }> = {
+  'All Cities': { fr: 'Toutes les villes', ar: 'كل المدن' },
+  Marrakech: { fr: 'Marrakech', ar: 'مراكش' },
+  Casablanca: { fr: 'Casablanca', ar: 'الدار البيضاء' },
+  Fes: { fr: 'Fès', ar: 'فاس' },
+  Rabat: { fr: 'Rabat', ar: 'الرباط' },
+  Tanger: { fr: 'Tanger', ar: 'طنجة' },
+  Oujda: { fr: 'Oujda', ar: 'وجدة' },
+  Agadir: { fr: 'Agadir', ar: 'أكادير' },
+  Meknes: { fr: 'Meknès', ar: 'مكناس' },
+  Tetouan: { fr: 'Tétouan', ar: 'تطوان' },
+  Kenitra: { fr: 'Kénitra', ar: 'القنيطرة' },
+  'El Jadida': { fr: 'El Jadida', ar: 'الجديدة' },
+  Safi: { fr: 'Safi', ar: 'آسفي' },
+  Laayoune: { fr: 'Laâyoune', ar: 'العيون' },
+  'El Hoceima': { fr: 'Al Hoceïma', ar: 'الحسيمة' },
+  'Beni Mellal': { fr: 'Béni Mellal', ar: 'بني ملال' },
+};
+
+export function localizeCityLabel(city: string, locale: string = 'en'): string {
+  const normalized = (locale || 'en').toLowerCase() as UiLocale;
+  if (normalized === 'en') return city;
+  const translated = CITY_TRANSLATIONS[city];
+  if (!translated) return city;
+  return translated[normalized] || city;
+}
+
+export function getLocalizedMoroccanCities(locale: string = 'en') {
+  return MOROCCAN_CITIES.map((city) => ({
+    ...city,
+    label: localizeCityLabel(city.label, locale),
+  }));
+}

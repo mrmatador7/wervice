@@ -9,6 +9,7 @@ import AccountToolViews from '@/components/home/AccountToolViews';
 import FavoritesView from '@/components/home/FavoritesView';
 import WeddingChecklistView from '@/components/home/WeddingChecklistView';
 import AccountSettingsView from '@/components/home/AccountSettingsView';
+import AuthAccessView from '@/components/home/AuthAccessView';
 import {
   WERVICE_CATEGORIES,
   labelForCategory,
@@ -16,9 +17,10 @@ import {
   slugToDbCategory,
 } from '@/lib/categories';
 import { fetchVendors } from '@/lib/supabase/vendors';
-import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { getAll } from '@/data/articles';
 import { getAllChapters, getTimelineSteps } from '@/data/planningChapters';
+import { getDashboardCopy, interpolateCopy } from '@/components/home/dashboard-i18n';
 
 interface VendorsPageProps {
   params: Promise<{ locale: string }>;
@@ -32,9 +34,10 @@ function firstParam(value: string | string[] | undefined): string | undefined {
 
 export async function generateMetadata({ params }: VendorsPageProps): Promise<Metadata> {
   const { locale } = await params;
+  const copy = getDashboardCopy(locale);
   return {
-    title: `All Wedding Vendors | Wervice`,
-    description: `Browse all verified wedding vendors across Morocco.`,
+    title: `${copy.vendors.title} | Wervice`,
+    description: copy.vendors.subtitle,
     alternates: {
       canonical: `https://wervice.com/${locale}/vendors`,
     },
@@ -43,10 +46,11 @@ export async function generateMetadata({ params }: VendorsPageProps): Promise<Me
 
 export default async function VendorsPage({ params, searchParams }: VendorsPageProps) {
   const { locale } = await params;
+  const copy = getDashboardCopy(locale);
   const resolvedSearchParams = await searchParams;
   const view = firstParam(resolvedSearchParams.view) || 'overview';
   const chapterParam = firstParam(resolvedSearchParams.chapter);
-  const allowedViews = new Set(['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools', 'settings', 'inspiration']);
+  const allowedViews = new Set(['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools', 'settings', 'auth', 'inspiration']);
   const safeView = allowedViews.has(view) ? view : 'overview';
 
   const cityParam = firstParam(resolvedSearchParams.city);
@@ -76,14 +80,14 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
       vendor.gallery_urls?.[0] ||
       vendor.gallery_photos?.[0] ||
       '/images/sample/venues-1.jpg',
-    href: `/${locale}/vendors?view=overview&vendor=${encodeURIComponent(vendor.slug)}`,
+    href: `/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(vendor.slug)}`,
     location: vendor.city,
-    categoryLabel: labelForCategory(vendor.category),
+    categoryLabel: labelForCategory(vendor.category, locale),
     logoUrl: vendor.profile_photo_url,
     galleryImages: vendor.gallery_urls || vendor.gallery_photos || [],
   }));
 
-  const inspirationArticles = getAll().slice(0, 15);
+  const inspirationArticles = getAll(locale).slice(0, 15);
   const activeMarketplace = safeView === 'inspiration' ? 'inspiration' : (categorySlug === 'venues' ? 'venues' : 'all-vendors');
   const activeItem = ['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools'].includes(safeView)
     ? safeView
@@ -124,10 +128,14 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
         <AccountSettingsView locale={locale} />
       )}
 
+      {safeView === 'auth' && (
+        <AuthAccessView locale={locale} />
+      )}
+
       {safeView === 'planning-tools' && (
         <section className="mx-auto max-w-7xl">
-          <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">Planning Tools</h1>
-          <p className="mt-3 text-lg text-[#4a5c74]">12-month timeline and chapter-by-chapter planning resources.</p>
+          <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{copy.planning.title}</h1>
+          <p className="mt-3 text-lg text-[#4a5c74]">{copy.planning.subtitle}</p>
 
           {selectedPlanningChapter && (
             <div className="mt-8 rounded-3xl border border-[#d7deea] bg-white p-6 shadow-sm">
@@ -143,15 +151,15 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
                 </div>
                 <div>
                   <p className="inline-flex rounded-full bg-[#11190C] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D9FF0A]">
-                    Chapter {selectedPlanningChapter.order} of {planningChapters.length}
+                    {interpolateCopy(copy.planning.chapterOf, { current: selectedPlanningChapter.order, total: planningChapters.length })}
                   </p>
                   <h2 className="mt-3 text-4xl font-black leading-tight text-[#11190C]">{selectedPlanningChapter.title}</h2>
                   <p className="mt-2 text-lg text-[#4a5c74]">{selectedPlanningChapter.excerpt}</p>
-                  <p className="mt-2 text-sm font-semibold text-[#6f7f95]">{selectedPlanningChapter.readTime} min read</p>
+                  <p className="mt-2 text-sm font-semibold text-[#6f7f95]">{interpolateCopy(copy.planning.minRead, { count: selectedPlanningChapter.readTime })}</p>
 
                   {selectedPlanningStep?.tasks?.length ? (
                     <div className="mt-5 rounded-2xl border border-[#d7deea] bg-[#F8FAFC] p-4">
-                      <h3 className="text-lg font-bold text-[#11190C]">Do This Now</h3>
+                      <h3 className="text-lg font-bold text-[#11190C]">{copy.planning.doThisNow}</h3>
                       <ul className="mt-3 space-y-2">
                         {selectedPlanningStep.tasks.map((task, idx) => (
                           <li key={idx} className="flex items-start gap-2 text-[#3f5671]">
@@ -166,18 +174,18 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
                   <div className="mt-5 flex flex-wrap gap-3">
                     {prevPlanningChapter && (
                       <Link
-                        href={`/${locale}/vendors?view=planning-tools&chapter=${prevPlanningChapter.slug}`}
+                        href={`/${locale}/dashboard?view=planning-tools&chapter=${prevPlanningChapter.slug}`}
                         className="rounded-xl border border-[#d2d9e5] bg-white px-4 py-2 text-sm font-semibold text-[#33475f]"
                       >
-                        Previous
+                        {copy.planning.previous}
                       </Link>
                     )}
                     {nextPlanningChapter && (
                       <Link
-                        href={`/${locale}/vendors?view=planning-tools&chapter=${nextPlanningChapter.slug}`}
+                        href={`/${locale}/dashboard?view=planning-tools&chapter=${nextPlanningChapter.slug}`}
                         className="rounded-xl bg-[#11190C] px-4 py-2 text-sm font-semibold text-[#D9FF0A]"
                       >
-                        Next
+                        {copy.planning.next}
                       </Link>
                     )}
                   </div>
@@ -187,16 +195,16 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
           )}
 
           <div className="mt-8 rounded-3xl border border-[#d7deea] bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-[#11190C]">Timeline</h2>
+            <h2 className="text-2xl font-bold text-[#11190C]">{copy.planning.timeline}</h2>
             <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {planningSteps.slice(0, 12).map((step) => (
                 <Link
                   key={step.chapterSlug}
-                  href={`/${locale}/vendors?view=planning-tools&chapter=${step.chapterSlug}`}
+                  href={`/${locale}/dashboard?view=planning-tools&chapter=${step.chapterSlug}`}
                   className="rounded-2xl border border-[#d7deea] bg-[#F8FAFC] p-4 transition hover:-translate-y-0.5 hover:bg-white"
                 >
                   <div className="text-2xl">{step.icon}</div>
-                  <p className="mt-2 text-sm font-semibold text-[#6f7f95]">{step.months === 0 ? 'Final' : `${step.months} months`}</p>
+                  <p className="mt-2 text-sm font-semibold text-[#6f7f95]">{step.months === 0 ? copy.planning.final : interpolateCopy(copy.planning.months, { count: step.months })}</p>
                   <p className="mt-1 text-lg font-bold text-[#11190C]">{step.title}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-[#5f6f84]">{step.description}</p>
                 </Link>
@@ -205,15 +213,15 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
           </div>
 
           <div className="mt-6 rounded-3xl border border-[#d7deea] bg-white p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-[#11190C]">Guide Chapters</h2>
+            <h2 className="text-2xl font-bold text-[#11190C]">{copy.planning.guideChapters}</h2>
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {planningChapters.map((chapter) => (
                 <Link
                   key={chapter.slug}
-                  href={`/${locale}/vendors?view=planning-tools&chapter=${chapter.slug}`}
+                  href={`/${locale}/dashboard?view=planning-tools&chapter=${chapter.slug}`}
                   className="rounded-2xl border border-[#d7deea] bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-sm"
                 >
-                  <p className="text-sm font-semibold text-[#6f7f95]">{chapter.readTime} min read</p>
+                  <p className="text-sm font-semibold text-[#6f7f95]">{interpolateCopy(copy.planning.minRead, { count: chapter.readTime })}</p>
                   <p className="mt-1 text-lg font-bold text-[#11190C]">{chapter.title}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-[#5f6f84]">{chapter.excerpt}</p>
                 </Link>
@@ -229,8 +237,8 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
 
       {safeView === 'overview' && (
       <section className="mx-auto max-w-7xl">
-        <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">All Vendors</h1>
-        <p className="mt-3 text-lg text-[#4a5c74]">Browse wedding vendors across Morocco.</p>
+        <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{copy.vendors.title}</h1>
+        <p className="mt-3 text-lg text-[#4a5c74]">{copy.vendors.subtitle}</p>
 
         <form className="mt-6">
           <div className="relative">
@@ -239,7 +247,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
               type="text"
               name="q"
               defaultValue={q}
-              placeholder="Search vendor names or styles..."
+              placeholder={copy.vendors.searchPlaceholder}
               className="h-14 w-full rounded-2xl border border-[#d7deea] bg-white pl-12 pr-4 text-base outline-none transition focus:border-[#11190C]"
             />
             {selectedCity && <input type="hidden" name="city" value={selectedCity} />}
@@ -254,7 +262,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
               !selectedCity ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
             }`}
           >
-            All Cities
+            {copy.vendors.allCities}
           </Link>
           {MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((city) => {
             const isActive = selectedCity === city.value;
@@ -266,7 +274,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
                   isActive ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
                 }`}
               >
-                {city.label}
+                {localizeCityLabel(city.label, locale)}
               </Link>
             );
           })}
@@ -279,7 +287,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
               !categorySlug ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
             }`}
           >
-            All Categories
+            {copy.vendors.allCategories}
           </Link>
           {WERVICE_CATEGORIES.map((category) => {
             const isActive = categorySlug === category.slug;
@@ -291,7 +299,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
                   isActive ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
                 }`}
               >
-                {labelForCategory(category.slug)}
+                {labelForCategory(category.slug, locale)}
               </Link>
             );
           })}
@@ -299,7 +307,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
 
         {vendors.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">
-            No vendors found for this filter.
+            {copy.vendors.noVendorsFound}
           </div>
         ) : (
           <InfiniteVendorGrid

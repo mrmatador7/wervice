@@ -8,6 +8,7 @@ import { RiCompassDiscoverLine } from 'react-icons/ri';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Article } from '@/data/articles';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface ArticleLayoutProps {
   article: Article;
@@ -18,16 +19,19 @@ interface ArticleLayoutProps {
   locale: string;
 }
 
-function articleMeta(article: Article) {
+function articleMeta(article: Article, locale: string) {
   const words = article.content.split(/\s+/).length;
   const readTime = Math.max(1, Math.ceil(words / 220));
 
   return {
     readTime,
-    city: article.tags?.[1]
-      ? article.tags[1].charAt(0).toUpperCase() + article.tags[1].slice(1)
-      : 'Morocco',
-    updated: new Date(article.date).toLocaleDateString('en-US', {
+    city: localizeCityLabel(
+      article.tags?.[1]
+        ? article.tags[1].charAt(0).toUpperCase() + article.tags[1].slice(1)
+        : 'Morocco',
+      locale
+    ),
+    updated: new Date(article.date).toLocaleDateString(locale, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
@@ -50,7 +54,7 @@ function OverviewBlock({ article }: { article: Article }) {
 }
 
 function PlacesSummary({ article }: { article: Article }) {
-  const meta = articleMeta(article);
+  const meta = articleMeta(article, 'en');
 
   return (
     <section className="border-b border-zinc-200 py-10">
@@ -148,7 +152,29 @@ export default function ArticleLayout({
   articleUrl,
   locale,
 }: ArticleLayoutProps) {
-  const meta = articleMeta(article);
+  const ui = {
+    en: {
+      guide: 'Inspiration Guide',
+      minRead: 'min read',
+      updated: 'Updated',
+    },
+    fr: {
+      guide: "Guide d'inspiration",
+      minRead: 'min de lecture',
+      updated: 'Mis à jour',
+    },
+    ar: {
+      guide: 'دليل الإلهام',
+      minRead: 'دقيقة قراءة',
+      updated: 'آخر تحديث',
+    },
+  }[(locale as 'en' | 'fr' | 'ar')] || {
+    guide: 'Inspiration Guide',
+    minRead: 'min read',
+    updated: 'Updated',
+  };
+
+  const meta = articleMeta(article, locale);
 
   return (
     <div className="min-h-screen bg-[#f5f5f4] text-zinc-900">
@@ -169,7 +195,7 @@ export default function ArticleLayout({
 
               <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-10">
                 <p className="mb-3 inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] backdrop-blur-sm">
-                  Inspiration Guide
+                  {ui.guide}
                 </p>
                 <h1 className="max-w-4xl text-3xl font-black leading-tight md:text-6xl">{article.title}</h1>
 
@@ -184,10 +210,10 @@ export default function ArticleLayout({
                   </span>
                   <span className="inline-flex items-center gap-2">
                     <FiClock className="h-4 w-4" />
-                    {meta.readTime} min read
+                    {meta.readTime} {ui.minRead}
                   </span>
                   <span className="inline-flex items-center rounded-full bg-white/15 px-2.5 py-0.5 text-xs backdrop-blur-sm">
-                    Updated {meta.updated}
+                    {ui.updated} {meta.updated}
                   </span>
                 </div>
               </div>

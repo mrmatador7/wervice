@@ -15,6 +15,8 @@ import {
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Article, getAll } from '@/data/articles';
+import { localizeCityLabel } from '@/lib/types/vendor';
+import { labelForCategory } from '@/lib/categories';
 
 function titleToMeta(title: string) {
   const words = title.split(' ').length;
@@ -23,10 +25,9 @@ function titleToMeta(title: string) {
   return { places, points };
 }
 
-function categoryLabel(tags?: string[]) {
-  if (!tags || tags.length === 0) return 'Guide';
-  const first = tags[0].replace(/-/g, ' ');
-  return first.charAt(0).toUpperCase() + first.slice(1);
+function categoryLabel(tags: string[] | undefined, locale: string) {
+  if (!tags || tags.length === 0) return locale === 'ar' ? 'دليل' : 'Guide';
+  return labelForCategory(tags[0], locale);
 }
 
 function toCardModel(article: Article, locale: string) {
@@ -41,8 +42,11 @@ function toCardModel(article: Article, locale: string) {
     image: article.cover || '/images/sample/venues-1.jpg',
     author: article.author || 'Wervice Editorial',
     date: article.date,
-    city: article.tags?.[1] || 'Morocco',
-    category: categoryLabel(article.tags),
+    city: localizeCityLabel(
+      article.tags?.[1] ? article.tags[1].charAt(0).toUpperCase() + article.tags[1].slice(1) : 'Morocco',
+      locale
+    ),
+    category: categoryLabel(article.tags, locale),
     readingTime,
     places: meta.places,
     points: meta.points,
@@ -56,7 +60,7 @@ export default function BlogPageContent() {
   const [query, setQuery] = useState('');
 
   const cards = useMemo(() => {
-    return getAll().map((article) => toCardModel(article, locale));
+    return getAll(locale).map((article) => toCardModel(article, locale));
   }, [locale]);
 
   const filteredCards = useMemo(() => {

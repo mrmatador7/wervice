@@ -15,6 +15,20 @@ export const WERVICE_CATEGORIES = [
   { slug: 'cakes', label: 'Cakes', dbCategory: 'cakes' },
 ] as const;
 
+const CATEGORY_TRANSLATIONS: Record<string, { fr: string; ar: string }> = {
+  florist: { fr: 'Fleuriste', ar: 'تنسيق الزهور' },
+  dresses: { fr: 'Robes', ar: 'فساتين' },
+  venues: { fr: 'Lieux', ar: 'أماكن' },
+  beauty: { fr: 'Beauté', ar: 'الجمال' },
+  'photo-film': { fr: 'Photo & Film', ar: 'تصوير وفيديو' },
+  caterer: { fr: 'Traiteur', ar: 'التموين' },
+  decor: { fr: 'Décor', ar: 'الديكور' },
+  negafa: { fr: 'Negafa', ar: 'نكافة' },
+  artist: { fr: 'Artiste', ar: 'فنان' },
+  'event-planner': { fr: "Organisateur d'événements", ar: 'منظم فعاليات' },
+  cakes: { fr: 'Gâteaux', ar: 'حلويات' },
+};
+
 export type WerviceCategorySlug = (typeof WERVICE_CATEGORIES)[number]['slug'];
 export const VALID_CATEGORY_SLUGS = WERVICE_CATEGORIES.map((c) => c.slug);
 
@@ -70,10 +84,16 @@ export function slugToDbCategory(slug: string | null | undefined): string | null
   return SLUG_TO_DB_CATEGORY[s] ?? (VALID_CATEGORY_SLUGS.includes(s) ? s : null);
 }
 
-export function labelForCategory(slug: string | null | undefined): string {
+export function labelForCategory(slug: string | null | undefined, locale: string = 'en'): string {
   if (!slug) return '';
   const normalized = normalizeCategory(slug);
-  if (normalized && CATEGORY_MAP[normalized]) return CATEGORY_MAP[normalized].label;
-  if (CATEGORY_MAP[slug]) return CATEGORY_MAP[slug].label;
-  return slug;
+  const key = normalized || slug;
+  const base = CATEGORY_MAP[key]?.label || CATEGORY_MAP[slug]?.label || slug;
+  const lc = (locale || 'en').toLowerCase();
+  if (lc === 'en') return base;
+  const translated = CATEGORY_TRANSLATIONS[key];
+  if (!translated) return base;
+  if (lc === 'fr') return translated.fr;
+  if (lc === 'ar') return translated.ar;
+  return base;
 }

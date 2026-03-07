@@ -1,22 +1,25 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { FiCheckCircle, FiCircle, FiSearch } from 'react-icons/fi';
 import { CHECKLIST, getCategories } from '@/data/checklist';
-
-const STORAGE_KEY = 'wervice_shell_checklist_v1';
+import { useUser } from '@/contexts/UserContext';
+import { getDashboardCopy } from '@/components/home/dashboard-i18n';
 
 type WeddingChecklistViewProps = {
   locale: string;
 };
 
 export default function WeddingChecklistView({ locale }: WeddingChecklistViewProps) {
+  const copy = getDashboardCopy(locale);
+  const { user } = useUser();
+  const storageKey = user?.id ? `wervice_shell_checklist_${user.id}` : 'wervice_shell_checklist_guest';
   const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activeCategory, setActiveCategory] = useState<string>(copy.checklist.all);
   const [completed, setCompleted] = useState<Record<string, boolean>>(() => {
     if (typeof window === 'undefined') return {};
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey);
     if (!raw) return {};
     try {
       return JSON.parse(raw) as Record<string, boolean>;
@@ -25,7 +28,21 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
     }
   });
 
-  const categories = useMemo(() => ['All', ...getCategories()], []);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) {
+      setCompleted({});
+      return;
+    }
+    try {
+      setCompleted(JSON.parse(raw) as Record<string, boolean>);
+    } catch {
+      setCompleted({});
+    }
+  }, [storageKey]);
+
+  const categories = useMemo(() => [copy.checklist.all, ...getCategories()], [copy.checklist.all]);
 
   const filteredSections = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -33,12 +50,12 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
     return CHECKLIST.map((section) => {
       const items = section.items.filter((item) => {
         const searchMatch = !q || item.label.toLowerCase().includes(q);
-        const categoryMatch = activeCategory === 'All' || item.category === activeCategory;
+        const categoryMatch = activeCategory === copy.checklist.all || item.category === activeCategory;
         return searchMatch && categoryMatch;
       });
       return { ...section, items };
     }).filter((section) => section.items.length > 0);
-  }, [search, activeCategory]);
+  }, [search, activeCategory, copy.checklist.all]);
 
   const stats = useMemo(() => {
     const total = CHECKLIST.reduce((sum, section) => sum + section.items.length, 0);
@@ -51,7 +68,8 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
     setCompleted((prev) => {
       const next = { ...prev, [id]: !prev[id] };
       if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        localStorage.setItem(storageKey, JSON.stringify(next));
+        window.dispatchEvent(new CustomEvent('wervice:checklist-updated'));
       }
       return next;
     });
@@ -61,17 +79,17 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
     <section className="mx-auto max-w-7xl">
       <div className="mb-7 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">Wedding Checklist</h1>
-          <p className="mt-2 text-lg text-[#4a5c74]">Track every step and stay on schedule.</p>
+          <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{copy.checklist.title}</h1>
+          <p className="mt-2 text-lg text-[#4a5c74]">{copy.checklist.subtitle}</p>
         </div>
         <div className="rounded-full border border-[#d2d9e5] bg-white px-4 py-2 text-sm font-semibold text-[#33475f]">
-          {stats.done}/{stats.total} completed
+          {stats.done}/{stats.total} {copy.checklist.completed}
         </div>
       </div>
 
       <div className="mb-6 rounded-3xl border border-[#d7deea] bg-white p-5 shadow-sm">
         <div className="mb-3 flex items-center justify-between text-sm text-[#5f6f84]">
-          <span>Overall Progress</span>
+          <span>{copy.checklist.overallProgress}</span>
           <span className="font-semibold text-[#11190C]">{stats.percentage}%</span>
         </div>
         <div className="h-2 w-full rounded-full bg-[#e8edf5]">
@@ -84,7 +102,7 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search checklist tasks"
+              placeholder={copy.checklist.searchPlaceholder}
               className="w-full rounded-xl border border-[#d2d9e5] bg-white py-2.5 pl-9 pr-3 text-sm focus:border-[#11190C] focus:outline-none"
             />
           </label>
@@ -136,7 +154,7 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
                         type="button"
                         onClick={() => toggle(item.id)}
                         className="mt-0.5 text-[#11190C]"
-                        aria-label={completed[item.id] ? 'Mark as not done' : 'Mark as done'}
+                        aria-label={completed[item.id] ? copy.checklist.markNotDone : copy.checklist.markDone}
                       >
                         {completed[item.id] ? <FiCheckCircle className="h-5 w-5" /> : <FiCircle className="h-5 w-5" />}
                       </button>

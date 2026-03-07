@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const resolvedParams = await params;
   const locale = resolvedParams?.locale ?? 'en';
-  const { vendors } = await fetchVendors({ limit: 9, sort: 'newest' });
+  const { vendors } = await fetchVendors({ limit: 80, sort: 'newest' });
 
   const dynamicCards = (vendors || []).map((vendor) => {
     const image =
@@ -51,7 +51,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
 
   const forYouCards = dynamicCards.slice(0, 3).length === 3 ? dynamicCards.slice(0, 3) : fallbackForYou;
 
-  const recommendedVendors = (vendors || []).slice(0, 24).map((vendor) => ({
+  const recommendedVendors = (vendors || []).slice(0, 80).map((vendor) => ({
     id: vendor.id,
     title: vendor.business_name,
     city: vendor.city,

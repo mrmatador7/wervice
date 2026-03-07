@@ -5,6 +5,7 @@ import { useUser } from '@/contexts/UserContext';
 import DashboardPlanner from '@/app/[locale]/dashboard/components/DashboardPlanner';
 import DashboardBudget from '@/app/[locale]/dashboard/components/DashboardBudget';
 import DashboardGuestList from '@/app/[locale]/dashboard/components/DashboardGuestList';
+import { getDashboardCopy } from '@/components/home/dashboard-i18n';
 
 type AccountToolViewsProps = {
   locale: string;
@@ -12,12 +13,13 @@ type AccountToolViewsProps = {
 };
 
 export default function AccountToolViews({ locale, view }: AccountToolViewsProps) {
+  const copy = getDashboardCopy(locale);
   const { user, profile, isLoading } = useUser();
 
   if (isLoading) {
     return (
       <section className="mx-auto max-w-6xl">
-        <div className="rounded-3xl border border-[#d7deea] bg-white p-8 text-[#5f6f84]">Loading your tools...</div>
+        <div className="rounded-3xl border border-[#d7deea] bg-white p-8 text-[#5f6f84]">{copy.tools.loading}</div>
       </section>
     );
   }
@@ -26,13 +28,13 @@ export default function AccountToolViews({ locale, view }: AccountToolViewsProps
     return (
       <section className="mx-auto max-w-4xl">
         <div className="rounded-3xl border border-[#d7deea] bg-white p-8">
-          <h2 className="text-2xl font-bold text-[#11190C]">Sign in to access your account tools</h2>
-          <p className="mt-2 text-[#5f6f84]">Your planner, guest list, and budget live in your account.</p>
+          <h2 className="text-2xl font-bold text-[#11190C]">{copy.tools.signinTitle}</h2>
+          <p className="mt-2 text-[#5f6f84]">{copy.tools.signinSubtitle}</p>
           <Link
-            href={`/${locale}/auth/signin`}
+            href={`/${locale}/dashboard?view=auth`}
             className="mt-5 inline-flex rounded-xl bg-[#11190C] px-4 py-2.5 text-sm font-bold text-[#D9FF0A]"
           >
-            Sign In
+            {copy.tools.signIn}
           </Link>
         </div>
       </section>

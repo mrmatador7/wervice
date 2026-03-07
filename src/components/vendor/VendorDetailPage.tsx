@@ -88,15 +88,70 @@ export default function VendorDetailPage({
     ? (googleMaps.startsWith('http') ? googleMaps : `https://www.google.com/maps/search/${encodeURIComponent(googleMaps + ', ' + city + ', Morocco')}`)
     : `https://www.google.com/maps/search/${encodeURIComponent(name + ', ' + city + ', Morocco')}`;
 
+  const contentCopy = {
+    en: {
+      home: 'Home',
+      vendors: 'Vendors',
+      vendorPortfolio: 'Vendor Portfolio',
+      viewAllPhotos: 'View all {count} photos',
+      share: 'Share',
+      aboutVendor: 'About the Vendor',
+      video: 'Video',
+      clickToPlay: 'Click to play',
+      location: 'Location',
+      getDirections: 'Get Directions',
+      fallbackOverview: `${name} is one of the featured ${categoryLabel.toLowerCase()} vendors in ${city}.`,
+    },
+    fr: {
+      home: 'Accueil',
+      vendors: 'Prestataires',
+      vendorPortfolio: 'Portfolio prestataire',
+      viewAllPhotos: 'Voir les {count} photos',
+      share: 'Partager',
+      aboutVendor: 'À propos du prestataire',
+      video: 'Vidéo',
+      clickToPlay: 'Cliquer pour lire',
+      location: 'Localisation',
+      getDirections: 'Obtenir l’itinéraire',
+      fallbackOverview: `${name} fait partie des prestataires ${categoryLabel.toLowerCase()} recommandés à ${city}.`,
+    },
+    ar: {
+      home: 'الرئيسية',
+      vendors: 'المزوّدون',
+      vendorPortfolio: 'معرض المزوّد',
+      viewAllPhotos: 'عرض كل الصور ({count})',
+      share: 'مشاركة',
+      aboutVendor: 'نبذة عن المزوّد',
+      video: 'فيديو',
+      clickToPlay: 'انقر للتشغيل',
+      location: 'الموقع',
+      getDirections: 'الحصول على الاتجاهات',
+      fallbackOverview: `${name} من مزوّدي ${categoryLabel.toLowerCase()} المميزين في ${city}.`,
+    },
+  } as const;
+
+  const c = contentCopy[(locale as keyof typeof contentCopy) || 'en'] || contentCopy.en;
+  const rawDescription = (description || '').trim();
+  const hasArabicScript = /[\u0600-\u06FF]/.test(rawDescription);
+  const looksFrench = /\b(le|la|les|des|pour|avec|mariage|prestataire|service|ville|dans)\b|[éèêàçù]/i.test(rawDescription);
+  const safeDescription =
+    rawDescription && (
+      (locale === 'en' && !hasArabicScript && !looksFrench) ||
+      (locale === 'fr' && !hasArabicScript) ||
+      (locale === 'ar' && hasArabicScript)
+    )
+      ? rawDescription
+      : c.fallbackOverview;
+
   return (
     <div className="min-h-screen bg-[#F5F5F0]">
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6 py-8">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-5">
-          <Link href={`/${locale}`} className="hover:text-gray-700">Home</Link>
+          <Link href={`/${locale}`} className="hover:text-gray-700">{c.home}</Link>
           <FiChevronRight className="w-3 h-3" />
-          <Link href={`/${locale}/vendors`} className="hover:text-gray-700">Vendors</Link>
+          <Link href={`/${locale}/vendors`} className="hover:text-gray-700">{c.vendors}</Link>
           <FiChevronRight className="w-3 h-3" />
           <Link href={`/${locale}/categories/${category}`} className="hover:text-gray-700">{categoryLabel}</Link>
           <FiChevronRight className="w-3 h-3" />
@@ -106,13 +161,13 @@ export default function VendorDetailPage({
         {/* ── Gallery ── */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-gray-400">Vendor Portfolio</span>
+            <span className="text-[11px] font-bold tracking-[0.15em] uppercase text-gray-400">{c.vendorPortfolio}</span>
             {allMedia.length > 1 && (
               <button
                 onClick={() => openLightbox(0)}
                 className="text-sm font-semibold text-gray-800 hover:text-gray-600 flex items-center gap-1 transition-colors"
               >
-                View all {allMedia.length} photos →
+                {c.viewAllPhotos.replace('{count}', String(allMedia.length))} →
               </button>
             )}
           </div>
@@ -185,7 +240,7 @@ export default function VendorDetailPage({
             <button
               onClick={() => { if (navigator.share) navigator.share({ title: name, url: window.location.href }); }}
               className="p-2.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
-              title="Share"
+              title={c.share}
             >
               <FiShare2 className="w-4.5 h-4.5 text-gray-600" />
             </button>
@@ -199,17 +254,17 @@ export default function VendorDetailPage({
           <div className="space-y-6">
 
             {/* About — hidden when no description */}
-            {description && (
+            {safeDescription && (
               <div className="bg-white rounded-2xl p-8 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">About the Vendor</h2>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap text-sm">{description}</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">{c.aboutVendor}</h2>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap text-sm">{safeDescription}</p>
               </div>
             )}
 
             {/* Video — hidden when no videoUrl, paused until clicked */}
             {videoUrl && (
               <div className="bg-white rounded-2xl p-8 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Video</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">{c.video}</h2>
                 <div className="aspect-video rounded-xl overflow-hidden bg-black relative">
                   {videoPlaying ? (
                     <iframe
@@ -224,7 +279,7 @@ export default function VendorDetailPage({
                       className="w-full h-full flex flex-col items-center justify-center gap-4 group bg-gray-900 hover:bg-gray-800 transition-colors"
                     >
                       <BsFillPlayCircleFill className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
-                      <span className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">Click to play</span>
+                      <span className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">{c.clickToPlay}</span>
                     </button>
                   )}
                 </div>
@@ -233,7 +288,7 @@ export default function VendorDetailPage({
 
             {/* Location */}
             <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-3">Location</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-3">{c.location}</h2>
               <p className="text-gray-600 flex items-center gap-2 text-sm">
                 <FiMapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 {googleMaps && !googleMaps.startsWith('http') ? googleMaps : `${city}, Morocco`}
@@ -244,7 +299,7 @@ export default function VendorDetailPage({
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold rounded-xl transition-colors"
               >
-                Get Directions
+                {c.getDirections}
               </a>
             </div>
 

@@ -7,6 +7,7 @@ import { ExternalLink, Instagram, MapPin, X } from 'lucide-react';
 import { labelForCategory } from '@/lib/categories';
 import { vendorUrl } from '@/lib/vendor-url';
 import VendorBrowseCard from '@/components/home/VendorBrowseCard';
+import { getDashboardCopy, interpolateCopy } from '@/components/home/dashboard-i18n';
 
 type VendorListItem = {
   id: string;
@@ -51,6 +52,7 @@ export default function InfiniteVendorGrid({
   gridClassName,
   showStatusText = true,
 }: InfiniteVendorGridProps) {
+  const copy = getDashboardCopy(locale);
   const [vendors, setVendors] = useState<VendorListItem[]>(initialVendors);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -96,6 +98,25 @@ export default function InfiniteVendorGrid({
     if (!email) return false;
     return email !== 'no-email@example.com';
   }, [selectedVendor?.email]);
+
+  const localizedOverview = useMemo(() => {
+    if (!selectedVendor) return '';
+    const source = (selectedVendor.profile_description || selectedVendor.description || '').trim();
+    const hasArabicScript = /[\u0600-\u06FF]/.test(source);
+    const looksFrench = /\b(le|la|les|des|pour|avec|mariage|prestataire|service|ville|dans)\b|[éèêàçù]/i.test(source);
+
+    if (source) {
+      if (locale === 'ar' && hasArabicScript) return source;
+      if (locale === 'fr' && !hasArabicScript) return source;
+      if (locale === 'en' && !hasArabicScript && !looksFrench) return source;
+    }
+
+    return interpolateCopy(copy.vendors.defaultOverviewTemplate, {
+      name: selectedVendor.business_name,
+      category: labelForCategory(selectedVendor.category, locale).toLowerCase(),
+      city: selectedVendor.city,
+    });
+  }, [selectedVendor, locale, copy.vendors.defaultOverviewTemplate]);
 
   const selectedVendorImages = useMemo(() => {
     if (!selectedVendor) return [];
@@ -191,10 +212,11 @@ export default function InfiniteVendorGrid({
         {vendors.map((vendor) => (
           <VendorBrowseCard
             key={vendor.id}
+            vendorId={vendor.id}
             href={vendorUrl(vendor, locale)}
             title={vendor.business_name}
             location={vendor.city}
-            categoryLabel={labelForCategory(vendor.category)}
+            categoryLabel={labelForCategory(vendor.category, locale)}
             logoUrl={vendor.profile_photo_url}
             galleryImages={vendor.gallery_urls || vendor.gallery_photos || []}
             onCardClick={() => {
@@ -207,17 +229,17 @@ export default function InfiniteVendorGrid({
 
       <div ref={sentinelRef} className="h-8" />
       {showStatusText && isLoadingMore && (
-        <p className="pb-8 pt-2 text-center text-sm text-[#5f6f84]">Loading more vendors...</p>
+        <p className="pb-8 pt-2 text-center text-sm text-[#5f6f84]">{copy.vendors.loadingMore}</p>
       )}
       {showStatusText && !hasMore && vendors.length > 0 && (
-        <p className="pb-8 pt-2 text-center text-sm text-[#5f6f84]">You reached the end.</p>
+        <p className="pb-8 pt-2 text-center text-sm text-[#5f6f84]">{copy.vendors.reachedEnd}</p>
       )}
 
       {selectedVendor && (
         <div className="fixed inset-0 z-50">
           <button
             type="button"
-            aria-label="Close vendor panel"
+            aria-label={copy.vendors.panelCloseVendor}
             className="absolute inset-0 bg-black/20"
             onClick={() => {
               setSelectedVendorId(null);
@@ -272,34 +294,32 @@ export default function InfiniteVendorGrid({
             </div>
 
             <div className="mt-5 border-t border-black/10 pt-5">
-              <h4 className="text-lg font-bold text-[#11190C]">Overview</h4>
+              <h4 className="text-lg font-bold text-[#11190C]">{copy.vendors.panelOverview}</h4>
               <p className="mt-2 text-sm leading-6 text-[#4d6078]">
-                {(selectedVendor.profile_description || selectedVendor.description)?.trim()
-                  ? (selectedVendor.profile_description || selectedVendor.description)
-                  : `${selectedVendor.business_name} is one of the featured ${labelForCategory(selectedVendor.category).toLowerCase()} vendors in ${selectedVendor.city}.`}
+                {localizedOverview}
               </p>
             </div>
 
             <div className="mt-6 grid gap-4 border-t border-black/10 pt-5 text-sm text-[#33475f] sm:grid-cols-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Category</p>
-                <p className="mt-1 font-semibold text-[#11190C]">{labelForCategory(selectedVendor.category)}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.vendors.panelCategory}</p>
+                <p className="mt-1 font-semibold text-[#11190C]">{labelForCategory(selectedVendor.category, locale)}</p>
               </div>
               {selectedVendor.profile_starting_price && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Starting Price</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.vendors.panelStartingPrice}</p>
                   <p className="mt-1 font-semibold text-[#11190C]">{selectedVendor.profile_starting_price}</p>
                 </div>
               )}
               {hasRealEmail && selectedVendor?.email && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Email</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.vendors.panelEmail}</p>
                   <p className="mt-1 break-all font-medium">{selectedVendor.email}</p>
                 </div>
               )}
               {selectedVendor.whatsapp && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Phone Number</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.vendors.panelPhoneNumber}</p>
                   <button
                     type="button"
                     onClick={() => setIsWhatsappRevealed(true)}
@@ -310,19 +330,19 @@ export default function InfiniteVendorGrid({
                     <span className={isWhatsappRevealed ? '' : 'blur-sm select-none'}>
                       {selectedVendor.whatsapp}
                     </span>
-                    {!isWhatsappRevealed && <span className="ml-2 text-xs font-medium text-[#5f6f84]">Tap to reveal</span>}
+                    {!isWhatsappRevealed && <span className="ml-2 text-xs font-medium text-[#5f6f84]">{copy.vendors.panelTapToReveal}</span>}
                   </button>
                 </div>
               )}
               {selectedVendor.instagram && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Instagram</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.vendors.panelInstagram}</p>
                   <a
                     href={selectedVendor.instagram.startsWith('http') ? selectedVendor.instagram : `https://instagram.com/${selectedVendor.instagram.replace(/^@/, '')}`}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 text-[#11190C] hover:bg-[#ECE7DE]"
-                    aria-label="Open Instagram"
+                    aria-label={copy.vendors.panelOpenInstagram}
                   >
                     <Instagram className="h-4.5 w-4.5" />
                   </a>
@@ -330,14 +350,14 @@ export default function InfiniteVendorGrid({
               )}
               {selectedVendor.google_maps && (
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Google Maps</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.vendors.panelGoogleMaps}</p>
                   <a
                     href={selectedVendor.google_maps}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-1 inline-flex items-center gap-1 font-medium text-[#11190C] hover:underline"
                   >
-                    View location
+                    {copy.vendors.panelViewLocation}
                     <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 </div>
@@ -346,9 +366,9 @@ export default function InfiniteVendorGrid({
 
             {similarVendors.length > 0 && (
               <div className="mt-6 border-t border-black/10 pt-5">
-                <h4 className="text-lg font-bold text-[#11190C]">Similar Vendors</h4>
+                <h4 className="text-lg font-bold text-[#11190C]">{copy.vendors.panelSimilarVendors}</h4>
                 <p className="mt-1 text-sm text-[#5f6f84]">
-                  Same category and city
+                  {copy.vendors.panelSameCategoryCity}
                 </p>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {similarVendors.map((vendor) => (

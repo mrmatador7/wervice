@@ -19,7 +19,7 @@ import {
   WandSparkles,
 } from 'lucide-react';
 import { WERVICE_CATEGORIES, labelForCategory } from '@/lib/categories';
-import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { cityToSlug } from '@/lib/vendor-url';
 import DashboardShell, { type ShellCard } from '@/components/home/DashboardShell';
 import VendorBrowseCard from '@/components/home/VendorBrowseCard';
@@ -158,7 +158,9 @@ export default function ExplorerHome({
 }: ExplorerHomeProps) {
   const categoriesRowRef = useRef<HTMLDivElement | null>(null);
   const citiesRowRef = useRef<HTMLDivElement | null>(null);
+  const recommendedSentinelRef = useRef<HTMLDivElement | null>(null);
   const [gpsCity, setGpsCity] = useState<string | null>(null);
+  const [visibleRecommendedCount, setVisibleRecommendedCount] = useState(6);
 
   function scrollRow(ref: React.RefObject<HTMLDivElement | null>, direction: 'left' | 'right') {
     const node = ref.current;
@@ -208,17 +210,17 @@ export default function ExplorerHome({
     decor: '/categories/decor.png',
     artist: '/categories/music.png',
     'event-planner': '/categories/event-planner.png',
-    florist: '/images/sample/venues-1.jpg',
-    negafa: '/images/hero/cover.jpg',
-    cakes: '/images/sample/venues-2.jpg',
+    florist: '/categories/decor.png',
+    negafa: '/categories/beauty.png',
+    cakes: '/categories/Catering.png',
   };
 
   const categoryCards = WERVICE_CATEGORIES.map((category) => ({
     id: `cat-${category.slug}`,
     slug: category.slug,
-    title: category.label,
+    title: labelForCategory(category.slug, locale),
     subtitle: '',
-    image: categoryImageBySlug[category.slug] || '/images/sample/venues-1.jpg',
+    image: categoryImageBySlug[category.slug] || '/categories/venues.png',
     href: `/${locale}/categories/${category.slug}`,
   }));
 
@@ -246,7 +248,7 @@ export default function ExplorerHome({
     .map((city, idx) => {
       const slug = cityToSlug(city.value);
       return {
-        title: city.label,
+        title: localizeCityLabel(city.label, locale),
         image: cityImageBySlug[slug] || '/cities/Casablanca.jpg',
         vendors: `${Math.max(25, 140 - idx * 6)}+ Vendors`,
         href: `/${locale}/${slug}`,
@@ -254,13 +256,45 @@ export default function ExplorerHome({
     });
 
   const savedCards: ShellCard[] = forYouCards;
-  const preferredCity = gpsCity || recommendedVendors[0]?.city || 'Morocco';
+
+  const cityKey = (value: string | null | undefined) => (value || '').toLowerCase().trim();
+  const fallbackCity = recommendedVendors[0]?.city || 'Morocco';
+  const selectedCity = useMemo(() => {
+    if (!gpsCity) return fallbackCity;
+    const normalized = cityKey(gpsCity);
+    const hasCity = recommendedVendors.some((vendor) => cityKey(vendor.city) === normalized);
+    return hasCity ? gpsCity : fallbackCity;
+  }, [gpsCity, recommendedVendors, fallbackCity]);
+
   const recommendedForCity = useMemo(() => {
-    if (!gpsCity) return recommendedVendors.slice(0, 8);
-    const normalizedCity = gpsCity.toLowerCase().trim();
-    const filtered = recommendedVendors.filter((v) => v.city.toLowerCase().trim() === normalizedCity);
-    return (filtered.length > 0 ? filtered : recommendedVendors).slice(0, 8);
-  }, [gpsCity, recommendedVendors]);
+    const normalized = cityKey(selectedCity);
+    return recommendedVendors.filter((vendor) => cityKey(vendor.city) === normalized).slice(0, 16);
+  }, [recommendedVendors, selectedCity]);
+
+  useEffect(() => {
+    setVisibleRecommendedCount(6);
+  }, [selectedCity]);
+
+  useEffect(() => {
+    const node = recommendedSentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting) return;
+        setVisibleRecommendedCount((prev) => {
+          if (prev >= recommendedForCity.length) return prev;
+          return Math.min(16, prev + 6, recommendedForCity.length);
+        });
+      },
+      { rootMargin: '260px 0px', threshold: 0 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [recommendedForCity.length]);
+
+  const visibleRecommended = recommendedForCity.slice(0, visibleRecommendedCount);
 
   return (
     <DashboardShell locale={locale} savedCards={savedCards}>
@@ -327,21 +361,30 @@ export default function ExplorerHome({
 
       <section>
         <h2 className="mb-4 text-4xl font-black tracking-tight text-[#11190C]">
-          Recommended for you in {preferredCity}
+          Recommended for you in {localizeCityLabel(selectedCity, locale)}
         </h2>
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {recommendedForCity.map((vendor) => (
+          {visibleRecommended.map((vendor) => (
             <VendorBrowseCard
               key={vendor.id}
+              vendorId={vendor.id}
               href={vendor.href}
               title={vendor.title}
               location={vendor.city}
-              categoryLabel={labelForCategory(vendor.category)}
+              categoryLabel={labelForCategory(vendor.category, locale)}
               logoUrl={vendor.logoUrl}
               galleryImages={vendor.galleryImages}
             />
           ))}
         </div>
+        {recommendedForCity.length === 0 && (
+          <div className="mt-4 rounded-2xl border border-[#d7deea] bg-white p-5 text-sm text-[#5f6f84]">
+            No recommended vendors found in this city yet.
+          </div>
+        )}
+        {recommendedForCity.length > visibleRecommended.length && (
+          <div ref={recommendedSentinelRef} className="h-8" />
+        )}
       </section>
     </DashboardShell>
   );

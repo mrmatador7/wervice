@@ -8,10 +8,10 @@ import { absoluteUrl } from '@/lib/absolute-url';
 export async function generateMetadata({
   params
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const article = getArticle(slug);
+  const { locale, slug } = await params;
+  const article = getArticle(slug, locale);
 
   if (!article) {
     return {
@@ -62,17 +62,17 @@ interface ArticlePageProps {
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { locale, slug } = await params;
-  const article = getArticle(slug);
+  const article = getArticle(slug, locale);
 
   if (!article) {
     notFound();
   }
 
   // Get related articles for the bottom section
-  const relatedArticles = getRelated(slug);
+  const relatedArticles = getRelated(slug, locale);
 
   // Get latest and popular articles for the sidebar
-  const allArticles = getAll();
+  const allArticles = getAll(locale);
   const latestArticles = allArticles.slice(0, 3);
   // Sort by date for popular articles since views property doesn't exist
   const popularArticles = allArticles

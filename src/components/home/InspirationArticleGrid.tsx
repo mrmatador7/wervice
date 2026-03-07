@@ -7,21 +7,31 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { Calendar, Clock3, MapPin, User, X } from 'lucide-react';
 import type { Article } from '@/data/articles';
+import { getDashboardCopy } from '@/components/home/dashboard-i18n';
+import { localizeCityLabel } from '@/lib/types/vendor';
+import { labelForCategory } from '@/lib/categories';
 
 type InspirationArticleGridProps = {
   locale: string;
   articles: Article[];
 };
 
-function articleCity(article: Article) {
+function articleCity(article: Article, locale: string) {
   const city = article.tags?.[1];
   if (!city) return 'Morocco';
-  return city.charAt(0).toUpperCase() + city.slice(1);
+  const normalized = city.charAt(0).toUpperCase() + city.slice(1);
+  return localizeCityLabel(normalized, locale);
 }
 
-function articleCategory(article: Article) {
+function articleCategory(article: Article, locale: string) {
   const tag = article.tags?.[0] || 'guide';
-  return tag.replace(/-/g, ' ');
+  const normalized = tag.toLowerCase();
+  if (normalized === 'guide') {
+    if (locale === 'fr') return 'Guide';
+    if (locale === 'ar') return 'دليل';
+    return 'Guide';
+  }
+  return labelForCategory(normalized, locale);
 }
 
 function articleReadTime(article: Article) {
@@ -46,6 +56,7 @@ function cleanMarkdown(markdown: string) {
 }
 
 export default function InspirationArticleGrid({ locale, articles }: InspirationArticleGridProps) {
+  const copy = getDashboardCopy(locale);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -84,8 +95,8 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
   return (
     <>
       <section className="mx-auto max-w-7xl">
-        <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">Inspiration</h1>
-        <p className="mt-3 text-lg text-[#4a5c74]">Explore guides and real wedding ideas.</p>
+        <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{copy.inspiration.title}</h1>
+        <p className="mt-3 text-lg text-[#4a5c74]">{copy.inspiration.subtitle}</p>
 
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {articles.map((article) => (
@@ -110,7 +121,7 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
 
               <div className="p-4">
                 <p className="mb-1 inline-flex rounded-full bg-[#11190C] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#D9FF0A]">
-                  {articleCategory(article)}
+                  {articleCategory(article, locale)}
                 </p>
                 <h3 className="line-clamp-2 text-xl font-bold leading-tight text-[#11190C]">{article.title}</h3>
                 <p className="mt-2 line-clamp-2 text-sm text-[#52657f]">{articleSummary(article)}</p>
@@ -125,7 +136,7 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
           <button
             type="button"
             className="absolute inset-0 bg-black/20"
-            aria-label="Close article panel"
+            aria-label={copy.inspiration.closeArticlePanel}
             onClick={() => {
               setSelectedSlug(null);
               updateArticleQuery(null);
@@ -138,7 +149,7 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
                 <h3 className="text-4xl font-black tracking-tight text-[#11190C]">{selectedArticle.title}</h3>
                 <p className="mt-1 flex items-center gap-1.5 text-base text-[#5f6f84]">
                   <MapPin className="h-4 w-4" />
-                  {articleCity(selectedArticle)}
+                  {articleCity(selectedArticle, locale)}
                 </p>
               </div>
               <button
@@ -148,7 +159,7 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
                   updateArticleQuery(null);
                 }}
                 className="grid h-10 w-10 place-items-center rounded-full border border-black/10 hover:bg-black/5"
-                aria-label="Close"
+                aria-label={copy.inspiration.closeArticlePanel}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -190,12 +201,12 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
             </div>
 
             <div className="mt-5 border-t border-black/10 pt-5">
-              <h4 className="text-lg font-bold text-[#11190C]">Overview</h4>
+              <h4 className="text-lg font-bold text-[#11190C]">{copy.inspiration.overview}</h4>
               <p className="mt-2 text-sm leading-6 text-[#4d6078]">{articleSummary(selectedArticle)}</p>
             </div>
 
             <div className="mt-6 border-t border-black/10 pt-5">
-              <h4 className="text-lg font-bold text-[#11190C]">Article</h4>
+              <h4 className="text-lg font-bold text-[#11190C]">{copy.inspiration.article}</h4>
               <div className="prose prose-sm mt-3 max-w-none text-[#33475f]">
                 <ReactMarkdown
                   components={{
@@ -221,28 +232,28 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
 
             <div className="mt-6 grid gap-4 border-t border-black/10 pt-5 text-sm text-[#33475f] sm:grid-cols-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Category</p>
-                <p className="mt-1 font-semibold text-[#11190C]">{articleCategory(selectedArticle)}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.inspiration.category}</p>
+                <p className="mt-1 font-semibold text-[#11190C]">{articleCategory(selectedArticle, locale)}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Read Time</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.inspiration.readTime}</p>
                 <p className="mt-1 inline-flex items-center gap-1.5 font-semibold text-[#11190C]">
                   <Clock3 className="h-4 w-4" />
-                  {articleReadTime(selectedArticle)} min
+                  {articleReadTime(selectedArticle)} {copy.inspiration.min}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Author</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.inspiration.author}</p>
                 <p className="mt-1 inline-flex items-center gap-1.5 font-semibold text-[#11190C]">
                   <User className="h-4 w-4" />
-                  {selectedArticle.author || 'Wervice Editorial'}
+                  {selectedArticle.author || copy.inspiration.defaultAuthor}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">Published</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#7a8ca4]">{copy.inspiration.published}</p>
                 <p className="mt-1 inline-flex items-center gap-1.5 font-semibold text-[#11190C]">
                   <Calendar className="h-4 w-4" />
-                  {new Date(selectedArticle.date).toLocaleDateString('en-US', {
+                  {new Date(selectedArticle.date).toLocaleDateString(locale, {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
@@ -253,8 +264,8 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
 
             {relatedArticles.length > 0 && (
               <div className="mt-6 border-t border-black/10 pt-5">
-                <h4 className="text-lg font-bold text-[#11190C]">Similar Guides</h4>
-                <p className="mt-1 text-sm text-[#5f6f84]">Recommended inspiration</p>
+                <h4 className="text-lg font-bold text-[#11190C]">{copy.inspiration.similarGuides}</h4>
+                <p className="mt-1 text-sm text-[#5f6f84]">{copy.inspiration.recommendedInspiration}</p>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {relatedArticles.map((article) => (
                     <button
@@ -271,7 +282,7 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
                       </div>
                       <div className="min-w-0">
                         <p className="line-clamp-1 text-base font-bold text-[#11190C]">{article.title}</p>
-                        <p className="text-sm text-[#5f6f84]">{articleCity(article)}</p>
+                        <p className="text-sm text-[#5f6f84]">{articleCity(article, locale)}</p>
                       </div>
                     </button>
                   ))}
@@ -284,7 +295,7 @@ export default function InspirationArticleGrid({ locale, articles }: Inspiration
                 href={`/${locale}/blog/${selectedArticle.slug}`}
                 className="inline-flex rounded-xl bg-[#11190C] px-4 py-2.5 text-sm font-bold text-[#D9FF0A]"
               >
-                Open Full Article
+                {copy.inspiration.openFullArticle}
               </Link>
             </div>
           </aside>
