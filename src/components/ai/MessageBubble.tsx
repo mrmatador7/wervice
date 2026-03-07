@@ -52,9 +52,9 @@ export default function MessageBubble({ type, content, vendors, onCopy, onRegene
           <p className="text-gray-900 text-sm leading-relaxed">{content}</p>
         </div>
 
-        {/* Vendor Cards */}
+        {/* Vendor Cards — same style as category page cards */}
         {vendors && vendors.length > 0 && (
-          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {vendors.map((vendor) => (
               <VendorCard key={vendor.id} vendor={vendor} />
             ))}

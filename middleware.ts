@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const authUiEnabled = process.env.NEXT_PUBLIC_AUTH_UI_ENABLED === 'true';
 
 export async function middleware(request: NextRequest) {
   // Create Supabase client for authentication
@@ -32,8 +33,23 @@ export async function middleware(request: NextRequest) {
   // Note: Removed session refresh from middleware to avoid cookie parsing issues
   // Session refresh is handled in individual pages as needed
 
-  // Check if the pathname starts with a locale
   const pathname = request.nextUrl.pathname;
+
+  // While auth UI is disabled, block direct access to auth and account-creation entry points.
+  if (!authUiEnabled) {
+    const blockedPatterns = [
+      /^\/(en|fr|ar)\/auth(?:\/|$)/,
+      /^\/(en|fr|ar)\/become-vendor(?:\/|$)/,
+      /^\/(en|fr|ar)\/vendors\/subscribe(?:\/|$)/,
+      /^\/vendor-login(?:\/|$)/,
+    ];
+    const isBlocked = blockedPatterns.some((pattern) => pattern.test(pathname));
+    if (isBlocked) {
+      const localeMatch = pathname.match(/^\/(en|fr|ar)(?:\/|$)/);
+      const locale = localeMatch?.[1] || 'en';
+      return NextResponse.redirect(new URL(`/${locale}`, request.url), 307);
+    }
+  }
 
   // If it's the root path, redirect to /en
   if (pathname === '/') {

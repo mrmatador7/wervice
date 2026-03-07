@@ -250,6 +250,10 @@ export const FOOTER_LINKS = [
 
 export const CURRENT_YEAR = new Date().getFullYear();
 
+// Temporary UI switch: keep auth code in place, but hide auth entry points in the interface.
+// Set NEXT_PUBLIC_AUTH_UI_ENABLED=true to re-enable auth entry points.
+export const AUTH_UI_ENABLED = process.env.NEXT_PUBLIC_AUTH_UI_ENABLED === 'true';
+
 /** Footer contact – update these to change contact info site-wide */
 export const FOOTER_CONTACT = {
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@wervice.ma',

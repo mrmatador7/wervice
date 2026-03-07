@@ -1,18 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef, Fragment } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Sparkles, MoreVertical, Send, Copy, RefreshCw } from 'lucide-react';
+import { X, MoreVertical, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageBubble from './MessageBubble';
 import SuggestionChip from './SuggestionChip';
-import VendorCard from './VendorCard';
+import { WERVICE_CATEGORIES, labelForCategory } from '@/lib/categories';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+import type { AIVendorCardVendor } from './VendorCard';
 
 interface Message {
   id: string;
   type: 'user' | 'ai';
   content: string;
-  vendors?: any[];
+  vendors?: AIVendorCardVendor[];
   timestamp: Date;
 }
 
@@ -22,57 +24,148 @@ interface AIChatModalProps {
   initialQuery?: string;
 }
 
+// Suggestions based on real categories and cities
 const SUGGESTION_PROMPTS = [
-  "Find a garden venue in Marrakech for 150 guests",
-  "Makeup artist in Casablanca under 1500 MAD",
-  "DJ available next month in Agadir",
-  "Photographer for outdoor ceremony in Rabat",
-  "Traditional henna artist in Fès",
-  "Rooftop venues in Tangier"
+  'Garden or riad venue in Marrakech',
+  'Makeup artist in Casablanca',
+  'Wedding photographer in Rabat',
+  'Caterer or traiteur in Fes',
+  'Negafa in Casablanca or Rabat',
+  'Event planner in Marrakech',
+  'Florist in Rabat',
+  'Venue in Agadir',
 ];
 
-// Mock AI response function
-const fetchAIResponse = async (query: string): Promise<{ answer: string; vendors: any[] }> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 700 + Math.random() * 500));
-  
-  // Mock response
-  return {
-    answer: `Here are the best wedding ${query.includes('venue') ? 'venues' : 'vendors'} I found for you in Morocco. These options match your requirements perfectly.`,
-    vendors: [
-      {
-        id: 'v1',
-        name: 'Palais Malak',
-        city: 'Marrakech',
-        category: 'Venues',
-        priceFrom: 1200,
-        whatsapp: '212600000000',
-        image: '/public/sample/venues-1.jpg',
-        slug: 'palais-malak'
-      },
-      {
-        id: 'v2',
-        name: 'Kasr Riad Asmar',
-        city: 'Marrakech',
-        category: 'Venues',
-        priceFrom: 1500,
-        whatsapp: '212611111111',
-        image: '/public/sample/venues-2.jpg',
-        slug: 'kasr-riad-asmar'
-      },
-      {
-        id: 'v3',
-        name: 'Salle Des Fêtes',
-        city: 'Casablanca',
-        category: 'Venues',
-        priceFrom: 1000,
-        whatsapp: '212622222222',
-        image: '/public/sample/venues-3.jpg',
-        slug: 'salle-des-fetes'
-      }
-    ]
-  };
-};
+// Map natural language / keywords to DB category
+const QUERY_TO_DB_CATEGORY: Record<string, string> = {};
+WERVICE_CATEGORIES.forEach((c) => {
+  QUERY_TO_DB_CATEGORY[c.dbCategory] = c.dbCategory;
+  QUERY_TO_DB_CATEGORY[c.label.toLowerCase()] = c.dbCategory;
+  QUERY_TO_DB_CATEGORY[c.slug] = c.dbCategory;
+});
+['venue', 'venues', 'riad', 'palace', 'salle'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'venues'; });
+['photo', 'photographer', 'photography', 'video', 'videographer'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'photography'; });
+['makeup', 'make-up', 'beauty', 'hair', 'henna', 'coiffure'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'beauty'; });
+['caterer', 'catering', 'traiteur', 'food'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'catering'; });
+['planner', 'planning', 'organizer', 'event planner'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'planning'; });
+['flower', 'florist', 'floral'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'florist'; });
+['cake', 'cakes', 'pastry'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'cakes'; });
+['decor', 'decoration'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'decor'; });
+['dress', 'dresses', 'caftan', 'takchita'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'dresses'; });
+['negafa', 'tanguif'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'negafa'; });
+['music', 'dj', 'artist', 'band', 'orchestra'].forEach((k) => { QUERY_TO_DB_CATEGORY[k] = 'music'; });
+
+// Map query keywords to subcategory slugs (from subcategories.ts)
+const QUERY_TO_SUBCATEGORY: Record<string, string> = {};
+// Venues
+['riad', 'riads', 'villa', 'villas'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'riads-villas'; });
+['garden', 'gardens', 'outdoor', 'jardin'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'outdoor-gardens'; });
+['hotel', 'resort'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'hotels-resorts'; });
+['palace', 'palais', 'luxury'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'luxury-palaces'; });
+['beach', 'plage'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'beach-venues'; });
+['hall', 'salle', 'halls'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'wedding-halls'; });
+// Beauty
+['makeup', 'make-up', 'maquillage'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'makeup-artist'; });
+['hair', 'coiffure', 'hairstylist'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'hair-stylist'; });
+// Photo & Film
+['photographer', 'photo', 'photography'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'wedding-photographer'; });
+['videographer', 'video', 'film'].forEach((k) => { QUERY_TO_SUBCATEGORY[k] = 'videographer'; });
+
+function parseQueryToFilters(query: string): { q?: string; city?: string; category?: string; subcategory?: string } {
+  const lower = query.toLowerCase().trim();
+  const filters: { q?: string; city?: string; category?: string; subcategory?: string } = {};
+
+  // Detect city (from canonical list)
+  for (const { label, value } of MOROCCAN_CITIES) {
+    if (value === 'all') continue;
+    if (lower.includes(label.toLowerCase()) || lower.includes(value.toLowerCase())) {
+      filters.city = label;
+      break;
+    }
+  }
+
+  // Detect category from keywords
+  const words = lower.split(/\s+/).filter(Boolean);
+  for (const word of words) {
+    const key = word.replace(/[^a-z]/g, '');
+    if (QUERY_TO_DB_CATEGORY[key]) {
+      filters.category = QUERY_TO_DB_CATEGORY[key];
+      break;
+    }
+  }
+  if (!filters.category) {
+    if (lower.includes('event planner') || lower.includes('wedding planner')) filters.category = 'planning';
+    else if (lower.includes('makeup') || lower.includes('make-up') || lower.includes('hair')) filters.category = 'beauty';
+    else if (lower.includes('photographer') || lower.includes('videographer') || lower.includes('photo & film')) filters.category = 'photography';
+    else if (lower.includes('venue') || lower.includes('riad') || lower.includes('palace')) filters.category = 'venues';
+    else if (lower.includes('caterer') || lower.includes('traiteur')) filters.category = 'catering';
+  }
+
+  // Subcategory (type) from query — only set when we have a matching category
+  for (const word of words) {
+    const key = word.replace(/[^a-z]/g, '');
+    if (QUERY_TO_SUBCATEGORY[key]) {
+      filters.subcategory = QUERY_TO_SUBCATEGORY[key];
+      break;
+    }
+  }
+  if (!filters.subcategory) {
+    if (lower.includes('makeup artist')) filters.subcategory = 'makeup-artist';
+    else if (lower.includes('hair stylist') || lower.includes('hairstylist')) filters.subcategory = 'hair-stylist';
+    else if (lower.includes('riad') || lower.includes('riads')) filters.subcategory = 'riads-villas';
+    else if (lower.includes('garden')) filters.subcategory = 'outdoor-gardens';
+  }
+
+  // Only use short q for text search when we have no category (e.g. "caftan" or business name). Don't send full sentence — it over-restricts.
+  if (!filters.category && query.trim().length < 80) {
+    filters.q = query.trim();
+  }
+
+  return filters;
+}
+
+async function fetchVendorsForQuery(query: string): Promise<{ answer: string; vendors: AIVendorCardVendor[] }> {
+  const filters = parseQueryToFilters(query);
+  const params = new URLSearchParams();
+  params.set('limit', '6');
+  params.set('allow_no_image', '1'); // Include vendors without images so AI always gets results
+  if (filters.category) params.set('category', filters.category);
+  if (filters.city) params.append('city', filters.city);
+  if (filters.subcategory) params.append('subcategory', filters.subcategory);
+  if (filters.q) params.set('q', filters.q);
+
+  const res = await fetch(`/api/vendors?${params.toString()}`);
+  if (!res.ok) {
+    return { answer: "I couldn't search vendors right now. Please try again.", vendors: [] };
+  }
+
+  const data = await res.json();
+  const list = Array.isArray(data.vendors) ? data.vendors : [];
+  const total = data.total ?? list.length;
+
+  const categoryLabel = filters.category ? labelForCategory(filters.category) : 'vendors';
+  const cityLabel = filters.city ? ` in ${filters.city}` : ' in Morocco';
+  let answer: string;
+  if (list.length === 0) {
+    answer = `I didn't find any ${categoryLabel.toLowerCase()}${cityLabel} matching your request. Try another city or category.`;
+  } else {
+    answer = `Here are ${list.length} ${categoryLabel.toLowerCase()}${cityLabel}${list.length < total ? ` (showing ${list.length} of ${total})` : ''}.`;
+  }
+
+  const vendors: AIVendorCardVendor[] = list.map((v: Record<string, unknown>) => ({
+    id: String(v.id ?? ''),
+    business_name: String(v.business_name ?? v.name ?? ''),
+    slug: String(v.slug ?? ''),
+    city: String(v.city ?? ''),
+    category: String(v.category ?? ''),
+    profile_photo_url: (v.profile_photo_url ?? v.logo_url ?? null) as string | null,
+    gallery_photos: (v.gallery_photos ?? v.gallery_urls ?? null) as string[] | null,
+    gallery_urls: (v.gallery_urls ?? v.gallery_photos ?? null) as string[] | null,
+    starting_price: typeof v.starting_price === 'number' ? v.starting_price : null,
+  }));
+
+  return { answer, vendors };
+}
 
 export default function AIChatModal({ isOpen, onClose, initialQuery = '' }: AIChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -159,8 +252,7 @@ export default function AIChatModal({ isOpen, onClose, initialQuery = '' }: AICh
     setError('');
 
     try {
-      // Fetch AI response
-      const response = await fetchAIResponse(trimmedQuery);
+      const response = await fetchVendorsForQuery(trimmedQuery);
       
       // Add AI message
       const aiMessage: Message = {
@@ -288,7 +380,7 @@ export default function AIChatModal({ isOpen, onClose, initialQuery = '' }: AICh
                       How can I help you today?
                     </h3>
                     <p className="text-gray-600 text-sm">
-                      Ask me about venues, vendors, pricing, or anything wedding-related in Morocco
+                      Search by city, category (venues, beauty, photo & film, caterer, negafa…), or describe what you need
                     </p>
                   </div>
                 </div>
@@ -341,7 +433,7 @@ export default function AIChatModal({ isOpen, onClose, initialQuery = '' }: AICh
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask anything… e.g. 'Rooftop venue in Marrakech for 120 guests'"
+                  placeholder="e.g. Riad venue in Marrakech, makeup artist in Casablanca"
                   className={`flex-1 px-4 py-3 border-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#D9FF0A] focus:border-transparent transition-all ${
                     showError ? 'border-red-500 animate-shake' : 'border-gray-300'
                   }`}

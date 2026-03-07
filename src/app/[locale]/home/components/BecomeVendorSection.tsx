@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { AUTH_UI_ENABLED } from '@/lib/config';
 
 // Vendor benefits will be translated in the component
 
@@ -19,6 +20,8 @@ const decorativeIcons = [
 ];
 
 export default function BecomeVendorSection() {
+  if (!AUTH_UI_ENABLED) return null;
+
   const pathname = usePathname();
   const currentLocale = pathname.split('/')[1] || 'en';
   const t = useTranslations('home');

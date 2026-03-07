@@ -1,0 +1,109 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ChevronRight, Heart, MapPin } from 'lucide-react';
+
+interface VendorBrowseCardProps {
+  href: string;
+  title: string;
+  location: string;
+  categoryLabel: string;
+  logoUrl?: string | null;
+  galleryImages: string[];
+  onCardClick?: () => void;
+}
+
+export default function VendorBrowseCard({
+  href,
+  title,
+  location,
+  categoryLabel,
+  logoUrl,
+  galleryImages,
+  onCardClick,
+}: VendorBrowseCardProps) {
+  const images = useMemo(() => {
+    const unique = new Set<string>();
+    for (const image of galleryImages) {
+      if (!image || !image.trim()) continue;
+      if (logoUrl && image === logoUrl) continue;
+      unique.add(image);
+    }
+    return Array.from(unique);
+  }, [galleryImages, logoUrl]);
+
+  const [imageIndex, setImageIndex] = useState(0);
+  const displayImages = images.length > 0 ? images : ['/images/sample/venues-1.jpg'];
+  const currentImage = displayImages[imageIndex] || '/images/sample/venues-1.jpg';
+  const safeLogo = logoUrl || displayImages[0] || '/images/sample/venues-1.jpg';
+
+  function showNextImage(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setImageIndex((prev) => (prev + 1) % displayImages.length);
+  }
+
+  return (
+    <Link
+      href={href}
+      onClick={(event) => {
+        if (!onCardClick) return;
+        event.preventDefault();
+        onCardClick();
+      }}
+      className="group min-w-0 rounded-[22px] bg-transparent transition hover:-translate-y-0.5"
+    >
+      <div className="relative h-56 overflow-hidden rounded-[22px]">
+        <Image
+          src={currentImage}
+          alt={title}
+          fill
+          sizes="(max-width: 1024px) 100vw, 25vw"
+          className="object-cover"
+        />
+
+        <button
+          type="button"
+          aria-label="Save vendor"
+          className="absolute right-2.5 top-2.5 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#F3EFE7] text-[#11190C] shadow-sm"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+        >
+          <Heart className="h-4.5 w-4.5" />
+        </button>
+
+        {displayImages.length > 1 && (
+          <button
+            type="button"
+            aria-label="Next image"
+            onClick={showNextImage}
+            className="absolute right-2.5 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition group-hover:opacity-100"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        )}
+
+        <div className="absolute left-2.5 bottom-2.5 rounded-full bg-[#11190C] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#D9FF0A]">
+          {categoryLabel}
+        </div>
+      </div>
+
+      <div className="p-3">
+        <div className="flex items-center gap-2">
+          <div className="relative h-6 w-6 overflow-hidden rounded-full border border-black/10 bg-white">
+            <Image src={safeLogo} alt={`${title} logo`} fill sizes="24px" className="object-cover" />
+          </div>
+          <h3 className="line-clamp-1 text-[1.6rem] font-bold leading-none text-[#11190C]">{title}</h3>
+        </div>
+        <div className="mt-1.5 flex items-center gap-1.5 text-sm text-[#5f6f84]">
+          <MapPin className="h-4 w-4" />
+          <span>{location}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}

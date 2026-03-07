@@ -1,262 +1,318 @@
-'use client';
-
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import ModernFilterBar from '@/components/vendors/ModernFilterBar';
-import CategoryCover from '@/components/vendors/CategoryCover';
-import VendorCard from '@/components/vendors/VendorCard';
-import SkeletonCard from '@/components/vendors/SkeletonCard';
+import Link from 'next/link';
+import { Metadata } from 'next';
+import Image from 'next/image';
 import { Search } from 'lucide-react';
-import { capitalizeCity } from '@/lib/utils';
+import DashboardShell from '@/components/home/DashboardShell';
+import InfiniteVendorGrid from '@/components/home/InfiniteVendorGrid';
+import InspirationArticleGrid from '@/components/home/InspirationArticleGrid';
+import AccountToolViews from '@/components/home/AccountToolViews';
+import FavoritesView from '@/components/home/FavoritesView';
+import WeddingChecklistView from '@/components/home/WeddingChecklistView';
+import AccountSettingsView from '@/components/home/AccountSettingsView';
+import {
+  WERVICE_CATEGORIES,
+  labelForCategory,
+  normalizeCategory,
+  slugToDbCategory,
+} from '@/lib/categories';
+import { fetchVendors } from '@/lib/supabase/vendors';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+import { getAll } from '@/data/articles';
+import { getAllChapters, getTimelineSteps } from '@/data/planningChapters';
 
-import { Vendor } from '@/lib/types/vendor';
-
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  strapline: string | null;
-  cover_url: string | null;
-};
-
-function VendorsPageContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [category, setCategory] = useState<Category | null>(null);
-  const [cities, setCities] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-  const [offset, setOffset] = useState(0);
-
-  // Parse filters from URL
-  const filters = {
-    q: searchParams.get('q') || undefined,
-    category: searchParams.get('category') || undefined,
-    city: searchParams.get('city') || undefined,
-    priceMin: searchParams.get('priceMin') ? parseInt(searchParams.get('priceMin')!) : undefined,
-    priceMax: searchParams.get('priceMax') ? parseInt(searchParams.get('priceMax')!) : undefined,
-    sort: searchParams.get('sort') || 'newest',
-  };
-
-  // Fetch vendors
-  const fetchVendors = async (append = false) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filters.q) params.set('q', filters.q);
-      if (filters.category) params.set('category', filters.category);
-      if (filters.city) params.set('city', filters.city);
-      if (filters.priceMin) params.set('priceMin', String(filters.priceMin));
-      if (filters.priceMax) params.set('priceMax', String(filters.priceMax));
-      if (filters.sort) params.set('sort', filters.sort);
-      params.set('limit', '24');
-      params.set('offset', String(append ? offset : 0));
-
-      const res = await fetch(`/api/vendors?${params.toString()}`);
-      const data = await res.json();
-
-      if (append) {
-        // Deduplicate vendors by ID when appending
-        setVendors((prev) => {
-          const existingIds = new Set(prev.map(v => v.id));
-          const newVendors = data.vendors.filter((v: Vendor) => !existingIds.has(v.id));
-          return [...prev, ...newVendors];
-        });
-      } else {
-        setVendors(data.vendors);
-        setOffset(0);
-      }
-
-      setTotal(data.total);
-      setHasMore(data.hasMore);
-    } catch (error) {
-      console.error('Error fetching vendors:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch category data
-  const fetchCategory = async () => {
-    if (!filters.category) {
-      setCategory(null);
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/categories/${filters.category}`);
-      if (res.ok) {
-        const data = await res.json();
-        setCategory(data);
-      }
-    } catch (error) {
-      console.error('Error fetching category:', error);
-    }
-  };
-
-  // Fetch cities
-  const fetchCities = async () => {
-    try {
-      const res = await fetch('/api/vendors/cities');
-      const data = await res.json();
-      setCities(data.cities || []);
-    } catch (error) {
-      console.error('Error fetching cities:', error);
-    }
-  };
-
-  // Initial load
-  useEffect(() => {
-    // Redirect to new category page structure if category parameter exists
-    if (filters.category) {
-      const categorySlug = filters.category;
-      const params = new URLSearchParams();
-      if (filters.city) params.set('city', filters.city);
-      if (filters.q) params.set('q', filters.q);
-      if (filters.priceMin) params.set('priceMin', String(filters.priceMin));
-      if (filters.priceMax) params.set('priceMax', String(filters.priceMax));
-      
-      const queryString = params.toString();
-      router.replace(`/en/categories/${categorySlug}${queryString ? `?${queryString}` : ''}`);
-      return;
-    }
-
-    fetchVendors();
-    fetchCategory();
-    fetchCities();
-  }, [searchParams]);
-
-  // Handle filter changes
-  const handleFilterChange = (newFilters: any) => {
-    const params = new URLSearchParams();
-    if (newFilters.q) params.set('q', newFilters.q);
-    if (newFilters.category) params.set('category', newFilters.category);
-    if (newFilters.city) params.set('city', newFilters.city);
-    if (newFilters.priceMin) params.set('priceMin', String(newFilters.priceMin));
-    if (newFilters.priceMax) params.set('priceMax', String(newFilters.priceMax));
-    if (newFilters.sort) params.set('sort', newFilters.sort);
-
-    router.push(`/en/vendors?${params.toString()}`);
-  };
-
-  // Handle city selection
-  const handleCitySelect = (city: string) => {
-    const newFilters = { ...filters, city: city || undefined };
-    handleFilterChange(newFilters);
-  };
-
-  // Load more
-  const handleLoadMore = () => {
-    setOffset((prev) => prev + 24);
-    fetchVendors(true);
-  };
-
-  // Clear all filters
-  const handleClearAll = () => {
-    router.push('/en/vendors');
-  };
-
-  const activeCity = filters.city ? capitalizeCity(filters.city) : 'All Cities';
-
-  return (
-    <main className="mx-auto max-w-[110rem] px-4 py-6 md:px-6 lg:px-8">
-        {/* Category Cover */}
-        {category && (
-          <CategoryCover
-            title={category.name}
-            strapline={category.strapline}
-            coverUrl={category.cover_url}
-          />
-        )}
-
-        {/* Modern Filters Bar */}
-        <div className="sticky top-14 z-30 mb-6 rounded-2xl border border-zinc-200 bg-white/80 px-6 py-4 shadow-sm backdrop-blur">
-          <ModernFilterBar initialFilters={filters} cities={cities} onChange={handleFilterChange} />
-        </div>
-
-        {/* Heading + Count */}
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-zinc-900">
-            🔥 Popular in {activeCity}
-          </h2>
-          <span className="text-sm text-zinc-500">{total} vendors</span>
-        </div>
-
-        {/* Grid */}
-        {loading && offset === 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
-          </div>
-        ) : vendors.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {vendors.map((vendor, index) => (
-                <VendorCard key={`${vendor.id}-${vendor.slug || index}`} vendor={vendor} />
-              ))}
-            </div>
-
-            {/* Load More */}
-            {hasMore && (
-              <div className="mt-8 flex justify-center">
-                <button
-                  onClick={handleLoadMore}
-                  disabled={loading}
-                  className="rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-                >
-                  {loading ? 'Loading...' : 'Show More'}
-                </button>
-              </div>
-            )}
-          </>
-        ) : !loading ? (
-          /* Only show empty state after loading is complete */
-          <div className="mx-auto my-16 max-w-md text-center">
-            <div className="mx-auto mb-4 grid h-12 w-12 place-content-center rounded-full bg-zinc-100">
-              <Search className="h-6 w-6 text-zinc-400" />
-            </div>
-            <h3 className="mb-1 text-lg font-semibold text-zinc-900">
-              No vendors found
-            </h3>
-            <p className="mb-4 text-sm text-zinc-500">
-              Try changing the city, category, or price range.
-            </p>
-            <button
-              onClick={handleClearAll}
-              className="rounded-full border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-            >
-              Clear all filters
-            </button>
-          </div>
-        ) : null}
-    </main>
-  );
+interface VendorsPageProps {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default function VendorsPage() {
+function firstParam(value: string | string[] | undefined): string | undefined {
+  if (Array.isArray(value)) return value[0];
+  return value;
+}
+
+export async function generateMetadata({ params }: VendorsPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: `All Wedding Vendors | Wervice`,
+    description: `Browse all verified wedding vendors across Morocco.`,
+    alternates: {
+      canonical: `https://wervice.com/${locale}/vendors`,
+    },
+  };
+}
+
+export default async function VendorsPage({ params, searchParams }: VendorsPageProps) {
+  const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
+  const view = firstParam(resolvedSearchParams.view) || 'overview';
+  const chapterParam = firstParam(resolvedSearchParams.chapter);
+  const allowedViews = new Set(['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools', 'settings', 'inspiration']);
+  const safeView = allowedViews.has(view) ? view : 'overview';
+
+  const cityParam = firstParam(resolvedSearchParams.city);
+  const q = (firstParam(resolvedSearchParams.q) || '').trim();
+  const categorySlug = normalizeCategory(firstParam(resolvedSearchParams.category) || null);
+  const dbCategory = categorySlug ? slugToDbCategory(categorySlug) : null;
+
+  const validCities = new Set(MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => c.value));
+  const selectedCity = cityParam && validCities.has(cityParam) ? cityParam : undefined;
+
+  const shouldLoadVendorGrid = safeView === 'overview';
+
+  const { vendors, hasMore } = await fetchVendors({
+    city: selectedCity,
+    category: dbCategory || undefined,
+    q: q || undefined,
+    sort: 'newest',
+    limit: shouldLoadVendorGrid ? 24 : 8,
+  });
+
+  const savedCards = vendors.slice(0, 12).map((vendor) => ({
+    id: vendor.id,
+    title: vendor.business_name,
+    subtitle: vendor.city,
+    image:
+      vendor.profile_photo_url ||
+      vendor.gallery_urls?.[0] ||
+      vendor.gallery_photos?.[0] ||
+      '/images/sample/venues-1.jpg',
+    href: `/${locale}/vendors?view=overview&vendor=${encodeURIComponent(vendor.slug)}`,
+    location: vendor.city,
+    categoryLabel: labelForCategory(vendor.category),
+    logoUrl: vendor.profile_photo_url,
+    galleryImages: vendor.gallery_urls || vendor.gallery_photos || [],
+  }));
+
+  const inspirationArticles = getAll().slice(0, 15);
+  const activeMarketplace = safeView === 'inspiration' ? 'inspiration' : (categorySlug === 'venues' ? 'venues' : 'all-vendors');
+  const activeItem = ['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools'].includes(safeView)
+    ? safeView
+    : activeMarketplace;
+  const planningChapters = getAllChapters();
+  const planningSteps = getTimelineSteps();
+  const selectedPlanningChapter = chapterParam
+    ? planningChapters.find((chapter) => chapter.slug === chapterParam) || null
+    : null;
+  const selectedPlanningStep = selectedPlanningChapter
+    ? planningSteps.find((step) => step.chapterSlug === selectedPlanningChapter.slug) || null
+    : null;
+  const selectedPlanningIndex = selectedPlanningChapter
+    ? planningChapters.findIndex((chapter) => chapter.slug === selectedPlanningChapter.slug)
+    : -1;
+  const prevPlanningChapter =
+    selectedPlanningIndex > 0 ? planningChapters[selectedPlanningIndex - 1] : null;
+  const nextPlanningChapter =
+    selectedPlanningIndex >= 0 && selectedPlanningIndex < planningChapters.length - 1
+      ? planningChapters[selectedPlanningIndex + 1]
+      : null;
+
   return (
-    <>
-      <div className="flex flex-1 flex-col">
-        <Header />
-        <Suspense fallback={
-          <main className="flex-1 mx-auto max-w-[110rem] px-4 py-6 md:px-6 lg:px-8">
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <SkeletonCard key={i} />
+    <DashboardShell locale={locale} savedCards={savedCards} activeItem={activeItem}>
+      {safeView === 'favorites' && (
+        <FavoritesView locale={locale} favorites={savedCards} />
+      )}
+
+      {safeView === 'checklist' && (
+        <WeddingChecklistView locale={locale} />
+      )}
+
+      {(safeView === 'wedding-date' || safeView === 'guest-list' || safeView === 'budget-planner') && (
+        <AccountToolViews locale={locale} view={safeView} />
+      )}
+
+      {safeView === 'settings' && (
+        <AccountSettingsView locale={locale} />
+      )}
+
+      {safeView === 'planning-tools' && (
+        <section className="mx-auto max-w-7xl">
+          <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">Planning Tools</h1>
+          <p className="mt-3 text-lg text-[#4a5c74]">12-month timeline and chapter-by-chapter planning resources.</p>
+
+          {selectedPlanningChapter && (
+            <div className="mt-8 rounded-3xl border border-[#d7deea] bg-white p-6 shadow-sm">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[380px_1fr]">
+                <div className="relative h-64 overflow-hidden rounded-2xl bg-[#eef2f7]">
+                  <Image
+                    src={selectedPlanningChapter.coverImage}
+                    alt={selectedPlanningChapter.title}
+                    fill
+                    sizes="380px"
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="inline-flex rounded-full bg-[#11190C] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D9FF0A]">
+                    Chapter {selectedPlanningChapter.order} of {planningChapters.length}
+                  </p>
+                  <h2 className="mt-3 text-4xl font-black leading-tight text-[#11190C]">{selectedPlanningChapter.title}</h2>
+                  <p className="mt-2 text-lg text-[#4a5c74]">{selectedPlanningChapter.excerpt}</p>
+                  <p className="mt-2 text-sm font-semibold text-[#6f7f95]">{selectedPlanningChapter.readTime} min read</p>
+
+                  {selectedPlanningStep?.tasks?.length ? (
+                    <div className="mt-5 rounded-2xl border border-[#d7deea] bg-[#F8FAFC] p-4">
+                      <h3 className="text-lg font-bold text-[#11190C]">Do This Now</h3>
+                      <ul className="mt-3 space-y-2">
+                        {selectedPlanningStep.tasks.map((task, idx) => (
+                          <li key={idx} className="flex items-start gap-2 text-[#3f5671]">
+                            <span className="mt-1 inline-block h-2.5 w-2.5 rounded-full bg-[#D9FF0A]" />
+                            <span>{task}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    {prevPlanningChapter && (
+                      <Link
+                        href={`/${locale}/vendors?view=planning-tools&chapter=${prevPlanningChapter.slug}`}
+                        className="rounded-xl border border-[#d2d9e5] bg-white px-4 py-2 text-sm font-semibold text-[#33475f]"
+                      >
+                        Previous
+                      </Link>
+                    )}
+                    {nextPlanningChapter && (
+                      <Link
+                        href={`/${locale}/vendors?view=planning-tools&chapter=${nextPlanningChapter.slug}`}
+                        className="rounded-xl bg-[#11190C] px-4 py-2 text-sm font-semibold text-[#D9FF0A]"
+                      >
+                        Next
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-8 rounded-3xl border border-[#d7deea] bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-bold text-[#11190C]">Timeline</h2>
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {planningSteps.slice(0, 12).map((step) => (
+                <Link
+                  key={step.chapterSlug}
+                  href={`/${locale}/vendors?view=planning-tools&chapter=${step.chapterSlug}`}
+                  className="rounded-2xl border border-[#d7deea] bg-[#F8FAFC] p-4 transition hover:-translate-y-0.5 hover:bg-white"
+                >
+                  <div className="text-2xl">{step.icon}</div>
+                  <p className="mt-2 text-sm font-semibold text-[#6f7f95]">{step.months === 0 ? 'Final' : `${step.months} months`}</p>
+                  <p className="mt-1 text-lg font-bold text-[#11190C]">{step.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-[#5f6f84]">{step.description}</p>
+                </Link>
               ))}
             </div>
-          </main>
-        }>
-          <VendorsPageContent />
-        </Suspense>
-        <Footer />
-      </div>
-    </>
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-[#d7deea] bg-white p-6 shadow-sm">
+            <h2 className="text-2xl font-bold text-[#11190C]">Guide Chapters</h2>
+            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {planningChapters.map((chapter) => (
+                <Link
+                  key={chapter.slug}
+                  href={`/${locale}/vendors?view=planning-tools&chapter=${chapter.slug}`}
+                  className="rounded-2xl border border-[#d7deea] bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-sm"
+                >
+                  <p className="text-sm font-semibold text-[#6f7f95]">{chapter.readTime} min read</p>
+                  <p className="mt-1 text-lg font-bold text-[#11190C]">{chapter.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-[#5f6f84]">{chapter.excerpt}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {safeView === 'inspiration' && (
+        <InspirationArticleGrid locale={locale} articles={inspirationArticles} />
+      )}
+
+      {safeView === 'overview' && (
+      <section className="mx-auto max-w-7xl">
+        <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">All Vendors</h1>
+        <p className="mt-3 text-lg text-[#4a5c74]">Browse wedding vendors across Morocco.</p>
+
+        <form className="mt-6">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8a99ad]" />
+            <input
+              type="text"
+              name="q"
+              defaultValue={q}
+              placeholder="Search vendor names or styles..."
+              className="h-14 w-full rounded-2xl border border-[#d7deea] bg-white pl-12 pr-4 text-base outline-none transition focus:border-[#11190C]"
+            />
+            {selectedCity && <input type="hidden" name="city" value={selectedCity} />}
+            {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
+          </div>
+        </form>
+
+        <div className="mt-6 flex flex-wrap gap-2.5">
+          <Link
+            href={`/${locale}/vendors${q ? `?q=${encodeURIComponent(q)}` : ''}`}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              !selectedCity ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
+            }`}
+          >
+            All Cities
+          </Link>
+          {MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((city) => {
+            const isActive = selectedCity === city.value;
+            return (
+              <Link
+                key={city.value}
+                href={`/${locale}/vendors?city=${encodeURIComponent(city.value)}${categorySlug ? `&category=${categorySlug}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isActive ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
+                }`}
+              >
+                {city.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 flex flex-wrap gap-2.5">
+          <Link
+            href={`/${locale}/vendors${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}${q ? `${selectedCity ? '&' : '?'}q=${encodeURIComponent(q)}` : ''}`}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              !categorySlug ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
+            }`}
+          >
+            All Categories
+          </Link>
+          {WERVICE_CATEGORIES.map((category) => {
+            const isActive = categorySlug === category.slug;
+            return (
+              <Link
+                key={category.slug}
+                href={`/${locale}/vendors?category=${category.slug}${selectedCity ? `&city=${encodeURIComponent(selectedCity)}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isActive ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
+                }`}
+              >
+                {labelForCategory(category.slug)}
+              </Link>
+            );
+          })}
+        </div>
+
+        {vendors.length === 0 ? (
+          <div className="mt-8 rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">
+            No vendors found for this filter.
+          </div>
+        ) : (
+          <InfiniteVendorGrid
+            locale={locale}
+            initialVendors={vendors}
+            initialHasMore={hasMore}
+            city={selectedCity}
+            category={dbCategory || undefined}
+            q={q || undefined}
+          />
+        )}
+      </section>
+      )}
+    </DashboardShell>
   );
 }

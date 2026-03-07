@@ -16,6 +16,7 @@ import { getCategorySeoContent } from '@/lib/seo/category-seo-content';
 import { WERVICE_CATEGORIES } from '@/lib/categories';
 import { cityToSlug } from '@/lib/vendor-url';
 import { capitalizeCity } from '@/lib/utils';
+import { AUTH_UI_ENABLED } from '@/lib/config';
 
 // Top Moroccan cities shown in the "Find by City" grid
 const CITIES = [
@@ -189,23 +190,25 @@ export default function CategorySeoBlocks({
         )}
 
         {/* ── 5. Join CTA ── */}
-        <section id="join" className="bg-[#11190C] rounded-3xl p-8 sm:p-10 text-center">
-          <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#D9FF0A] mb-3">
-            Are you a {categoryLabel} vendor?
-          </p>
-          <h3 className="text-2xl font-bold text-white mb-3">
-            List Your Business on Wervice
-          </h3>
-          <p className="text-sm text-white/70 mb-6 max-w-md mx-auto">
-            Join hundreds of verified wedding professionals. Get discovered by couples planning their wedding in Morocco.
-          </p>
-          <Link
-            href={`/${locale}/become-vendor`}
-            className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#D9FF0A] hover:bg-[#c8f000] text-[#11190C] font-bold rounded-full text-sm transition-colors"
-          >
-            Get Listed Free →
-          </Link>
-        </section>
+        {AUTH_UI_ENABLED && (
+          <section id="join" className="bg-[#11190C] rounded-3xl p-8 sm:p-10 text-center">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#D9FF0A] mb-3">
+              Are you a {categoryLabel} vendor?
+            </p>
+            <h3 className="text-2xl font-bold text-white mb-3">
+              List Your Business on Wervice
+            </h3>
+            <p className="text-sm text-white/70 mb-6 max-w-md mx-auto">
+              Join hundreds of verified wedding professionals. Get discovered by couples planning their wedding in Morocco.
+            </p>
+            <Link
+              href={`/${locale}/become-vendor`}
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#D9FF0A] hover:bg-[#c8f000] text-[#11190C] font-bold rounded-full text-sm transition-colors"
+            >
+              Get Listed Free →
+            </Link>
+          </section>
+        )}
 
       </div>
     </>

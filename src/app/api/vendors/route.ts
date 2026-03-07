@@ -20,16 +20,19 @@ export async function GET(request: NextRequest) {
     const categories = categoryParams.length > 0 ? categoryParams.map(c => c.toLowerCase()) : undefined;
     const subcategories = subcategoryParams.length > 0 ? subcategoryParams : undefined;
 
+    const allowNoImage = searchParams.get('allow_no_image') === '1' || searchParams.get('allowNoImage') === 'true';
+
     const filters: VendorFilters = {
       q: searchParams.get('q') || undefined,
-      city: cities && cities.length > 1 ? cities : cities?.[0], // Single value or array
-      category: categories && categories.length > 1 ? categories : categories?.[0], // Single value or array
-      subcategory: subcategories && subcategories.length > 1 ? subcategories : subcategories?.[0], // Single value or array
+      city: cities && cities.length > 1 ? cities : cities?.[0],
+      category: categories && categories.length > 1 ? categories : categories?.[0],
+      subcategory: subcategories && subcategories.length > 1 ? subcategories : subcategories?.[0],
       priceMin: searchParams.get('priceMin') ? parseInt(searchParams.get('priceMin')!) : undefined,
       priceMax: searchParams.get('priceMax') ? parseInt(searchParams.get('priceMax')!) : undefined,
       sort: (searchParams.get('sort') as VendorFilters['sort']) || 'newest',
       limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 24,
       offset: searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : 0,
+      allowNoImage,
     };
 
     const result = await fetchVendors(filters);

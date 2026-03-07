@@ -5,6 +5,7 @@ import LanguageCurrencyDropdown from "../ui/LanguageDropdown";
 import { useUser } from "@/contexts/UserContext";
 import { useLocale } from "@/contexts/LocaleContext";
 import { MOROCCAN_CITIES } from "@/lib/types/vendor";
+import { AUTH_UI_ENABLED } from "@/lib/config";
 
 export default function Header() {
   const { locale: currentLocale } = useLocale();
@@ -118,7 +119,7 @@ export default function Header() {
             <LanguageCurrencyDropdown />
 
             {/* Auth-related buttons - only render on client to prevent hydration mismatch */}
-            {isClient && (
+            {AUTH_UI_ENABLED && isClient && (
               <>
                 {user ? (
                   /* User Dropdown Menu */
@@ -249,7 +250,7 @@ export default function Header() {
             )}
 
             {/* Become a Vendor - Only show when not logged in */}
-            {!user && (
+            {AUTH_UI_ENABLED && !user && (
               <Link
                 href={`/${currentLocale}/become-vendor`}
                 className="inline-flex items-center rounded-lg bg-[#D9FF0A] px-3.5 py-2 text-sm font-semibold text-[#11190C] shadow-sm hover:brightness-95"

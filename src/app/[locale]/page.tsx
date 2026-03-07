@@ -1,47 +1,71 @@
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import Hero from './components/Hero';
-import CategoriesSection from './categories/components/CategoriesSection';
-import CitiesCarousel from '@/components/cities/CitiesCarousel';
-import FeaturedVendorsSection from '@/components/home/FeaturedVendorsSection';
-import BecomeVendorSection from '@/components/sections/VendorCTA';
+import ExplorerHome from '@/components/home/ExplorerHome';
+import { fetchVendors } from '@/lib/supabase/vendors';
+import { vendorUrl } from '@/lib/vendor-url';
+
+export const dynamic = 'force-dynamic';
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const resolvedParams = await params;
   const locale = resolvedParams?.locale ?? 'en';
+  const { vendors } = await fetchVendors({ limit: 9, sort: 'newest' });
+
+  const dynamicCards = (vendors || []).map((vendor) => {
+    const image =
+      vendor.profile_photo_url ||
+      vendor.gallery_urls?.[0] ||
+      vendor.gallery_photos?.[0] ||
+      '/images/sample/venues-1.jpg';
+
+    return {
+      id: vendor.id,
+      title: vendor.business_name,
+      subtitle: `${vendor.city} • ${vendor.category.replace('-', ' ')}`,
+      image,
+      href: vendorUrl(vendor, locale),
+    };
+  });
+
+  const fallbackForYou = [
+    {
+      id: 'fy-1',
+      title: 'Riad Albaidaa',
+      subtitle: 'Venue • Marrakech',
+      image: '/images/sample/venues-1.jpg',
+      href: `/${locale}/vendors`,
+    },
+    {
+      id: 'fy-2',
+      title: 'Le Jardin Secret',
+      subtitle: 'Inspiration • Marrakech',
+      image: '/cities/Marrakech.jpg',
+      href: `/${locale}/vendors`,
+    },
+    {
+      id: 'fy-3',
+      title: 'Nomad Dinner Edit',
+      subtitle: 'Catering • Marrakech',
+      image: '/images/hero/cover.jpg',
+      href: `/${locale}/vendors`,
+    },
+  ];
+
+  const forYouCards = dynamicCards.slice(0, 3).length === 3 ? dynamicCards.slice(0, 3) : fallbackForYou;
+
+  const recommendedVendors = (vendors || []).slice(0, 24).map((vendor) => ({
+    id: vendor.id,
+    title: vendor.business_name,
+    city: vendor.city,
+    category: vendor.category,
+    logoUrl: vendor.profile_photo_url,
+    galleryImages: vendor.gallery_urls || vendor.gallery_photos || [],
+    href: vendorUrl(vendor, locale),
+  }));
 
   return (
-    <div className="flex flex-1 flex-col">
-      <Header />
-      <main className="flex-1 bg-[#f4f4f4]">
-        {/* Hero Section */}
-        <div className="bg-[#f7f7f7]">
-          <Hero locale={locale} />
-        </div>
-
-        {/* Categories Section */}
-        <section className="py-12 bg-[#f0f0f0]">
-          <CategoriesSection />
-        </section>
-
-        {/* Cities Carousel */}
-        <section className="py-12 bg-[#f1f1f1]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <CitiesCarousel variant="small" className="-mx-4 md:-mx-6 lg:-mx-8" />
-          </div>
-        </section>
-
-        {/* Featured Vendors Section */}
-        <section className="py-12 bg-[#f3f3f3]">
-          <FeaturedVendorsSection locale={locale} />
-        </section>
-
-        {/* Become Vendor Section */}
-        <section className="py-12 bg-[#f4f4f4]">
-          <BecomeVendorSection />
-        </section>
-      </main>
-      <Footer />
-    </div>
+    <ExplorerHome
+      locale={locale}
+      forYouCards={forYouCards}
+      recommendedVendors={recommendedVendors}
+    />
   );
 }

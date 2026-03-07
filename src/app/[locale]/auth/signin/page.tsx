@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
+import { AUTH_UI_ENABLED } from '@/lib/config';
 
 export default function SignInPage() {
     const router = useRouter();
@@ -273,15 +274,17 @@ export default function SignInPage() {
                     </form>
 
                     {/* Sign Up Link */}
-                    <p className="text-center mt-6 text-sm text-gray-600">
-                        Have an account?{' '}
-                        <Link 
-                            href={`/${locale}/auth/signup`}
-                            className="text-indigo-600 hover:text-indigo-700 font-semibold"
-                        >
-                            Sign up
-                        </Link>
-                    </p>
+                    {AUTH_UI_ENABLED && (
+                        <p className="text-center mt-6 text-sm text-gray-600">
+                            Have an account?{' '}
+                            <Link 
+                                href={`/${locale}/auth/signup`}
+                                className="text-indigo-600 hover:text-indigo-700 font-semibold"
+                            >
+                                Sign up
+                            </Link>
+                        </p>
+                    )}
 
                     {/* Divider */}
                     <div className="relative my-8">

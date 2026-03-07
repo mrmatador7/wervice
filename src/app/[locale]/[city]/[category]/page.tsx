@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import CategorySeoBlocks from '@/components/category/CategorySeoBlocks';
-import NewCategoryClient from '@/app/[locale]/categories/components/NewCategoryClient';
+import { notFound, redirect } from 'next/navigation';
 import { formatCategoryName } from '@/lib/format';
 import { slugToDbCategory, VALID_CATEGORY_SLUGS } from '@/lib/categories';
 import { getListingIndexingDecision } from '@/lib/seo/indexing';
@@ -56,30 +54,19 @@ export async function generateMetadata({ params, searchParams }: CityCategoryPag
 
 export default async function CityCategoryPage({ params, searchParams }: CityCategoryPageProps) {
   const { locale, city: citySlug, category } = await params;
-  const resolvedSearchParams = await searchParams;
   const cityName = slugToCityName(citySlug);
 
   if (!cityName) notFound();
   if (!VALID_CATEGORY_SLUGS.includes(category as (typeof VALID_CATEGORY_SLUGS)[number])) notFound();
 
-  const mergedSearchParams = {
-    ...resolvedSearchParams,
-    city: cityName,
-  };
-
-  return (
-    <main className="min-h-screen bg-white">
-      <NewCategoryClient
-        category={category}
-        initialSearchParams={mergedSearchParams}
-        seoBlocks={(
-          <CategorySeoBlocks
-            categorySlug={category}
-            city={cityName}
-            locale={locale}
-          />
-        )}
-      />
-    </main>
-  );
+  const resolvedSearchParams = await searchParams;
+  const qs = new URLSearchParams();
+  Object.entries(resolvedSearchParams).forEach(([key, value]) => {
+    if (key === 'city') return;
+    if (value === undefined) return;
+    if (Array.isArray(value)) value.forEach((v) => qs.append(key, v));
+    else qs.append(key, value);
+  });
+  qs.set('city', cityName);
+  redirect(`/${locale}/categories/${category}?${qs.toString()}`);
 }

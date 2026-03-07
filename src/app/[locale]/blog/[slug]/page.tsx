@@ -80,7 +80,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     .slice(0, 5);
 
   // Construct the full article URL for social sharing
-  const articleUrl = `${absoluteUrl()}${locale}/blog/${slug}`;
+  const articleUrl = absoluteUrl(`/${locale}/blog/${slug}`);
 
   return (
     <ArticleLayout
@@ -89,6 +89,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       latestArticles={latestArticles}
       popularArticles={popularArticles}
       articleUrl={articleUrl}
+      locale={locale}
     />
   );
 }

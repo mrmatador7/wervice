@@ -2,75 +2,91 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ExternalLink, MessageCircle } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { FiMapPin } from 'react-icons/fi';
+import { formatCategoryName } from '@/lib/format';
 import { vendorUrl } from '@/lib/vendor-url';
 
-interface VendorCardProps {
-  vendor: {
-    id: string;
-    name: string;
-    city: string;
-    category: string;
-    priceFrom: number;
-    whatsapp: string;
-    image: string;
-    slug: string;
-  };
+/** Vendor shape from /api/vendors (vendor_leads + media) */
+export interface AIVendorCardVendor {
+  id: string;
+  business_name: string;
+  slug: string;
+  city: string;
+  category: string;
+  profile_photo_url?: string | null;
+  gallery_photos?: string[] | null;
+  gallery_urls?: string[] | null;
+  starting_price?: number | null;
 }
+
+interface VendorCardProps {
+  vendor: AIVendorCardVendor;
+}
+
+const capitalizeCity = (city: string) =>
+  city.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
 export default function VendorCard({ vendor }: VendorCardProps) {
-  const whatsappMessage = encodeURIComponent(
-    `Hi! I'm interested in ${vendor.name} for my wedding. Can you share more details?`
-  );
-  const whatsappLink = `https://wa.me/${vendor.whatsapp}?text=${whatsappMessage}`;
+  const params = useParams<{ locale?: string }>();
+  const locale = (params?.locale as string) || 'en';
+  const href = vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, locale);
+
+  const images: string[] = [];
+  if (vendor.profile_photo_url?.trim()) images.push(vendor.profile_photo_url.trim());
+  const gallery = vendor.gallery_photos ?? vendor.gallery_urls ?? [];
+  gallery.forEach((img) => {
+    if (img?.trim() && img !== vendor.profile_photo_url) images.push(img.trim());
+  });
+  const cover = images[0] || '';
+
+  const categoryName = formatCategoryName(vendor.category);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200">
-      {/* Image */}
-      <div className="relative h-32 bg-gray-100">
-        <Image
-          src={vendor.image}
-          alt={vendor.name}
-          fill
-          className="object-cover"
-        />
-      </div>
+    <Link href={href} className="group block w-full">
+      <article className="bg-white rounded-[20px] border border-neutral-100 shadow-[0_2px_12px_rgba(0,0,0,0.07)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
+        {/* Image */}
+        <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
+          {cover ? (
+            <Image
+              src={cover}
+              alt={vendor.business_name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, 280px"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-100">
+              <span className="text-4xl font-bold text-neutral-300">
+                {vendor.business_name.charAt(0)}
+              </span>
+            </div>
+          )}
 
-      {/* Content */}
-      <div className="p-3">
-        <h4 className="font-semibold text-gray-900 text-sm line-clamp-1 mb-1">
-          {vendor.name}
-        </h4>
-        <div className="flex items-center gap-2 text-xs text-gray-600 mb-2">
-          <span>{vendor.city}</span>
-          <span>•</span>
-          <span>{vendor.category}</span>
+          {/* Category badge */}
+          <div className="absolute left-3 top-3">
+            <span className="inline-block rounded-full bg-white/95 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#11190C] shadow-sm backdrop-blur-sm">
+              {categoryName}
+            </span>
+          </div>
         </div>
-        <p className="text-sm font-semibold text-gray-900 mb-3">
-          Starting from <span className="text-[#D9FF0A] bg-[#0B0F0A] px-2 py-0.5 rounded">{vendor.priceFrom}</span> MAD
-        </p>
 
-        {/* Actions */}
-        <div className="flex gap-2">
-          <Link
-            href={vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, 'en')}
-            className="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1"
-          >
-            <ExternalLink className="w-3 h-3" />
-            View
-          </Link>
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 px-3 py-2 bg-[#25D366] hover:bg-[#20BA5A] text-white text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1"
-          >
-            <MessageCircle className="w-3 h-3" />
-            WhatsApp
-          </a>
+        {/* Info */}
+        <div className="px-4 py-4">
+          <h3 className="text-[17px] font-bold leading-snug text-[#11190C] line-clamp-1 group-hover:text-[#333] transition-colors">
+            {vendor.business_name}
+          </h3>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <FiMapPin className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+            <span className="text-sm text-neutral-500">{capitalizeCity(vendor.city)}</span>
+          </div>
+          {vendor.starting_price != null && vendor.starting_price > 0 && (
+            <p className="mt-1.5 text-sm font-semibold text-[#11190C]">
+              From {vendor.starting_price.toLocaleString()} MAD
+            </p>
+          )}
         </div>
-      </div>
-    </div>
+      </article>
+    </Link>
   );
 }
-
