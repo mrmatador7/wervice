@@ -174,16 +174,16 @@ export default function VendorBrowseCard({
         </div>
       </div>
 
-      <div className="p-3">
+      <div className="p-3 font-[var(--font-inter)]">
         <div className="flex items-center gap-2">
           <div className="relative h-6 w-6 overflow-hidden rounded-full border border-black/10 bg-white">
             <Image src={safeLogo} alt={`${title} logo`} fill sizes="24px" className="object-cover" />
           </div>
-          <h3 className="line-clamp-1 text-[1.6rem] font-bold leading-none text-[#11190C]">{title}</h3>
+          <h3 className="line-clamp-1 text-[1.12rem] font-semibold leading-[1.2] tracking-[-0.01em] text-[#1f2937]">{title}</h3>
         </div>
-        <div className="mt-1.5 flex items-center gap-1.5 text-sm text-[#5f6f84]">
-          <MapPin className="h-4 w-4" />
-          <span>{localizedLocation}</span>
+        <div className="mt-1.5 flex items-center gap-1.5 text-[0.95rem] font-medium text-[#6b7280]">
+          <MapPin className="h-4 w-4 text-[#8b95a7]" />
+          <span className="line-clamp-1">{localizedLocation}</span>
         </div>
       </div>
     </Link>

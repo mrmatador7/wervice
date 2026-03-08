@@ -10,6 +10,7 @@ import FavoritesView from '@/components/home/FavoritesView';
 import WeddingChecklistView from '@/components/home/WeddingChecklistView';
 import AccountSettingsView from '@/components/home/AccountSettingsView';
 import AuthAccessView from '@/components/home/AuthAccessView';
+import VendorExploreFilters from '@/components/home/VendorExploreFilters';
 import {
   WERVICE_CATEGORIES,
   labelForCategory,
@@ -239,10 +240,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
 
       {safeView === 'overview' && (
       <section className="mx-auto max-w-7xl">
-        <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{copy.vendors.title}</h1>
-        <p className="mt-3 text-lg text-[#4a5c74]">{copy.vendors.subtitle}</p>
-
-        <form className="mt-6">
+        <form className="mt-3 max-w-3xl">
           <div className="relative">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8a99ad]" />
             <input
@@ -250,62 +248,29 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
               name="q"
               defaultValue={q}
               placeholder={copy.vendors.searchPlaceholder}
-              className="h-14 w-full rounded-2xl border border-[#d7deea] bg-white pl-12 pr-4 text-base outline-none transition focus:border-[#11190C]"
+              className="h-11 w-full rounded-xl border border-[#d7deea] bg-white pl-12 pr-4 text-base outline-none transition focus:border-[#11190C]"
             />
             {selectedCity && <input type="hidden" name="city" value={selectedCity} />}
             {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap gap-2.5">
-          <Link
-            href={`/${locale}/vendors${q ? `?q=${encodeURIComponent(q)}` : ''}`}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              !selectedCity ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
-            }`}
-          >
-            {copy.vendors.allCities}
-          </Link>
-          {MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((city) => {
-            const isActive = selectedCity === city.value;
-            return (
-              <Link
-                key={city.value}
-                href={`/${locale}/vendors?city=${encodeURIComponent(city.value)}${categorySlug ? `&category=${categorySlug}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isActive ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
-                }`}
-              >
-                {localizeCityLabel(city.label, locale)}
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-2.5">
-          <Link
-            href={`/${locale}/vendors${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}${q ? `${selectedCity ? '&' : '?'}q=${encodeURIComponent(q)}` : ''}`}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              !categorySlug ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
-            }`}
-          >
-            {copy.vendors.allCategories}
-          </Link>
-          {WERVICE_CATEGORIES.map((category) => {
-            const isActive = categorySlug === category.slug;
-            return (
-              <Link
-                key={category.slug}
-                href={`/${locale}/vendors?category=${category.slug}${selectedCity ? `&city=${encodeURIComponent(selectedCity)}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isActive ? 'bg-[#11190C] text-[#D9FF0A]' : 'border border-[#d2d9e5] bg-white text-[#33475f] hover:bg-[#eef2f8]'
-                }`}
-              >
-                {labelForCategory(category.slug, locale)}
-              </Link>
-            );
-          })}
-        </div>
+        <VendorExploreFilters
+          locale={locale}
+          q={q}
+          selectedCity={selectedCity}
+          categorySlug={categorySlug}
+          allCitiesLabel={copy.vendors.allCities}
+          allCategoriesLabel={copy.vendors.allCategories}
+          cityItems={MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => ({
+            value: c.value,
+            label: localizeCityLabel(c.label, locale),
+          }))}
+          categoryItems={WERVICE_CATEGORIES.map((category) => ({
+            slug: category.slug,
+            label: labelForCategory(category.slug, locale),
+          }))}
+        />
 
         {vendors.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">
@@ -313,6 +278,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
           </div>
         ) : (
           <InfiniteVendorGrid
+            key={`vendors-grid:${selectedCity || 'all'}:${dbCategory || 'all'}:${q || ''}`}
             locale={locale}
             initialVendors={vendors}
             initialHasMore={hasMore}

@@ -26,6 +26,11 @@ type DashboardCopy = {
   };
   rightSidebar: {
     checklistTitle: string;
+    weddingDateTitle: string;
+    noWeddingDate: string;
+    openWeddingDate: string;
+    planningProgressTitle: string;
+    tasksDone: string;
     completed: string;
     pending: string;
     viewAllTasks: string;
@@ -170,6 +175,11 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
     },
     rightSidebar: {
       checklistTitle: 'Wedding Checklist',
+      weddingDateTitle: 'Wedding Date',
+      noWeddingDate: 'Not set yet',
+      openWeddingDate: 'Open Wedding Date',
+      planningProgressTitle: 'Planning Progress',
+      tasksDone: '{done}/{total} tasks done',
       completed: 'Completed',
       pending: 'Pending',
       viewAllTasks: 'View All Tasks',
@@ -312,6 +322,11 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
     },
     rightSidebar: {
       checklistTitle: 'Checklist mariage',
+      weddingDateTitle: 'Date du mariage',
+      noWeddingDate: 'Pas encore définie',
+      openWeddingDate: 'Ouvrir Date du mariage',
+      planningProgressTitle: 'Progression planning',
+      tasksDone: '{done}/{total} tâches faites',
       completed: 'Terminé',
       pending: 'En attente',
       viewAllTasks: 'Voir toutes les tâches',
@@ -454,6 +469,11 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
     },
     rightSidebar: {
       checklistTitle: 'قائمة مهام الزفاف',
+      weddingDateTitle: 'تاريخ الزفاف',
+      noWeddingDate: 'غير محدد بعد',
+      openWeddingDate: 'فتح تاريخ الزفاف',
+      planningProgressTitle: 'تقدم التخطيط',
+      tasksDone: '{done}/{total} مهام مكتملة',
       completed: 'مكتمل',
       pending: 'قيد الانتظار',
       viewAllTasks: 'عرض كل المهام',

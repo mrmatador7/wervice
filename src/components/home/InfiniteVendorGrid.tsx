@@ -209,7 +209,7 @@ export default function InfiniteVendorGrid({
 
   return (
     <>
-      <div className={gridClassName || 'mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}>
+      <div className={`${gridClassName || 'mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'} animate-fade-in`}>
         {vendors.map((vendor) => (
           <VendorBrowseCard
             key={vendor.id}

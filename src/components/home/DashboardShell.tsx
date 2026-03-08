@@ -107,6 +107,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
   const langWrapRef = useRef<HTMLDivElement | null>(null);
   const [sidebarFavorites, setSidebarFavorites] = useState<ShellCard[]>(savedCards);
   const [checklistCompletedMap, setChecklistCompletedMap] = useState<Record<string, boolean>>({});
+  const [isRouteSwitching, setIsRouteSwitching] = useState(false);
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
@@ -121,6 +122,10 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     document.addEventListener('mousedown', onClickOutside);
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
+
+  useEffect(() => {
+    setIsRouteSwitching(false);
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -194,7 +199,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     };
 
     load();
-    const onUpdate = () => load();
+    const onUpdate = () => {
+      window.setTimeout(load, 0);
+    };
     window.addEventListener('wervice:favorites-updated', onUpdate);
     window.addEventListener('storage', onUpdate);
     return () => {
@@ -221,7 +228,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     };
 
     load();
-    const onUpdate = () => load();
+    const onUpdate = () => {
+      window.setTimeout(load, 0);
+    };
     window.addEventListener('wervice:checklist-updated', onUpdate);
     window.addEventListener('storage', onUpdate);
     return () => {
@@ -247,9 +256,47 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     return [...remaining.slice(0, 3), ...done.slice(0, 3)].slice(0, 3);
   }, [checklistCompletedMap]);
 
+  const checklistStats = useMemo(() => {
+    const validIds = new Set(CHECKLIST.flatMap((section) => section.items.map((item) => item.id)));
+    const total = validIds.size;
+    const done = Object.entries(checklistCompletedMap).filter(([id, isDone]) => isDone && validIds.has(id)).length;
+    const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+    return { total, done, percent };
+  }, [checklistCompletedMap]);
+
+  const weddingDateDisplay = useMemo(() => {
+    const raw = profile?.wedding_date;
+    if (!raw) return null;
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return null;
+    const localeTag = locale === 'ar' ? 'ar-MA' : locale === 'fr' ? 'fr-FR' : 'en-US';
+    return date.toLocaleDateString(localeTag, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }, [profile?.wedding_date, locale]);
+
+  const checklistTasksDoneLabel = useMemo(() => {
+    return copy.rightSidebar.tasksDone
+      .replace('{done}', String(checklistStats.done))
+      .replace('{total}', String(checklistStats.total));
+  }, [copy.rightSidebar.tasksDone, checklistStats.done, checklistStats.total]);
+
   function openVendorFromSearch(slug: string) {
     setIsSearchFocused(false);
     router.push(`/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(slug)}`);
+  }
+
+  function navigateSmooth(href: string) {
+    setIsRouteSwitching(true);
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as Document & { startViewTransition?: (cb: () => void) => void }).startViewTransition?.(() => {
+        router.push(href);
+      });
+      return;
+    }
+    router.push(href);
   }
 
   function switchLocale(nextLocale: string) {
@@ -294,6 +341,10 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               <Link
                 key={city.value}
                 href={`/${locale}/dashboard?view=overview&city=${encodeURIComponent(city.value)}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigateSmooth(`/${locale}/dashboard?view=overview&city=${encodeURIComponent(city.value)}`);
+                }}
                 className="rounded-full border border-[#d7dde7] bg-white px-3 py-1.5 text-sm font-medium text-[#4d5f78] transition hover:bg-[#f1f4f9]"
               >
                 {localizeCityLabel(city.label, locale)}
@@ -442,7 +493,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
           </div>
         </header>
 
-        <div className={`grid h-[calc(100vh-85px)] ${user ? 'xl:grid-cols-[290px_1fr_330px]' : 'xl:grid-cols-[290px_1fr]'}`}>
+        <div className={`grid h-[calc(100vh-85px)] transition-opacity duration-300 ${isRouteSwitching ? 'opacity-70' : 'opacity-100'} ${user ? 'xl:grid-cols-[290px_1fr_330px]' : 'xl:grid-cols-[290px_1fr]'}`}>
           <aside className="hidden overflow-y-auto border-r border-[#dde2ea] bg-[#f3f5f8] px-5 py-6 xl:block">
             <div className="space-y-1">
               {dashboardNav.map((item) => {
@@ -491,39 +542,82 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
           <main className="space-y-9 overflow-y-auto bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">{children}</main>
 
           {user && (
-            <aside className="hidden space-y-6 overflow-y-auto border-l border-[#dde2ea] bg-[#f3f5f8] px-4 py-6 lg:block sm:px-6">
-              <section>
-                <h3 className="mb-3 text-[42px] font-bold leading-[0.95] tracking-[-0.02em] text-[#182236]">{copy.rightSidebar.checklistTitle}</h3>
-                <div className="space-y-3">
+            <aside className="hidden space-y-4 overflow-y-auto border-l border-[#dde2ea] bg-[#f3f5f8] px-4 py-6 lg:block sm:px-5">
+              <section className="grid grid-cols-1 gap-3">
+                <div className="rounded-2xl border border-[#dde2ea] bg-white p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-[#1f2937]">{copy.rightSidebar.weddingDateTitle}</h3>
+                    <Calendar className="h-4 w-4 text-[#8a96ab]" />
+                  </div>
+                  <p className="text-lg font-semibold text-[#243244]">{weddingDateDisplay || copy.rightSidebar.noWeddingDate}</p>
+                  <Link
+                    href={`/${locale}/dashboard?view=wedding-date`}
+                    className="mt-2 inline-flex text-xs font-semibold text-[#5a6f90] hover:text-[#2f4668]"
+                  >
+                    {copy.rightSidebar.openWeddingDate}
+                  </Link>
+                </div>
+
+                <div className="rounded-2xl border border-[#dde2ea] bg-white p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-[#1f2937]">{copy.rightSidebar.planningProgressTitle}</h3>
+                    <span className="text-sm font-semibold text-[#3a4f70]">{checklistStats.percent}%</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#e5ebf3]">
+                    <div className="h-full rounded-full bg-[#8fb6ff]" style={{ width: `${checklistStats.percent}%` }} />
+                  </div>
+                  <p className="mt-2 text-xs font-medium text-[#8a96ab]">{checklistTasksDoneLabel}</p>
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-[#dde2ea] bg-white p-4">
+                <h3 className="mb-3 text-2xl font-semibold tracking-[-0.01em] text-[#1f2937]">{copy.rightSidebar.checklistTitle}</h3>
+                <div className="space-y-2.5">
                   {checklistCards.map((task) => (
                     <div
                       key={task.id}
-                      className={`rounded-2xl border p-4 ${task.completed ? 'border-[#cfe7d6] bg-[#ecfaf0]' : 'border-[#dde2ea] bg-white'}`}
+                      className={`rounded-xl border p-3 ${task.completed ? 'border-[#cfe7d6] bg-[#f2fcf5]' : 'border-[#e2e7ef] bg-[#fbfcfe]'}`}
                     >
-                      <p className="line-clamp-2 text-xl font-semibold text-[#1b263a]">{task.label}</p>
-                      <p className="text-sm text-[#7a89a0]">{task.completed ? copy.rightSidebar.completed : copy.rightSidebar.pending}</p>
+                      <p className="line-clamp-2 text-[15px] font-semibold leading-[1.28] text-[#243244]">{task.label}</p>
+                      <p className="mt-1 text-xs font-medium text-[#8a96ab]">{task.completed ? copy.rightSidebar.completed : copy.rightSidebar.pending}</p>
                     </div>
                   ))}
                   <Link
                     href={`/${locale}/dashboard?view=checklist`}
-                    className="block rounded-2xl border border-[#dbe1ea] bg-[#e9edf4] p-3 text-center text-xl font-semibold text-[#3b4a62]"
+                    className="block rounded-xl border border-[#dde2ea] bg-[#edf2f8] p-2.5 text-center text-sm font-semibold text-[#3f4f67]"
                   >
                     {copy.rightSidebar.viewAllTasks}
                   </Link>
                 </div>
               </section>
 
-              <section>
-                <h3 className="mb-3 text-[42px] font-bold leading-[0.95] tracking-[-0.02em] text-[#182236]">{copy.rightSidebar.savedVendors}</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {sidebarFavorites.slice(0, 4).map((card) => (
-                    <Link key={card.id} href={toShellVendorHref(locale, card.href)} className="relative block h-32 overflow-hidden rounded-xl border border-[#dde2ea] bg-zinc-200">
-                      <Image src={card.image} alt={card.title} fill sizes="160px" className="object-cover" />
+              <section className="rounded-2xl border border-[#dde2ea] bg-white p-4">
+                <h3 className="mb-3 text-2xl font-semibold tracking-[-0.01em] text-[#1f2937]">{copy.rightSidebar.savedVendors}</h3>
+                <div className="space-y-3">
+                  {sidebarFavorites.slice(0, 3).map((card) => (
+                    <Link
+                      key={card.id}
+                      href={toShellVendorHref(locale, card.href)}
+                      className="block overflow-hidden rounded-2xl border border-[#e2e7ef] bg-[#f9fbfe] p-2.5 transition hover:border-[#cfd8e5] hover:bg-white"
+                    >
+                      <div className="relative h-36 overflow-hidden rounded-xl bg-zinc-200">
+                        <Image src={card.image} alt={card.title} fill sizes="280px" className="object-cover" />
+                      </div>
+                      <p className="mt-2.5 line-clamp-2 text-[15px] font-semibold leading-[1.25] text-[#1f2937]">{card.title}</p>
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <span className="rounded-full border border-[#d8dfea] bg-white px-2 py-0.5 text-[11px] font-medium text-[#6f7f96]">
+                          {card.categoryLabel || 'Vendor'}
+                        </span>
+                        <span className="inline-flex min-w-0 items-center gap-1 text-[11px] font-medium text-[#8a96ab]">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">{card.location || 'Morocco'}</span>
+                        </span>
+                      </div>
                     </Link>
                   ))}
                   <Link
                     href={`/${locale}/dashboard?view=favorites`}
-                    className="grid h-32 place-items-center rounded-xl border-2 border-dashed border-[#cfd6e1] bg-[#eef2f8] text-5xl font-light text-[#7f8da3]"
+                    className="grid h-14 place-items-center rounded-xl border-2 border-dashed border-[#cfd6e1] bg-[#f4f7fc] text-3xl font-light text-[#7f8da3]"
                   >
                     +
                   </Link>

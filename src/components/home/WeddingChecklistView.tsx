@@ -42,6 +42,12 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
     }
   }, [storageKey]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(storageKey, JSON.stringify(completed));
+    window.dispatchEvent(new CustomEvent('wervice:checklist-updated'));
+  }, [completed, storageKey]);
+
   const categories = useMemo(() => [copy.checklist.all, ...getCategories()], [copy.checklist.all]);
 
   const filteredSections = useMemo(() => {
@@ -65,14 +71,7 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
   }, [completed]);
 
   const toggle = (id: string) => {
-    setCompleted((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(storageKey, JSON.stringify(next));
-        window.dispatchEvent(new CustomEvent('wervice:checklist-updated'));
-      }
-      return next;
-    });
+    setCompleted((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (

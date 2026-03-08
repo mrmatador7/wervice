@@ -23,6 +23,7 @@ import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { cityToSlug } from '@/lib/vendor-url';
 import DashboardShell, { type ShellCard } from '@/components/home/DashboardShell';
 import VendorBrowseCard from '@/components/home/VendorBrowseCard';
+import { useRouter } from 'next/navigation';
 
 type HomeCard = {
   id: string;
@@ -109,10 +110,22 @@ const iconByCategorySlug = {
   cakes: Sparkles,
 } as const;
 
-function SmallCategoryCard({ card, Icon }: { card: HomeCard; Icon: React.ComponentType<{ className?: string }> }) {
+function SmallCategoryCard({
+  card,
+  Icon,
+  onNavigate,
+}: {
+  card: HomeCard;
+  Icon: React.ComponentType<{ className?: string }>;
+  onNavigate: (href: string) => void;
+}) {
   return (
     <Link
       href={card.href}
+      onClick={(event) => {
+        event.preventDefault();
+        onNavigate(card.href);
+      }}
       className="group relative block h-44 w-[260px] shrink-0 overflow-hidden rounded-3xl ring-1 ring-black/10"
     >
       <Image
@@ -131,9 +144,28 @@ function SmallCategoryCard({ card, Icon }: { card: HomeCard; Icon: React.Compone
   );
 }
 
-function CityCard({ title, image, vendors, href }: { title: string; image: string; vendors: string; href: string }) {
+function CityCard({
+  title,
+  image,
+  vendors,
+  href,
+  onNavigate,
+}: {
+  title: string;
+  image: string;
+  vendors: string;
+  href: string;
+  onNavigate: (href: string) => void;
+}) {
   return (
-    <Link href={href} className="group block w-[260px] shrink-0 rounded-3xl">
+    <Link
+      href={href}
+      onClick={(event) => {
+        event.preventDefault();
+        onNavigate(href);
+      }}
+      className="group block w-[260px] shrink-0 rounded-3xl font-[var(--font-inter)]"
+    >
       <div className="relative h-44 overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-black/10">
         <Image
           src={image}
@@ -143,9 +175,9 @@ function CityCard({ title, image, vendors, href }: { title: string; image: strin
           className="object-cover transition duration-500 group-hover:scale-105"
         />
       </div>
-      <div className="px-2 pb-1 pt-4">
-        <h4 className="text-[1.65rem] font-bold leading-none text-[#11190C]">{title}</h4>
-        <p className="mt-1 text-[1.55rem] text-[#6a7f9d]">{vendors}</p>
+      <div className="px-2 pb-1 pt-4 text-center">
+        <h4 className="line-clamp-1 text-[1.08rem] font-semibold leading-[1.2] tracking-[-0.01em] text-[#1f2937]">{title}</h4>
+        <p className="mt-1 text-[0.95rem] font-medium text-[#6b7280]">{vendors}</p>
       </div>
     </Link>
   );
@@ -156,11 +188,24 @@ export default function ExplorerHome({
   forYouCards,
   recommendedVendors,
 }: ExplorerHomeProps) {
+  const router = useRouter();
   const categoriesRowRef = useRef<HTMLDivElement | null>(null);
   const citiesRowRef = useRef<HTMLDivElement | null>(null);
   const recommendedSentinelRef = useRef<HTMLDivElement | null>(null);
   const [gpsCity, setGpsCity] = useState<string | null>(null);
   const [visibleRecommendedCount, setVisibleRecommendedCount] = useState(6);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  function smoothNavigate(href: string) {
+    setIsNavigating(true);
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as Document & { startViewTransition?: (cb: () => void) => void }).startViewTransition?.(() => {
+        router.push(href);
+      });
+      return;
+    }
+    router.push(href);
+  }
 
   function scrollRow(ref: React.RefObject<HTMLDivElement | null>, direction: 'left' | 'right') {
     const node = ref.current;
@@ -298,6 +343,7 @@ export default function ExplorerHome({
 
   return (
     <DashboardShell locale={locale} savedCards={savedCards}>
+      <div className={`transition-opacity duration-300 ${isNavigating ? 'opacity-70' : 'opacity-100'}`}>
       <section className="overflow-hidden">
         <div className="mx-auto max-w-4xl px-6 py-10 text-center sm:px-10 sm:py-14">
           <h1 className="text-4xl font-black leading-[0.95] text-[#11190C] sm:text-6xl">
@@ -331,6 +377,7 @@ export default function ExplorerHome({
               key={card.id}
               card={card}
               Icon={iconByCategorySlug[card.slug as keyof typeof iconByCategorySlug] || Sparkles}
+              onNavigate={smoothNavigate}
             />
           ))}
         </div>
@@ -354,6 +401,7 @@ export default function ExplorerHome({
               image={city.image}
               vendors={city.vendors}
               href={city.href}
+              onNavigate={smoothNavigate}
             />
           ))}
         </div>
@@ -386,6 +434,7 @@ export default function ExplorerHome({
           <div ref={recommendedSentinelRef} className="h-8" />
         )}
       </section>
+      </div>
     </DashboardShell>
   );
 }
