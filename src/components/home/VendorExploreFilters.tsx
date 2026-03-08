@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Item = {
   value: string;
@@ -39,10 +39,31 @@ export default function VendorExploreFilters({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isSwitching, setIsSwitching] = useState(false);
+  const [categorySliderMode, setCategorySliderMode] = useState(false);
+  const [citySliderMode, setCitySliderMode] = useState(false);
+  const categoryWrapRef = useRef<HTMLDivElement | null>(null);
+  const categoryNavRef = useRef<HTMLElement | null>(null);
+  const cityWrapRef = useRef<HTMLDivElement | null>(null);
+  const cityRowRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setIsSwitching(false);
   }, [pathname, searchParams]);
+
+  useEffect(() => {
+    const computeModes = () => {
+      if (categoryWrapRef.current && categoryNavRef.current) {
+        setCategorySliderMode(categoryNavRef.current.scrollWidth > categoryWrapRef.current.clientWidth + 4);
+      }
+      if (cityWrapRef.current && cityRowRef.current) {
+        setCitySliderMode(cityRowRef.current.scrollWidth > cityWrapRef.current.clientWidth + 4);
+      }
+    };
+
+    computeModes();
+    window.addEventListener('resize', computeModes);
+    return () => window.removeEventListener('resize', computeModes);
+  }, [categoryItems, cityItems, selectedCity, categorySlug, q]);
 
   function navigateSmooth(href: string) {
     if (href === `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`) return;
@@ -63,8 +84,14 @@ export default function VendorExploreFilters({
 
   return (
     <div className={`transition-opacity duration-300 ${isSwitching ? 'opacity-70' : 'opacity-100'}`}>
-      <div className="mb-6 overflow-x-auto border-b border-[#d7deea] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <nav className="flex min-w-max items-center gap-1">
+      <div
+        ref={categoryWrapRef}
+        className={`mb-6 border-b border-[#d7deea] ${categorySliderMode ? 'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'overflow-visible'}`}
+      >
+        <nav
+          ref={categoryNavRef}
+          className={`flex items-center gap-1 ${categorySliderMode ? 'min-w-max flex-nowrap' : 'w-full flex-wrap'}`}
+        >
           {(() => {
             const href = `/${locale}/vendors${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}${q ? `${selectedCity ? '&' : '?'}q=${encodeURIComponent(q)}` : ''}`;
             return (
@@ -102,7 +129,14 @@ export default function VendorExploreFilters({
         </nav>
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-2.5">
+      <div
+        ref={cityWrapRef}
+        className={`mt-6 ${citySliderMode ? 'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'overflow-visible'}`}
+      >
+        <div
+          ref={cityRowRef}
+          className={`flex gap-2.5 ${citySliderMode ? 'min-w-max flex-nowrap pb-1' : 'flex-wrap'}`}
+        >
         {(() => {
           const href = `/${locale}/vendors${q ? `?q=${encodeURIComponent(q)}` : ''}`;
           return (
@@ -133,6 +167,7 @@ export default function VendorExploreFilters({
             </Link>
           );
         })}
+        </div>
       </div>
     </div>
   );

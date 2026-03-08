@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FiChevronRight, FiMapPin, FiInstagram, FiShare2, FiChevronLeft } from 'react-icons/fi';
 import { BsFillPlayCircleFill } from 'react-icons/bs';
 import type { SimilarVendor } from '@/lib/db/vendors';
@@ -57,11 +58,13 @@ export default function VendorDetailPage({
   locale = 'en',
   similarVendors = [],
 }: VendorDetailPageProps) {
+  const router = useRouter();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
+  const [showBackButton, setShowBackButton] = useState(false);
 
   const copyPhone = () => {
     if (!phone) return;
@@ -98,6 +101,7 @@ export default function VendorDetailPage({
       aboutVendor: 'About the Vendor',
       video: 'Video',
       clickToPlay: 'Click to play',
+      back: 'Back',
       location: 'Location',
       getDirections: 'Get Directions',
       fallbackOverview: `${name} is one of the featured ${categoryLabel.toLowerCase()} vendors in ${city}.`,
@@ -111,6 +115,7 @@ export default function VendorDetailPage({
       aboutVendor: 'À propos du prestataire',
       video: 'Vidéo',
       clickToPlay: 'Cliquer pour lire',
+      back: 'Retour',
       location: 'Localisation',
       getDirections: 'Obtenir l’itinéraire',
       fallbackOverview: `${name} fait partie des prestataires ${categoryLabel.toLowerCase()} recommandés à ${city}.`,
@@ -124,6 +129,7 @@ export default function VendorDetailPage({
       aboutVendor: 'نبذة عن المزوّد',
       video: 'فيديو',
       clickToPlay: 'انقر للتشغيل',
+      back: 'رجوع',
       location: 'الموقع',
       getDirections: 'الحصول على الاتجاهات',
       fallbackOverview: `${name} من مزوّدي ${categoryLabel.toLowerCase()} المميزين في ${city}.`,
@@ -143,9 +149,34 @@ export default function VendorDetailPage({
       ? rawDescription
       : c.fallbackOverview;
 
+  const handleBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+      return;
+    }
+    router.push(`/${locale}/vendors`);
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    const prevPath = window.sessionStorage.getItem('wervice_prev_path');
+    setShowBackButton(Boolean(prevPath && prevPath !== currentPath));
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F5F5F0]">
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6 py-8">
+        {showBackButton && (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="mb-4 inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+          >
+            <FiChevronLeft className="h-4 w-4" />
+            {c.back}
+          </button>
+        )}
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-5">

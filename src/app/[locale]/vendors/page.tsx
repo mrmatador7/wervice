@@ -17,6 +17,7 @@ import {
   normalizeCategory,
   slugToDbCategory,
 } from '@/lib/categories';
+import { vendorUrl } from '@/lib/vendor-url';
 import { fetchVendors } from '@/lib/supabase/vendors';
 import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { getAll } from '@/data/articles';
@@ -83,7 +84,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
       vendor.gallery_urls?.[0] ||
       vendor.gallery_photos?.[0] ||
       '/images/sample/venues-1.jpg',
-    href: `/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(vendor.slug)}`,
+    href: vendorUrl(vendor, locale),
     location: localizeCityLabel(vendor.city, locale),
     categoryLabel: labelForCategory(vendor.category, locale),
     logoUrl: vendor.profile_photo_url,

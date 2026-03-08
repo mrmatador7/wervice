@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
+import { cityToSlug } from '@/lib/vendor-url';
 import { useUser } from '@/contexts/UserContext';
 import { CHECKLIST } from '@/data/checklist';
 import { getDashboardCopy } from '@/components/home/dashboard-i18n';
@@ -59,18 +60,24 @@ type VendorSearchItem = {
 
 function toShellVendorHref(locale: string, href: string) {
   if (!href) return `/${locale}/dashboard?view=overview`;
-  if (href.startsWith(`/${locale}/dashboard`)) return href;
-  if (href.startsWith(`/${locale}/vendors`)) return href.replace(`/${locale}/vendors`, `/${locale}/dashboard`);
+
+  if (href.startsWith(`/${locale}/dashboard?`)) {
+    try {
+      const url = new URL(href, 'https://wervice.local');
+      const slug = url.searchParams.get('vendor');
+      if (slug) return `/${locale}/vendors/${encodeURIComponent(slug)}`;
+    } catch {
+      // ignore and keep fallback behavior
+    }
+    return href;
+  }
 
   const clean = href.split('?')[0].split('#')[0];
   const parts = clean.split('/').filter(Boolean);
 
   // Old vendor URL pattern: /{locale}/{city}/{category}/{slug}
   if (parts.length >= 4 && parts[0] === locale) {
-    const slug = parts[parts.length - 1];
-    if (slug) {
-      return `/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(slug)}`;
-    }
+    return href;
   }
 
   return href;
@@ -125,6 +132,16 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
 
   useEffect(() => {
     setIsRouteSwitching(false);
+  }, [pathname, searchParams]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const current = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
+    const previousCurrent = window.sessionStorage.getItem('wervice_current_path');
+    if (previousCurrent && previousCurrent !== current) {
+      window.sessionStorage.setItem('wervice_prev_path', previousCurrent);
+    }
+    window.sessionStorage.setItem('wervice_current_path', current);
   }, [pathname, searchParams]);
 
   useEffect(() => {
@@ -283,9 +300,10 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
       .replace('{total}', String(checklistStats.total));
   }, [copy.rightSidebar.tasksDone, checklistStats.done, checklistStats.total]);
 
-  function openVendorFromSearch(slug: string) {
+  function openVendorFromSearch(vendor: VendorSearchItem) {
     setIsSearchFocused(false);
-    router.push(`/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(slug)}`);
+    const href = `/${locale}/${cityToSlug(vendor.city)}/${vendor.category}/${vendor.slug}`;
+    router.push(href);
   }
 
   function navigateSmooth(href: string) {
@@ -390,7 +408,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                           <button
                             key={vendor.id}
                             type="button"
-                            onClick={() => openVendorFromSearch(vendor.slug)}
+                            onClick={() => openVendorFromSearch(vendor)}
                             className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-[#f2f5fa]"
                           >
                             <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-[#d8dee8] bg-[#edf1f6]">

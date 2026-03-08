@@ -5,8 +5,7 @@ import { labelForCategory } from '@/lib/categories';
 import { capitalizeCity } from '@/lib/utils';
 import { vendorUrl, cityToSlug } from '@/lib/vendor-url';
 import VendorDetailPage from '@/components/vendor/VendorDetailPage';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import DashboardShell from '@/components/home/DashboardShell';
 import { toAbsoluteUrl } from '@/lib/seo/site-url';
 import { localizeCityLabel } from '@/lib/types/vendor';
 
@@ -100,9 +99,7 @@ export default async function VendorPage({ params }: VendorPageProps) {
   const description = (rawDesc && rawDesc !== 'No description provided' && rawDesc !== 'No description') ? rawDesc : null;
 
   return (
-    <>
-      <Header />
-
+    <DashboardShell locale={locale} activeItem="all-vendors">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -125,8 +122,6 @@ export default async function VendorPage({ params }: VendorPageProps) {
         locale={locale}
         similarVendors={similarVendors}
       />
-
-      <Footer />
-    </>
+    </DashboardShell>
   );
 }

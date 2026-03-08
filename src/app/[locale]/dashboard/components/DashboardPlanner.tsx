@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiPlus, FiCheck, FiCalendar } from 'react-icons/fi';
+import { useUser } from '@/contexts/UserContext';
 
 interface DashboardPlannerProps {
   profile: any;
@@ -19,8 +20,16 @@ const defaultCategories = [
 ];
 
 export default function DashboardPlanner({ profile }: DashboardPlannerProps) {
+  const { refreshUserData } = useUser();
   const [plannedVendors, setPlannedVendors] = useState(defaultCategories);
   const [weddingDate, setWeddingDate] = useState(profile?.wedding_date || '');
+  const [isSavingDate, setIsSavingDate] = useState(false);
+  const [saveDateMessage, setSaveDateMessage] = useState('');
+  const [saveDateError, setSaveDateError] = useState('');
+
+  useEffect(() => {
+    setWeddingDate(profile?.wedding_date || '');
+  }, [profile?.wedding_date]);
 
   const toggleVendor = (id: string) => {
     setPlannedVendors((prev) =>
@@ -30,6 +39,35 @@ export default function DashboardPlanner({ profile }: DashboardPlannerProps) {
 
   const completedCount = plannedVendors.filter((v) => v.completed).length;
   const progressPercentage = (completedCount / plannedVendors.length) * 100;
+
+  const saveWeddingDate = async () => {
+    setSaveDateError('');
+    setSaveDateMessage('');
+    setIsSavingDate(true);
+
+    try {
+      const response = await fetch('/api/profiles/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          wedding_date: weddingDate || null,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to save wedding date');
+      }
+
+      setSaveDateMessage('Wedding date saved.');
+      await refreshUserData();
+    } catch (error) {
+      setSaveDateError(error instanceof Error ? error.message : 'Failed to save wedding date');
+    } finally {
+      setIsSavingDate(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -56,6 +94,18 @@ export default function DashboardPlanner({ profile }: DashboardPlannerProps) {
           onChange={(e) => setWeddingDate(e.target.value)}
           className="w-full px-6 py-4 bg-white/50 backdrop-blur-sm border-2 border-white/60 rounded-2xl focus:outline-none focus:border-white text-lg font-semibold text-[#11190C]"
         />
+        <div className="mt-4 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={saveWeddingDate}
+            disabled={isSavingDate}
+            className="rounded-xl bg-[#11190C] px-5 py-2.5 text-sm font-bold text-[#D9FF0A] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSavingDate ? 'Saving...' : 'Save Wedding Date'}
+          </button>
+          {saveDateError && <span className="text-sm font-semibold text-red-700">{saveDateError}</span>}
+          {saveDateMessage && <span className="text-sm font-semibold text-[#2f6f49]">{saveDateMessage}</span>}
+        </div>
       </div>
 
       {/* Progress Card */}
@@ -133,4 +183,3 @@ export default function DashboardPlanner({ profile }: DashboardPlannerProps) {
     </div>
   );
 }
-

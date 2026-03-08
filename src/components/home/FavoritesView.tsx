@@ -14,14 +14,22 @@ type FavoritesViewProps = {
 
 function toShellVendorHref(locale: string, href: string) {
   if (!href) return `/${locale}/dashboard?view=overview`;
-  if (href.startsWith(`/${locale}/dashboard`)) return href;
-  if (href.startsWith(`/${locale}/vendors`)) return href.replace(`/${locale}/vendors`, `/${locale}/dashboard`);
+  if (href.startsWith(`/${locale}/dashboard?`)) {
+    try {
+      const url = new URL(href, 'https://wervice.local');
+      const slug = url.searchParams.get('vendor');
+      if (slug) return `/${locale}/vendors/${encodeURIComponent(slug)}`;
+    } catch {
+      // ignore and use existing href below
+    }
+    return href;
+  }
 
   const clean = href.split('?')[0].split('#')[0];
   const parts = clean.split('/').filter(Boolean);
   if (parts.length >= 4 && parts[0] === locale) {
     const slug = parts[parts.length - 1];
-    if (slug) return `/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(slug)}`;
+    if (slug) return `/${locale}/vendors/${encodeURIComponent(slug)}`;
   }
   return href;
 }

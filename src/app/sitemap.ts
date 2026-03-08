@@ -14,7 +14,6 @@ type VendorRow = {
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const MIN_VENDOR_COUNT = Number(process.env.SEO_MIN_VENDOR_COUNT || process.env.NEXT_PUBLIC_SEO_MIN_VENDOR_COUNT || '5');
 const LOCALES = ['en', 'fr', 'ar'] as const;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -54,13 +53,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
-    for (const category of WERVICE_CATEGORIES) {
-      entries.push({
-        url: toAbsoluteUrl(`/${locale}/categories/${category.slug}`),
-        changeFrequency: 'weekly',
-        priority: 0.6,
-      });
-    }
   }
 
   // If envs are unavailable (preview/build edge case), still return static locale pages.
@@ -84,52 +76,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const rows = data as VendorRow[];
   const dbCategoryToSlug = new Map(WERVICE_CATEGORIES.map((category) => [category.dbCategory, category.slug]));
-  const cityCounts = new Map<string, number>();
-  const cityCategoryCounts = new Map<string, number>();
-
-  for (const row of rows) {
-    const city = (row.city || '').trim();
-    const dbCategory = (row.category || '').trim().toLowerCase();
-    if (!city || !dbCategory) continue;
-    const categorySlug = dbCategoryToSlug.get(dbCategory);
-    if (!categorySlug) continue;
-
-    cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
-    const cityCategoryKey = `${city}::${categorySlug}`;
-    cityCategoryCounts.set(cityCategoryKey, (cityCategoryCounts.get(cityCategoryKey) || 0) + 1);
-  }
-
-  const indexableCities = Array.from(cityCounts.entries())
-    .filter(([, count]) => count >= MIN_VENDOR_COUNT)
-    .map(([city]) => city);
-
-  for (const locale of LOCALES) {
-    for (const city of indexableCities) {
-      const citySlug = cityToSlug(city);
-      entries.push({
-        url: toAbsoluteUrl(`/${locale}/${citySlug}`),
-        changeFrequency: 'daily',
-        priority: 0.8,
-      });
-    }
-  }
-
-  const indexableCityCategory = new Set<string>();
-  for (const [key, count] of cityCategoryCounts.entries()) {
-    if (count < MIN_VENDOR_COUNT) continue;
-    indexableCityCategory.add(key);
-  }
-
-  for (const locale of LOCALES) {
-    for (const key of indexableCityCategory) {
-      const [city, categorySlug] = key.split('::');
-      entries.push({
-        url: toAbsoluteUrl(`/${locale}/${cityToSlug(city)}/${categorySlug}`),
-        changeFrequency: 'daily',
-        priority: 0.8,
-      });
-    }
-  }
 
   for (const row of rows) {
     const city = (row.city || '').trim();
@@ -140,12 +86,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const categorySlug = dbCategoryToSlug.get(dbCategory);
     if (!categorySlug) continue;
 
-    const key = `${city}::${categorySlug}`;
-    if (!indexableCityCategory.has(key)) continue;
-
     const lastModified = row.created_at ? new Date(row.created_at) : new Date();
     for (const locale of LOCALES) {
-        entries.push({
+      entries.push({
         url: toAbsoluteUrl(`/${locale}/${cityToSlug(city)}/${categorySlug}/${slug}`),
         lastModified,
         changeFrequency: 'weekly',
