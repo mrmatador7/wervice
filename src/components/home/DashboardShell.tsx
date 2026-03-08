@@ -275,9 +275,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     .join('') || 'G';
 
   return (
-    <div className="h-screen w-full overflow-hidden bg-[#F3F1EE]">
-      <div className="h-full w-full overflow-hidden border border-black/10 bg-[#F7F5F2] shadow-[0_15px_45px_rgba(17,25,12,0.1)]">
-        <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-black/10 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+    <div className="h-screen w-full overflow-hidden bg-[#eceff3] font-[var(--font-inter)]">
+      <div className="h-full w-full overflow-hidden border border-[#d8dce3] bg-[#f6f7f9]">
+        <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-[#dde2ea] bg-[#f8f9fb]/95 px-4 py-3 backdrop-blur sm:px-6">
           <Link href={`/${locale}`} className="flex items-center gap-3">
             <Image
               src="/wervice-logo-black.png"
@@ -289,12 +289,12 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
             />
           </Link>
 
-          <nav className="ml-4 hidden flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex xl:flex-wrap xl:overflow-visible xl:whitespace-normal">
+          <nav className="ml-2 hidden flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex xl:flex-wrap xl:overflow-visible xl:whitespace-normal">
             {MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => (
               <Link
                 key={city.value}
                 href={`/${locale}/dashboard?view=overview&city=${encodeURIComponent(city.value)}`}
-                className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-sm font-semibold text-[#33475f] transition hover:bg-[#F3EFE7]"
+                className="rounded-full border border-[#d7dde7] bg-white px-3 py-1.5 text-sm font-medium text-[#4d5f78] transition hover:bg-[#f1f4f9]"
               >
                 {localizeCityLabel(city.label, locale)}
               </Link>
@@ -303,9 +303,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
 
           <div className="ml-auto flex w-full max-w-[760px] items-center gap-3 lg:w-auto">
             <div ref={searchWrapRef} className="relative hidden flex-1 lg:block">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-black/35" />
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8b95a7]" />
               <input
-                className="h-14 w-full rounded-2xl border border-black/10 bg-[#EFECE7] pl-12 pr-4 text-lg outline-none transition focus:border-[#11190C]"
+                className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white pl-12 pr-4 text-base text-[#2c3850] outline-none transition placeholder:text-[#98a3b6] focus:border-[#96aac9]"
                 placeholder={copy.topbar.searchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
@@ -322,7 +322,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               />
 
               {showSearchDropdown && (
-                <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-xl">
+                <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-xl border border-[#d8dee8] bg-white shadow-xl">
                   {isSearching ? (
                     <p className="px-4 py-3 text-sm text-[#5f6f84]">{copy.topbar.searchingVendors}</p>
                   ) : searchResults.length === 0 ? (
@@ -340,9 +340,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                             key={vendor.id}
                             type="button"
                             onClick={() => openVendorFromSearch(vendor.slug)}
-                            className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-[#F3EFE7]"
+                            className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-[#f2f5fa]"
                           >
-                            <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-black/10 bg-[#EEE9E1]">
+                            <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-[#d8dee8] bg-[#edf1f6]">
                               <Image src={cover} alt={vendor.business_name} fill sizes="40px" className="object-cover" />
                             </div>
                             <div className="min-w-0">
@@ -357,16 +357,16 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 </div>
               )}
             </div>
-            <button type="button" className="hidden h-10 w-10 items-center justify-center rounded-xl border border-black/10 bg-white text-[#11190C] hover:bg-[#F3EFE7] sm:inline-flex">
+            <button type="button" className="hidden h-10 w-10 items-center justify-center rounded-xl border border-[#d8dee8] bg-white text-[#4d5f78] hover:bg-[#f1f4f9] sm:inline-flex">
               <Heart className="h-5 w-5" />
             </button>
 
-            <div className="hidden items-center rounded-2xl border border-[#d3dae5] bg-[#e9edf3] px-2 py-1.5 sm:flex">
+            <div className="hidden items-center rounded-2xl border border-[#d7dde8] bg-[#edf2f8] px-2 py-1.5 sm:flex">
               <div ref={langWrapRef} className="relative">
                 <button
                   type="button"
                   onClick={() => setIsLangOpen((prev) => !prev)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-[#33475f] hover:bg-white/50"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-[#475a76] hover:bg-white/60"
                   aria-haspopup="menu"
                   aria-expanded={isLangOpen}
                   aria-label={copy.topbar.language}
@@ -377,13 +377,13 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 </button>
 
                 {isLangOpen && (
-                  <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-24 overflow-hidden rounded-xl border border-[#d2d9e5] bg-white p-1 text-[#33475f] shadow-xl">
+                  <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-24 overflow-hidden rounded-xl border border-[#d8dee8] bg-white p-1 text-[#475a76] shadow-xl">
                     {(['en', 'fr', 'ar'] as const).map((lng) => (
                       <button
                         key={lng}
                         type="button"
                         onClick={() => switchLocale(lng)}
-                        className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-semibold uppercase tracking-wide hover:bg-[#F3EFE7]"
+                        className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-semibold uppercase tracking-wide hover:bg-[#f1f4f9]"
                       >
                         {locale === lng ? <span className="text-xs">✓</span> : <span className="w-3" />}
                         <span>{lng}</span>
@@ -393,16 +393,16 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 )}
               </div>
 
-              <div className="mx-2 h-8 w-px bg-[#ccd4e1]" />
+              <div className="mx-2 h-8 w-px bg-[#d2d9e6]" />
 
               {user ? (
                 <div className="flex items-center gap-2.5 rounded-xl px-1 py-0.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-lg border border-[#cfd8e6] bg-white text-sm font-bold text-[#33475f]">
+                  <div className="grid h-9 w-9 place-items-center rounded-lg border border-[#d2d9e6] bg-white text-sm font-semibold text-[#4d5f78]">
                     {initials}
                   </div>
                   <div className="min-w-[110px]">
                     <p className="text-base font-semibold leading-tight text-[#1f2d44] line-clamp-1">{displayName}</p>
-                    <p className="text-xs text-[#6a7f9d]">{copy.topbar.member}</p>
+                    <p className="text-xs text-[#7a89a0]">{copy.topbar.member}</p>
                   </div>
                 </div>
               ) : (
@@ -410,7 +410,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   <button
                     type="button"
                     onClick={() => router.push(`/${locale}/dashboard?view=auth&mode=signin`)}
-                    className="rounded-lg bg-[#11190C] px-3 py-1.5 text-xs font-semibold text-[#D9FF0A]"
+                    className="rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-semibold text-white"
                   >
                     {copy.topbar.signIn}
                   </button>
@@ -422,7 +422,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 onClick={() =>
                   router.push(user ? `/${locale}/dashboard?view=settings` : `/${locale}/dashboard?view=auth&mode=signin`)
                 }
-                className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8fa2bf] hover:bg-white/70"
+                className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8093af] hover:bg-white/70"
                 aria-label={copy.topbar.accountSettings}
               >
                 <Settings className="h-4.5 w-4.5" />
@@ -431,7 +431,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 <button
                   type="button"
                   onClick={() => signOut()}
-                  className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8fa2bf] hover:bg-white/70"
+                  className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8093af] hover:bg-white/70"
                   aria-label={copy.topbar.disconnect}
                   title={copy.topbar.disconnect}
                 >
@@ -442,9 +442,9 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
           </div>
         </header>
 
-        <div className={`grid h-[calc(100vh-85px)] ${user ? 'xl:grid-cols-[260px_1fr_330px]' : 'xl:grid-cols-[260px_1fr]'}`}>
-          <aside className="hidden overflow-y-auto border-r border-black/10 bg-[#F1EEE9] px-5 py-6 xl:block">
-            <div className="mt-3 space-y-1.5">
+        <div className={`grid h-[calc(100vh-85px)] ${user ? 'xl:grid-cols-[290px_1fr_330px]' : 'xl:grid-cols-[290px_1fr]'}`}>
+          <aside className="hidden overflow-y-auto border-r border-[#dde2ea] bg-[#f3f5f8] px-5 py-6 xl:block">
+            <div className="space-y-1">
               {dashboardNav.map((item) => {
                 const Icon = item.icon;
                 const active = activeItem === item.id;
@@ -452,19 +452,21 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   <Link
                     key={item.labelKey}
                     href={`/${locale}${item.href}`}
-                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-xl font-semibold transition ${
-                      active ? 'bg-[#D9FF0A] text-[#11190C] shadow-sm' : 'text-[#354860] hover:bg-[#E8E2D8]'
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[17px] font-medium transition ${
+                      active
+                        ? 'border border-[#d9dee7] bg-white text-[#2e3b52] shadow-[0_2px_8px_rgba(15,23,42,0.08)]'
+                        : 'border border-transparent text-[#6f7888] hover:bg-white/70'
                     }`}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-5 w-5 stroke-[1.9]" />
                     {copy.nav[item.labelKey as keyof typeof copy.nav]}
                   </Link>
                 );
               })}
             </div>
 
-            <p className="mt-8 px-2 text-sm font-bold uppercase tracking-[0.16em] text-[#787664]">{copy.nav.marketplace}</p>
-            <div className="mt-3 space-y-1.5">
+            <p className="mt-6 px-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9aa3b3]">{copy.nav.marketplace}</p>
+            <div className="mt-2 space-y-1">
               {marketplaceNav.map((item) => {
                 const Icon = item.icon;
                 const active = activeItem === item.id;
@@ -472,11 +474,13 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   <Link
                     key={item.labelKey}
                     href={`/${locale}${item.href}`}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-xl font-semibold transition ${
-                      active ? 'bg-[#D9FF0A] text-[#11190C] shadow-sm' : 'text-[#354860] hover:bg-[#E8E2D8]'
+                    className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-[17px] font-medium transition ${
+                      active
+                        ? 'border border-[#d9dee7] bg-white text-[#2e3b52] shadow-[0_2px_8px_rgba(15,23,42,0.08)]'
+                        : 'border border-transparent text-[#6f7888] hover:bg-white/70'
                     }`}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-5 w-5 stroke-[1.9]" />
                     {copy.nav[item.labelKey as keyof typeof copy.nav]}
                   </Link>
                 );
@@ -484,25 +488,25 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
             </div>
           </aside>
 
-          <main className="space-y-9 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+          <main className="space-y-9 overflow-y-auto bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">{children}</main>
 
           {user && (
-            <aside className="hidden space-y-6 overflow-y-auto border-l border-black/10 bg-[#F7F5F2] px-4 py-6 lg:block sm:px-6">
+            <aside className="hidden space-y-6 overflow-y-auto border-l border-[#dde2ea] bg-[#f3f5f8] px-4 py-6 lg:block sm:px-6">
               <section>
-                <h3 className="mb-3 text-5xl font-black text-[#11190C]">{copy.rightSidebar.checklistTitle}</h3>
+                <h3 className="mb-3 text-[42px] font-bold leading-[0.95] tracking-[-0.02em] text-[#182236]">{copy.rightSidebar.checklistTitle}</h3>
                 <div className="space-y-3">
                   {checklistCards.map((task) => (
                     <div
                       key={task.id}
-                      className={`rounded-2xl border p-4 ${task.completed ? 'border-[#D9FF0A]/40 bg-[#F7FFD9]' : 'border-black/10 bg-white'}`}
+                      className={`rounded-2xl border p-4 ${task.completed ? 'border-[#cfe7d6] bg-[#ecfaf0]' : 'border-[#dde2ea] bg-white'}`}
                     >
-                      <p className="text-xl font-bold text-[#11190C] line-clamp-2">{task.label}</p>
-                      <p className="text-sm text-[#6a7f9d]">{task.completed ? copy.rightSidebar.completed : copy.rightSidebar.pending}</p>
+                      <p className="line-clamp-2 text-xl font-semibold text-[#1b263a]">{task.label}</p>
+                      <p className="text-sm text-[#7a89a0]">{task.completed ? copy.rightSidebar.completed : copy.rightSidebar.pending}</p>
                     </div>
                   ))}
                   <Link
                     href={`/${locale}/dashboard?view=checklist`}
-                    className="block rounded-2xl border border-black/10 bg-[#ECE7DE] p-3 text-center text-xl font-bold text-[#3E4C37]"
+                    className="block rounded-2xl border border-[#dbe1ea] bg-[#e9edf4] p-3 text-center text-xl font-semibold text-[#3b4a62]"
                   >
                     {copy.rightSidebar.viewAllTasks}
                   </Link>
@@ -510,16 +514,16 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               </section>
 
               <section>
-                <h3 className="mb-3 text-5xl font-black text-[#11190C]">{copy.rightSidebar.savedVendors}</h3>
+                <h3 className="mb-3 text-[42px] font-bold leading-[0.95] tracking-[-0.02em] text-[#182236]">{copy.rightSidebar.savedVendors}</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {sidebarFavorites.slice(0, 4).map((card) => (
-                    <Link key={card.id} href={toShellVendorHref(locale, card.href)} className="relative block h-32 overflow-hidden rounded-xl border border-black/10 bg-zinc-200">
+                    <Link key={card.id} href={toShellVendorHref(locale, card.href)} className="relative block h-32 overflow-hidden rounded-xl border border-[#dde2ea] bg-zinc-200">
                       <Image src={card.image} alt={card.title} fill sizes="160px" className="object-cover" />
                     </Link>
                   ))}
                   <Link
                     href={`/${locale}/dashboard?view=favorites`}
-                    className="grid h-32 place-items-center rounded-xl border-2 border-dashed border-[#C7C1B4] bg-[#F3EEE4] text-5xl font-light text-[#787664]"
+                    className="grid h-32 place-items-center rounded-xl border-2 border-dashed border-[#cfd6e1] bg-[#eef2f8] text-5xl font-light text-[#7f8da3]"
                   >
                     +
                   </Link>
