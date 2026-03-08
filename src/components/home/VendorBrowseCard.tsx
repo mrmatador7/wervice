@@ -47,6 +47,7 @@ export default function VendorBrowseCard({
   const displayImages = images.length > 0 ? images : ['/images/sample/venues-1.jpg'];
   const currentImage = displayImages[imageIndex] || '/images/sample/venues-1.jpg';
   const safeLogo = logoUrl || displayImages[0] || '/images/sample/venues-1.jpg';
+  const localizedLocation = localizeCityLabel(location, locale);
   const favoritesKey = user?.id ? `wervice_favorites_${user.id}` : '';
 
   const [isFavorite, setIsFavorite] = useState<boolean>(() => {
@@ -188,4 +189,3 @@ export default function VendorBrowseCard({
     </Link>
   );
 }
-  const localizedLocation = localizeCityLabel(location, locale);
