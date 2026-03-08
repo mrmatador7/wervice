@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { labelForCategory } from '@/lib/categories';
 import { capitalizeCity } from '@/lib/utils';
 import type { VendorDetail } from '@/lib/db/vendors';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface VendorHeroProps {
   vendor: VendorDetail;
@@ -11,8 +12,8 @@ interface VendorHeroProps {
 }
 
 export default function VendorHero({ vendor, locale }: VendorHeroProps) {
-  const categoryLabel = labelForCategory(vendor.category);
-  const cityLabel = capitalizeCity(vendor.city);
+  const categoryLabel = labelForCategory(vendor.category, locale);
+  const cityLabel = localizeCityLabel(capitalizeCity(vendor.city), locale);
   const heroImage = vendor.profile_photo_url || vendor.gallery_photos?.[0];
 
   return (
@@ -92,4 +93,3 @@ export default function VendorHero({ vendor, locale }: VendorHeroProps) {
     </div>
   );
 }
-

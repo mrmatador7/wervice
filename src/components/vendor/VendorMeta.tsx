@@ -2,14 +2,16 @@ import { Calendar, MapPin, Tag, Award } from 'lucide-react';
 import { labelForCategory } from '@/lib/categories';
 import { capitalizeCity } from '@/lib/utils';
 import type { VendorDetail } from '@/lib/db/vendors';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface VendorMetaProps {
   vendor: VendorDetail;
+  locale?: string;
 }
 
-export default function VendorMeta({ vendor }: VendorMetaProps) {
-  const categoryLabel = labelForCategory(vendor.category);
-  const cityLabel = capitalizeCity(vendor.city);
+export default function VendorMeta({ vendor, locale = 'en' }: VendorMetaProps) {
+  const categoryLabel = labelForCategory(vendor.category, locale);
+  const cityLabel = localizeCityLabel(capitalizeCity(vendor.city), locale);
   
   // Format the created date
   const joinDate = new Date(vendor.created_at).toLocaleDateString('en-US', {
@@ -71,4 +73,3 @@ export default function VendorMeta({ vendor }: VendorMetaProps) {
     </div>
   );
 }
-

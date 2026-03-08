@@ -347,7 +347,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                             </div>
                             <div className="min-w-0">
                               <p className="line-clamp-1 text-sm font-bold text-[#11190C]">{vendor.business_name}</p>
-                              <p className="line-clamp-1 text-xs text-[#5f6f84]">{vendor.city}</p>
+                              <p className="line-clamp-1 text-xs text-[#5f6f84]">{localizeCityLabel(vendor.city, locale)}</p>
                             </div>
                           </button>
                         );

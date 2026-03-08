@@ -5,6 +5,7 @@ import { labelForCategory } from '@/lib/categories';
 import { capitalizeCity } from '@/lib/utils';
 import { vendorUrl } from '@/lib/vendor-url';
 import type { SimilarVendor } from '@/lib/db/vendors';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface SimilarVendorsProps {
   items: SimilarVendor[];
@@ -25,8 +26,8 @@ export default function SimilarVendors({ items, locale }: SimilarVendorsProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {items.map((vendor) => {
           const imageUrl = vendor.gallery_photos?.[0] || vendor.profile_photo_url;
-          const categoryLabel = labelForCategory(vendor.category);
-          const cityLabel = capitalizeCity(vendor.city);
+          const categoryLabel = labelForCategory(vendor.category, locale);
+          const cityLabel = localizeCityLabel(capitalizeCity(vendor.city), locale);
 
           return (
             <Link

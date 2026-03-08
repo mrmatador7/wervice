@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { MapPin } from 'lucide-react';
 import { labelForCategory } from '@/lib/categories';
 import { vendorUrl } from '@/lib/vendor-url';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface Vendor {
   id: string;
@@ -126,9 +127,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
     return () => clearInterval(timer);
   }, [total]);
 
-  const cityLabel = vendor.city
-    ? vendor.city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
-    : '';
+  const cityLabel = vendor.city ? localizeCityLabel(vendor.city, locale || 'en') : '';
 
   return (
     <article className="group flex flex-col rounded-[28px] border border-zinc-200 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.10),0_1px_4px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,25,12,0.14)] cursor-pointer">
@@ -164,7 +163,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
         {/* Category pill */}
         <div className="absolute left-3 top-3 rounded-2xl bg-white/95 px-3 py-1.5 shadow-sm backdrop-blur-sm">
           <span className="text-xs font-semibold uppercase tracking-wide text-[#11190C]">
-            {labelForCategory(vendor.category)}
+            {labelForCategory(vendor.category, locale || 'en')}
           </span>
         </div>
 

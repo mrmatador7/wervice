@@ -4,9 +4,16 @@ import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { FiSearch, FiGrid, FiPhone, FiCheckCircle, FiShield, FiClock } from 'react-icons/fi';
+import { localeAlternates, toAbsoluteUrl } from '@/lib/seo/site-url';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('how-it-works');
+  const canonical = toAbsoluteUrl(`/${locale}/how-it-works`);
 
   return {
     title: t('title'),
@@ -16,6 +23,11 @@ export async function generateMetadata(): Promise<Metadata> {
       title: 'How Wervice Works',
       description: t('description'),
       type: 'website',
+      url: canonical,
+    },
+    alternates: {
+      canonical,
+      languages: localeAlternates('/how-it-works'),
     },
   };
 }

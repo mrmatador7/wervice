@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { normalizeCategory } from '@/lib/categories';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -34,6 +35,44 @@ export async function middleware(request: NextRequest) {
   // Session refresh is handled in individual pages as needed
 
   const pathname = request.nextUrl.pathname;
+  const localeMatch = pathname.match(/^\/(en|fr|ar)(?:\/|$)/);
+  const locale = localeMatch?.[1] || 'en';
+
+  // Legacy category URLs -> canonical category slugs
+  // /categories/:slug -> /en/categories/:normalized
+  const plainCategoryMatch = pathname.match(/^\/categories\/([^/]+)\/?$/);
+  if (plainCategoryMatch) {
+    const normalized = normalizeCategory(decodeURIComponent(plainCategoryMatch[1]));
+    if (normalized) {
+      return NextResponse.redirect(new URL(`/${locale}/categories/${normalized}`, request.url), 308);
+    }
+  }
+
+  // /:locale/categories/:slug -> /:locale/categories/:normalized
+  const localizedCategoryMatch = pathname.match(/^\/(en|fr|ar)\/categories\/([^/]+)\/?$/);
+  if (localizedCategoryMatch) {
+    const targetLocale = localizedCategoryMatch[1];
+    const rawSlug = decodeURIComponent(localizedCategoryMatch[2]);
+    const normalized = normalizeCategory(rawSlug);
+    if (normalized && normalized !== rawSlug) {
+      return NextResponse.redirect(new URL(`/${targetLocale}/categories/${normalized}`, request.url), 308);
+    }
+  }
+
+  // Legacy vendor URLs
+  // /vendor/:slug -> /en/vendors/:slug
+  const plainVendorMatch = pathname.match(/^\/vendor\/([^/]+)\/?$/);
+  if (plainVendorMatch) {
+    return NextResponse.redirect(new URL(`/${locale}/vendors/${plainVendorMatch[1]}`, request.url), 308);
+  }
+
+  // /:locale/vendor/:slug -> /:locale/vendors/:slug
+  const localizedVendorMatch = pathname.match(/^\/(en|fr|ar)\/vendor\/([^/]+)\/?$/);
+  if (localizedVendorMatch) {
+    const targetLocale = localizedVendorMatch[1];
+    const slug = localizedVendorMatch[2];
+    return NextResponse.redirect(new URL(`/${targetLocale}/vendors/${slug}`, request.url), 308);
+  }
 
   const isAdminPage = pathname === '/admin' || pathname.startsWith('/admin/');
   const isAdminApi = pathname === '/api/admin' || pathname.startsWith('/api/admin/');

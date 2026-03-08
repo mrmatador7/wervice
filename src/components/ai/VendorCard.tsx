@@ -4,7 +4,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { FiMapPin } from 'react-icons/fi';
-import { formatCategoryName } from '@/lib/format';
+import { labelForCategory } from '@/lib/categories';
+import { localizeCityLabel } from '@/lib/types/vendor';
 import { vendorUrl } from '@/lib/vendor-url';
 
 /** Vendor shape from /api/vendors (vendor_leads + media) */
@@ -24,9 +25,6 @@ interface VendorCardProps {
   vendor: AIVendorCardVendor;
 }
 
-const capitalizeCity = (city: string) =>
-  city.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-
 export default function VendorCard({ vendor }: VendorCardProps) {
   const params = useParams<{ locale?: string }>();
   const locale = (params?.locale as string) || 'en';
@@ -40,7 +38,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
   });
   const cover = images[0] || '';
 
-  const categoryName = formatCategoryName(vendor.category);
+  const categoryName = labelForCategory(vendor.category, locale);
 
   return (
     <Link href={href} className="group block w-full">
@@ -78,7 +76,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
           </h3>
           <div className="mt-1.5 flex items-center gap-1.5">
             <FiMapPin className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
-            <span className="text-sm text-neutral-500">{capitalizeCity(vendor.city)}</span>
+            <span className="text-sm text-neutral-500">{localizeCityLabel(vendor.city, locale)}</span>
           </div>
           {vendor.starting_price != null && vendor.starting_price > 0 && (
             <p className="mt-1.5 text-sm font-semibold text-[#11190C]">

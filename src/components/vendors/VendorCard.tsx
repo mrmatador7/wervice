@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { MapPin } from 'lucide-react';
 import { labelForCategory } from '@/lib/categories';
-import { capitalizeCity } from '@/lib/utils';
 import { vendorUrl } from '@/lib/vendor-url';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 import { Vendor } from '@/lib/types/vendor';
 
@@ -16,6 +17,8 @@ type VendorCardProps = {
 
 export default function VendorCard({ vendor }: VendorCardProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'en';
 
   // Build image list from gallery + profile photo
   const images: string[] = [];
@@ -39,9 +42,9 @@ export default function VendorCard({ vendor }: VendorCardProps) {
     return () => clearInterval(timer);
   }, [total]);
 
-  const categoryLabel = labelForCategory(vendor.category);
-  const cityLabel = capitalizeCity(vendor.city);
-  const vendorHref = vendor.slug ? vendorUrl(vendor, 'en') : '/en/vendors';
+  const categoryLabel = labelForCategory(vendor.category, locale);
+  const cityLabel = localizeCityLabel(vendor.city, locale);
+  const vendorHref = vendor.slug ? vendorUrl(vendor, locale) : `/${locale}/vendors`;
 
   return (
     <article className="group mx-auto flex w-full max-w-[480px] flex-col rounded-[28px] border border-zinc-200 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.10),0_1px_4px_rgba(0,0,0,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(17,25,12,0.14)]">

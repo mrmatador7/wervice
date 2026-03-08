@@ -8,10 +8,10 @@ import CustomSelect from '@/components/vendors/CustomSelect';
 import { capitalizeCity } from '@/lib/utils';
 import { vendorUrl } from '@/lib/vendor-url';
 import { labelForCategory, WERVICE_CATEGORIES, slugToDbCategory } from '@/lib/categories';
-import { MOROCCAN_CITIES } from '@/lib/types/vendor';
+import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 
 // Mini card with auto-sliding carousel used inside this section
-function FeaturedVendorCard({ vendor, onClick }: { vendor: any; onClick: () => void }) {
+function FeaturedVendorCard({ vendor, onClick, locale }: { vendor: any; onClick: () => void; locale: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const images: string[] = [];
@@ -61,7 +61,7 @@ function FeaturedVendorCard({ vendor, onClick }: { vendor: any; onClick: () => v
 
         <div className="absolute left-3 top-3 rounded-2xl bg-white/95 px-3 py-1.5 shadow-sm backdrop-blur-sm">
           <span className="text-xs font-semibold uppercase tracking-wide text-[#11190C]">
-            {labelForCategory(vendor.category)}
+            {labelForCategory(vendor.category, locale)}
           </span>
         </div>
 
@@ -85,7 +85,7 @@ function FeaturedVendorCard({ vendor, onClick }: { vendor: any; onClick: () => v
         </h3>
         <div className="mt-2 flex items-center gap-2">
           <MapPin className="h-4 w-4 shrink-0 text-[#aaa]" />
-          <span className="text-sm font-medium text-[#888]">{capitalizeCity(vendor.city)}</span>
+          <span className="text-sm font-medium text-[#888]">{localizeCityLabel(capitalizeCity(vendor.city), locale)}</span>
         </div>
       </div>
     </button>
@@ -306,6 +306,7 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
               <FeaturedVendorCard
                 key={vendor.id}
                 vendor={vendor}
+                locale={locale}
                 onClick={() => handleVendorClick(vendor)}
               />
             ))}
@@ -330,4 +331,3 @@ export default function FeaturedVendorsSection({ locale = 'en' }: { locale?: str
     </div>
   );
 }
-

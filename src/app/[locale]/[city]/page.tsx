@@ -8,6 +8,8 @@ import { fetchCityCategoryVendorCounts, fetchPublishedVendorCount, fetchVendors 
 import { slugToCityName, vendorUrl } from '@/lib/vendor-url';
 import DashboardShell from '@/components/home/DashboardShell';
 import InfiniteVendorGrid from '@/components/home/InfiniteVendorGrid';
+import { localeAlternates, toAbsoluteUrl } from '@/lib/seo/site-url';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface CityPageProps {
   params: Promise<{ locale: string; city: string }>;
@@ -23,6 +25,7 @@ export async function generateMetadata({ params, searchParams }: CityPageProps):
       : resolvedSearchParams.category
   );
   const cityName = slugToCityName(citySlug);
+  const cityLabel = cityName ? localizeCityLabel(cityName, locale) : '';
 
   if (!cityName) {
     return {
@@ -31,28 +34,29 @@ export async function generateMetadata({ params, searchParams }: CityPageProps):
     };
   }
 
-  const canonical = `https://wervice.com/${locale}/${citySlug}`;
+  const canonical = toAbsoluteUrl(`/${locale}/${citySlug}`);
   const vendorCount = await fetchPublishedVendorCount({ city: cityName });
   const indexing = getListingIndexingDecision({
     searchParams: resolvedSearchParams,
     vendorCount,
   });
 
-  const selectedLabel = selectedCategorySlug ? labelForCategory(selectedCategorySlug) : 'Wedding Vendors';
+  const selectedLabel = selectedCategorySlug ? labelForCategory(selectedCategorySlug, locale) : 'Wedding Vendors';
 
   return {
-    title: `${cityName} ${selectedLabel} | Wervice`,
-    description: `Browse verified wedding vendors in ${cityName}, Morocco. Discover trusted categories, compare options, and plan with confidence.`,
+    title: `${cityLabel} ${selectedLabel} | Wervice`,
+    description: `Browse verified wedding vendors in ${cityLabel}, Morocco. Discover trusted categories, compare options, and plan with confidence.`,
     alternates: {
       canonical,
+      languages: localeAlternates(`/${citySlug}`),
     },
     robots: {
       index: indexing.shouldIndex,
       follow: indexing.shouldFollow,
     },
     openGraph: {
-      title: `Wedding Vendors in ${cityName} | Wervice`,
-      description: `Top wedding vendors in ${cityName}.`,
+      title: `Wedding Vendors in ${cityLabel} | Wervice`,
+      description: `Top wedding vendors in ${cityLabel}.`,
       url: canonical,
     },
   };
@@ -67,6 +71,7 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
   const selectedDbCategory = selectedCategorySlug ? slugToDbCategory(selectedCategorySlug) : null;
   const cityName = slugToCityName(citySlug);
   if (!cityName) notFound();
+  const cityLabel = localizeCityLabel(cityName, locale);
 
   if (selectedCategorySlug || q) {
     const qs = new URLSearchParams();
@@ -86,7 +91,7 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
   const categoryLinks = WERVICE_CATEGORIES
     .map((category) => ({
       slug: category.slug,
-      label: category.label,
+      label: labelForCategory(category.slug, locale),
       vendorCount: countsByDbCategory.get(category.dbCategory) || 0,
     }))
     .filter((category) => category.vendorCount > 0)
@@ -102,8 +107,8 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
   });
 
   const pageTitle = selectedCategorySlug
-    ? `${cityName} ${labelForCategory(selectedCategorySlug)}`
-    : `${cityName} Wedding Vendors`;
+    ? `${cityLabel} ${labelForCategory(selectedCategorySlug, locale)}`
+    : `${cityLabel} Wedding Vendors`;
   const vendorsByCategorySlug = new Map<string, typeof vendors>();
   for (const category of WERVICE_CATEGORIES) {
     vendorsByCategorySlug.set(category.slug, []);
@@ -139,7 +144,7 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
       <section className="mx-auto max-w-7xl">
           <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{pageTitle}</h1>
           <p className="mt-3 text-lg text-[#4a5c74]">
-            Discover top wedding vendors in {cityName}, filtered by category and style.
+            Discover top wedding vendors in {cityLabel}, filtered by category and style.
           </p>
 
           <form className="mt-6">
@@ -196,7 +201,7 @@ export default async function CityPage({ params, searchParams }: CityPageProps) 
 
           {vendors.length === 0 ? (
             <div className="mt-8 rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">
-              No vendors found for this filter in {cityName}.
+              No vendors found for this filter in {cityLabel}.
             </div>
           ) : isForYouMode ? (
             <div className="mt-8 space-y-10">

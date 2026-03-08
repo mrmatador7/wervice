@@ -8,6 +8,7 @@ import { FiStar, FiMessageCircle, FiHeart } from 'react-icons/fi';
 import { Vendor } from '@/lib/types/vendor';
 import { labelForCategory } from '@/lib/categories';
 import { vendorUrl } from '@/lib/vendor-url';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface VendorsResultsGridProps {
   vendors: Vendor[];
@@ -27,8 +28,8 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
     <div className="bg-white rounded-2xl border border-[#CAC4B7] shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group">
       {/* Image */}
       <div className="relative h-[200px] md:h-[210px] lg:h-[220px] overflow-hidden">
-        {(() => {
-          // Get all available images (gallery + profile)
+            {(() => {
+              // Get all available images (gallery + profile)
           // Handle both gallery_urls and gallery_photos field names
           const allImages: string[] = [];
           const gallery = (vendor as any).gallery_urls || (vendor as any).gallery_photos || [];
@@ -67,8 +68,8 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
 
         {/* Category badge */}
         <div className="absolute top-3 left-3">
-          <span className="inline-flex items-center px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-slate-700 rounded-full">
-            {labelForCategory(vendor.category)}
+            <span className="inline-flex items-center px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-slate-700 rounded-full">
+            {labelForCategory(vendor.category, currentLocale)}
           </span>
         </div>
 
@@ -105,7 +106,7 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
                 {vendor.business_name}
               </h3>
             </Link>
-            <p className="text-[#787664] text-sm">{vendor.city}</p>
+            <p className="text-[#787664] text-sm">{localizeCityLabel(vendor.city, currentLocale)}</p>
           </div>
         </div>
 

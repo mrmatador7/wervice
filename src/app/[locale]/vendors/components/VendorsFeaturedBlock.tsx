@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation';
 import { FiStar, FiMapPin } from 'react-icons/fi';
 import { Vendor } from '@/lib/types/vendor';
 import { vendorUrl } from '@/lib/vendor-url';
+import { labelForCategory } from '@/lib/categories';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface VendorsFeaturedBlockProps {
   vendors: Vendor[];
@@ -20,8 +22,8 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
   if (!vendors.length) return null;
 
   const displayVendors = vendors.slice(0, 6); // Show max 6 featured vendors
-  const locationText = city ? city : 'Morocco';
-  const categoryText = category ? `${category} vendors` : 'wedding vendors';
+  const locationText = city ? localizeCityLabel(city, currentLocale) : (currentLocale === 'ar' ? 'المغرب' : currentLocale === 'fr' ? 'Maroc' : 'Morocco');
+  const categoryText = category ? `${labelForCategory(category, currentLocale)} vendors` : 'wedding vendors';
 
   return (
     <section className="py-12 bg-[#F3F1EE]">
@@ -79,7 +81,7 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
                   {/* Category badge */}
                   <div className="absolute top-3 left-3">
                     <span className="inline-flex items-center px-2 py-1 bg-white/90 backdrop-blur-sm text-xs font-medium text-[#11190C] rounded-full">
-                      {vendor.category}
+                      {labelForCategory(vendor.category, currentLocale)}
                     </span>
                   </div>
 
@@ -96,7 +98,7 @@ export default function VendorsFeaturedBlock({ vendors, city, category }: Vendor
                   <div className="flex items-center gap-4 text-sm text-[#787664] mb-3">
                     <div className="flex items-center gap-1">
                       <FiMapPin className="w-4 h-4" />
-                      <span>{vendor.city}</span>
+                      <span>{localizeCityLabel(vendor.city, currentLocale)}</span>
                     </div>
                     {vendor.rating && (
                       <div className="flex items-center gap-1">

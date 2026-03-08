@@ -21,6 +21,7 @@ import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { getAll } from '@/data/articles';
 import { getAllChapters, getTimelineSteps } from '@/data/planningChapters';
 import { getDashboardCopy, interpolateCopy } from '@/components/home/dashboard-i18n';
+import { localeAlternates, toAbsoluteUrl } from '@/lib/seo/site-url';
 
 interface VendorsPageProps {
   params: Promise<{ locale: string }>;
@@ -39,7 +40,8 @@ export async function generateMetadata({ params }: VendorsPageProps): Promise<Me
     title: `${copy.vendors.title} | Wervice`,
     description: copy.vendors.subtitle,
     alternates: {
-      canonical: `https://wervice.com/${locale}/vendors`,
+      canonical: toAbsoluteUrl(`/${locale}/vendors`),
+      languages: localeAlternates('/vendors'),
     },
   };
 }
@@ -74,14 +76,14 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
   const savedCards = vendors.slice(0, 12).map((vendor) => ({
     id: vendor.id,
     title: vendor.business_name,
-    subtitle: vendor.city,
+    subtitle: localizeCityLabel(vendor.city, locale),
     image:
       vendor.profile_photo_url ||
       vendor.gallery_urls?.[0] ||
       vendor.gallery_photos?.[0] ||
       '/images/sample/venues-1.jpg',
     href: `/${locale}/dashboard?view=overview&vendor=${encodeURIComponent(vendor.slug)}`,
-    location: vendor.city,
+    location: localizeCityLabel(vendor.city, locale),
     categoryLabel: labelForCategory(vendor.category, locale),
     logoUrl: vendor.profile_photo_url,
     galleryImages: vendor.gallery_urls || vendor.gallery_photos || [],

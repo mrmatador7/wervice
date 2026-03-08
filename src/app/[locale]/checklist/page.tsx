@@ -1,8 +1,15 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import ChecklistClient from './client';
+import { localeAlternates, toAbsoluteUrl } from '@/lib/seo/site-url';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const canonical = toAbsoluteUrl(`/${locale}/checklist`);
   return {
     title: 'Wedding Checklist – Interactive Planning Tool | Wervice',
     description: 'Complete wedding planning checklist organized by timeline. Track progress, save notes, and get vendor recommendations for your Moroccan wedding.',
@@ -11,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: 'Wedding Checklist – Interactive Planning Tool | Wervice',
       description: 'Complete wedding planning checklist organized by timeline. Track progress, save notes, and get vendor recommendations for your Moroccan wedding.',
       type: 'website',
-      url: '/checklist',
+      url: canonical,
     },
     twitter: {
       card: 'summary_large_image',
@@ -21,6 +28,10 @@ export async function generateMetadata(): Promise<Metadata> {
     robots: {
       index: true,
       follow: true,
+    },
+    alternates: {
+      canonical,
+      languages: localeAlternates('/checklist'),
     },
   };
 }

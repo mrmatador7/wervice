@@ -1,8 +1,9 @@
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { getArticle, getRelated, getAll } from '@/data/articles';
 import ArticleLayout from './ArticleLayout';
 import { absoluteUrl } from '@/lib/absolute-url';
+import { toAbsoluteUrl } from '@/lib/seo/site-url';
 
 // Generate metadata for SEO
 export async function generateMetadata({
@@ -11,7 +12,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const article = getArticle(slug, locale);
+  const legacySlugRedirects: Record<string, string> = {
+    'photography-videography-moroccan-weddings': 'best-wedding-photographers-marrakech-2026',
+    'wedding-trends-2025': 'best-wedding-photographers-marrakech-2026',
+  };
+  const redirectedSlug = legacySlugRedirects[slug] || slug;
+  const article = getArticle(redirectedSlug, locale);
 
   if (!article) {
     return {
@@ -40,7 +46,13 @@ export async function generateMetadata({
       images: article.cover ? [article.cover] : [],
     },
     alternates: {
-      canonical: `/blog/${article.slug}`,
+      canonical: toAbsoluteUrl(`/${locale}/blog/${article.slug}`),
+      languages: {
+        en: toAbsoluteUrl(`/en/blog/${article.slug}`),
+        fr: toAbsoluteUrl(`/fr/blog/${article.slug}`),
+        ar: toAbsoluteUrl(`/ar/blog/${article.slug}`),
+        'x-default': toAbsoluteUrl(`/en/blog/${article.slug}`),
+      },
     },
   };
 }
@@ -62,6 +74,14 @@ interface ArticlePageProps {
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { locale, slug } = await params;
+  const legacySlugRedirects: Record<string, string> = {
+    'photography-videography-moroccan-weddings': 'best-wedding-photographers-marrakech-2026',
+    'wedding-trends-2025': 'best-wedding-photographers-marrakech-2026',
+  };
+  const redirectedSlug = legacySlugRedirects[slug];
+  if (redirectedSlug) {
+    permanentRedirect(`/${locale}/blog/${redirectedSlug}`);
+  }
   const article = getArticle(slug, locale);
 
   if (!article) {

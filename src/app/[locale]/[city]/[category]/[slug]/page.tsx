@@ -7,21 +7,23 @@ import { vendorUrl, cityToSlug } from '@/lib/vendor-url';
 import VendorDetailPage from '@/components/vendor/VendorDetailPage';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { toAbsoluteUrl } from '@/lib/seo/site-url';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface VendorPageProps {
   params: Promise<{ locale: string; city: string; category: string; slug: string }>;
 }
 
 export async function generateMetadata({ params }: VendorPageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const vendor = await getVendorBySlug(slug);
 
   if (!vendor) {
     return { title: 'Vendor Not Found | Wervice' };
   }
 
-  const categoryLabel = labelForCategory(vendor.category);
-  const cityLabel = capitalizeCity(vendor.city);
+  const categoryLabel = labelForCategory(vendor.category, locale);
+  const cityLabel = localizeCityLabel(capitalizeCity(vendor.city), locale);
   const rawDesc = vendor.description?.trim() || '';
   const descClean = (rawDesc && rawDesc !== 'No description provided' && rawDesc !== 'No description') ? rawDesc : null;
   const metaDesc = descClean
@@ -35,7 +37,13 @@ export async function generateMetadata({ params }: VendorPageProps): Promise<Met
     description: metaDesc,
     keywords: [vendor.business_name, categoryLabel, cityLabel, 'wedding vendor', 'Morocco wedding'],
     alternates: {
-      canonical: `https://wervice.com${vendorUrl(vendor, 'en')}`,
+      canonical: toAbsoluteUrl(vendorUrl(vendor, locale)),
+      languages: {
+        en: toAbsoluteUrl(vendorUrl(vendor, 'en')),
+        fr: toAbsoluteUrl(vendorUrl(vendor, 'fr')),
+        ar: toAbsoluteUrl(vendorUrl(vendor, 'ar')),
+        'x-default': toAbsoluteUrl(vendorUrl(vendor, 'en')),
+      },
     },
     openGraph: {
       title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel}`,
@@ -72,12 +80,12 @@ export default async function VendorPage({ params }: VendorPageProps) {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     name: vendor.business_name,
-    description: vendor.description || `${labelForCategory(vendor.category)} services in ${capitalizeCity(vendor.city)}`,
-    '@id': `https://wervice.com${vendorUrl(vendor, 'en')}`,
-    url: `https://wervice.com${vendorUrl(vendor, 'en')}`,
+    description: vendor.description || `${labelForCategory(vendor.category, locale)} services in ${localizeCityLabel(capitalizeCity(vendor.city), locale)}`,
+    '@id': toAbsoluteUrl(vendorUrl(vendor, locale)),
+    url: toAbsoluteUrl(vendorUrl(vendor, locale)),
     address: {
       '@type': 'PostalAddress',
-      addressLocality: capitalizeCity(vendor.city),
+      addressLocality: localizeCityLabel(capitalizeCity(vendor.city), locale),
       addressCountry: 'MA',
     },
     ...(vendor.profile_photo_url && { image: vendor.profile_photo_url }),
@@ -102,9 +110,9 @@ export default async function VendorPage({ params }: VendorPageProps) {
 
       <VendorDetailPage
         name={vendor.business_name}
-        city={capitalizeCity(vendor.city)}
+        city={localizeCityLabel(capitalizeCity(vendor.city), locale)}
         category={vendor.category}
-        categoryLabel={labelForCategory(vendor.category)}
+        categoryLabel={labelForCategory(vendor.category, locale)}
         description={description}
         priceFrom={vendor.starting_price || 0}
         phone={vendor.phone || ''}

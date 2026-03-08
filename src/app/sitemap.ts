@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { WERVICE_CATEGORIES } from '@/lib/categories';
 import { cityToSlug } from '@/lib/vendor-url';
+import { getAll } from '@/data/articles';
+import { toAbsoluteUrl } from '@/lib/seo/site-url';
 
 type VendorRow = {
   slug: string | null;
@@ -10,26 +12,55 @@ type VendorRow = {
   created_at: string | null;
 };
 
-const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.wervice.com').replace(/\/+$/, '');
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const MIN_VENDOR_COUNT = Number(process.env.SEO_MIN_VENDOR_COUNT || process.env.NEXT_PUBLIC_SEO_MIN_VENDOR_COUNT || '5');
 const LOCALES = ['en', 'fr', 'ar'] as const;
 
-function toAbsolute(path: string): string {
-  return `${BASE_URL}${path}`;
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
+  const staticLocalizedPaths = [
+    '/',
+    '/home',
+    '/vendors',
+    '/blog',
+    '/checklist',
+    '/how-it-works',
+    '/about',
+    '/contact',
+    '/privacy',
+    '/terms',
+    '/cookies',
+    '/showcase',
+    '/guides/planning',
+  ];
 
-  // Locale home pages
   for (const locale of LOCALES) {
-    entries.push({
-      url: toAbsolute(`/${locale}`),
-      changeFrequency: 'daily',
-      priority: 0.9,
-    });
+    for (const path of staticLocalizedPaths) {
+      entries.push({
+        url: toAbsoluteUrl(`/${locale}${path}`),
+        changeFrequency: path === '/' || path === '/vendors' ? 'daily' : 'weekly',
+        priority: path === '/' ? 0.9 : 0.7,
+      });
+    }
+
+    const articles = getAll(locale);
+    for (const article of articles) {
+      entries.push({
+        url: toAbsoluteUrl(`/${locale}/blog/${article.slug}`),
+        lastModified: article.date ? new Date(article.date) : new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      });
+    }
+
+    for (const category of WERVICE_CATEGORIES) {
+      entries.push({
+        url: toAbsoluteUrl(`/${locale}/categories/${category.slug}`),
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      });
+    }
   }
 
   // If envs are unavailable (preview/build edge case), still return static locale pages.
@@ -76,7 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const city of indexableCities) {
       const citySlug = cityToSlug(city);
       entries.push({
-        url: toAbsolute(`/${locale}/${citySlug}`),
+        url: toAbsoluteUrl(`/${locale}/${citySlug}`),
         changeFrequency: 'daily',
         priority: 0.8,
       });
@@ -93,7 +124,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const key of indexableCityCategory) {
       const [city, categorySlug] = key.split('::');
       entries.push({
-        url: toAbsolute(`/${locale}/${cityToSlug(city)}/${categorySlug}`),
+        url: toAbsoluteUrl(`/${locale}/${cityToSlug(city)}/${categorySlug}`),
         changeFrequency: 'daily',
         priority: 0.8,
       });
@@ -114,8 +145,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const lastModified = row.created_at ? new Date(row.created_at) : new Date();
     for (const locale of LOCALES) {
-      entries.push({
-        url: toAbsolute(`/${locale}/${cityToSlug(city)}/${categorySlug}/${slug}`),
+        entries.push({
+        url: toAbsoluteUrl(`/${locale}/${cityToSlug(city)}/${categorySlug}/${slug}`),
         lastModified,
         changeFrequency: 'weekly',
         priority: 0.7,
@@ -130,4 +161,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return Array.from(deduped.values());
 }
-

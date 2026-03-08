@@ -13,10 +13,12 @@
 
 import Link from 'next/link';
 import { getCategorySeoContent } from '@/lib/seo/category-seo-content';
-import { WERVICE_CATEGORIES } from '@/lib/categories';
-import { cityToSlug } from '@/lib/vendor-url';
+import { labelForCategory, WERVICE_CATEGORIES } from '@/lib/categories';
+import { cityToSlug, slugToCityName } from '@/lib/vendor-url';
 import { capitalizeCity } from '@/lib/utils';
 import { AUTH_UI_ENABLED } from '@/lib/config';
+import { toAbsoluteUrl } from '@/lib/seo/site-url';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 // Top Moroccan cities shown in the "Find by City" grid
 const CITIES = [
@@ -29,21 +31,32 @@ interface CategorySeoBlocksProps {
   categorySlug: string;
   /** Raw city value from URL search params (e.g. "Marrakech") */
   city?: string | null;
+  /** City slug when page is rendered on /:locale/:city/:category */
+  citySlug?: string | null;
   locale?: string;
 }
 
 export default function CategorySeoBlocks({
   categorySlug,
   city,
+  citySlug,
   locale = 'en',
 }: CategorySeoBlocksProps) {
-  const seo = getCategorySeoContent(categorySlug);
+  const seo = getCategorySeoContent(categorySlug, locale);
   const cat = WERVICE_CATEGORIES.find((c) => c.slug === categorySlug);
-  const categoryLabel = cat?.label ?? categorySlug;
+  const categoryLabel = cat ? labelForCategory(cat.slug, locale) : categorySlug;
+  const copy = getSeoBlocksCopy(locale);
 
   // Resolved city name — either the filter selection or "Morocco"
-  const locationLabel = city && city !== 'all' ? capitalizeCity(city) : 'Morocco';
-  const citySlugForLinks = city && city !== 'all' ? cityToSlug(city) : null;
+  const locationLabel = city && city !== 'all'
+    ? localizeCityLabel(capitalizeCity(city), locale)
+    : copy.moroccoLabel;
+  const citySlugForLinks =
+    citySlug && slugToCityName(citySlug)
+      ? citySlug
+      : city && city !== 'all'
+        ? cityToSlug(city)
+        : null;
 
   // JSON-LD FAQPage schema — must match visible FAQ answers exactly
   const faqSchema =
@@ -62,6 +75,53 @@ export default function CategorySeoBlocks({
         }
       : null;
 
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${categoryLabel} in ${locationLabel}`,
+    description: `Find verified ${categoryLabel.toLowerCase()} vendors in ${locationLabel}.`,
+    inLanguage: locale,
+    url: citySlugForLinks
+      ? toAbsoluteUrl(`/${locale}/${citySlugForLinks}/${categorySlug}`)
+      : toAbsoluteUrl(`/${locale}/categories/${categorySlug}`),
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: toAbsoluteUrl(`/${locale}`),
+      },
+      ...(citySlugForLinks
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: locationLabel,
+              item: toAbsoluteUrl(`/${locale}/${citySlugForLinks}`),
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: categoryLabel,
+              item: toAbsoluteUrl(`/${locale}/${citySlugForLinks}/${categorySlug}`),
+            },
+          ]
+        : [
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: categoryLabel,
+              item: toAbsoluteUrl(`/${locale}/categories/${categorySlug}`),
+            },
+          ]),
+    ],
+  };
+
   // Related category entries
   const relatedCats = seo.relatedCategories
     .map((slug) => WERVICE_CATEGORIES.find((c) => c.slug === slug))
@@ -72,6 +132,14 @@ export default function CategorySeoBlocks({
   return (
     <>
       {/* JSON-LD FAQ schema — injected in-place (Next.js hoists to <head> via RSC) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {faqSchema && (
         <script
           type="application/ld+json"
@@ -85,7 +153,7 @@ export default function CategorySeoBlocks({
         {seo.intro && (
           <section id="about" aria-label="Category SEO intro">
             <h2 className="text-2xl font-bold text-gray-900 mb-5">
-              {categoryLabel} in {locationLabel}
+              {copy.inLabel(categoryLabel, locationLabel)}
             </h2>
             <div className="prose prose-neutral max-w-none text-gray-600 leading-relaxed">
               {seo.intro.split('\n\n').map((paragraph, i) => (
@@ -100,14 +168,19 @@ export default function CategorySeoBlocks({
         {/* ── 2. Find by City ── */}
         <section id="cities" aria-label={`Find ${categoryLabel} by city`}>
           <h3 className="text-xl font-bold text-gray-900 mb-5">
-            Find {categoryLabel} by City
+            {copy.findByCity(categoryLabel)}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {CITIES.map((cityName) => {
-              const isActive = city && city !== 'all' && capitalizeCity(city) === cityName;
+              const cityRouteSlug = cityToSlug(cityName);
+              const isActive = citySlugForLinks
+                ? citySlugForLinks === cityRouteSlug
+                : city && city !== 'all' && capitalizeCity(city) === cityName;
               const href = isActive
-                ? `/${locale}/categories/${categorySlug}`
-                : `/${locale}/categories/${categorySlug}?city=${encodeURIComponent(cityName)}`;
+                ? citySlugForLinks
+                  ? `/${locale}/${citySlugForLinks}/${categorySlug}`
+                  : `/${locale}/categories/${categorySlug}`
+                : `/${locale}/${cityRouteSlug}/${categorySlug}`;
               return (
                 <Link
                   key={cityName}
@@ -119,7 +192,7 @@ export default function CategorySeoBlocks({
                   }`}
                 >
                   <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-[#11190C]' : 'bg-gray-300 group-hover:bg-[#99cc00]'} transition-colors`} />
-                  {categoryLabel} in {cityName}
+                  {copy.inLabel(categoryLabel, localizeCityLabel(cityName, locale))}
                 </Link>
               );
             })}
@@ -130,7 +203,7 @@ export default function CategorySeoBlocks({
         {seo.faqs.length > 0 && (
           <section id="faq" aria-label="Frequently asked questions">
             <h3 className="text-xl font-bold text-gray-900 mb-6">
-              Frequently Asked Questions
+              {copy.faqTitle}
             </h3>
             <div className="space-y-0 divide-y divide-gray-100 border border-gray-200 rounded-2xl overflow-hidden">
               {seo.faqs.map((faq, i) => (
@@ -163,12 +236,12 @@ export default function CategorySeoBlocks({
         {relatedCats.length > 0 && (
           <section id="related" aria-label="Complete your wedding planning">
             <h3 className="text-xl font-bold text-gray-900 mb-5">
-              Complete Your Wedding Planning
+              {copy.completePlanningTitle}
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {relatedCats.map((relCat) => {
                 const href = citySlugForLinks
-                  ? `/${locale}/categories/${relCat.slug}?city=${encodeURIComponent(city!)}`
+                  ? `/${locale}/${citySlugForLinks}/${relCat.slug}`
                   : `/${locale}/categories/${relCat.slug}`;
                 return (
                   <Link
@@ -180,7 +253,7 @@ export default function CategorySeoBlocks({
                       {CATEGORY_EMOJI[relCat.slug] ?? '✨'}
                     </span>
                     <span className="font-semibold text-gray-800 text-sm group-hover:text-gray-900 transition-colors">
-                      {relCat.label}
+                      {labelForCategory(relCat.slug, locale)}
                     </span>
                   </Link>
                 );
@@ -193,19 +266,19 @@ export default function CategorySeoBlocks({
         {AUTH_UI_ENABLED && (
           <section id="join" className="bg-[#11190C] rounded-3xl p-8 sm:p-10 text-center">
             <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-[#D9FF0A] mb-3">
-              Are you a {categoryLabel} vendor?
+              {copy.vendorCtaQuestion(categoryLabel)}
             </p>
             <h3 className="text-2xl font-bold text-white mb-3">
-              List Your Business on Wervice
+              {copy.vendorCtaTitle}
             </h3>
             <p className="text-sm text-white/70 mb-6 max-w-md mx-auto">
-              Join hundreds of verified wedding professionals. Get discovered by couples planning their wedding in Morocco.
+              {copy.vendorCtaBody}
             </p>
             <Link
               href={`/${locale}/become-vendor`}
               className="inline-flex items-center gap-2 px-7 py-3.5 bg-[#D9FF0A] hover:bg-[#c8f000] text-[#11190C] font-bold rounded-full text-sm transition-colors"
             >
-              Get Listed Free →
+              {copy.vendorCtaButton}
             </Link>
           </section>
         )}
@@ -228,3 +301,44 @@ const CATEGORY_EMOJI: Record<string, string> = {
   'event-planner': '📋',
   cakes: '🎂',
 };
+
+function getSeoBlocksCopy(locale: string) {
+  const lc = (locale || 'en').toLowerCase();
+  if (lc === 'fr') {
+    return {
+      moroccoLabel: 'Maroc',
+      findByCity: (category: string) => `Trouver ${category} par ville`,
+      inLabel: (category: string, city: string) => `${category} à ${city}`,
+      faqTitle: 'Questions fréquentes',
+      completePlanningTitle: 'Complétez votre organisation de mariage',
+      vendorCtaQuestion: (category: string) => `Vous êtes un prestataire ${category} ?`,
+      vendorCtaTitle: 'Inscrivez votre activité sur Wervice',
+      vendorCtaBody: 'Rejoignez des centaines de professionnels vérifiés et gagnez en visibilité auprès des couples au Maroc.',
+      vendorCtaButton: 'Référencement gratuit →',
+    };
+  }
+  if (lc === 'ar') {
+    return {
+      moroccoLabel: 'المغرب',
+      findByCity: (category: string) => `ابحث عن ${category} حسب المدينة`,
+      inLabel: (category: string, city: string) => `${category} في ${city}`,
+      faqTitle: 'الأسئلة الشائعة',
+      completePlanningTitle: 'أكمل تخطيط زفافك',
+      vendorCtaQuestion: (category: string) => `هل أنت مزوّد ${category}؟`,
+      vendorCtaTitle: 'أضف نشاطك على Wervice',
+      vendorCtaBody: 'انضم إلى مزوّدين موثوقين واحصل على ظهور أكبر لدى الأزواج الذين يخططون لزفافهم في المغرب.',
+      vendorCtaButton: 'إدراج مجاني →',
+    };
+  }
+  return {
+    moroccoLabel: 'Morocco',
+    findByCity: (category: string) => `Find ${category} by City`,
+    inLabel: (category: string, city: string) => `${category} in ${city}`,
+    faqTitle: 'Frequently Asked Questions',
+    completePlanningTitle: 'Complete Your Wedding Planning',
+    vendorCtaQuestion: (category: string) => `Are you a ${category} vendor?`,
+    vendorCtaTitle: 'List Your Business on Wervice',
+    vendorCtaBody: 'Join hundreds of verified wedding professionals. Get discovered by couples planning their wedding in Morocco.',
+    vendorCtaButton: 'Get Listed Free →',
+  };
+}

@@ -1,5 +1,7 @@
 import ExplorerHome from '@/components/home/ExplorerHome';
+import { labelForCategory } from '@/lib/categories';
 import { fetchVendors } from '@/lib/supabase/vendors';
+import { localizeCityLabel } from '@/lib/types/vendor';
 import { vendorUrl } from '@/lib/vendor-url';
 
 // Force dynamic rendering since we use cookies for Supabase client
@@ -20,7 +22,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     return {
       id: vendor.id,
       title: vendor.business_name,
-      subtitle: `${vendor.city} • ${vendor.category.replace('-', ' ')}`,
+      subtitle: `${localizeCityLabel(vendor.city, locale)} • ${labelForCategory(vendor.category, locale)}`,
       image,
       href: vendorUrl(vendor, locale),
     };

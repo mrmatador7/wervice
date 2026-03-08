@@ -1,3 +1,5 @@
+import { labelForCategory } from '@/lib/categories';
+
 /**
  * SEO content for each category page.
  * Each entry includes:
@@ -405,12 +407,87 @@ Discover talented wedding cake artists across Morocco on Wervice. Browse their g
 };
 
 /** Returns content for a given category slug, falling back to empty defaults. */
-export function getCategorySeoContent(categorySlug: string): CategorySeoContent {
-  return (
-    CATEGORY_SEO_CONTENT[categorySlug] ?? {
-      intro: '',
-      faqs: [],
-      relatedCategories: [],
-    }
-  );
+type UiLocale = 'en' | 'fr' | 'ar';
+
+function getLocalizedTemplateContent(categorySlug: string, locale: UiLocale): CategorySeoContent | null {
+  if (locale === 'en') return null;
+  const english = CATEGORY_SEO_CONTENT[categorySlug];
+  if (!english) return null;
+
+  const categoryLabel = labelForCategory(categorySlug, locale);
+
+  if (locale === 'fr') {
+    return {
+      intro: `Trouver le bon prestataire ${categoryLabel.toLowerCase()} est une étape essentielle pour organiser un mariage réussi au Maroc. Chaque couple a un style, un budget et des priorités différents, c'est pourquoi il est important de comparer les options disponibles avant de réserver.
+
+Sur Wervice, vous pouvez découvrir des prestataires vérifiés, consulter leurs photos, comparer leurs services et contacter directement les meilleurs profils. Que vous prépariez un mariage intime ou une grande célébration, vous trouverez des professionnels adaptés à votre vision.
+
+Prenez le temps d'analyser les portfolios, les disponibilités et les fourchettes de prix. Une bonne sélection en amont vous aidera à gagner du temps, à éviter les imprévus et à construire une expérience fluide pour vos invités.`,
+      faqs: [
+        {
+          question: `Quand faut-il réserver un prestataire ${categoryLabel.toLowerCase()} au Maroc ?`,
+          answer: `Il est recommandé de réserver votre prestataire ${categoryLabel.toLowerCase()} entre 4 et 9 mois avant la date du mariage, et plus tôt en haute saison.`,
+        },
+        {
+          question: `Comment comparer les prestataires ${categoryLabel.toLowerCase()} ?`,
+          answer: `Comparez leur portfolio, leur expérience, la qualité des prestations, les avis clients, les délais et les tarifs avant de prendre votre décision.`,
+        },
+        {
+          question: `Quel budget prévoir pour ${categoryLabel.toLowerCase()} ?`,
+          answer: `Le budget dépend de la ville, du niveau de service et de la complexité de votre événement. Demandez toujours un devis détaillé.`,
+        },
+        {
+          question: `Peut-on personnaliser les prestations ?`,
+          answer: `Oui. La majorité des prestataires proposent des offres personnalisables selon vos besoins, votre thème et votre planning.`,
+        },
+        {
+          question: `Peut-on organiser à distance ?`,
+          answer: `Oui. Beaucoup de prestataires travaillent via WhatsApp, appel vidéo et email, ce qui facilite l'organisation à distance.`,
+        },
+      ],
+      relatedCategories: english.relatedCategories,
+    };
+  }
+
+  return {
+    intro: `اختيار مزوّد ${categoryLabel} المناسب خطوة أساسية لتنظيم زفاف ناجح في المغرب. لكل زوجين أسلوب وميزانية وأولويات مختلفة، لذلك من المهم مقارنة الخيارات المتاحة قبل الحجز.
+
+على Wervice يمكنك اكتشاف مزوّدين موثوقين، مشاهدة الأعمال السابقة، مقارنة الخدمات، والتواصل مباشرة مع أفضل الخيارات. سواء كنت تخطط لحفل صغير أو احتفال كبير، ستجد مزوّدين مناسبين لرؤيتك.
+
+من الأفضل مراجعة المعرض، التوفر، ومستوى الأسعار قبل اتخاذ القرار النهائي. الاختيار الجيد مبكرًا يساعدك على توفير الوقت وتجنب المفاجآت وتنظيم تجربة مريحة لضيوفك.`,
+    faqs: [
+      {
+        question: `متى يجب حجز مزوّد ${categoryLabel} في المغرب؟`,
+        answer: `يُنصح بالحجز قبل موعد الزفاف من 4 إلى 9 أشهر، ومع موسم الذروة من الأفضل الحجز أبكر.`,
+      },
+      {
+        question: `كيف أقارن بين مزوّدي ${categoryLabel}؟`,
+        answer: `قارن الأعمال السابقة، الخبرة، جودة الخدمة، آراء العملاء، المواعيد المتاحة، والأسعار قبل اختيارك النهائي.`,
+      },
+      {
+        question: `ما الميزانية المناسبة لخدمات ${categoryLabel}؟`,
+        answer: `الميزانية تختلف حسب المدينة ومستوى الخدمة وتعقيد الحفل. اطلب دائمًا عرض سعر مفصل قبل التأكيد.`,
+      },
+      {
+        question: `هل يمكن تخصيص الخدمة حسب احتياجاتي؟`,
+        answer: `نعم، معظم المزوّدين يقدمون باقات قابلة للتخصيص حسب الميزانية، النمط، وعدد الضيوف.`,
+      },
+      {
+        question: `هل يمكن التخطيط عن بُعد؟`,
+        answer: `نعم، عدد كبير من المزوّدين يعملون عبر واتساب والمكالمات المرئية والبريد الإلكتروني لتسهيل التخطيط عن بُعد.`,
+      },
+    ],
+    relatedCategories: english.relatedCategories,
+  };
+}
+
+export function getCategorySeoContent(categorySlug: string, locale: string = 'en'): CategorySeoContent {
+  const normalizedLocale = (locale || 'en').toLowerCase() as UiLocale;
+  const localized = getLocalizedTemplateContent(categorySlug, normalizedLocale);
+  if (localized) return localized;
+  return CATEGORY_SEO_CONTENT[categorySlug] ?? {
+    intro: '',
+    faqs: [],
+    relatedCategories: [],
+  };
 }

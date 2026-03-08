@@ -1,14 +1,17 @@
 import type { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/seo/site-url';
 
-const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.wervice.com').replace(/\/+$/, '');
+const BASE_URL = getSiteUrl();
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow: '/',
-    },
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/admin/', '/api/'],
+      },
+    ],
     sitemap: `${BASE_URL}/sitemap.xml`,
   };
 }
-

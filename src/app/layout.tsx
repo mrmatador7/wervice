@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import ClientHtml from "@/components/sections/ClientHtml";
+import { getSiteUrl } from '@/lib/seo/site-url';
 import "./globals.css";
 
 const rubik = Rubik({
@@ -48,6 +49,7 @@ const openSans = Open_Sans({
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: "Wervice - Moroccan Wedding Planning",
   description: "Authentic Moroccan weddings made easy",
   manifest: "/manifest.json",

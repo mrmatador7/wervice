@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { FiMapPin } from 'react-icons/fi';
-import { formatCategoryName } from '@/lib/format';
+import { labelForCategory } from '@/lib/categories';
+import { localizeCityLabel } from '@/lib/types/vendor';
 import { vendorUrl } from '@/lib/vendor-url';
 
 interface Vendor {
@@ -27,9 +28,6 @@ interface NewVendorCardProps {
   vendor: Vendor;
 }
 
-const capitalizeCity = (city: string) =>
-  city.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-
 export default function NewVendorCard({ vendor }: NewVendorCardProps) {
   const { locale } = useParams<{ locale: string }>();
   const href = vendorUrl({ city: vendor.city, category: vendor.category, slug: vendor.slug }, locale || 'en');
@@ -50,7 +48,7 @@ export default function NewVendorCard({ vendor }: NewVendorCardProps) {
     return () => clearInterval(timer);
   }, [total]);
 
-  const categoryName = formatCategoryName(vendor.category);
+  const categoryName = labelForCategory(vendor.category, locale || 'en');
 
   return (
     <Link href={href} className="group block w-full">
@@ -111,7 +109,7 @@ export default function NewVendorCard({ vendor }: NewVendorCardProps) {
           </h3>
           <div className="mt-1.5 flex items-center gap-1.5">
             <FiMapPin className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
-            <span className="text-sm text-neutral-500">{capitalizeCity(vendor.city)}</span>
+            <span className="text-sm text-neutral-500">{localizeCityLabel(vendor.city, locale || 'en')}</span>
           </div>
         </div>
 

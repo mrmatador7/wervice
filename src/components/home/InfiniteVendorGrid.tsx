@@ -8,6 +8,7 @@ import { labelForCategory } from '@/lib/categories';
 import { vendorUrl } from '@/lib/vendor-url';
 import VendorBrowseCard from '@/components/home/VendorBrowseCard';
 import { getDashboardCopy, interpolateCopy } from '@/components/home/dashboard-i18n';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 type VendorListItem = {
   id: string;
@@ -114,7 +115,7 @@ export default function InfiniteVendorGrid({
     return interpolateCopy(copy.vendors.defaultOverviewTemplate, {
       name: selectedVendor.business_name,
       category: labelForCategory(selectedVendor.category, locale).toLowerCase(),
-      city: selectedVendor.city,
+      city: localizeCityLabel(selectedVendor.city, locale),
     });
   }, [selectedVendor, locale, copy.vendors.defaultOverviewTemplate]);
 
@@ -215,7 +216,7 @@ export default function InfiniteVendorGrid({
             vendorId={vendor.id}
             href={vendorUrl(vendor, locale)}
             title={vendor.business_name}
-            location={vendor.city}
+            location={localizeCityLabel(vendor.city, locale)}
             categoryLabel={labelForCategory(vendor.category, locale)}
             logoUrl={vendor.profile_photo_url}
             galleryImages={vendor.gallery_urls || vendor.gallery_photos || []}
@@ -252,7 +253,7 @@ export default function InfiniteVendorGrid({
                 <h3 className="text-4xl font-black tracking-tight text-[#11190C]">{selectedVendor.business_name}</h3>
                 <p className="mt-1 flex items-center gap-1.5 text-base text-[#5f6f84]">
                   <MapPin className="h-4 w-4" />
-                  {selectedVendor.city}
+                  {localizeCityLabel(selectedVendor.city, locale)}
                 </p>
               </div>
               <button
@@ -393,7 +394,7 @@ export default function InfiniteVendorGrid({
                       </div>
                       <div className="min-w-0">
                         <p className="line-clamp-1 font-semibold text-[#11190C]">{vendor.business_name}</p>
-                        <p className="line-clamp-1 text-xs text-[#5f6f84]">{vendor.city}</p>
+                        <p className="line-clamp-1 text-xs text-[#5f6f84]">{localizeCityLabel(vendor.city, locale)}</p>
                       </div>
                     </button>
                   ))}

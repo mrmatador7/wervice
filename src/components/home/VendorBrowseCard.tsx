@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRight, Heart, MapPin } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
+import { localizeCityLabel } from '@/lib/types/vendor';
 
 interface VendorBrowseCardProps {
   vendorId?: string;
@@ -29,6 +30,8 @@ export default function VendorBrowseCard({
   onCardClick,
 }: VendorBrowseCardProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'en';
   const { user } = useUser();
   const images = useMemo(() => {
     const unique = new Set<string>();
@@ -107,7 +110,7 @@ export default function VendorBrowseCard({
             title,
             image: currentImage,
             href,
-            location,
+            location: localizedLocation,
             categoryLabel,
             logoUrl: safeLogo,
             galleryImages: displayImages,
@@ -179,9 +182,10 @@ export default function VendorBrowseCard({
         </div>
         <div className="mt-1.5 flex items-center gap-1.5 text-sm text-[#5f6f84]">
           <MapPin className="h-4 w-4" />
-          <span>{location}</span>
+          <span>{localizedLocation}</span>
         </div>
       </div>
     </Link>
   );
 }
+  const localizedLocation = localizeCityLabel(location, locale);
