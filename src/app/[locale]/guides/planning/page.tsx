@@ -6,5 +6,5 @@ export default async function PlanningGuidePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard?view=planning-tools`);
+  redirect(`/${locale}/planning-tools`);
 }

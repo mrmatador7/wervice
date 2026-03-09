@@ -31,7 +31,7 @@ export default function AccountToolViews({ locale, view }: AccountToolViewsProps
           <h2 className="text-2xl font-bold text-[#11190C]">{copy.tools.signinTitle}</h2>
           <p className="mt-2 text-[#5f6f84]">{copy.tools.signinSubtitle}</p>
           <Link
-            href={`/${locale}/dashboard?view=auth&mode=signin`}
+            href={`/${locale}/auth-access?mode=signin`}
             className="mt-5 inline-flex rounded-xl bg-[#11190C] px-4 py-2.5 text-sm font-bold text-[#D9FF0A]"
           >
             {copy.tools.signIn}

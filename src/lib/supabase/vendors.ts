@@ -24,6 +24,7 @@ export type Vendor = {
   profile_photo_url: string | null;
   gallery_photos: string[] | null;
   gallery_urls?: string[] | null; // Also support gallery_urls for compatibility
+  video_urls?: string[] | null;
   description: string | null;
   published: boolean;
   created_at: string;
@@ -63,6 +64,10 @@ type MediaFileRow = {
 
 function normalizeName(value: string | null | undefined): string {
   return (value || '').trim().toLowerCase();
+}
+
+function isVideoUrl(url: string): boolean {
+  return /\.(mp4|mov|webm|avi|m4v)(\?|$)/i.test(url);
 }
 
 function buildMediaUrl(fileKey: string): string {
@@ -203,7 +208,7 @@ export async function fetchVendors(filters: VendorFilters = {}) {
     const vendorNames = vendorsWithSlugs
       .map((v) => v.business_name)
       .filter(Boolean);
-    const mediaByName = new Map<string, string[]>();
+    const mediaByName = new Map<string, { images: string[]; videos: string[] }>();
     if (vendorNames.length > 0) {
       const { data: mediaRows } = await supabase
         .from('media_files')
@@ -213,22 +218,55 @@ export async function fetchVendors(filters: VendorFilters = {}) {
       if (Array.isArray(mediaRows) && mediaRows.length > 0) {
         for (const row of mediaRows as MediaFileRow[]) {
           const key = normalizeName(row.vendor_name);
-          if (!mediaByName.has(key)) mediaByName.set(key, []);
-          if (row.mime_type?.startsWith('image/')) {
-            mediaByName.get(key)!.push(buildMediaUrl(row.file_key));
+          if (!mediaByName.has(key)) mediaByName.set(key, { images: [], videos: [] });
+          const mediaUrl = buildMediaUrl(row.file_key);
+          if (row.mime_type?.startsWith('video/')) {
+            mediaByName.get(key)!.videos.push(mediaUrl);
+          } else if (row.mime_type?.startsWith('image/')) {
+            mediaByName.get(key)!.images.push(mediaUrl);
           }
         }
       }
     }
 
     const vendorsWithMedia = vendorsWithSlugs.map((vendor) => {
-      const media = mediaByName.get(normalizeName(vendor.business_name)) || [];
-      if (media.length === 0) return vendor;
+      const media = mediaByName.get(normalizeName(vendor.business_name)) || { images: [], videos: [] };
+      if (media.images.length === 0 && media.videos.length === 0) return vendor;
+
+      const dbGallery = Array.isArray(vendor.gallery_urls) ? vendor.gallery_urls : [];
+      const dbGalleryImages = dbGallery.filter((url) => !isVideoUrl(url));
+      const dbGalleryVideos = dbGallery.filter((url) => isVideoUrl(url));
+      const seen = new Set(dbGalleryImages);
+      const prioritizedVideos: string[] = [];
+      const seenVideos = new Set<string>();
+
+      // Keep DB gallery as source of truth and augment with media_files image URLs.
+      for (const mediaUrl of media.images) {
+        if (mediaUrl !== vendor.profile_photo_url && !seen.has(mediaUrl)) {
+          dbGalleryImages.push(mediaUrl);
+          seen.add(mediaUrl);
+        }
+      }
+      // Prefer MIME-verified media_files videos first, then DB gallery video fallbacks.
+      for (const mediaUrl of media.videos) {
+        if (!seenVideos.has(mediaUrl)) {
+          prioritizedVideos.push(mediaUrl);
+          seenVideos.add(mediaUrl);
+        }
+      }
+      for (const dbVideoUrl of dbGalleryVideos) {
+        if (!seenVideos.has(dbVideoUrl)) {
+          prioritizedVideos.push(dbVideoUrl);
+          seenVideos.add(dbVideoUrl);
+        }
+      }
+
       return {
         ...vendor,
-        profile_photo_url: media[0] || vendor.profile_photo_url || null,
-        gallery_photos: media.slice(1),
-        gallery_urls: media.slice(1),
+        profile_photo_url: vendor.profile_photo_url || media.images[0] || null,
+        gallery_photos: dbGalleryImages,
+        gallery_urls: dbGalleryImages,
+        video_urls: prioritizedVideos,
       };
     });
 

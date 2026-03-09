@@ -37,7 +37,7 @@ export default function VendorSuccessPage() {
           href="/vendor/dashboard"
           className="inline-block bg-black text-white font-ui-primary text-lg px-8 py-4 rounded-xl hover:bg-gray-800 transition-colors duration-200 shadow-lg"
         >
-          Go to Dashboard
+          Go to Vendor Portal
         </Link>
 
         {/* Additional Info */}

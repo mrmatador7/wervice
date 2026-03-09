@@ -14,8 +14,10 @@ import {
   Globe,
   Grid2X2,
   Heart,
+  PlayCircle,
   LogOut,
   MapPin,
+  Menu,
   Search,
   Settings,
   Store,
@@ -59,9 +61,9 @@ type VendorSearchItem = {
 };
 
 function toShellVendorHref(locale: string, href: string) {
-  if (!href) return `/${locale}/dashboard?view=overview`;
+  if (!href) return `/${locale}/vendors`;
 
-  if (href.startsWith(`/${locale}/dashboard?`)) {
+  if (href.startsWith(`/${locale}/vendors?`)) {
     try {
       const url = new URL(href, 'https://wervice.local');
       const slug = url.searchParams.get('vendor');
@@ -72,31 +74,23 @@ function toShellVendorHref(locale: string, href: string) {
     return href;
   }
 
-  const clean = href.split('?')[0].split('#')[0];
-  const parts = clean.split('/').filter(Boolean);
-
-  // Old vendor URL pattern: /{locale}/{city}/{category}/{slug}
-  if (parts.length >= 4 && parts[0] === locale) {
-    return href;
-  }
-
   return href;
 }
 
 const dashboardNav = [
   { id: 'overview', labelKey: 'home', icon: Grid2X2, href: '' },
-  { id: 'favorites', labelKey: 'favorites', icon: Heart, href: '/dashboard?view=favorites' },
-  { id: 'wedding-date', labelKey: 'weddingDate', icon: Calendar, href: '/dashboard?view=wedding-date' },
-  { id: 'checklist', labelKey: 'checklist', icon: CheckSquare, href: '/dashboard?view=checklist' },
-  { id: 'guest-list', labelKey: 'guestList', icon: Users, href: '/dashboard?view=guest-list' },
-  { id: 'budget-planner', labelKey: 'budgetPlanner', icon: CreditCard, href: '/dashboard?view=budget-planner' },
-  { id: 'planning-tools', labelKey: 'planningTools', icon: BookOpen, href: '/dashboard?view=planning-tools' },
+  { id: 'favorites', labelKey: 'favorites', icon: Heart, href: '/favorites' },
+  { id: 'wedding-date', labelKey: 'weddingDate', icon: Calendar, href: '/wedding-date' },
+  { id: 'checklist', labelKey: 'checklist', icon: CheckSquare, href: '/wedding-checklist' },
+  { id: 'guest-list', labelKey: 'guestList', icon: Users, href: '/guest-list' },
+  { id: 'budget-planner', labelKey: 'budgetPlanner', icon: CreditCard, href: '/budget-planner' },
+  { id: 'planning-tools', labelKey: 'planningTools', icon: BookOpen, href: '/planning-tools' },
 ];
 
 const marketplaceNav = [
-  { id: 'all-vendors', labelKey: 'allVendors', icon: Store, href: '/dashboard?view=overview' },
-  { id: 'venues', labelKey: 'venues', icon: MapPin, href: '/dashboard?view=overview&category=venues' },
-  { id: 'inspiration', labelKey: 'inspiration', icon: Compass, href: '/dashboard?view=inspiration' },
+  { id: 'all-vendors', labelKey: 'allVendors', icon: Store, href: '/vendors' },
+  { id: 'videos', labelKey: 'videos', icon: PlayCircle, href: '/videos' },
+  { id: 'inspiration', labelKey: 'inspiration', icon: Compass, href: '/inspiration' },
 ];
 
 export default function DashboardShell({ locale, children, savedCards = [], activeItem }: DashboardShellProps) {
@@ -105,23 +99,25 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, profile, signOut } = useUser();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<VendorSearchItem[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const searchWrapRef = useRef<HTMLDivElement | null>(null);
   const [isLangOpen, setIsLangOpen] = useState(false);
-  const langWrapRef = useRef<HTMLDivElement | null>(null);
   const [sidebarFavorites, setSidebarFavorites] = useState<ShellCard[]>(savedCards);
   const [checklistCompletedMap, setChecklistCompletedMap] = useState<Record<string, boolean>>({});
   const [isRouteSwitching, setIsRouteSwitching] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [desktopCitiesOverflow, setDesktopCitiesOverflow] = useState(false);
+  const [desktopCitiesCanScrollLeft, setDesktopCitiesCanScrollLeft] = useState(false);
+  const [desktopCitiesCanScrollRight, setDesktopCitiesCanScrollRight] = useState(false);
+
+  const langWrapRef = useRef<HTMLDivElement | null>(null);
+  const desktopCitiesNavRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
-      if (!searchWrapRef.current) return;
-      if (!searchWrapRef.current.contains(event.target as Node)) {
-        setIsSearchFocused(false);
-      }
       if (langWrapRef.current && !langWrapRef.current.contains(event.target as Node)) {
         setIsLangOpen(false);
       }
@@ -132,6 +128,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
 
   useEffect(() => {
     setIsRouteSwitching(false);
+    setMobileNavOpen(false);
   }, [pathname, searchParams]);
 
   useEffect(() => {
@@ -143,6 +140,34 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     }
     window.sessionStorage.setItem('wervice_current_path', current);
   }, [pathname, searchParams]);
+
+  useEffect(() => {
+    const updateDesktopCitiesOverflow = () => {
+      const nav = desktopCitiesNavRef.current;
+      if (!nav) return;
+      const overflow = nav.scrollWidth > nav.clientWidth + 2;
+      setDesktopCitiesOverflow(overflow);
+      setDesktopCitiesCanScrollLeft(nav.scrollLeft > 2);
+      setDesktopCitiesCanScrollRight(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
+    };
+
+    updateDesktopCitiesOverflow();
+    const nav = desktopCitiesNavRef.current;
+    if (!nav) return;
+
+    const onScroll = () => updateDesktopCitiesOverflow();
+    nav.addEventListener('scroll', onScroll, { passive: true });
+
+    const resizeObserver = new ResizeObserver(() => updateDesktopCitiesOverflow());
+    resizeObserver.observe(nav);
+    window.addEventListener('resize', updateDesktopCitiesOverflow);
+
+    return () => {
+      nav.removeEventListener('scroll', onScroll);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateDesktopCitiesOverflow);
+    };
+  }, []);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -169,7 +194,6 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
         const vendors: VendorSearchItem[] = Array.isArray(data?.vendors) ? data.vendors : [];
         const normalized = query.toLowerCase();
 
-        // Prioritize exact prefix matches (e.g. "Neg..." -> "Negafa ...")
         const sorted = [...vendors].sort((a, b) => {
           const aName = a.business_name.toLowerCase();
           const bName = b.business_name.toLowerCase();
@@ -216,9 +240,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     };
 
     load();
-    const onUpdate = () => {
-      window.setTimeout(load, 0);
-    };
+    const onUpdate = () => window.setTimeout(load, 0);
     window.addEventListener('wervice:favorites-updated', onUpdate);
     window.addEventListener('storage', onUpdate);
     return () => {
@@ -245,9 +267,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     };
 
     load();
-    const onUpdate = () => {
-      window.setTimeout(load, 0);
-    };
+    const onUpdate = () => window.setTimeout(load, 0);
     window.addEventListener('wervice:checklist-updated', onUpdate);
     window.addEventListener('storage', onUpdate);
     return () => {
@@ -256,9 +276,27 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     };
   }, [user?.id]);
 
-  const showSearchDropdown = useMemo(() => {
-    return isSearchFocused && searchQuery.trim().length >= 3;
-  }, [isSearchFocused, searchQuery]);
+  const showSearchDropdown = useMemo(() => isSearchFocused && searchQuery.trim().length >= 3, [isSearchFocused, searchQuery]);
+  const sectionBasePath = useMemo(() => {
+    const known = [
+      'vendors',
+      'videos',
+      'inspiration',
+      'favorites',
+      'wedding-date',
+      'wedding-checklist',
+      'guest-list',
+      'budget-planner',
+      'planning-tools',
+      'settings',
+      'auth-access',
+    ];
+    const parts = pathname.split('/').filter(Boolean);
+    if (parts.length >= 2 && parts[0] === locale && known.includes(parts[1])) {
+      return `/${locale}/${parts[1]}`;
+    }
+    return `/${locale}/vendors`;
+  }, [locale, pathname]);
 
   const checklistCards = useMemo(() => {
     const allItems = CHECKLIST.flatMap((section) =>
@@ -317,6 +355,19 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     router.push(href);
   }
 
+  function buildSectionUrl(updates: Record<string, string | undefined>) {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value && value.trim()) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
+    const qs = params.toString();
+    return `${sectionBasePath}${qs ? `?${qs}` : ''}`;
+  }
+
   function switchLocale(nextLocale: string) {
     if (!nextLocale || nextLocale === locale) return;
     const segments = pathname.split('/').filter(Boolean);
@@ -327,51 +378,258 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     router.push(`${nextPath}${qs ? `?${qs}` : ''}`);
   }
 
+  function scrollDesktopCities(direction: 'left' | 'right') {
+    const nav = desktopCitiesNavRef.current;
+    if (!nav) return;
+    nav.scrollBy({
+      left: direction === 'right' ? 260 : -260,
+      behavior: 'smooth',
+    });
+  }
+
   const displayName =
     [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim() ||
     profile?.full_name ||
     user?.email?.split('@')[0] ||
     'Guest';
-  const initials = displayName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() || '')
-    .join('') || 'G';
+  const initials =
+    displayName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() || '')
+      .join('') || 'G';
+
+  const mobilePrimaryNav = [
+    dashboardNav.find((item) => item.id === 'overview'),
+    dashboardNav.find((item) => item.id === 'favorites'),
+    marketplaceNav.find((item) => item.id === 'all-vendors'),
+    marketplaceNav.find((item) => item.id === 'inspiration'),
+  ].filter((item): item is (typeof dashboardNav)[number] => Boolean(item));
 
   return (
     <div className="h-screen w-full overflow-hidden bg-[#eceff3] font-[var(--font-inter)]">
-      <div className="h-full w-full overflow-hidden border border-[#d8dce3] bg-[#f6f7f9]">
-        <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-[#dde2ea] bg-[#f8f9fb]/95 px-4 py-3 backdrop-blur sm:px-6">
-          <Link href={`/${locale}`} className="flex items-center gap-3">
-            <Image
-              src="/wervice-logo-black.png"
-              alt="Wervice"
-              width={210}
-              height={64}
-              priority
-              className="h-12 w-auto"
-            />
-          </Link>
+      <div className="flex h-full w-full flex-col overflow-hidden border border-[#d8dce3] bg-[#f6f7f9]">
+        <header className="sticky top-0 z-30 border-b border-[#dde2ea] bg-[#f8f9fb]/95 px-4 py-3 backdrop-blur sm:px-6">
+          <div className="hidden items-center gap-4 lg:flex">
+            <Link href={`/${locale}`} className="flex items-center gap-3">
+              <Image src="/wervice-logo-black.png" alt="Wervice" width={210} height={64} priority className="h-12 w-auto" />
+            </Link>
 
-          <nav className="ml-2 hidden flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex xl:flex-wrap xl:overflow-visible xl:whitespace-normal">
-            {MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => (
-              <Link
-                key={city.value}
-                href={`/${locale}/dashboard?view=overview&city=${encodeURIComponent(city.value)}`}
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigateSmooth(`/${locale}/dashboard?view=overview&city=${encodeURIComponent(city.value)}`);
-                }}
-                className="rounded-full border border-[#d7dde7] bg-white px-3 py-1.5 text-sm font-medium text-[#4d5f78] transition hover:bg-[#f1f4f9]"
+            <div className="ml-2 flex min-w-0 flex-1 items-center gap-2">
+              {desktopCitiesOverflow && (
+                <button
+                  type="button"
+                  onClick={() => scrollDesktopCities('left')}
+                  disabled={!desktopCitiesCanScrollLeft}
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#d8dee8] bg-white text-[#4d5f78] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Scroll cities left"
+                >
+                  <span className="text-base leading-none">‹</span>
+                </button>
+              )}
+
+              <nav
+                ref={desktopCitiesNavRef}
+                className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
-                {localizeCityLabel(city.label, locale)}
-              </Link>
-            ))}
-          </nav>
+                {MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => (
+                  <Link
+                    key={city.value}
+                    href={buildSectionUrl({ city: city.value })}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      navigateSmooth(buildSectionUrl({ city: city.value }));
+                    }}
+                    className="rounded-full border border-[#d7dde7] bg-white px-3 py-1.5 text-sm font-medium text-[#4d5f78] transition hover:bg-[#f1f4f9]"
+                  >
+                    {localizeCityLabel(city.label, locale)}
+                  </Link>
+                ))}
+              </nav>
 
-          <div className="ml-auto flex w-full max-w-[760px] items-center gap-3 lg:w-auto">
-            <div ref={searchWrapRef} className="relative hidden flex-1 lg:block">
+              {desktopCitiesOverflow && (
+                <button
+                  type="button"
+                  onClick={() => scrollDesktopCities('right')}
+                  disabled={!desktopCitiesCanScrollRight}
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#d8dee8] bg-white text-[#4d5f78] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Scroll cities right"
+                >
+                  <span className="text-base leading-none">›</span>
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative hidden min-w-0 lg:block lg:w-72 xl:w-80 2xl:w-96">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#8b95a7]" />
+                <input
+                  className="h-10 w-full rounded-xl border border-[#d8dee8] bg-white pl-10 pr-3 text-sm text-[#2c3850] outline-none transition placeholder:text-[#98a3b6] focus:border-[#96aac9]"
+                  placeholder={copy.topbar.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 100)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      const q = searchQuery.trim();
+                      if (!q) return;
+                      setIsSearchFocused(false);
+                      router.push(buildSectionUrl({ q }));
+                    }
+                  }}
+                />
+
+                {showSearchDropdown && (
+                  <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-xl border border-[#d8dee8] bg-white shadow-xl">
+                    {isSearching ? (
+                      <p className="px-4 py-3 text-sm text-[#5f6f84]">{copy.topbar.searchingVendors}</p>
+                    ) : searchResults.length === 0 ? (
+                      <p className="px-4 py-3 text-sm text-[#5f6f84]">{copy.topbar.noVendorsFound}</p>
+                    ) : (
+                      <div className="max-h-96 overflow-y-auto py-1">
+                        {searchResults.map((vendor) => {
+                          const cover =
+                            vendor.profile_photo_url ||
+                            vendor.gallery_urls?.[0] ||
+                            vendor.gallery_photos?.[0] ||
+                            '/images/sample/venues-1.jpg';
+                          return (
+                            <button
+                              key={vendor.id}
+                              type="button"
+                              onClick={() => openVendorFromSearch(vendor)}
+                              className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-[#f2f5fa]"
+                            >
+                              <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-[#d8dee8] bg-[#edf1f6]">
+                                <Image src={cover} alt={vendor.business_name} fill sizes="40px" className="object-cover" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="line-clamp-1 text-sm font-bold text-[#11190C]">{vendor.business_name}</p>
+                                <p className="line-clamp-1 text-xs text-[#5f6f84]">{localizeCityLabel(vendor.city, locale)}</p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#d8dee8] bg-white text-[#4d5f78] hover:bg-[#f1f4f9]">
+                <Heart className="h-5 w-5" />
+              </button>
+
+              <div className="flex items-center rounded-2xl border border-[#d7dde8] bg-[#edf2f8] px-2 py-1.5">
+                <div ref={langWrapRef} className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsLangOpen((prev) => !prev)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-[#475a76] hover:bg-white/60"
+                    aria-haspopup="menu"
+                    aria-expanded={isLangOpen}
+                    aria-label={copy.topbar.language}
+                  >
+                    <Globe className="h-4 w-4" />
+                    <span className="text-base font-semibold">{locale.toUpperCase()}</span>
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+
+                  {isLangOpen && (
+                    <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-24 overflow-hidden rounded-xl border border-[#d8dee8] bg-white p-1 text-[#475a76] shadow-xl">
+                      {(['en', 'fr', 'ar'] as const).map((lng) => (
+                        <button
+                          key={lng}
+                          type="button"
+                          onClick={() => switchLocale(lng)}
+                          className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-semibold uppercase tracking-wide hover:bg-[#f1f4f9]"
+                        >
+                          {locale === lng ? <span className="text-xs">✓</span> : <span className="w-3" />}
+                          <span>{lng}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mx-2 h-8 w-px bg-[#d2d9e6]" />
+
+                {user ? (
+                  <div className="flex items-center gap-2.5 rounded-xl px-1 py-0.5">
+                    <div className="grid h-9 w-9 place-items-center rounded-lg border border-[#d2d9e6] bg-white text-sm font-semibold text-[#4d5f78]">
+                      {initials}
+                    </div>
+                    <div className="min-w-[110px]">
+                      <p className="line-clamp-1 text-base font-semibold leading-tight text-[#1f2d44]">{displayName}</p>
+                      <p className="text-xs text-[#7a89a0]">{copy.topbar.member}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/${locale}/auth-access?mode=signin`)}
+                    className="rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-semibold text-white"
+                  >
+                    {copy.topbar.signIn}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(user ? `/${locale}/settings` : `/${locale}/auth-access?mode=signin`)
+                  }
+                  className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8093af] hover:bg-white/70"
+                  aria-label={copy.topbar.accountSettings}
+                >
+                  <Settings className="h-4.5 w-4.5" />
+                </button>
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => signOut()}
+                    className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8093af] hover:bg-white/70"
+                    aria-label={copy.topbar.disconnect}
+                    title={copy.topbar.disconnect}
+                  >
+                    <LogOut className="h-4.5 w-4.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between lg:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen((prev) => !prev)}
+              className="grid h-10 w-10 place-items-center rounded-xl border border-[#d8dee8] bg-white text-[#4d5f78]"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <Link href={`/${locale}`} className="flex items-center gap-2">
+              <Image src="/wervice-logo-black.png" alt="Wervice" width={156} height={44} priority className="h-9 w-auto" />
+            </Link>
+            <button
+              type="button"
+              onClick={() => router.push(user ? `/${locale}/settings` : `/${locale}/auth-access?mode=signin`)}
+              className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-[#d8dee8] bg-white px-3 text-[#4d5f78]"
+              aria-label={copy.topbar.accountSettings}
+            >
+              {user ? (
+                <span className="text-sm font-semibold tracking-wide">{initials}</span>
+              ) : (
+                <Settings className="h-4.5 w-4.5" />
+              )}
+            </button>
+          </div>
+
+          <div className="mt-3 flex items-center gap-2 lg:hidden" onFocus={() => setIsSearchFocused(true)}>
+            <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8b95a7]" />
               <input
                 className="h-12 w-full rounded-xl border border-[#d8dee8] bg-white pl-12 pr-4 text-base text-[#2c3850] outline-none transition placeholder:text-[#98a3b6] focus:border-[#96aac9]"
@@ -379,13 +637,14 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 100)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     event.preventDefault();
                     const q = searchQuery.trim();
                     if (!q) return;
                     setIsSearchFocused(false);
-                    router.push(`/${locale}/dashboard?view=overview&q=${encodeURIComponent(q)}`);
+                    router.push(buildSectionUrl({ q }));
                   }
                 }}
               />
@@ -426,94 +685,127 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                 </div>
               )}
             </div>
-            <button type="button" className="hidden h-10 w-10 items-center justify-center rounded-xl border border-[#d8dee8] bg-white text-[#4d5f78] hover:bg-[#f1f4f9] sm:inline-flex">
+
+            <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#d8dee8] bg-white text-[#4d5f78] hover:bg-[#f1f4f9]">
               <Heart className="h-5 w-5" />
             </button>
 
-            <div className="hidden items-center rounded-2xl border border-[#d7dde8] bg-[#edf2f8] px-2 py-1.5 sm:flex">
-              <div ref={langWrapRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsLangOpen((prev) => !prev)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-[#475a76] hover:bg-white/60"
-                  aria-haspopup="menu"
-                  aria-expanded={isLangOpen}
-                  aria-label={copy.topbar.language}
-                >
-                  <Globe className="h-4 w-4" />
-                  <span className="text-base font-semibold">{locale.toUpperCase()}</span>
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
-
-                {isLangOpen && (
-                  <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-24 overflow-hidden rounded-xl border border-[#d8dee8] bg-white p-1 text-[#475a76] shadow-xl">
-                    {(['en', 'fr', 'ar'] as const).map((lng) => (
-                      <button
-                        key={lng}
-                        type="button"
-                        onClick={() => switchLocale(lng)}
-                        className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-semibold uppercase tracking-wide hover:bg-[#f1f4f9]"
-                      >
-                        {locale === lng ? <span className="text-xs">✓</span> : <span className="w-3" />}
-                        <span>{lng}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="mx-2 h-8 w-px bg-[#d2d9e6]" />
-
-              {user ? (
-                <div className="flex items-center gap-2.5 rounded-xl px-1 py-0.5">
-                  <div className="grid h-9 w-9 place-items-center rounded-lg border border-[#d2d9e6] bg-white text-sm font-semibold text-[#4d5f78]">
-                    {initials}
-                  </div>
-                  <div className="min-w-[110px]">
-                    <p className="text-base font-semibold leading-tight text-[#1f2d44] line-clamp-1">{displayName}</p>
-                    <p className="text-xs text-[#7a89a0]">{copy.topbar.member}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 rounded-xl px-1 py-0.5">
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/${locale}/dashboard?view=auth&mode=signin`)}
-                    className="rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-semibold text-white"
-                  >
-                    {copy.topbar.signIn}
-                  </button>
-                </div>
-              )}
-
+            <div ref={langWrapRef} className="relative lg:hidden">
               <button
                 type="button"
-                onClick={() =>
-                  router.push(user ? `/${locale}/dashboard?view=settings` : `/${locale}/dashboard?view=auth&mode=signin`)
-                }
-                className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8093af] hover:bg-white/70"
-                aria-label={copy.topbar.accountSettings}
+                onClick={() => setIsLangOpen((prev) => !prev)}
+                className="inline-flex h-10 items-center gap-1 rounded-xl border border-[#d8dee8] bg-white px-3 text-[#475a76]"
+                aria-haspopup="menu"
+                aria-expanded={isLangOpen}
               >
-                <Settings className="h-4.5 w-4.5" />
+                <Globe className="h-4 w-4" />
+                <span className="text-sm font-semibold">{locale.toUpperCase()}</span>
+                <ChevronDown className="h-3.5 w-3.5" />
               </button>
-              {user && (
-                <button
-                  type="button"
-                  onClick={() => signOut()}
-                  className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8093af] hover:bg-white/70"
-                  aria-label={copy.topbar.disconnect}
-                  title={copy.topbar.disconnect}
-                >
-                  <LogOut className="h-4.5 w-4.5" />
-                </button>
+              {isLangOpen && (
+                <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-24 overflow-hidden rounded-xl border border-[#d8dee8] bg-white p-1 text-[#475a76] shadow-xl">
+                  {(['en', 'fr', 'ar'] as const).map((lng) => (
+                    <button
+                      key={lng}
+                      type="button"
+                      onClick={() => switchLocale(lng)}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-semibold uppercase tracking-wide hover:bg-[#f1f4f9]"
+                    >
+                      {locale === lng ? <span className="text-xs">✓</span> : <span className="w-3" />}
+                      <span>{lng}</span>
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </div>
+
+          <nav className="mt-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden">
+            {MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => (
+              <Link
+                key={city.value}
+                href={buildSectionUrl({ city: city.value })}
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigateSmooth(buildSectionUrl({ city: city.value }));
+                }}
+                className="rounded-full border border-[#d7dde7] bg-white px-3 py-1.5 text-sm font-medium text-[#4d5f78] transition hover:bg-[#f1f4f9]"
+              >
+                {localizeCityLabel(city.label, locale)}
+              </Link>
+            ))}
+          </nav>
         </header>
 
-        <div className={`grid h-[calc(100vh-85px)] transition-opacity duration-300 ${isRouteSwitching ? 'opacity-70' : 'opacity-100'} ${user ? 'xl:grid-cols-[290px_1fr_330px]' : 'xl:grid-cols-[290px_1fr]'}`}>
-          <aside className="hidden overflow-y-auto border-r border-[#dde2ea] bg-[#f3f5f8] px-5 py-6 xl:block">
-            <div className="space-y-1">
+        {mobileNavOpen && (
+          <div className="fixed inset-0 z-40 bg-black/35 lg:hidden" onClick={() => setMobileNavOpen(false)}>
+            <aside
+              className="h-full w-[86%] max-w-[320px] overflow-y-auto border-r border-[#dde2ea] bg-[#f3f5f8] px-4 py-5"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between px-1">
+                <p className="text-lg font-semibold text-[#2e3b52]">Wervice</p>
+                <button
+                  type="button"
+                  onClick={() => setMobileNavOpen(false)}
+                  className="rounded-lg border border-[#d8dee8] bg-white px-2 py-1 text-sm text-[#4d5f78]"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-0.5">
+                {dashboardNav.map((item) => {
+                  const Icon = item.icon;
+                  const active = activeItem === item.id;
+                  return (
+                    <Link
+                      key={item.labelKey}
+                      href={`/${locale}${item.href}`}
+                      className={`flex h-11 items-center gap-3 rounded-xl px-3.5 text-[16px] font-semibold transition ${
+                        active
+                          ? 'border border-[#d9dee7] bg-white text-[#2e3b52] shadow-[0_2px_8px_rgba(15,23,42,0.08)]'
+                          : 'border border-transparent text-[#6f7888] hover:bg-white/70'
+                      }`}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      <Icon className="h-5 w-5 shrink-0 stroke-[1.9]" />
+                      {copy.nav[item.labelKey as keyof typeof copy.nav]}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="my-5 h-px bg-[#e2e7ef]" />
+              <p className="px-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9aa3b3]">{copy.nav.marketplace}</p>
+              <div className="mt-2 space-y-0.5">
+                {marketplaceNav.map((item) => {
+                  const Icon = item.icon;
+                  const active = activeItem === item.id;
+                  return (
+                    <Link
+                      key={item.labelKey}
+                      href={`/${locale}${item.href}`}
+                      className={`flex h-11 items-center gap-3 rounded-xl px-3.5 text-[16px] font-semibold transition ${
+                        active
+                          ? 'border border-[#d9dee7] bg-white text-[#2e3b52] shadow-[0_2px_8px_rgba(15,23,42,0.08)]'
+                          : 'border border-transparent text-[#6f7888] hover:bg-white/70'
+                      }`}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      <Icon className="h-5 w-5 shrink-0 stroke-[1.9]" />
+                      {copy.nav[item.labelKey as keyof typeof copy.nav]}
+                    </Link>
+                  );
+                })}
+              </div>
+            </aside>
+          </div>
+        )}
+
+        <div className={`grid min-h-0 flex-1 transition-opacity duration-300 ${isRouteSwitching ? 'opacity-70' : 'opacity-100'} ${user ? 'xl:grid-cols-[290px_1fr_330px]' : 'xl:grid-cols-[290px_1fr]'}`}>
+          <aside className="hidden h-full overflow-y-auto border-r border-[#dde2ea] bg-[#f3f5f8] px-5 py-6 xl:block">
+            <div className="space-y-0.5">
               {dashboardNav.map((item) => {
                 const Icon = item.icon;
                 const active = activeItem === item.id;
@@ -521,21 +813,23 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   <Link
                     key={item.labelKey}
                     href={`/${locale}${item.href}`}
-                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-left text-[17px] font-medium transition ${
+                    className={`flex h-12 w-full items-center gap-3.5 rounded-xl px-4 text-left text-[17px] font-semibold transition ${
                       active
                         ? 'border border-[#d9dee7] bg-white text-[#2e3b52] shadow-[0_2px_8px_rgba(15,23,42,0.08)]'
                         : 'border border-transparent text-[#6f7888] hover:bg-white/70'
                     }`}
+                    aria-current={active ? 'page' : undefined}
                   >
-                    <Icon className="h-5 w-5 stroke-[1.9]" />
+                    <Icon className="h-5 w-5 shrink-0 stroke-[1.9]" />
                     {copy.nav[item.labelKey as keyof typeof copy.nav]}
                   </Link>
                 );
               })}
             </div>
 
-            <p className="mt-6 px-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9aa3b3]">{copy.nav.marketplace}</p>
-            <div className="mt-2 space-y-1">
+            <div className="my-6 h-px bg-[#e2e7ef]" />
+            <p className="px-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9aa3b3]">{copy.nav.marketplace}</p>
+            <div className="mt-2 space-y-0.5">
               {marketplaceNav.map((item) => {
                 const Icon = item.icon;
                 const active = activeItem === item.id;
@@ -543,13 +837,14 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   <Link
                     key={item.labelKey}
                     href={`/${locale}${item.href}`}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-[17px] font-medium transition ${
+                    className={`flex h-12 items-center gap-3.5 rounded-xl px-4 text-[17px] font-semibold transition ${
                       active
                         ? 'border border-[#d9dee7] bg-white text-[#2e3b52] shadow-[0_2px_8px_rgba(15,23,42,0.08)]'
                         : 'border border-transparent text-[#6f7888] hover:bg-white/70'
                     }`}
+                    aria-current={active ? 'page' : undefined}
                   >
-                    <Icon className="h-5 w-5 stroke-[1.9]" />
+                    <Icon className="h-5 w-5 shrink-0 stroke-[1.9]" />
                     {copy.nav[item.labelKey as keyof typeof copy.nav]}
                   </Link>
                 );
@@ -557,7 +852,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
             </div>
           </aside>
 
-          <main className="space-y-9 overflow-y-auto bg-[#f7f8fa] px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+          <main className="space-y-9 overflow-y-auto bg-[#f7f8fa] px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-6">{children}</main>
 
           {user && (
             <aside className="hidden space-y-4 overflow-y-auto border-l border-[#dde2ea] bg-[#f3f5f8] px-4 py-6 lg:block sm:px-5">
@@ -569,7 +864,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   </div>
                   <p className="text-lg font-semibold text-[#243244]">{weddingDateDisplay || copy.rightSidebar.noWeddingDate}</p>
                   <Link
-                    href={`/${locale}/dashboard?view=wedding-date`}
+                    href={`/${locale}/wedding-date`}
                     className="mt-2 inline-flex text-xs font-semibold text-[#5a6f90] hover:text-[#2f4668]"
                   >
                     {copy.rightSidebar.openWeddingDate}
@@ -601,7 +896,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                     </div>
                   ))}
                   <Link
-                    href={`/${locale}/dashboard?view=checklist`}
+                    href={`/${locale}/wedding-checklist`}
                     className="block rounded-xl border border-[#dde2ea] bg-[#edf2f8] p-2.5 text-center text-sm font-semibold text-[#3f4f67]"
                   >
                     {copy.rightSidebar.viewAllTasks}
@@ -634,7 +929,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                     </Link>
                   ))}
                   <Link
-                    href={`/${locale}/dashboard?view=favorites`}
+                    href={`/${locale}/favorites`}
                     className="grid h-14 place-items-center rounded-xl border-2 border-dashed border-[#cfd6e1] bg-[#f4f7fc] text-3xl font-light text-[#7f8da3]"
                   >
                     +
@@ -644,6 +939,27 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
             </aside>
           )}
         </div>
+
+        <nav className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#d8dee8] bg-white/95 px-3 py-2 backdrop-blur lg:hidden">
+          <div className="mx-auto flex max-w-xl items-center justify-between">
+            {mobilePrimaryNav.map((item) => {
+              const Icon = item.icon;
+              const active = activeItem === item.id;
+              return (
+                <Link
+                  key={item.id}
+                  href={`/${locale}${item.href}`}
+                  className={`flex min-w-[68px] flex-col items-center gap-1 rounded-xl px-2 py-1.5 text-xs font-medium ${
+                    active ? 'text-[#11190C]' : 'text-[#7c8ca4]'
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 ${active ? 'text-[#11190C]' : 'text-[#8fa0b8]'}`} />
+                  <span className="line-clamp-1">{copy.nav[item.labelKey as keyof typeof copy.nav]}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
     </div>
   );

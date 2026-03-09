@@ -10,6 +10,7 @@ import FavoritesView from '@/components/home/FavoritesView';
 import WeddingChecklistView from '@/components/home/WeddingChecklistView';
 import AccountSettingsView from '@/components/home/AccountSettingsView';
 import AuthAccessView from '@/components/home/AuthAccessView';
+import VideoExperienceGrid from '@/components/home/VideoExperienceGrid';
 import VendorExploreFilters from '@/components/home/VendorExploreFilters';
 import {
   WERVICE_CATEGORIES,
@@ -35,6 +36,31 @@ function firstParam(value: string | string[] | undefined): string | undefined {
   return value;
 }
 
+function getFileExtension(url: string): string {
+  const clean = url.split('#')[0];
+  const path = clean.split('?')[0];
+  const parts = path.split('.');
+  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : '';
+}
+
+function isVideoFile(url: string): boolean {
+  const ext = getFileExtension(url);
+  return ['mp4', 'webm', 'm4v'].includes(ext);
+}
+
+function videoPriority(url: string): number {
+  const lower = url.toLowerCase();
+  const ext = getFileExtension(url);
+  const hasVideoHint = /(vid|video|reel|clip)/.test(lower);
+  const hasLogoHint = /(logo|cover|banner|profile)/.test(lower);
+  if (hasVideoHint) return -2;
+  if (hasLogoHint) return 8;
+  if (ext === 'mp4') return 0;
+  if (ext === 'webm') return 1;
+  if (ext === 'm4v') return 2;
+  return 10;
+}
+
 export async function generateMetadata({ params }: VendorsPageProps): Promise<Metadata> {
   const { locale } = await params;
   const copy = getDashboardCopy(locale);
@@ -54,7 +80,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
   const resolvedSearchParams = await searchParams;
   const view = firstParam(resolvedSearchParams.view) || 'overview';
   const chapterParam = firstParam(resolvedSearchParams.chapter);
-  const allowedViews = new Set(['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools', 'settings', 'auth', 'inspiration']);
+  const allowedViews = new Set(['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools', 'settings', 'auth', 'inspiration', 'videos']);
   const safeView = allowedViews.has(view) ? view : 'overview';
 
   const cityParam = firstParam(resolvedSearchParams.city);
@@ -66,14 +92,65 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
   const selectedCity = cityParam && validCities.has(cityParam) ? cityParam : undefined;
 
   const shouldLoadVendorGrid = safeView === 'overview';
+  const shouldLoadVideos = safeView === 'videos';
 
   const { vendors, hasMore } = await fetchVendors({
     city: selectedCity,
     category: dbCategory || undefined,
     q: q || undefined,
     sort: 'newest',
-    limit: shouldLoadVendorGrid ? 24 : 8,
+    limit: shouldLoadVendorGrid ? 24 : shouldLoadVideos ? 120 : 8,
   });
+
+  const videoVendors = vendors
+    .map((vendor) => {
+      const gallery = (vendor.gallery_urls || vendor.gallery_photos || []).filter(Boolean);
+      const preferredVideos = ((vendor.video_urls || []).filter(Boolean)).filter((url) => isVideoFile(url));
+      const fallbackVideos = preferredVideos.length > 0 ? [] : gallery.filter((url) => isVideoFile(url));
+      const allVideos = [...preferredVideos, ...fallbackVideos];
+      const sortedVideos = Array.from(new Set(allVideos))
+        .sort((a, b) => videoPriority(a) - videoPriority(b));
+      const videoUrl = sortedVideos[0];
+      if (!videoUrl) return null;
+
+      const posterUrl =
+        vendor.profile_photo_url ||
+        gallery.find((url) => !isVideoFile(url)) ||
+        '/images/sample/venues-1.jpg';
+
+      return {
+        id: vendor.id,
+        href: vendorUrl(vendor, locale),
+        title: vendor.business_name,
+        categorySlug: normalizeCategory(vendor.category) || 'all',
+        location: localizeCityLabel(vendor.city, locale),
+        cityValue: vendor.city,
+        categoryLabel: labelForCategory(vendor.category, locale).toUpperCase(),
+        logoUrl: vendor.profile_photo_url || posterUrl,
+        posterUrl,
+        videoUrl,
+        videoUrls: sortedVideos,
+      };
+    })
+    .filter(Boolean) as Array<{
+    id: string;
+    href: string;
+    title: string;
+    categorySlug: string;
+    location: string;
+    cityValue: string;
+    categoryLabel: string;
+    logoUrl: string;
+    posterUrl: string;
+    videoUrl: string;
+    videoUrls: string[];
+  }>;
+  const videoCategoryTabs = WERVICE_CATEGORIES.filter((category) =>
+    videoVendors.some((vendor) => vendor.categorySlug === category.slug)
+  );
+  const videoCityTabs = MOROCCAN_CITIES.filter((city) => city.value !== 'all' &&
+    videoVendors.some((vendor) => vendor.cityValue === city.value)
+  );
 
   const savedCards = vendors.slice(0, 12).map((vendor) => ({
     id: vendor.id,
@@ -92,7 +169,11 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
   }));
 
   const inspirationArticles = getAll(locale).slice(0, 15);
-  const activeMarketplace = safeView === 'inspiration' ? 'inspiration' : (categorySlug === 'venues' ? 'venues' : 'all-vendors');
+  const activeMarketplace = safeView === 'inspiration'
+    ? 'inspiration'
+    : safeView === 'videos'
+      ? 'videos'
+      : (categorySlug === 'venues' ? 'venues' : 'all-vendors');
   const activeItem = ['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools'].includes(safeView)
     ? safeView
     : activeMarketplace;
@@ -117,7 +198,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
   return (
     <DashboardShell locale={locale} savedCards={savedCards} activeItem={activeItem}>
       {safeView === 'favorites' && (
-        <FavoritesView locale={locale} favorites={savedCards} />
+        <FavoritesView locale={locale} />
       )}
 
       {safeView === 'checklist' && (
@@ -178,7 +259,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
                   <div className="mt-5 flex flex-wrap gap-3">
                     {prevPlanningChapter && (
                       <Link
-                        href={`/${locale}/dashboard?view=planning-tools&chapter=${prevPlanningChapter.slug}`}
+                        href={`/${locale}/planning-tools?chapter=${prevPlanningChapter.slug}`}
                         className="rounded-xl border border-[#d2d9e5] bg-white px-4 py-2 text-sm font-semibold text-[#33475f]"
                       >
                         {copy.planning.previous}
@@ -186,7 +267,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
                     )}
                     {nextPlanningChapter && (
                       <Link
-                        href={`/${locale}/dashboard?view=planning-tools&chapter=${nextPlanningChapter.slug}`}
+                        href={`/${locale}/planning-tools?chapter=${nextPlanningChapter.slug}`}
                         className="rounded-xl bg-[#11190C] px-4 py-2 text-sm font-semibold text-[#D9FF0A]"
                       >
                         {copy.planning.next}
@@ -204,7 +285,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
               {planningSteps.slice(0, 12).map((step) => (
                 <Link
                   key={step.chapterSlug}
-                  href={`/${locale}/dashboard?view=planning-tools&chapter=${step.chapterSlug}`}
+                  href={`/${locale}/planning-tools?chapter=${step.chapterSlug}`}
                   className="rounded-2xl border border-[#d7deea] bg-[#F8FAFC] p-4 transition hover:-translate-y-0.5 hover:bg-white"
                 >
                   <div className="text-2xl">{step.icon}</div>
@@ -222,7 +303,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
               {planningChapters.map((chapter) => (
                 <Link
                   key={chapter.slug}
-                  href={`/${locale}/dashboard?view=planning-tools&chapter=${chapter.slug}`}
+                  href={`/${locale}/planning-tools?chapter=${chapter.slug}`}
                   className="rounded-2xl border border-[#d7deea] bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-sm"
                 >
                   <p className="text-sm font-semibold text-[#6f7f95]">{interpolateCopy(copy.planning.minRead, { count: chapter.readTime })}</p>
@@ -237,6 +318,89 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
 
       {safeView === 'inspiration' && (
         <InspirationArticleGrid locale={locale} articles={inspirationArticles} />
+      )}
+
+      {safeView === 'videos' && (
+        <section className="mx-auto max-w-7xl">
+          <div className="mb-6">
+            <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{copy.nav.videos}</h1>
+            <p className="mt-2 text-lg text-[#4a5c74]">Watch vendors that shared video highlights.</p>
+          </div>
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            <Link
+              href={`/${locale}/videos${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}`}
+              className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${
+                !categorySlug ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
+              }`}
+            >
+              All Categories
+            </Link>
+            {videoCategoryTabs.map((category) => (
+              <Link
+                key={category.slug}
+                href={`/${locale}/videos?${new URLSearchParams({
+                  ...(selectedCity ? { city: selectedCity } : {}),
+                  category: category.slug,
+                }).toString()}`}
+                className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${
+                  categorySlug === category.slug ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
+                }`}
+              >
+                {labelForCategory(category.slug, locale)}
+              </Link>
+            ))}
+          </div>
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <Link
+              href={`/${locale}/videos${categorySlug ? `?category=${encodeURIComponent(categorySlug)}` : ''}`}
+              className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                !selectedCity ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
+              }`}
+            >
+              All Cities
+            </Link>
+            {videoCityTabs.map((city) => (
+              <Link
+                key={city.value}
+                href={`/${locale}/videos?${new URLSearchParams({
+                  ...(categorySlug ? { category: categorySlug } : {}),
+                  city: city.value,
+                }).toString()}`}
+                className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
+                  selectedCity === city.value ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
+                }`}
+              >
+                {localizeCityLabel(city.label, locale)}
+              </Link>
+            ))}
+          </div>
+
+          {videoVendors.length === 0 ? (
+            <div className="rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">
+              No vendor videos found yet.
+            </div>
+          ) : (
+            <VideoExperienceGrid
+              vendors={videoVendors.map((vendor) => ({
+                id: vendor.id,
+                href: vendor.href,
+                title: vendor.title,
+                categoryLabel: vendor.categoryLabel,
+                categorySlug: vendor.categorySlug,
+                location: vendor.location,
+                cityValue: vendor.cityValue,
+                logoUrl: vendor.logoUrl,
+                videoUrl: vendor.videoUrl,
+                videoUrls: vendor.videoUrls,
+                posterUrl: vendor.posterUrl,
+                galleryImages: vendors
+                  .find((entry) => entry.id === vendor.id)
+                  ?.gallery_urls?.slice(0, 8)
+                  ?.filter((url) => !isVideoFile(url)),
+              }))}
+            />
+          )}
+        </section>
       )}
 
       {safeView === 'overview' && (

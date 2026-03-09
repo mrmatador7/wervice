@@ -1,21 +1,55 @@
 'use server';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase-server';
 import { generateUniqueSlug } from '@/lib/slug';
 import { revalidateTag } from 'next/cache';
 import { normalizeCategory } from '@/lib/categories';
 
+async function requireAdmin(): Promise<NextResponse | null> {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('user_type')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const isAdmin = !profileError && (profile?.user_type === 'admin' || profile?.user_type === 'super_admin');
+  if (!isAdmin) {
+    return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
+  }
+
+  return null;
+}
+
+async function getVendorSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (supabaseUrl && serviceKey) {
+    return createClient(supabaseUrl, serviceKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+  }
+
+  return createServerClient();
+}
+
 export async function GET() {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabase =
-      supabaseUrl && serviceKey
-        ? createClient(supabaseUrl, serviceKey, { auth: { autoRefreshToken: false, persistSession: false } })
-        : await createServerClient();
+    const authGuard = await requireAdmin();
+    if (authGuard) return authGuard;
+    const supabase = await getVendorSupabaseClient();
 
     // Read from vendor_leads (where imports and admin-managed vendors live)
     const { data: leadsRows, error } = await supabase
@@ -90,6 +124,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const authGuard = await requireAdmin();
+    if (authGuard) return authGuard;
+
     // Check if request has files (multipart/form-data) or is JSON
     const contentType = request.headers.get('content-type') || '';
 
@@ -170,8 +207,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Supabase client
-    const cookieStore = await cookies();
-    const supabase = await createServerClient();
+    const supabase = await getVendorSupabaseClient();
 
     // Map plan to price
     const planPricing = {
@@ -315,6 +351,9 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const authGuard = await requireAdmin();
+    if (authGuard) return authGuard;
+
     // Check if request has files (multipart/form-data)
     const contentType = request.headers.get('content-type') || '';
 
@@ -393,8 +432,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Create Supabase client
-    const cookieStore = await cookies();
-    const supabase = await createServerClient();
+    const supabase = await getVendorSupabaseClient();
 
     // Map plan to price
     const planPricing = {

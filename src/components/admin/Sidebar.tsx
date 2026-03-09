@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Overview', href: '/admin', icon: LayoutDashboard },
   { name: 'Vendors', href: '/admin/vendors', icon: Users },
   { name: 'Users', href: '/admin/users', icon: UserCheck },
   { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
@@ -44,8 +44,8 @@ export default function Sidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const isActive = (href: string) => {
-    if (href === '/admin/dashboard') {
-      return pathname === href || pathname === '/admin';
+    if (href === '/admin') {
+      return pathname === href || pathname === '/admin/dashboard';
     }
     return pathname.startsWith(href);
   };
@@ -171,4 +171,3 @@ export default function Sidebar() {
     </>
   );
 }
-

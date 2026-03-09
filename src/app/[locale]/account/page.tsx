@@ -6,5 +6,5 @@ interface AccountPageProps {
 
 export default async function AccountPage({ params }: AccountPageProps) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard?view=settings`);
+  redirect(`/${locale}/settings`);
 }

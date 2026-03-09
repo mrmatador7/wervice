@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ChevronRight, Heart, MapPin } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
@@ -17,6 +16,10 @@ interface VendorBrowseCardProps {
   logoUrl?: string | null;
   galleryImages: string[];
   onCardClick?: () => void;
+}
+
+function isVideoUrl(url: string): boolean {
+  return /\.(mp4|mov|webm|avi|m4v)(\?|$)/i.test(url);
 }
 
 export default function VendorBrowseCard({
@@ -37,6 +40,7 @@ export default function VendorBrowseCard({
     const unique = new Set<string>();
     for (const image of galleryImages) {
       if (!image || !image.trim()) continue;
+      if (isVideoUrl(image)) continue;
       if (logoUrl && image === logoUrl) continue;
       unique.add(image);
     }
@@ -44,11 +48,21 @@ export default function VendorBrowseCard({
   }, [galleryImages, logoUrl]);
 
   const [imageIndex, setImageIndex] = useState(0);
+  const [coverSrc, setCoverSrc] = useState<string>('/images/sample/venues-1.jpg');
+  const [logoSrc, setLogoSrc] = useState<string>('/images/sample/venues-1.jpg');
   const displayImages = images.length > 0 ? images : ['/images/sample/venues-1.jpg'];
   const currentImage = displayImages[imageIndex] || '/images/sample/venues-1.jpg';
-  const safeLogo = logoUrl || displayImages[0] || '/images/sample/venues-1.jpg';
+  const safeLogo = (logoUrl && !isVideoUrl(logoUrl)) ? logoUrl : (displayImages[0] || '/images/sample/venues-1.jpg');
   const localizedLocation = localizeCityLabel(location, locale);
   const favoritesKey = user?.id ? `wervice_favorites_${user.id}` : '';
+
+  useEffect(() => {
+    setCoverSrc(currentImage);
+  }, [currentImage]);
+
+  useEffect(() => {
+    setLogoSrc(safeLogo);
+  }, [safeLogo]);
 
   const [isFavorite, setIsFavorite] = useState<boolean>(() => {
     if (!user?.id || !vendorId || typeof window === 'undefined') return false;
@@ -88,7 +102,7 @@ export default function VendorBrowseCard({
     if (!user?.id) {
       const localeMatch = href.match(/^\/(en|fr|ar)(\/|$)/);
       const locale = localeMatch?.[1] || 'en';
-      router.push(`/${locale}/dashboard?view=auth&mode=signin`);
+      router.push(`/${locale}/auth-access?mode=signin`);
       return;
     }
 
@@ -139,12 +153,12 @@ export default function VendorBrowseCard({
       className="group min-w-0 rounded-[22px] bg-transparent transition hover:-translate-y-0.5"
     >
       <div className="relative h-56 overflow-hidden rounded-[22px]">
-        <Image
-          src={currentImage}
+        <img
+          src={coverSrc}
           alt={title}
-          fill
-          sizes="(max-width: 1024px) 100vw, 25vw"
-          className="object-cover"
+          className="h-full w-full object-cover"
+          loading="lazy"
+          onError={() => setCoverSrc('/images/sample/venues-1.jpg')}
         />
 
         <button
@@ -177,7 +191,13 @@ export default function VendorBrowseCard({
       <div className="p-3 font-[var(--font-inter)]">
         <div className="flex items-center gap-2">
           <div className="relative h-6 w-6 overflow-hidden rounded-full border border-black/10 bg-white">
-            <Image src={safeLogo} alt={`${title} logo`} fill sizes="24px" className="object-cover" />
+            <img
+              src={logoSrc}
+              alt={`${title} logo`}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              onError={() => setLogoSrc('/images/sample/venues-1.jpg')}
+            />
           </div>
           <h3 className="line-clamp-1 text-[1.12rem] font-semibold leading-[1.2] tracking-[-0.01em] text-[#1f2937]">{title}</h3>
         </div>

@@ -74,6 +74,10 @@ function isVideoMime(mimeType: string | null | undefined): boolean {
   return Boolean(mimeType && mimeType.startsWith('video/'));
 }
 
+function isVideoUrl(url: string): boolean {
+  return /\.(mp4|mov|webm|avi|m4v)(\?|$)/i.test(url);
+}
+
 export async function getVendorBySlug(slug: string): Promise<VendorDetail | null> {
   try {
     const supabase = await createClient();
@@ -113,8 +117,12 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
     
     // Default media from vendor_leads fields
     let profilePhotoUrl = lead.logo_url || null;
-    let galleryPhotos: string[] = Array.isArray(lead.gallery_urls) ? lead.gallery_urls : [];
-    let videoUrl: string | null = null;
+    const leadGalleryRaw: string[] = Array.isArray(lead.gallery_urls) ? lead.gallery_urls : [];
+    const leadGalleryImages = leadGalleryRaw.filter((url) => !isVideoUrl(url));
+    const leadGalleryVideos = leadGalleryRaw.filter((url) => isVideoUrl(url));
+
+    let galleryPhotos: string[] = leadGalleryImages;
+    let videoUrl: string | null = leadGalleryVideos[0] || null;
 
     // Prefer media_files (R2) when vendor_name matches business_name (case-insensitive)
     const { data: mediaRows } = await supabase
@@ -141,10 +149,27 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
       const images = urls.filter((x) => !x.isVideo).map((x) => x.url);
       const videos = urls.filter((x) => x.isVideo).map((x) => x.url);
 
-      if (images.length > 0) {
+      // Use media_files as a fallback source, not as authoritative replacement.
+      // vendor_leads.gallery_urls can be manually curated and more complete.
+      if (!profilePhotoUrl && images.length > 0) {
         profilePhotoUrl = images[0];
-        galleryPhotos = images.slice(1);
       }
+
+      if (galleryPhotos.length === 0 && images.length > 0) {
+        galleryPhotos = profilePhotoUrl
+          ? images.filter((url) => url !== profilePhotoUrl)
+          : images.slice(1);
+      } else if (galleryPhotos.length > 0 && images.length > 0) {
+        const seen = new Set(galleryPhotos);
+        for (const imageUrl of images) {
+          if (imageUrl !== profilePhotoUrl && !seen.has(imageUrl)) {
+            galleryPhotos.push(imageUrl);
+            seen.add(imageUrl);
+          }
+        }
+      }
+
+      // Prefer MIME-verified R2 videos whenever available.
       if (videos.length > 0) {
         videoUrl = videos[0];
       }

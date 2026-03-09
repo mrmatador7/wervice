@@ -32,7 +32,7 @@ export default function DashboardSidebar({ activeTab, onTabChange, userName }: D
   };
 
   const menuItems = [
-    { id: 'overview', label: 'Dashboard', icon: FiHome, badge: null, href: `${pathname}?tab=overview` },
+    { id: 'overview', label: 'Overview', icon: FiHome, badge: null, href: `${pathname}?tab=overview` },
     { id: 'favorites', label: 'Favorites', icon: FiHeart, badge: null, href: `${pathname}?tab=favorites` },
     { id: 'vendors', label: 'Vendor Manager', icon: FiUsers, badge: null, href: `${pathname}?tab=vendors` },
     { id: 'planner', label: 'Wedding Planner', icon: FiCalendar, badge: null, href: `${pathname}?tab=planner` },
@@ -141,4 +141,3 @@ export default function DashboardSidebar({ activeTab, onTabChange, userName }: D
     </aside>
   );
 }
-

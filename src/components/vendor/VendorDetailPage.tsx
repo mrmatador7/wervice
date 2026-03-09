@@ -41,6 +41,44 @@ function parseInstagramHandle(ig: string | null | undefined): { handle: string; 
   return null;
 }
 
+function isDirectVideoFile(url: string | undefined): boolean {
+  if (!url) return false;
+  return /\.(mp4|mov|webm|avi|m4v)(\?|$)/i.test(url);
+}
+
+function getEmbeddableVideoUrl(url: string | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      const id = parsed.searchParams.get('v');
+      if (id) return `https://www.youtube.com/embed/${id}`;
+      if (parsed.pathname.startsWith('/shorts/')) {
+        const shortsId = parsed.pathname.split('/')[2];
+        if (shortsId) return `https://www.youtube.com/embed/${shortsId}`;
+      }
+    }
+
+    if (host === 'youtu.be') {
+      const id = parsed.pathname.replace(/^\/+/, '').split('/')[0];
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+
+    if (host === 'vimeo.com') {
+      const id = parsed.pathname.replace(/^\/+/, '').split('/')[0];
+      if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+
+    if (host === 'player.vimeo.com') return url;
+    if (host === 'youtube-nocookie.com' || host === 'youtube.com' && parsed.pathname.includes('/embed/')) return url;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export default function VendorDetailPage({
   name,
   city,
@@ -62,6 +100,7 @@ export default function VendorDetailPage({
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
@@ -76,6 +115,7 @@ export default function VendorDetailPage({
 
   const allMedia = [...images];
   if (videoUrl) allMedia.push(videoUrl);
+  const embeddableVideoUrl = getEmbeddableVideoUrl(videoUrl);
 
   const mainImage = allMedia[0] || null;
   const gridImages = allMedia.slice(1, 5);
@@ -165,7 +205,7 @@ export default function VendorDetailPage({
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0]">
+    <div className="min-h-screen bg-transparent">
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6 py-8">
         {showBackButton && (
           <button
@@ -297,16 +337,42 @@ export default function VendorDetailPage({
               <div className="bg-white rounded-2xl p-8 shadow-sm">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">{c.video}</h2>
                 <div className="aspect-video rounded-xl overflow-hidden bg-black relative">
-                  {videoPlaying ? (
-                    <iframe
-                      src={videoUrl.includes('?') ? `${videoUrl}&autoplay=1` : `${videoUrl}?autoplay=1`}
-                      className="w-full h-full"
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
-                    />
+                  {videoPlaying && !videoError ? (
+                    isDirectVideoFile(videoUrl) ? (
+                      <video
+                        src={videoUrl}
+                        className="w-full h-full"
+                        controls
+                        autoPlay
+                        playsInline
+                        onError={() => setVideoError(true)}
+                      />
+                    ) : embeddableVideoUrl ? (
+                      <iframe
+                        src={embeddableVideoUrl.includes('?') ? `${embeddableVideoUrl}&autoplay=1` : `${embeddableVideoUrl}?autoplay=1`}
+                        className="w-full h-full"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gray-900 text-white px-6 text-center">
+                        <p className="text-sm text-white/80">This video link can&apos;t be embedded.</p>
+                        <a
+                          href={videoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex rounded-lg bg-white text-gray-900 px-3 py-2 text-sm font-semibold"
+                        >
+                          Open video source
+                        </a>
+                      </div>
+                    )
                   ) : (
                     <button
-                      onClick={() => setVideoPlaying(true)}
+                      onClick={() => {
+                        setVideoError(false);
+                        setVideoPlaying(true);
+                      }}
                       className="w-full h-full flex flex-col items-center justify-center gap-4 group bg-gray-900 hover:bg-gray-800 transition-colors"
                     >
                       <BsFillPlayCircleFill className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
@@ -451,7 +517,29 @@ export default function VendorDetailPage({
           <div className="relative w-full h-full flex items-center justify-center p-16">
             {allMedia[lightboxIndex] === videoUrl ? (
               <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden">
-                <iframe src={videoUrl} className="w-full h-full" allowFullScreen allow="autoplay" />
+                {isDirectVideoFile(videoUrl) ? (
+                  <video
+                    src={videoUrl}
+                    className="w-full h-full"
+                    controls
+                    autoPlay
+                    playsInline
+                  />
+                ) : embeddableVideoUrl ? (
+                  <iframe src={embeddableVideoUrl} className="w-full h-full" allowFullScreen allow="autoplay" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gray-900 text-white px-6 text-center">
+                    <p className="text-sm text-white/80">This video link can&apos;t be embedded.</p>
+                    <a
+                      href={videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex rounded-lg bg-white text-gray-900 px-3 py-2 text-sm font-semibold"
+                    >
+                      Open video source
+                    </a>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="relative w-full h-full">

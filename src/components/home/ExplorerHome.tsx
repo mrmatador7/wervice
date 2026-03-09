@@ -64,21 +64,21 @@ function CarouselHeader({
 }) {
   const Icon = icon;
   return (
-    <div className="mb-4 flex items-center justify-between gap-3">
-      <h2 className="flex items-center gap-3 text-4xl font-black tracking-tight text-[#11190C]">
-        <Icon className="h-9 w-9 text-[#11190C]" />
+    <div className="mb-4 flex items-center justify-between gap-3 sm:mb-5">
+      <h2 className="flex items-center gap-2.5 text-2xl font-black leading-tight tracking-tight text-[#11190C] sm:text-[1.9rem]">
+        <Icon className="h-6 w-6 text-[#11190C]" />
         {title}
       </h2>
       <div className="flex items-center gap-2">
         {actionLabel && actionHref && (
-          <Link href={actionHref} className="mr-2 text-2xl font-bold text-[#11190C]">
+          <Link href={actionHref} className="mr-1 text-sm font-semibold leading-none text-[#11190C] sm:mr-2 sm:text-base">
             {actionLabel}
           </Link>
         )}
         <button
           type="button"
           onClick={onPrev}
-          className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-[#F3EFE7] text-[#33475f] hover:bg-[#E8E2D8]"
+          className="grid h-9 w-9 place-items-center rounded-full border border-[#d8dee8] bg-[#f8fafc] text-[#33475f] hover:bg-[#eef2f7]"
           aria-label="Scroll left"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -86,7 +86,7 @@ function CarouselHeader({
         <button
           type="button"
           onClick={onNext}
-          className="grid h-9 w-9 place-items-center rounded-full border border-black/10 bg-[#F3EFE7] text-[#33475f] hover:bg-[#E8E2D8]"
+          className="grid h-9 w-9 place-items-center rounded-full border border-[#d8dee8] bg-[#f8fafc] text-[#33475f] hover:bg-[#eef2f7]"
           aria-label="Scroll right"
         >
           <ChevronRight className="h-4 w-4" />
@@ -138,7 +138,7 @@ function SmallCategoryCard({
       <div className="absolute inset-0 bg-gradient-to-t from-[#0f172fcc] via-[#0f172f66] to-[#0f172f22]" />
       <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white">
         <Icon className="mb-1.5 h-7 w-7" />
-        <p className="text-3xl font-extrabold leading-none">{card.title}</p>
+        <p className="text-[1.9rem] font-extrabold leading-none sm:text-3xl">{card.title}</p>
       </div>
     </Link>
   );
@@ -275,17 +275,16 @@ export default function ExplorerHome({
     fes: '/cities/Fez.jpg',
     rabat: '/cities/Rabat.jpg',
     tanger: '/cities/tanger.jpg',
-    agadir: '/cities/tanger.jpg',
+    agadir: '/cities/Agadir.jpg',
     meknes: '/cities/meknes.jpg',
-    tetouan: '/cities/tanger.jpg',
+    tetouan: '/cities/Tetouan.jpg',
     kenitra: '/cities/Kenitra.webp',
     'el-jadida': '/cities/El Jadida.jpg',
-    safi: '/cities/El Jadida.jpg',
-    oujda: '/cities/Casablanca.jpg',
-    laayoune: '/cities/tanger.jpg',
-    'el-hoceima': '/cities/tanger.jpg',
-    'beni-mellal': '/cities/Casablanca.jpg',
-    chefchaouen: '/cities/tanger.jpg',
+    safi: '/cities/Safi.jpg',
+    oujda: '/cities/Oujda.jpg',
+    laayoune: '/cities/Laayoune.jpg',
+    'el-hoceima': '/cities/El Hoceima.jpg',
+    'beni-mellal': '/cities/Beni Mellal.jpg',
   };
 
   const cityCards = MOROCCAN_CITIES
@@ -294,7 +293,7 @@ export default function ExplorerHome({
       const slug = cityToSlug(city.value);
       return {
         title: localizeCityLabel(city.label, locale),
-        image: cityImageBySlug[slug] || '/cities/Casablanca.jpg',
+        image: cityImageBySlug[slug] || '/images/sample/venues-1.jpg',
         vendors: `${Math.max(25, 140 - idx * 6)}+ Vendors`,
         href: `/${locale}/${slug}`,
       };
@@ -343,97 +342,101 @@ export default function ExplorerHome({
 
   return (
     <DashboardShell locale={locale} savedCards={savedCards}>
-      <div className={`transition-opacity duration-300 ${isNavigating ? 'opacity-70' : 'opacity-100'}`}>
-      <section className="overflow-hidden">
-        <div className="mx-auto max-w-4xl px-6 py-10 text-center sm:px-10 sm:py-14">
-          <h1 className="text-4xl font-black leading-[0.95] text-[#11190C] sm:text-6xl">
-            Plan your Moroccan{' '}
-            <span className="inline-block rounded-2xl bg-[#11190C] px-4 py-1.5 text-[#D9FF0A] shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
-              wedding
-            </span>
-            , your way.
-          </h1>
-          <p className="mt-5 text-xl text-[#4a5c74] sm:text-2xl">
-            Find the best venues, planners, and standout vendors across Morocco to make your day unforgettable.
-          </p>
-        </div>
-      </section>
-
-      <section>
-        <CarouselHeader
-          icon={Grid3X3}
-          title="Explore Categories"
-          actionLabel="View All"
-          actionHref={`/${locale}/vendors`}
-          onPrev={() => scrollRow(categoriesRowRef, 'left')}
-          onNext={() => scrollRow(categoriesRowRef, 'right')}
-        />
-        <div
-          ref={categoriesRowRef}
-          className="flex gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {categoryCards.map((card) => (
-            <SmallCategoryCard
-              key={card.id}
-              card={card}
-              Icon={iconByCategorySlug[card.slug as keyof typeof iconByCategorySlug] || Sparkles}
-              onNavigate={smoothNavigate}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <CarouselHeader
-          icon={MapPin}
-          title="Popular Cities"
-          onPrev={() => scrollRow(citiesRowRef, 'left')}
-          onNext={() => scrollRow(citiesRowRef, 'right')}
-        />
-        <div
-          ref={citiesRowRef}
-          className="flex gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {cityCards.map((city) => (
-            <CityCard
-              key={city.href}
-              title={city.title}
-              image={city.image}
-              vendors={city.vendors}
-              href={city.href}
-              onNavigate={smoothNavigate}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="mb-4 text-4xl font-black tracking-tight text-[#11190C]">
-          Recommended for you in {localizeCityLabel(selectedCity, locale)}
-        </h2>
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {visibleRecommended.map((vendor) => (
-            <VendorBrowseCard
-              key={vendor.id}
-              vendorId={vendor.id}
-              href={vendor.href}
-              title={vendor.title}
-              location={vendor.city}
-              categoryLabel={labelForCategory(vendor.category, locale)}
-              logoUrl={vendor.logoUrl}
-              galleryImages={vendor.galleryImages}
-            />
-          ))}
-        </div>
-        {recommendedForCity.length === 0 && (
-          <div className="mt-4 rounded-2xl border border-[#d7deea] bg-white p-5 text-sm text-[#5f6f84]">
-            No recommended vendors found in this city yet.
+      <div
+        className={`transition-opacity duration-300 ${isNavigating ? 'opacity-70' : 'opacity-100'} xl:[zoom:0.75]`}
+      >
+        <section className="overflow-hidden">
+          <div className="mx-auto max-w-4xl px-6 py-10 text-center sm:px-10 sm:py-14">
+            <h1 className="text-3xl font-black leading-[0.95] text-[#11190C] sm:text-6xl">
+              Plan your Moroccan{' '}
+              <span className="inline-block rounded-xl bg-[#11190C] px-3 py-1 text-[#D9FF0A] shadow-[0_8px_24px_rgba(0,0,0,0.25)] sm:rounded-2xl sm:px-4 sm:py-1.5">
+                wedding
+              </span>
+              , your way.
+            </h1>
+            <p className="mt-4 text-[0.92rem] leading-snug text-[#4a5c74] sm:mt-5 sm:text-2xl">
+              Find the best venues, planners, and standout vendors across Morocco to make your day unforgettable.
+            </p>
           </div>
-        )}
-        {recommendedForCity.length > visibleRecommended.length && (
-          <div ref={recommendedSentinelRef} className="h-8" />
-        )}
-      </section>
+        </section>
+
+        <div className="space-y-6">
+          <section className="rounded-[28px] border border-[#dbe2ec] bg-white/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] sm:p-6">
+            <CarouselHeader
+              icon={Grid3X3}
+              title="Explore Categories"
+              actionLabel="View All"
+              actionHref={`/${locale}/vendors`}
+              onPrev={() => scrollRow(categoriesRowRef, 'left')}
+              onNext={() => scrollRow(categoriesRowRef, 'right')}
+            />
+            <div
+              ref={categoriesRowRef}
+              className="flex gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {categoryCards.map((card) => (
+                <SmallCategoryCard
+                  key={card.id}
+                  card={card}
+                  Icon={iconByCategorySlug[card.slug as keyof typeof iconByCategorySlug] || Sparkles}
+                  onNavigate={smoothNavigate}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[28px] border border-[#dbe2ec] bg-white/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] sm:p-6">
+            <CarouselHeader
+              icon={MapPin}
+              title="Popular Cities"
+              onPrev={() => scrollRow(citiesRowRef, 'left')}
+              onNext={() => scrollRow(citiesRowRef, 'right')}
+            />
+            <div
+              ref={citiesRowRef}
+              className="flex gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              {cityCards.map((city) => (
+                <CityCard
+                  key={city.href}
+                  title={city.title}
+                  image={city.image}
+                  vendors={city.vendors}
+                  href={city.href}
+                  onNavigate={smoothNavigate}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[28px] border border-[#dbe2ec] bg-white/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] sm:p-6">
+            <h2 className="mb-4 text-2xl font-black tracking-tight text-[#11190C] sm:text-[1.9rem]">
+              Recommended for you in {localizeCityLabel(selectedCity, locale)}
+            </h2>
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {visibleRecommended.map((vendor) => (
+                <VendorBrowseCard
+                  key={vendor.id}
+                  vendorId={vendor.id}
+                  href={vendor.href}
+                  title={vendor.title}
+                  location={vendor.city}
+                  categoryLabel={labelForCategory(vendor.category, locale)}
+                  logoUrl={vendor.logoUrl}
+                  galleryImages={vendor.galleryImages}
+                />
+              ))}
+            </div>
+            {recommendedForCity.length === 0 && (
+              <div className="mt-4 rounded-2xl border border-[#d7deea] bg-white p-5 text-sm text-[#5f6f84]">
+                No recommended vendors found in this city yet.
+              </div>
+            )}
+            {recommendedForCity.length > visibleRecommended.length && (
+              <div ref={recommendedSentinelRef} className="h-8" />
+            )}
+          </section>
+        </div>
       </div>
     </DashboardShell>
   );

@@ -13,7 +13,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/en/dashboard');
+    redirect('/en/vendors');
   }
 
   const { data: profile } = await supabase
@@ -24,7 +24,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   const isAdmin = profile?.user_type === 'admin' || profile?.user_type === 'super_admin';
   if (!isAdmin) {
-    redirect('/en/dashboard');
+    redirect('/en/vendors');
   }
 
   return (

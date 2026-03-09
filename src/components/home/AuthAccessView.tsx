@@ -109,7 +109,7 @@ export default function AuthAccessView({ locale }: AuthAccessViewProps) {
     const params = new URLSearchParams(searchParams.toString());
     params.set('view', 'auth');
     params.set('mode', nextMode);
-    router.replace(`/${locale}/dashboard?${params.toString()}`);
+    router.replace(`/${locale}/vendors?${params.toString()}`);
     setError('');
   };
 
@@ -162,10 +162,10 @@ export default function AuthAccessView({ locale }: AuthAccessViewProps) {
 
       const isAdmin = data.user_type === 'admin' || data.user_type === 'super_admin';
       if (isAdmin) {
-        window.location.href = '/admin/dashboard';
+        window.location.href = '/admin';
         return;
       }
-      window.location.href = `/${locale}/dashboard?view=overview`;
+      window.location.href = `/${locale}/vendors`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
       setIsLoading(false);
@@ -215,7 +215,7 @@ export default function AuthAccessView({ locale }: AuthAccessViewProps) {
         );
       }
 
-      window.location.href = `/${locale}/dashboard?view=overview`;
+      window.location.href = `/${locale}/vendors`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
       setIsLoading(false);
@@ -229,7 +229,7 @@ export default function AuthAccessView({ locale }: AuthAccessViewProps) {
           <div className="absolute -left-16 top-[-120px] h-[320px] w-[320px] rounded-full bg-[#D9FF0A]/35 blur-3xl" />
           <div className="absolute -right-10 bottom-[-90px] h-[280px] w-[280px] rounded-full bg-[#C7D5EA]/45 blur-3xl" />
           <div className="relative z-10 flex h-full flex-col justify-between p-10">
-            <Link href={`/${locale}/dashboard?view=overview`} className="w-fit">
+            <Link href={`/${locale}/vendors`} className="w-fit">
               <Image src="/wervice-logo-black.png" alt="Wervice Logo" width={190} height={56} className="h-12 w-auto" />
             </Link>
             <div>
@@ -245,7 +245,7 @@ export default function AuthAccessView({ locale }: AuthAccessViewProps) {
         <div className="flex items-center justify-center p-6 sm:p-10">
           <div className="w-full max-w-md">
             <div className="mb-8 text-center lg:hidden">
-              <Link href={`/${locale}/dashboard?view=overview`}>
+              <Link href={`/${locale}/vendors`}>
                 <Image src="/wervice-logo-black.png" alt="Wervice Logo" width={150} height={44} className="mx-auto h-10 w-auto" />
               </Link>
             </div>

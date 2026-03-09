@@ -1,0 +1,41 @@
+id,business_name,city,category,published,has_logo,gallery_count
+a08f8928-4e28-4449-ac6a-e79eb38386c2,"Alaa Alkahf Photography","Tangier","photography",true,false,0
+a0f2748c-17d1-4e22-89bd-1724d48f1c9d,"Alae El Moudni","Meknes","photography",true,true,0
+5390279a-039f-4568-87eb-a8659bef68c8,"Arijs","Marrakech","cakes",true,true,0
+a601b876-cd77-43f3-a586-c7fed9edbaeb,"Ben Lahcen saida","Casablanca","negafa",true,true,0
+49d216c7-c42a-43af-ae72-8293d739c52c,"Bendidi Fleurs","Safi","florist",true,true,0
+9e65bf53-aa91-4b1e-9408-78c7e9f4cfcf,"Caftin by Alaoui","Casablanca","dresses",true,true,0
+ed267925-4f7d-43e8-a4a0-e4bce9fc85cc,"Dahlia Wedding Dress","Casablanca","dresses",true,true,0
+cab59e04-edd3-4510-9e1a-28b82f07134d,"Dar Makhtara","Fes","venues",true,false,0
+231dc992-01b8-4bbb-8fc2-fe9c59f8677d,"El FASSI CAFTAN","Agadir","dresses",true,true,0
+53435830-06e6-4814-8b85-4a145e223598,"Fairy Events","Rabat","dresses",true,true,0
+f8141e1d-4dfc-494c-b73d-0794ab10d269,"Fatimazahra Khattabi","Marrakech","beauty",true,true,0
+f9a38fc1-522a-4408-8113-081c559b395c,"Fleuriste Safi","Safi","florist",true,true,0
+6dfd9f87-3402-4f21-8c96-9fa30296c860,"Fleurs Magique","Tangier","florist",true,true,0
+72c93e31-d474-4088-836b-7156428b8c07,"Ghita Boukrim","Casablanca","beauty",true,true,0
+58b9d4cc-e3a1-42da-9206-abbab2013483,"Haltout Photographe","Tangier","photography",true,true,0
+8886ec65-798f-4e0e-b69c-cc4151fe3886,"Jihane Loukili","Fes","beauty",true,true,0
+e5a10630-eef9-43fc-a33f-8f4fa68180ca,"La Rose de Fes","Fes","florist",true,true,0
+d5e6f6f8-7d53-4078-a905-464b5932b3e7,"Le Carré d'Or","Casablanca","venues",true,true,0
+de4df810-4e0a-486b-9233-460e46ac5afa,"Liika Photographe","Tetouan","photography",true,true,0
+18077cd5-3ac5-41dc-b3d5-1a54d52f83b2,"Loom Events","Meknes","planning",true,false,0
+8203a710-420f-42b0-956a-da9293d385f0,"Maison bel","Meknes","catering",true,false,0
+20ca443d-2aba-459a-a5dc-9fdf50a12dde,"Mariem Fleuriste","Casablanca","florist",true,true,0
+a5bf2201-99f8-4314-a808-92bc658a7bed,"Negafa Dar Benjellon","Tangier","negafa",true,true,0
+d52df543-3445-4c26-bf98-2cba968f39e4,"Negafa Divine féminine","Agadir","negafa",true,true,0
+5c1aae05-e149-4eac-8490-6d4e86c3a6ed,"Negafa hiba","Casablanca","negafa",true,true,0
+b68afb62-a2e1-404c-87f9-9e0fac07a5ea,"Nouha el idrissi","Tetouan","beauty",true,true,0
+b03a2b5f-5479-4a01-96c8-1806ea6ec397,"Orchestre Karawan","Marrakech","music",true,true,0
+bd4339c7-4f82-4877-b0cb-956a60838acb,"Photo Halim","Kenitra","photography",true,true,0
+2196aae8-58b6-4d51-add6-2147924615bc,"Qasr Al Anwar","Tangier","planning",true,true,0
+021af5c7-ed38-4ffa-aab2-673b60225e74,"Riad Alya","Fes","venues",true,true,0
+3e4f35c2-c499-4049-9317-733e681e1696,"Salle de fêtes AlHouda","Fes","venues",true,false,0
+dfb9444d-7a5f-4b29-80bc-287241e51f30,"Sekkate Traiteur","Casablanca","catering",true,true,0
+396e7134-a29b-4a08-840c-cd7f4cd9395a,"SYM’S Fantasy","Marrakech","catering",true,false,0
+697ee28a-b4de-4f05-b7db-fec643f9a5c5,"Traiteur Ch'hiwates Bennani","Rabat","planning",true,true,0
+1553e2c0-dd99-4d7d-9aef-d133e0b87fd3,"𝗧𝗿𝗮𝗶𝘁𝗲𝘂𝗿 𝗗𝘂 𝗟𝘂𝘅𝗲","Agadir","catering",true,true,0
+c07ea1d6-4d56-4ad4-81d6-fb2b1f86caff,"Your Event by FS","Casablanca","planning",true,false,0
+457ec9b3-1ecb-49c6-8cc2-eda626e8218f,"Zahra Saad","Agadir","beauty",true,true,0
+0f564a88-656f-4063-92b3-96cac3746643,"ZED EVENT","Agadir","planning",true,true,0
+3b3624d1-4cb9-40dc-92e1-425e8525959c,"Ziana Mariam Mahrach","Tangier","beauty",true,true,0
+f981d390-0411-4ee0-bc6f-68cb2e79714f,"Zineb Lachheb","Kenitra","beauty",true,true,0

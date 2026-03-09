@@ -10,6 +10,7 @@ type DashboardCopy = {
     budgetPlanner: string;
     planningTools: string;
     allVendors: string;
+    videos: string;
     venues: string;
     inspiration: string;
     marketplace: string;
@@ -159,6 +160,7 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
       budgetPlanner: 'Budget Planner',
       planningTools: 'Planning Tools',
       allVendors: 'All Vendors',
+      videos: 'Videos',
       venues: 'Venues',
       inspiration: 'Inspiration',
       marketplace: 'Marketplace',
@@ -306,6 +308,7 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
       budgetPlanner: 'Planificateur de budget',
       planningTools: 'Outils de planification',
       allVendors: 'Tous les prestataires',
+      videos: 'Vidéos',
       venues: 'Lieux',
       inspiration: 'Inspiration',
       marketplace: 'Marketplace',
@@ -453,6 +456,7 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
       budgetPlanner: 'مخطط الميزانية',
       planningTools: 'أدوات التخطيط',
       allVendors: 'كل المزوّدين',
+      videos: 'فيديوهات',
       venues: 'الأماكن',
       inspiration: 'الإلهام',
       marketplace: 'المتجر',

@@ -114,10 +114,10 @@ export default function OnboardingOverlay({ userName, userEmail, locale }: Onboa
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(onboardingData)
       });
-      router.push(`/${locale}/dashboard`);
+      router.push(`/${locale}/vendors`);
     } catch (error) {
       console.error('Failed to save onboarding data:', error);
-      router.push(`/${locale}/dashboard`);
+      router.push(`/${locale}/vendors`);
     }
   };
 

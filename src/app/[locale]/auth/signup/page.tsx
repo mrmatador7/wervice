@@ -6,5 +6,5 @@ interface SignUpPageProps {
 
 export default async function SignUpPage({ params }: SignUpPageProps) {
   const { locale } = await params;
-  redirect(`/${locale}/dashboard?view=auth&mode=signup`);
+  redirect(`/${locale}/auth-access?mode=signup`);
 }

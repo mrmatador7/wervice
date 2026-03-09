@@ -9,12 +9,11 @@ import { getDashboardCopy } from '@/components/home/dashboard-i18n';
 
 type FavoritesViewProps = {
   locale: string;
-  favorites: ShellCard[];
 };
 
 function toShellVendorHref(locale: string, href: string) {
-  if (!href) return `/${locale}/dashboard?view=overview`;
-  if (href.startsWith(`/${locale}/dashboard?`)) {
+  if (!href) return `/${locale}/vendors`;
+  if (href.startsWith(`/${locale}/vendors?`)) {
     try {
       const url = new URL(href, 'https://wervice.local');
       const slug = url.searchParams.get('vendor');
@@ -34,7 +33,7 @@ function toShellVendorHref(locale: string, href: string) {
   return href;
 }
 
-export default function FavoritesView({ locale, favorites }: FavoritesViewProps) {
+export default function FavoritesView({ locale }: FavoritesViewProps) {
   const copy = getDashboardCopy(locale);
   const { user } = useUser();
   const [liveFavorites, setLiveFavorites] = useState<ShellCard[]>([]);
@@ -72,9 +71,9 @@ export default function FavoritesView({ locale, favorites }: FavoritesViewProps)
   }, [user?.id]);
 
   const cards = useMemo(() => {
-    if (user?.id) return liveFavorites;
-    return favorites;
-  }, [user?.id, liveFavorites, favorites]);
+    if (!user?.id) return [];
+    return liveFavorites;
+  }, [user?.id, liveFavorites]);
 
   return (
     <section className="mx-auto max-w-7xl">
@@ -93,7 +92,7 @@ export default function FavoritesView({ locale, favorites }: FavoritesViewProps)
           <p className="text-xl font-bold text-[#11190C]">{copy.favorites.emptyTitle}</p>
           <p className="mt-2 text-[#5f6f84]">{copy.favorites.emptySubtitle}</p>
           <Link
-            href={`/${locale}/dashboard?view=overview`}
+            href={`/${locale}/vendors`}
             className="mt-6 inline-flex rounded-xl bg-[#11190C] px-5 py-3 text-sm font-bold text-[#D9FF0A]"
           >
             {copy.favorites.browseVendors}

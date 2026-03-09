@@ -66,7 +66,7 @@ export default function DashboardOverview({ profile, favorites, locale }: Dashbo
             </div>
           </div>
           <Link
-            href={`/${locale}/dashboard`}
+            href={`/${locale}/vendors`}
             className="mt-6 flex items-center gap-2 text-[#11190C] font-medium hover:gap-3 transition-all"
           >
             <span>Set date</span>
@@ -99,7 +99,7 @@ export default function DashboardOverview({ profile, favorites, locale }: Dashbo
             </div>
           </div>
           <Link
-            href={`/${locale}/dashboard`}
+            href={`/${locale}/vendors`}
             className="mt-6 flex items-center gap-2 text-gray-600 font-medium hover:text-[#11190C] hover:gap-3 transition-all"
           >
             <span>View summary</span>
@@ -130,7 +130,7 @@ export default function DashboardOverview({ profile, favorites, locale }: Dashbo
             </div>
           </div>
           <Link
-            href={`/${locale}/dashboard`}
+            href={`/${locale}/vendors`}
             className="mt-6 flex items-center gap-2 text-gray-600 font-medium hover:text-[#11190C] hover:gap-3 transition-all"
           >
             <span>Analyze performance</span>
@@ -166,7 +166,7 @@ export default function DashboardOverview({ profile, favorites, locale }: Dashbo
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-[#11190C]">Recently Saved</h2>
             <Link
-              href={`/${locale}/dashboard`}
+              href={`/${locale}/vendors`}
               className="text-sm text-gray-600 hover:text-[#11190C] font-medium flex items-center gap-1"
             >
               View all
@@ -202,4 +202,3 @@ export default function DashboardOverview({ profile, favorites, locale }: Dashbo
     </div>
   );
 }
-

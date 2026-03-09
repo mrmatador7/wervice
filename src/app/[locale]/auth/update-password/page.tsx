@@ -24,7 +24,7 @@ export default function UpdatePasswordPage() {
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) router.replace(`/${locale}/dashboard?view=auth&mode=signin`);
+      if (!user) router.replace(`/${locale}/auth-access?mode=signin`);
     };
     checkUser();
   }, [router, locale, supabase.auth]);
@@ -49,7 +49,7 @@ export default function UpdatePasswordPage() {
         setError(error.message);
       } else {
         setIsSuccess(true);
-        setTimeout(() => router.push(`/${locale}/dashboard?view=settings`), 1200);
+        setTimeout(() => router.push(`/${locale}/settings`), 1200);
       }
     } catch {
       setError(t('update.error', { defaultValue: 'An error occurred. Please try again.' }));

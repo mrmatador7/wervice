@@ -10,5 +10,5 @@ export default async function AuthCodeErrorPage({ params, searchParams }: AuthCo
   const query = await searchParams;
   const raw = query.error_description || query.error;
   const suffix = raw ? `&error=${encodeURIComponent(raw)}` : '';
-  redirect(`/${locale}/dashboard?view=auth&mode=signup${suffix}`);
+  redirect(`/${locale}/auth-access?mode=signup${suffix}`);
 }
