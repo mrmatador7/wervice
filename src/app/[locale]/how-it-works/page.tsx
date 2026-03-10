@@ -14,13 +14,28 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations('how-it-works');
   const canonical = toAbsoluteUrl(`/${locale}/how-it-works`);
+  const seoCopy = {
+    en: {
+      ogTitle: 'How Wervice Works',
+      keywords: 'wedding planning Morocco, wedding vendors, Moroccan weddings, wedding marketplace',
+    },
+    fr: {
+      ogTitle: 'Comment Wervice fonctionne',
+      keywords: 'organisation mariage maroc, prestataires mariage, mariage marocain, marketplace mariage',
+    },
+    ar: {
+      ogTitle: 'كيف يعمل Wervice',
+      keywords: 'تخطيط الزفاف في المغرب, مزودو خدمات الزفاف, زفاف مغربي, منصة الزفاف',
+    },
+  } as const;
+  const current = seoCopy[locale as keyof typeof seoCopy] || seoCopy.en;
 
   return {
     title: t('title'),
     description: t('description'),
-    keywords: 'wedding planning Morocco, wedding vendors, Moroccan weddings, wedding marketplace',
+    keywords: current.keywords,
     openGraph: {
-      title: 'How Wervice Works',
+      title: current.ogTitle,
       description: t('description'),
       type: 'website',
       url: canonical,

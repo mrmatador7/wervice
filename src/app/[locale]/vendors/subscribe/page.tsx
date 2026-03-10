@@ -8,10 +8,26 @@ interface PageProps {
   searchParams: Promise<{ category?: string; cadence?: string }>;
 }
 
-export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const seoCopy = {
+    en: {
+      title: 'Start your Wervice Vendor Subscription',
+      description: "Fill out your business details — we'll review and contact you to activate your subscription.",
+    },
+    fr: {
+      title: 'Commencez votre abonnement prestataire Wervice',
+      description: 'Renseignez les details de votre activite. Notre equipe examinera votre demande et vous contactera pour activer votre abonnement.',
+    },
+    ar: {
+      title: 'ابدأ اشتراكك كبائع على Wervice',
+      description: 'أدخل بيانات نشاطك التجاري. سنراجع الطلب ونتواصل معك لتفعيل الاشتراك.',
+    },
+  } as const;
+  const current = seoCopy[locale as keyof typeof seoCopy] || seoCopy.en;
   return {
-    title: "Start your Wervice Vendor Subscription",
-    description: "Fill out your business details — we'll review and contact you to activate your subscription.",
+    title: current.title,
+    description: current.description,
   };
 }
 

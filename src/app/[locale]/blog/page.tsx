@@ -19,17 +19,32 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const seo = await getBlogSeoSettings();
+  const localizedDefaults = {
+    en: {
+      title: seo.homepageTitle,
+      description: seo.homepageDescription,
+    },
+    fr: {
+      title: 'Blog Mariage | Wervice',
+      description: 'Guides mariage, inspiration et conseils prestataires pour les mariages au Maroc.',
+    },
+    ar: {
+      title: 'مدونة الزفاف | Wervice',
+      description: 'أدلة التخطيط، أفكار ملهمة، ونصائح مزوّدي الخدمات لزفافك في المغرب.',
+    },
+  } as const;
+  const current = localizedDefaults[locale as keyof typeof localizedDefaults] || localizedDefaults.en;
   const canonical = toAbsoluteUrl(`/${locale}/blog`);
   return {
-    title: seo.homepageTitle,
-    description: seo.homepageDescription,
+    title: current.title,
+    description: current.description,
     alternates: {
       canonical,
       languages: localeAlternates('/blog'),
     },
     openGraph: {
-      title: seo.homepageTitle,
-      description: seo.homepageDescription,
+      title: current.title,
+      description: current.description,
       type: 'website',
       url: canonical,
     },

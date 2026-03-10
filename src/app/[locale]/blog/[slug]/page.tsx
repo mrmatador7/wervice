@@ -12,6 +12,27 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
   const { locale, slug } = await params;
+  const seoCopy = {
+    en: {
+      notFound: 'Article Not Found | Wervice',
+      blogSuffix: 'Wervice Blog',
+      fallbackKeywords: 'Moroccan weddings, wedding planning',
+      fallbackAuthor: 'Wervice Team',
+    },
+    fr: {
+      notFound: 'Article Introuvable | Wervice',
+      blogSuffix: 'Blog Wervice',
+      fallbackKeywords: 'mariage marocain, organisation mariage',
+      fallbackAuthor: 'Equipe Wervice',
+    },
+    ar: {
+      notFound: 'المقال غير موجود | Wervice',
+      blogSuffix: 'مدونة Wervice',
+      fallbackKeywords: 'زفاف مغربي، تخطيط الزفاف',
+      fallbackAuthor: 'فريق Wervice',
+    },
+  } as const;
+  const current = seoCopy[locale as keyof typeof seoCopy] || seoCopy.en;
   const legacySlugRedirects: Record<string, string> = {
     'photography-videography-moroccan-weddings': 'best-wedding-photographers-marrakech-2026',
     'wedding-trends-2025': 'best-wedding-photographers-marrakech-2026',
@@ -21,22 +42,22 @@ export async function generateMetadata({
 
   if (!article) {
     return {
-      title: 'Article Not Found | Wervice',
+      title: current.notFound,
     };
   }
 
   return {
-    title: `${article.title} | Wervice Blog`,
+    title: `${article.title} | ${current.blogSuffix}`,
     description: article.excerpt || article.content.substring(0, 160),
-    keywords: article.tags?.join(', ') || 'Moroccan weddings, wedding planning',
-    authors: [{ name: article.author || 'Wervice Team' }],
+    keywords: article.tags?.join(', ') || current.fallbackKeywords,
+    authors: [{ name: article.author || current.fallbackAuthor }],
     openGraph: {
       title: article.title,
       description: article.excerpt || article.content.substring(0, 160),
       images: article.cover ? [{ url: article.cover, alt: article.title }] : [],
       type: 'article',
       publishedTime: article.date,
-      authors: [article.author || 'Wervice Team'],
+      authors: [article.author || current.fallbackAuthor],
       tags: article.tags || [],
     },
     twitter: {

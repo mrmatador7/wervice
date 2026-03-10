@@ -15,10 +15,31 @@ interface VendorPageProps {
 
 export async function generateMetadata({ params }: VendorPageProps): Promise<Metadata> {
   const { slug, locale } = await params;
+  const seoCopy = {
+    en: {
+      notFound: 'Vendor Not Found | Wervice',
+      fallbackDescription: (name: string, categoryLabel: string, cityLabel: string) =>
+        `Find and book ${name} for your wedding in ${cityLabel}. Professional ${categoryLabel.toLowerCase()} services.`,
+      keywordsTail: ['wedding vendor', 'Morocco wedding'],
+    },
+    fr: {
+      notFound: 'Prestataire introuvable | Wervice',
+      fallbackDescription: (name: string, categoryLabel: string, cityLabel: string) =>
+        `Trouvez et reservez ${name} pour votre mariage a ${cityLabel}. Services professionnels de ${categoryLabel.toLowerCase()}.`,
+      keywordsTail: ['prestataire mariage', 'mariage maroc'],
+    },
+    ar: {
+      notFound: 'المزوّد غير موجود | Wervice',
+      fallbackDescription: (name: string, categoryLabel: string, cityLabel: string) =>
+        `اعثر على ${name} واحجزه لزفافك في ${cityLabel}. خدمات ${categoryLabel.toLowerCase()} احترافية.`,
+      keywordsTail: ['مزود خدمات زفاف', 'زفاف المغرب'],
+    },
+  } as const;
+  const current = seoCopy[locale as keyof typeof seoCopy] || seoCopy.en;
   const vendor = await getVendorBySlug(slug);
 
   if (!vendor) {
-    return { title: 'Vendor Not Found | Wervice' };
+    return { title: current.notFound };
   }
 
   const categoryLabel = labelForCategory(vendor.category, locale);
@@ -27,14 +48,14 @@ export async function generateMetadata({ params }: VendorPageProps): Promise<Met
   const descClean = (rawDesc && rawDesc !== 'No description provided' && rawDesc !== 'No description') ? rawDesc : null;
   const metaDesc = descClean
     ? descClean.substring(0, 150) + (descClean.length > 150 ? '...' : '')
-    : `Find and book ${vendor.business_name} for your wedding in ${cityLabel}. Professional ${categoryLabel.toLowerCase()} services.`;
+    : current.fallbackDescription(vendor.business_name, categoryLabel, cityLabel);
 
   const imageUrl = vendor.profile_photo_url || vendor.gallery_photos?.[0] || '';
 
   return {
     title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel} | Wervice`,
     description: metaDesc,
-    keywords: [vendor.business_name, categoryLabel, cityLabel, 'wedding vendor', 'Morocco wedding'],
+    keywords: [vendor.business_name, categoryLabel, cityLabel, ...current.keywordsTail],
     alternates: {
       canonical: toAbsoluteUrl(vendorUrl(vendor, locale)),
       languages: {

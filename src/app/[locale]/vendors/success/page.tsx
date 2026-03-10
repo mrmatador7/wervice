@@ -1,13 +1,27 @@
 import type { Metadata } from "next";
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const locale = (await params)?.locale || 'en';
+  const seoCopy = {
+    en: {
+      title: 'Welcome to Wervice | Success',
+      description: 'Your vendor subscription has started successfully.',
+    },
+    fr: {
+      title: 'Bienvenue sur Wervice | Succes',
+      description: 'Votre abonnement prestataire a bien demarre.',
+    },
+    ar: {
+      title: 'مرحباً بك في Wervice | تم بنجاح',
+      description: 'تم بدء اشتراكك كبائع بنجاح.',
+    },
+  } as const;
+  const current = seoCopy[locale as keyof typeof seoCopy] || seoCopy.en;
 
   return {
-    title: "Welcome to Wervice | Success",
-    description: "Your vendor subscription has started successfully.",
+    title: current.title,
+    description: current.description,
   };
 }
 
