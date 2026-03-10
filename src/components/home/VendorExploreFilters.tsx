@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { Search } from 'lucide-react';
 
 type Item = {
   value: string;
@@ -23,6 +24,9 @@ type VendorExploreFiltersProps = {
   allCategoriesLabel: string;
   cityItems: Item[];
   categoryItems: CategoryItem[];
+  basePath?: string;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
 };
 
 export default function VendorExploreFilters({
@@ -34,6 +38,9 @@ export default function VendorExploreFilters({
   allCategoriesLabel,
   cityItems,
   categoryItems,
+  basePath = 'vendors',
+  showSearch = false,
+  searchPlaceholder = 'Search vendor names or styles...',
 }: VendorExploreFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -45,6 +52,8 @@ export default function VendorExploreFilters({
   const categoryNavRef = useRef<HTMLElement | null>(null);
   const cityWrapRef = useRef<HTMLDivElement | null>(null);
   const cityRowRef = useRef<HTMLDivElement | null>(null);
+  const normalizedBasePath = basePath.replace(/^\/+/, '');
+  const baseHref = `/${locale}/${normalizedBasePath}`;
 
   useEffect(() => {
     setIsSwitching(false);
@@ -88,12 +97,29 @@ export default function VendorExploreFilters({
         ref={categoryWrapRef}
         className={`mb-6 border-b border-[#d7deea] ${categorySliderMode ? 'overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden' : 'overflow-visible'}`}
       >
+        {showSearch && (
+          <form action={baseHref} method="get" className="mb-5">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-6 w-6 -translate-y-1/2 text-[#8a99ad]" />
+              <input
+                type="text"
+                name="q"
+                defaultValue={q}
+                placeholder={searchPlaceholder}
+                className="h-14 w-full rounded-[22px] border border-[#ccd6e4] bg-white pl-14 pr-4 text-base text-[#33475f] outline-none transition placeholder:text-[#7f8fa6] focus:border-[#11190C] md:text-lg"
+              />
+              {selectedCity && <input type="hidden" name="city" value={selectedCity} />}
+              {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
+            </div>
+          </form>
+        )}
+
         <nav
           ref={categoryNavRef}
           className={`flex items-center gap-1 ${categorySliderMode ? 'min-w-max flex-nowrap' : 'w-full flex-wrap'}`}
         >
           {(() => {
-            const href = `/${locale}/vendors${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}${q ? `${selectedCity ? '&' : '?'}q=${encodeURIComponent(q)}` : ''}`;
+            const href = `${baseHref}${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}${q ? `${selectedCity ? '&' : '?'}q=${encodeURIComponent(q)}` : ''}`;
             return (
               <Link
                 href={href}
@@ -110,7 +136,7 @@ export default function VendorExploreFilters({
           })()}
           {categoryItems.map((category) => {
             const isActive = categorySlug === category.slug;
-            const href = `/${locale}/vendors?category=${category.slug}${selectedCity ? `&city=${encodeURIComponent(selectedCity)}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+            const href = `${baseHref}?category=${category.slug}${selectedCity ? `&city=${encodeURIComponent(selectedCity)}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
             return (
               <Link
                 key={category.slug}
@@ -138,7 +164,7 @@ export default function VendorExploreFilters({
           className={`flex gap-2.5 ${citySliderMode ? 'min-w-max flex-nowrap pb-1' : 'flex-wrap'}`}
         >
         {(() => {
-          const href = `/${locale}/vendors${q ? `?q=${encodeURIComponent(q)}` : ''}`;
+          const href = `${baseHref}${q ? `?q=${encodeURIComponent(q)}` : ''}`;
           return (
             <Link
               href={href}
@@ -153,7 +179,7 @@ export default function VendorExploreFilters({
         })()}
         {cityItems.map((city) => {
           const isActive = selectedCity === city.value;
-          const href = `/${locale}/vendors?city=${encodeURIComponent(city.value)}${categorySlug ? `&category=${categorySlug}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+          const href = `${baseHref}?city=${encodeURIComponent(city.value)}${categorySlug ? `&category=${categorySlug}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
           return (
             <Link
               key={city.value}

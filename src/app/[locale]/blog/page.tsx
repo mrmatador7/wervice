@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
 import { localeAlternates, toAbsoluteUrl } from '@/lib/seo/site-url';
+import { getBlogSeoSettings } from '@/lib/blog-admin-store';
 
 // Dynamically import the client component
 const BlogPageContent = dynamic(() => import('./BlogPageContent'), {
@@ -17,17 +18,18 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const seo = await getBlogSeoSettings();
   const canonical = toAbsoluteUrl(`/${locale}/blog`);
   return {
-    title: 'Wedding Blog | Wervice',
-    description: 'Wedding planning guides, inspiration, and vendor tips for Moroccan weddings.',
+    title: seo.homepageTitle,
+    description: seo.homepageDescription,
     alternates: {
       canonical,
       languages: localeAlternates('/blog'),
     },
     openGraph: {
-      title: 'Wedding Blog | Wervice',
-      description: 'Wedding planning guides, inspiration, and vendor tips for Moroccan weddings.',
+      title: seo.homepageTitle,
+      description: seo.homepageDescription,
       type: 'website',
       url: canonical,
     },

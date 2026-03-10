@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
-import { Heart, PlayCircle, X } from 'lucide-react';
+import { Heart, PlayCircle } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useUser } from '@/contexts/UserContext';
 
@@ -45,7 +45,6 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
   );
   const activeVideoUrls = useMemo(() => active?.videoUrls?.length ? active.videoUrls : active?.videoUrl ? [active.videoUrl] : [], [active]);
   const activeVideoUrl = activeVideoUrls[activeVideoIndex] || activeVideoUrls[0] || '';
-
   const moreFromVendor = useMemo(() => {
     if (!active) return [];
     return (active.galleryImages || []).slice(0, 4);
@@ -108,6 +107,20 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
     }
   }
 
+  useEffect(() => {
+    if (!active) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [active]);
+
+  useEffect(() => {
+    setActiveVideoIndex(0);
+    setActiveVideoFailed(false);
+  }, [activeId]);
+
   const similar = useMemo(() => {
     if (!active) return [];
     const sameCityAndCategory = visibleVendors.filter(
@@ -124,23 +137,14 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
     return visibleVendors.filter((v) => v.id !== active.id).slice(0, 3);
   }, [active, visibleVendors]);
 
-  useEffect(() => {
-    if (!active) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, [active]);
-
-  useEffect(() => {
-    setActiveVideoIndex(0);
-    setActiveVideoFailed(false);
-  }, [activeId]);
-
   function tryNextVideo() {
     if (!activeVideoUrls.length) return;
     setActiveVideoIndex((prev) => (prev + 1 < activeVideoUrls.length ? prev + 1 : prev));
+  }
+
+  function enforceMutedPlayback(element: HTMLVideoElement) {
+    if (!element.muted) element.muted = true;
+    if (element.volume !== 0) element.volume = 0;
   }
 
   return (
@@ -167,6 +171,9 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
               autoPlay
               playsInline
               preload="metadata"
+              onLoadedMetadata={(event) => enforceMutedPlayback(event.currentTarget)}
+              onPlay={(event) => enforceMutedPlayback(event.currentTarget)}
+              onVolumeChange={(event) => enforceMutedPlayback(event.currentTarget)}
               onError={() => {
                 setHiddenVendorIds((prev) => {
                   const next = new Set(prev);
@@ -211,25 +218,28 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
       </div>
 
       {active && (
-        <div className="fixed inset-0 z-[100] bg-[#11190C]/76 backdrop-blur-sm">
-          <div className="flex h-full w-full">
-            <section className="relative flex flex-1 items-center justify-center p-6">
-              <button
-                type="button"
-                onClick={() => setActiveId(null)}
-                className="absolute left-6 top-6 rounded-full border border-white/25 bg-[#11190C]/50 px-4 py-2 text-sm font-semibold text-white"
-              >
-                Back to Gallery
-              </button>
+        <div className="fixed inset-0 z-[9999] bg-[#11190C]/78 backdrop-blur-md">
+          <button
+            type="button"
+            onClick={() => setActiveId(null)}
+            className="absolute right-3 top-[max(12px,env(safe-area-inset-top))] z-30 rounded-full bg-white/15 p-3 text-white hover:bg-white/25 md:right-5 md:top-5"
+            aria-label="Close"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
-              <div className="relative h-[84vh] w-full max-w-[560px] overflow-hidden rounded-[24px] border border-white/15 bg-black">
+          <div className="flex h-full w-full items-center justify-center gap-6 px-3 pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(56px,env(safe-area-inset-top))] md:p-6">
+            <div className="relative w-full max-w-[min(100vw-24px,420px)] md:max-w-[min(92vw,420px)]">
+              <div className="relative aspect-[9/16] max-h-[calc(100vh-88px)] w-full overflow-hidden rounded-[22px] border border-white/15 bg-black shadow-2xl md:max-h-[86vh] md:rounded-[26px]">
                 {activeVideoFailed || !activeVideoUrl ? (
                   <div className="relative h-full w-full bg-black">
                     <Image
                       src={active.posterUrl || active.logoUrl}
                       alt={active.title}
                       fill
-                      sizes="560px"
+                      sizes="420px"
                       className="object-cover"
                     />
                     <div className="absolute inset-x-0 bottom-0 bg-black/70 px-4 py-3 text-sm text-white/90">
@@ -242,9 +252,11 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
                     src={activeVideoUrl}
                     poster={active.posterUrl}
                     controls
-                    muted
+                    controlsList="nodownload noplaybackrate noremoteplayback"
+                    disablePictureInPicture
                     autoPlay
                     playsInline
+                    muted
                     preload="auto"
                     onError={() => {
                       if (activeVideoIndex + 1 < activeVideoUrls.length) {
@@ -255,6 +267,7 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
                     }}
                     onLoadedMetadata={(event) => {
                       const element = event.currentTarget;
+                      enforceMutedPlayback(element);
                       if (!Number.isFinite(element.duration) || element.duration <= 0.2) {
                         if (activeVideoIndex + 1 < activeVideoUrls.length) {
                           tryNextVideo();
@@ -265,41 +278,32 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
                       }
                       element.play().catch(() => {});
                     }}
-                    className="h-full w-full object-cover"
+                    onPlay={(event) => enforceMutedPlayback(event.currentTarget)}
+                    onVolumeChange={(event) => enforceMutedPlayback(event.currentTarget)}
+                    onContextMenu={(event) => event.preventDefault()}
+                    className="h-full w-full object-cover wervice-video-controls"
                   />
                 )}
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5">
+
+                <button
+                  type="button"
+                  onClick={(event) => toggleFavorite(active, event)}
+                  className={`absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full border bg-black/35 text-white backdrop-blur-sm ${
+                    favoriteIds.has(active.id) ? 'border-[#D9FF0A] text-[#D9FF0A]' : 'border-white/30'
+                  }`}
+                  aria-label="Save vendor"
+                >
+                  <Heart className={`h-5 w-5 ${favoriteIds.has(active.id) ? 'fill-current' : ''}`} />
+                </button>
+
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5">
                   <h2 className="text-2xl font-bold text-white">{active.title}</h2>
                   <p className="mt-1 text-base text-white/85">{active.location}</p>
                 </div>
               </div>
+            </div>
 
-              <div className="ml-4 hidden flex-col gap-4 md:flex">
-                <button
-                  type="button"
-                  onClick={() => toggleFavorite(active)}
-                  className={`grid h-14 w-14 place-items-center rounded-full border text-white ${
-                    favoriteIds.has(active.id)
-                      ? 'border-[#D9FF0A] bg-[#11190C] text-[#D9FF0A]'
-                      : 'border-white/20 bg-white/10'
-                  }`}
-                  aria-label="Save vendor"
-                >
-                  <Heart className={`h-6 w-6 ${favoriteIds.has(active.id) ? 'fill-current' : ''}`} />
-                </button>
-              </div>
-            </section>
-
-            <aside className="relative hidden w-[390px] border-l border-[#d8dee8] bg-[#f6f7f9] p-6 text-[#11190C] lg:block">
-              <button
-                type="button"
-                onClick={() => setActiveId(null)}
-                className="absolute right-5 top-5 text-[#6f7f95] hover:text-[#11190C]"
-                aria-label="Close"
-              >
-                <X className="h-6 w-6" />
-              </button>
-
+            <aside className="relative hidden w-[390px] max-h-[86vh] overflow-auto rounded-2xl border border-[#d8dee8] bg-[#f6f7f9] p-6 text-[#11190C] lg:block">
               <div>
                 <h3 className="text-4xl font-black tracking-tight text-[#11190C]">{active.title}</h3>
                 <p className="mt-1 text-sm text-[#5f6f84]">{active.categoryLabel} • {active.location}</p>
@@ -339,13 +343,6 @@ export default function VideoExperienceGrid({ vendors }: VideoExperienceGridProp
                   ))}
                 </div>
               </div>
-
-              <a
-                href={active.href}
-                className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#11190C] text-base font-bold text-[#D9FF0A] hover:bg-[#0a1008]"
-              >
-                Book {active.title}
-              </a>
             </aside>
           </div>
         </div>

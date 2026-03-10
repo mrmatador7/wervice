@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FiChevronRight, FiMapPin, FiInstagram, FiShare2, FiChevronLeft } from 'react-icons/fi';
-import { BsFillPlayCircleFill } from 'react-icons/bs';
+import { BsPlayCircle } from 'react-icons/bs';
 import type { SimilarVendor } from '@/lib/db/vendors';
 import SimilarVendors from './SimilarVendors';
 
@@ -17,12 +17,12 @@ interface VendorDetailPageProps {
   description: string | null;
   priceFrom: number;
   phone: string;
-  whatsapp: string;
   instagram?: string | null;
   googleMaps?: string | null;
   logoUrl?: string | null;
   images: string[];
   videoUrl?: string;
+  videoUrls?: string[] | null;
   locale?: string;
   similarVendors?: SimilarVendor[];
 }
@@ -87,23 +87,25 @@ export default function VendorDetailPage({
   description,
   priceFrom,
   phone,
-  whatsapp,
   instagram,
   googleMaps,
   logoUrl,
   images,
   videoUrl,
+  videoUrls,
   locale = 'en',
   similarVendors = [],
 }: VendorDetailPageProps) {
   const router = useRouter();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [videoPlaying, setVideoPlaying] = useState(false);
-  const [videoError, setVideoError] = useState(false);
+  const [videoIndex, setVideoIndex] = useState(0);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [videoModalError, setVideoModalError] = useState(false);
   const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
+  const previewRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const copyPhone = () => {
     if (!phone) return;
@@ -113,9 +115,41 @@ export default function VendorDetailPage({
     });
   };
 
+  const videoCandidates = Array.from(
+    new Set([...(videoUrls || []), ...(videoUrl ? [videoUrl] : [])].filter(Boolean))
+  );
+  const currentVideoUrl = videoCandidates[videoIndex] || videoCandidates[0];
+  const visibleVideoCandidates = videoCandidates.slice(0, 2);
   const allMedia = [...images];
-  if (videoUrl) allMedia.push(videoUrl);
-  const embeddableVideoUrl = getEmbeddableVideoUrl(videoUrl);
+  if (currentVideoUrl) allMedia.push(currentVideoUrl);
+  const embeddableVideoUrl = getEmbeddableVideoUrl(currentVideoUrl);
+
+  const playPreview = (index: number) => {
+    const videoEl = previewRefs.current[index];
+    if (!videoEl) return;
+    if (!videoEl.muted) videoEl.muted = true;
+    if (videoEl.volume !== 0) videoEl.volume = 0;
+    videoEl.currentTime = 0;
+    void videoEl.play().catch(() => {});
+  };
+
+  const stopPreview = (index: number) => {
+    const videoEl = previewRefs.current[index];
+    if (!videoEl) return;
+    videoEl.pause();
+    videoEl.currentTime = 0;
+  };
+
+  const openVideoModal = (index: number) => {
+    setVideoIndex(index);
+    setVideoModalError(false);
+    setVideoModalOpen(true);
+  };
+
+  const enforceMutedPlayback = (element: HTMLVideoElement) => {
+    if (!element.muted) element.muted = true;
+    if (element.volume !== 0) element.volume = 0;
+  };
 
   const mainImage = allMedia[0] || null;
   const gridImages = allMedia.slice(1, 5);
@@ -332,53 +366,60 @@ export default function VendorDetailPage({
               </div>
             )}
 
-            {/* Video — hidden when no videoUrl, paused until clicked */}
-            {videoUrl && (
+            {/* Video */}
+            {currentVideoUrl && (
               <div className="bg-white rounded-2xl p-8 shadow-sm">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">{c.video}</h2>
-                <div className="aspect-video rounded-xl overflow-hidden bg-black relative">
-                  {videoPlaying && !videoError ? (
-                    isDirectVideoFile(videoUrl) ? (
-                      <video
-                        src={videoUrl}
-                        className="w-full h-full"
-                        controls
-                        autoPlay
-                        playsInline
-                        onError={() => setVideoError(true)}
-                      />
-                    ) : embeddableVideoUrl ? (
-                      <iframe
-                        src={embeddableVideoUrl.includes('?') ? `${embeddableVideoUrl}&autoplay=1` : `${embeddableVideoUrl}?autoplay=1`}
-                        className="w-full h-full"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gray-900 text-white px-6 text-center">
-                        <p className="text-sm text-white/80">This video link can&apos;t be embedded.</p>
-                        <a
-                          href={videoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex rounded-lg bg-white text-gray-900 px-3 py-2 text-sm font-semibold"
-                        >
-                          Open video source
-                        </a>
-                      </div>
-                    )
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setVideoError(false);
-                        setVideoPlaying(true);
-                      }}
-                      className="w-full h-full flex flex-col items-center justify-center gap-4 group bg-gray-900 hover:bg-gray-800 transition-colors"
-                    >
-                      <BsFillPlayCircleFill className="w-20 h-20 text-white/80 group-hover:text-white group-hover:scale-110 transition-all" />
-                      <span className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">{c.clickToPlay}</span>
-                    </button>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h2 className="text-xl font-bold text-gray-900">{c.video}</h2>
+                  {visibleVideoCandidates.length > 0 && (
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                      {visibleVideoCandidates.length} / {visibleVideoCandidates.length}
+                    </span>
                   )}
+                </div>
+                <div className="mt-1 overflow-x-auto pb-1">
+                  <div className="flex min-w-max gap-4">
+                    {visibleVideoCandidates.map((url, idx) => (
+                      <button
+                        key={`${url}-${idx}`}
+                        type="button"
+                        onClick={() => openVideoModal(idx)}
+                        onMouseEnter={() => playPreview(idx)}
+                        onMouseLeave={() => stopPreview(idx)}
+                        className={`group relative h-52 w-32 overflow-hidden rounded-3xl border transition-all md:h-64 md:w-40 ${
+                          idx === videoIndex
+                            ? 'border-gray-900 shadow-lg ring-2 ring-gray-900/10'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                        title={`Video ${idx + 1}`}
+                      >
+                        {isDirectVideoFile(url) ? (
+                          <video
+                            src={url}
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                            onLoadedMetadata={(event) => enforceMutedPlayback(event.currentTarget)}
+                            onPlay={(event) => enforceMutedPlayback(event.currentTarget)}
+                            onVolumeChange={(event) => enforceMutedPlayback(event.currentTarget)}
+                            ref={(el) => {
+                              previewRefs.current[idx] = el;
+                            }}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-gradient-to-br from-gray-200 to-gray-400" />
+                        )}
+
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                        <div className="absolute bottom-3 left-3 flex items-center gap-2 text-white">
+                          <BsPlayCircle className="h-5 w-5" />
+                          <span className="text-xs font-semibold">Video {idx + 1}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -488,6 +529,68 @@ export default function VendorDetailPage({
       </div>
 
       {/* ── Lightbox ── */}
+      {videoModalOpen && currentVideoUrl && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 p-6 backdrop-blur-md"
+          onClick={() => setVideoModalOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setVideoModalOpen(false)}
+            className="absolute right-6 top-6 z-20 rounded-full bg-white/10 p-3 text-white hover:bg-white/20"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <div
+            className="relative w-full max-w-[min(92vw,420px)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="relative aspect-[9/16] max-h-[86vh] w-full overflow-hidden rounded-[26px] bg-black shadow-2xl">
+              {isDirectVideoFile(currentVideoUrl) ? (
+                <video
+                  key={`modal-${currentVideoUrl}`}
+                  src={currentVideoUrl}
+                  className="h-full w-full object-cover"
+                  autoPlay
+                  loop
+                  playsInline
+                  muted
+                  onLoadedMetadata={(event) => enforceMutedPlayback(event.currentTarget)}
+                  onPlay={(event) => enforceMutedPlayback(event.currentTarget)}
+                  onVolumeChange={(event) => enforceMutedPlayback(event.currentTarget)}
+                  onError={() => setVideoModalError(true)}
+                />
+              ) : embeddableVideoUrl ? (
+                <iframe
+                  src={embeddableVideoUrl.includes('?') ? `${embeddableVideoUrl}&autoplay=1&mute=1&muted=1` : `${embeddableVideoUrl}?autoplay=1&mute=1&muted=1`}
+                  className="h-full w-full object-cover"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center text-sm text-white/80">
+                  This video link can&apos;t be embedded.
+                </div>
+              )}
+
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-5 text-white">
+                <p className="text-3xl font-semibold leading-tight">{name}</p>
+                <p className="mt-1 text-sm text-white/85">{city}</p>
+              </div>
+            </div>
+
+            {videoModalError && (
+              <div className="mt-3 rounded-lg border border-red-300/30 bg-red-900/30 px-4 py-3 text-sm text-red-200">
+                Failed to play video in popup.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {lightboxOpen && (
         <div className="fixed inset-0 z-[100] bg-black/96 flex items-center justify-center">
           <button
@@ -515,23 +618,35 @@ export default function VendorDetailPage({
           )}
 
           <div className="relative w-full h-full flex items-center justify-center p-16">
-            {allMedia[lightboxIndex] === videoUrl ? (
+            {allMedia[lightboxIndex] === currentVideoUrl ? (
               <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden">
-                {isDirectVideoFile(videoUrl) ? (
+                {isDirectVideoFile(currentVideoUrl) ? (
                   <video
-                    src={videoUrl}
-                    className="w-full h-full"
+                    src={currentVideoUrl}
                     controls
+                    controlsList="nodownload noplaybackrate noremoteplayback"
+                    disablePictureInPicture
                     autoPlay
                     playsInline
+                    muted
+                    onLoadedMetadata={(event) => enforceMutedPlayback(event.currentTarget)}
+                    onPlay={(event) => enforceMutedPlayback(event.currentTarget)}
+                    onVolumeChange={(event) => enforceMutedPlayback(event.currentTarget)}
+                    onContextMenu={(event) => event.preventDefault()}
+                    className="w-full h-full wervice-video-controls"
                   />
                 ) : embeddableVideoUrl ? (
-                  <iframe src={embeddableVideoUrl} className="w-full h-full" allowFullScreen allow="autoplay" />
+                  <iframe
+                    src={embeddableVideoUrl.includes('?') ? `${embeddableVideoUrl}&autoplay=1&mute=1&muted=1` : `${embeddableVideoUrl}?autoplay=1&mute=1&muted=1`}
+                    className="w-full h-full"
+                    allowFullScreen
+                    allow="autoplay"
+                  />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gray-900 text-white px-6 text-center">
                     <p className="text-sm text-white/80">This video link can&apos;t be embedded.</p>
                     <a
-                      href={videoUrl}
+                      href={currentVideoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex rounded-lg bg-white text-gray-900 px-3 py-2 text-sm font-semibold"
@@ -563,7 +678,7 @@ export default function VendorDetailPage({
                   i === lightboxIndex ? 'border-white scale-110' : 'border-white/30 hover:border-white/60'
                 }`}
               >
-                {item === videoUrl ? (
+                {item === currentVideoUrl ? (
                   <div className="w-full h-full bg-gray-800 flex items-center justify-center">
                     <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                   </div>

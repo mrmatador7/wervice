@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@supabase/supabase-js';
-import { authStorage, type CachedUserData } from '@/lib/localStorage';
+import { authStorage } from '@/lib/localStorage';
 
 interface UserProfile {
     id?: string;
@@ -20,7 +20,7 @@ interface UserProfile {
     currency?: string;
     email_notifications?: boolean;
     whatsapp_notifications?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface UserContextType {
@@ -38,9 +38,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // Initialize with null - we'll load from localStorage after mount
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [hasInitialized, setHasInitialized] = useState(false);
 
     const fetchUserData = async (isBackgroundValidation = false) => {
         try {
@@ -116,10 +115,33 @@ export function UserProvider({ children }: { children: ReactNode }) {
             });
 
         } catch (err) {
+            const cachedData = authStorage.get();
+            const isTransientNetworkError =
+                (err instanceof TypeError && /fetch|network/i.test(err.message)) ||
+                (err instanceof Error && err.name === 'AbortError');
+
+            if (isTransientNetworkError) {
+                if (cachedData) {
+                    // Keep existing session state on temporary network issues.
+                    setUser(cachedData.user);
+                    setProfile(cachedData.profile);
+                }
+                if (!isBackgroundValidation) {
+                    setError('Network connection issue. Retrying automatically.');
+                }
+                return;
+            }
+
             console.error('Error fetching user data:', err);
             setError(err instanceof Error ? err.message : 'Failed to load user data');
 
-            // Clear cached data on error
+            // Keep cached data if available; clear only when we have no usable cache.
+            if (cachedData) {
+                setUser(cachedData.user);
+                setProfile(cachedData.profile);
+                return;
+            }
+
             authStorage.clear();
             setUser(null);
             setProfile(null);
@@ -173,6 +195,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
                 // Validate in background if cache is fresh, otherwise fetch fresh
                 if (!authStorage.isExpired()) {
+                    setIsLoading(false);
                     fetchUserData(true); // Background validation
                 } else {
                     setIsLoading(true);
@@ -184,7 +207,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
                 fetchUserData();
             }
 
-            setHasInitialized(true);
         };
 
         initializeAuth();

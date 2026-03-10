@@ -681,4 +681,25 @@
     animation-delay: 4s;
   }
 
+  /* Custom native-video controls for popup players */
+  .wervice-video-controls::-webkit-media-controls-panel {
+    background: linear-gradient(180deg, rgba(3, 9, 18, 0.08), rgba(3, 9, 18, 0.78));
+  }
+
+  .wervice-video-controls::-webkit-media-controls-overflow-button {
+    display: none !important;
+  }
+
+  .wervice-video-controls::-webkit-media-controls-download-button,
+  .wervice-video-controls::-webkit-media-controls-playback-rate-button,
+  .wervice-video-controls::-webkit-media-controls-picture-in-picture-button {
+    display: none !important;
+  }
+
+  .wervice-video-controls::-webkit-media-controls-mute-button,
+  .wervice-video-controls::-webkit-media-controls-volume-slider,
+  .wervice-video-controls::-webkit-media-controls-volume-control-container {
+    display: none !important;
+  }
+
 }

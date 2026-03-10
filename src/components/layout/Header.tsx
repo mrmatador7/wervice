@@ -9,7 +9,7 @@ import { AUTH_UI_ENABLED } from "@/lib/config";
 
 export default function Header() {
   const { locale: currentLocale } = useLocale();
-  const { user, profile, signOut } = useUser();
+  const { user, profile, signOut, isLoading } = useUser();
   const userType = profile?.user_type ?? 'user';
   const [isClient, setIsClient] = useState(false);
   const [selectedCity, setSelectedCity] = useState('all');
@@ -240,6 +240,8 @@ export default function Header() {
                       </div>
                     )}
                   </div>
+                ) : isLoading ? (
+                  <div className="h-9 w-[88px] animate-pulse rounded-lg border border-black/10 bg-white/70" aria-hidden />
                 ) : (
                   /* Sign In Button */
                   <Link
@@ -253,7 +255,7 @@ export default function Header() {
             )}
 
             {/* Become a Vendor - Only show when not logged in */}
-            {AUTH_UI_ENABLED && !user && (
+            {AUTH_UI_ENABLED && !user && !isLoading && (
               <Link
                 href={`/${currentLocale}/become-vendor`}
                 className="inline-flex items-center rounded-lg bg-[#D9FF0A] px-3.5 py-2 text-sm font-semibold text-[#11190C] shadow-sm hover:brightness-95"

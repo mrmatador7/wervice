@@ -16,6 +16,7 @@ export type VendorDetail = {
   starting_price: number | null;
   created_at: string;
   video_url?: string | null;
+  video_urls?: string[] | null;
   instagram?: string | null;
   google_maps?: string | null;
 };
@@ -122,7 +123,7 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
     const leadGalleryVideos = leadGalleryRaw.filter((url) => isVideoUrl(url));
 
     let galleryPhotos: string[] = leadGalleryImages;
-    let videoUrl: string | null = leadGalleryVideos[0] || null;
+    const collectedVideos: string[] = [...leadGalleryVideos];
 
     // Prefer media_files (R2) when vendor_name matches business_name (case-insensitive)
     const { data: mediaRows } = await supabase
@@ -171,9 +172,14 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
 
       // Prefer MIME-verified R2 videos whenever available.
       if (videos.length > 0) {
-        videoUrl = videos[0];
+        const merged = [...videos, ...collectedVideos];
+        const unique = Array.from(new Set(merged));
+        collectedVideos.length = 0;
+        collectedVideos.push(...unique);
       }
     }
+
+    const videoUrl = collectedVideos[0] || null;
 
     // Transform database columns to match VendorDetail type
     return {
@@ -194,6 +200,7 @@ export async function getVendorBySlug(slug: string): Promise<VendorDetail | null
         (lead.profile_starting_price ? parseFloat(lead.profile_starting_price) : null),
       created_at: lead.created_at,
       video_url: videoUrl,
+      video_urls: collectedVideos.length > 0 ? collectedVideos : null,
       instagram: lead.instagram || null,
       google_maps: lead.google_maps || null,
     } as VendorDetail;

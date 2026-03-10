@@ -436,6 +436,50 @@ export type CityStats = {
   publishedCount: number;
 };
 
+function normalizeCityForAdmin(rawCity: string): string {
+  const city = (rawCity || '').trim();
+  if (!city) return city;
+
+  const lower = city.toLowerCase();
+
+  // Common variants/typos mapped to canonical admin city names.
+  if (lower === 'tangier') return 'Tanger';
+  if (lower === 'casabalnca') return 'Casablanca';
+
+  // Handle multi-city values (e.g. "Rabat / Salé", "Casablanca / El Jadida").
+  const parts = city
+    .split('/')
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length > 1) {
+    const canonical = new Set([
+      'Marrakech',
+      'Casablanca',
+      'Fes',
+      'Rabat',
+      'Tanger',
+      'Oujda',
+      'Agadir',
+      'Meknes',
+      'Tetouan',
+      'Kenitra',
+      'El Jadida',
+      'Safi',
+      'Laayoune',
+      'El Hoceima',
+      'Beni Mellal',
+    ]);
+
+    for (const part of parts) {
+      const normalizedPart = part.toLowerCase() === 'tangier' ? 'Tanger' : part;
+      if (canonical.has(normalizedPart)) return normalizedPart;
+    }
+  }
+
+  return city;
+}
+
 /**
  * Fetch all cities with vendor counts (total and published) for admin
  */
@@ -454,7 +498,7 @@ export async function fetchCitiesWithStats(): Promise<CityStats[]> {
 
     const byCity = new Map<string, { total: number; published: number }>();
     for (const row of data || []) {
-      const city = (row as { city: string; published: boolean }).city;
+      const city = normalizeCityForAdmin((row as { city: string; published: boolean }).city);
       if (!city || typeof city !== 'string') continue;
       const current = byCity.get(city) ?? { total: 0, published: 0 };
       current.total += 1;

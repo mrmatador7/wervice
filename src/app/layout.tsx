@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import ClientHtml from "@/components/sections/ClientHtml";
+import FirebaseAnalytics from '@/components/analytics/FirebaseAnalytics';
 import { getSiteUrl } from '@/lib/seo/site-url';
 import "./globals.css";
 
@@ -70,6 +71,7 @@ export default function RootLayout({
     >
       <body>
         {children}
+        <FirebaseAnalytics />
         <Toaster />
       </body>
     </ClientHtml>

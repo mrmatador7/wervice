@@ -98,7 +98,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { user, profile, signOut } = useUser();
+  const { user, profile, signOut, isLoading } = useUser();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<VendorSearchItem[]>([]);
@@ -567,6 +567,8 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                       <p className="text-xs text-[#7a89a0]">{copy.topbar.member}</p>
                     </div>
                   </div>
+                ) : isLoading ? (
+                  <div className="h-8 w-[92px] animate-pulse rounded-lg bg-[#d8e0ec]" aria-hidden />
                 ) : (
                   <button
                     type="button"
@@ -582,6 +584,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                   onClick={() =>
                     router.push(user ? `/${locale}/settings` : `/${locale}/auth-access?mode=signin`)
                   }
+                  disabled={isLoading}
                   className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-[#8093af] hover:bg-white/70"
                   aria-label={copy.topbar.accountSettings}
                 >
@@ -617,6 +620,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
             <button
               type="button"
               onClick={() => router.push(user ? `/${locale}/settings` : `/${locale}/auth-access?mode=signin`)}
+              disabled={isLoading}
               className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-[#d8dee8] bg-white px-3 text-[#4d5f78]"
               aria-label={copy.topbar.accountSettings}
             >

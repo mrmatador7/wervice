@@ -94,7 +94,6 @@ export default async function VendorPage({ params }: VendorPageProps) {
   };
 
   const images = (vendor.gallery_photos || []).filter(Boolean) as string[];
-  const whatsappNumber = vendor.phone?.replace(/\D/g, '') || '';
   const rawDesc = vendor.description?.trim() || '';
   const description = (rawDesc && rawDesc !== 'No description provided' && rawDesc !== 'No description') ? rawDesc : null;
 
@@ -113,12 +112,12 @@ export default async function VendorPage({ params }: VendorPageProps) {
         description={description}
         priceFrom={vendor.starting_price || 0}
         phone={vendor.phone || ''}
-        whatsapp={whatsappNumber}
         instagram={vendor.instagram || null}
         googleMaps={vendor.google_maps || null}
         logoUrl={vendor.profile_photo_url || null}
         images={images}
         videoUrl={vendor.video_url || undefined}
+        videoUrls={vendor.video_urls || undefined}
         locale={locale}
         similarVendors={similarVendors}
       />

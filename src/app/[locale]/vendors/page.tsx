@@ -145,13 +145,6 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
     videoUrl: string;
     videoUrls: string[];
   }>;
-  const videoCategoryTabs = WERVICE_CATEGORIES.filter((category) =>
-    videoVendors.some((vendor) => vendor.categorySlug === category.slug)
-  );
-  const videoCityTabs = MOROCCAN_CITIES.filter((city) => city.value !== 'all' &&
-    videoVendors.some((vendor) => vendor.cityValue === city.value)
-  );
-
   const savedCards = vendors.slice(0, 12).map((vendor) => ({
     id: vendor.id,
     title: vendor.business_name,
@@ -326,80 +319,52 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
             <h1 className="text-4xl font-black tracking-tight text-[#11190C] sm:text-5xl">{copy.nav.videos}</h1>
             <p className="mt-2 text-lg text-[#4a5c74]">Watch vendors that shared video highlights.</p>
           </div>
-          <div className="mb-5 flex flex-wrap items-center gap-2">
-            <Link
-              href={`/${locale}/videos${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}`}
-              className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${
-                !categorySlug ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
-              }`}
-            >
-              All Categories
-            </Link>
-            {videoCategoryTabs.map((category) => (
-              <Link
-                key={category.slug}
-                href={`/${locale}/videos?${new URLSearchParams({
-                  ...(selectedCity ? { city: selectedCity } : {}),
-                  category: category.slug,
-                }).toString()}`}
-                className={`rounded-full border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${
-                  categorySlug === category.slug ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
-                }`}
-              >
-                {labelForCategory(category.slug, locale)}
-              </Link>
-            ))}
-          </div>
-          <div className="mb-6 flex flex-wrap items-center gap-2">
-            <Link
-              href={`/${locale}/videos${categorySlug ? `?category=${encodeURIComponent(categorySlug)}` : ''}`}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                !selectedCity ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
-              }`}
-            >
-              All Cities
-            </Link>
-            {videoCityTabs.map((city) => (
-              <Link
-                key={city.value}
-                href={`/${locale}/videos?${new URLSearchParams({
-                  ...(categorySlug ? { category: categorySlug } : {}),
-                  city: city.value,
-                }).toString()}`}
-                className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${
-                  selectedCity === city.value ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]' : 'border-[#d7dde7] bg-white text-[#4d5f78]'
-                }`}
-              >
-                {localizeCityLabel(city.label, locale)}
-              </Link>
-            ))}
-          </div>
+          <VendorExploreFilters
+            locale={locale}
+            q={q}
+            selectedCity={selectedCity}
+            categorySlug={categorySlug}
+            allCitiesLabel={copy.vendors.allCities}
+            allCategoriesLabel={copy.vendors.allCategories}
+            cityItems={MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => ({
+              value: c.value,
+              label: localizeCityLabel(c.label, locale),
+            }))}
+            categoryItems={WERVICE_CATEGORIES.map((category) => ({
+              slug: category.slug,
+              label: labelForCategory(category.slug, locale),
+            }))}
+            basePath="videos"
+            searchPlaceholder={copy.vendors.searchPlaceholder}
+          />
 
-          {videoVendors.length === 0 ? (
-            <div className="rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">
-              No vendor videos found yet.
-            </div>
-          ) : (
-            <VideoExperienceGrid
-              vendors={videoVendors.map((vendor) => ({
-                id: vendor.id,
-                href: vendor.href,
-                title: vendor.title,
-                categoryLabel: vendor.categoryLabel,
-                categorySlug: vendor.categorySlug,
-                location: vendor.location,
-                cityValue: vendor.cityValue,
-                logoUrl: vendor.logoUrl,
-                videoUrl: vendor.videoUrl,
-                videoUrls: vendor.videoUrls,
-                posterUrl: vendor.posterUrl,
-                galleryImages: vendors
-                  .find((entry) => entry.id === vendor.id)
-                  ?.gallery_urls?.slice(0, 8)
-                  ?.filter((url) => !isVideoFile(url)),
-              }))}
-            />
-          )}
+          <div className="mt-8">
+            {videoVendors.length === 0 ? (
+              <div className="rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">
+                No vendor videos found yet.
+              </div>
+            ) : (
+              <VideoExperienceGrid
+                vendors={videoVendors.map((vendor) => ({
+                  id: vendor.id,
+                  href: vendor.href,
+                  title: vendor.title,
+                  categoryLabel: vendor.categoryLabel,
+                  categorySlug: vendor.categorySlug,
+                  location: vendor.location,
+                  cityValue: vendor.cityValue,
+                  logoUrl: vendor.logoUrl,
+                  videoUrl: vendor.videoUrl,
+                  videoUrls: vendor.videoUrls,
+                  posterUrl: vendor.posterUrl,
+                  galleryImages: vendors
+                    .find((entry) => entry.id === vendor.id)
+                    ?.gallery_urls?.slice(0, 8)
+                    ?.filter((url) => !isVideoFile(url)),
+                }))}
+              />
+            )}
+          </div>
         </section>
       )}
 
