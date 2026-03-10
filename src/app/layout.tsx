@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import ClientHtml from "@/components/sections/ClientHtml";
@@ -71,7 +72,9 @@ export default function RootLayout({
     >
       <body>
         {children}
-        <FirebaseAnalytics />
+        <Suspense fallback={null}>
+          <FirebaseAnalytics />
+        </Suspense>
         <Toaster />
       </body>
     </ClientHtml>
