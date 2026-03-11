@@ -4,6 +4,7 @@ import { Rubik, Allan, Readex_Pro, Poppins, Inter, Montserrat, Open_Sans } from 
 import { Toaster } from "sonner";
 import ClientHtml from "@/components/sections/ClientHtml";
 import FirebaseAnalytics from '@/components/analytics/FirebaseAnalytics';
+import MicrosoftClarity from '@/components/analytics/MicrosoftClarity';
 import { getSiteUrl } from '@/lib/seo/site-url';
 import "./globals.css";
 
@@ -75,6 +76,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <FirebaseAnalytics />
         </Suspense>
+        <MicrosoftClarity />
         <Toaster />
       </body>
     </ClientHtml>
