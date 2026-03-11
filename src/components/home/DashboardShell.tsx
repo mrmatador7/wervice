@@ -14,6 +14,7 @@ import {
   Globe,
   Grid2X2,
   Heart,
+  MessageSquare,
   PlayCircle,
   LogOut,
   MapPin,
@@ -24,10 +25,10 @@ import {
   Users,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
+import { localizeCityLabel } from '@/lib/types/vendor';
 import { cityToSlug } from '@/lib/vendor-url';
 import { useUser } from '@/contexts/UserContext';
-import { CHECKLIST } from '@/data/checklist';
+import { CHECKLIST, getChecklistItemLabel } from '@/data/checklist';
 import { getDashboardCopy } from '@/components/home/dashboard-i18n';
 
 export type ShellCard = {
@@ -80,6 +81,7 @@ function toShellVendorHref(locale: string, href: string) {
 const dashboardNav = [
   { id: 'overview', labelKey: 'home', icon: Grid2X2, href: '' },
   { id: 'favorites', labelKey: 'favorites', icon: Heart, href: '/favorites' },
+  { id: 'messages', labelKey: 'messages', icon: MessageSquare, href: '/messages' },
   { id: 'wedding-date', labelKey: 'weddingDate', icon: Calendar, href: '/wedding-date' },
   { id: 'checklist', labelKey: 'checklist', icon: CheckSquare, href: '/wedding-checklist' },
   { id: 'guest-list', labelKey: 'guestList', icon: Users, href: '/guest-list' },
@@ -107,18 +109,19 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [sidebarFavorites, setSidebarFavorites] = useState<ShellCard[]>(savedCards);
   const [checklistCompletedMap, setChecklistCompletedMap] = useState<Record<string, boolean>>({});
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [isRouteSwitching, setIsRouteSwitching] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [desktopCitiesOverflow, setDesktopCitiesOverflow] = useState(false);
-  const [desktopCitiesCanScrollLeft, setDesktopCitiesCanScrollLeft] = useState(false);
-  const [desktopCitiesCanScrollRight, setDesktopCitiesCanScrollRight] = useState(false);
 
-  const langWrapRef = useRef<HTMLDivElement | null>(null);
-  const desktopCitiesNavRef = useRef<HTMLElement | null>(null);
+  const desktopLangWrapRef = useRef<HTMLDivElement | null>(null);
+  const mobileLangWrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
-      if (langWrapRef.current && !langWrapRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const isInsideDesktop = Boolean(desktopLangWrapRef.current?.contains(target));
+      const isInsideMobile = Boolean(mobileLangWrapRef.current?.contains(target));
+      if (!isInsideDesktop && !isInsideMobile) {
         setIsLangOpen(false);
       }
     }
@@ -140,34 +143,6 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     }
     window.sessionStorage.setItem('wervice_current_path', current);
   }, [pathname, searchParams]);
-
-  useEffect(() => {
-    const updateDesktopCitiesOverflow = () => {
-      const nav = desktopCitiesNavRef.current;
-      if (!nav) return;
-      const overflow = nav.scrollWidth > nav.clientWidth + 2;
-      setDesktopCitiesOverflow(overflow);
-      setDesktopCitiesCanScrollLeft(nav.scrollLeft > 2);
-      setDesktopCitiesCanScrollRight(nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 2);
-    };
-
-    updateDesktopCitiesOverflow();
-    const nav = desktopCitiesNavRef.current;
-    if (!nav) return;
-
-    const onScroll = () => updateDesktopCitiesOverflow();
-    nav.addEventListener('scroll', onScroll, { passive: true });
-
-    const resizeObserver = new ResizeObserver(() => updateDesktopCitiesOverflow());
-    resizeObserver.observe(nav);
-    window.addEventListener('resize', updateDesktopCitiesOverflow);
-
-    return () => {
-      nav.removeEventListener('scroll', onScroll);
-      resizeObserver.disconnect();
-      window.removeEventListener('resize', updateDesktopCitiesOverflow);
-    };
-  }, []);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -216,6 +191,40 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
       controller.abort();
     };
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadMessagesCount(0);
+      return;
+    }
+
+    let canceled = false;
+    const loadUnreadMessages = async () => {
+      try {
+        const response = await fetch('/api/messages', { cache: 'no-store' });
+        if (!response.ok) return;
+        const json = (await response.json()) as {
+          success?: boolean;
+          messages?: Array<{ isRead?: boolean }>;
+        };
+        if (!json.success || !Array.isArray(json.messages)) return;
+        const unread = json.messages.reduce((count, message) => (message.isRead ? count : count + 1), 0);
+        if (!canceled) setUnreadMessagesCount(unread);
+      } catch {
+        // keep UI functional if the badge request fails
+      }
+    };
+
+    void loadUnreadMessages();
+    const timer = window.setInterval(() => {
+      void loadUnreadMessages();
+    }, 30000);
+
+    return () => {
+      canceled = true;
+      window.clearInterval(timer);
+    };
+  }, [user]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -283,6 +292,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
       'videos',
       'inspiration',
       'favorites',
+      'messages',
       'wedding-date',
       'wedding-checklist',
       'guest-list',
@@ -302,14 +312,14 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     const allItems = CHECKLIST.flatMap((section) =>
       section.items.map((item) => ({
         id: item.id,
-        label: item.label,
+        label: getChecklistItemLabel(item, locale as 'en' | 'fr' | 'ar'),
         completed: Boolean(checklistCompletedMap[item.id]),
       }))
     );
     const remaining = allItems.filter((item) => !item.completed);
     const done = allItems.filter((item) => item.completed);
     return [...remaining.slice(0, 3), ...done.slice(0, 3)].slice(0, 3);
-  }, [checklistCompletedMap]);
+  }, [checklistCompletedMap, locale]);
 
   const checklistStats = useMemo(() => {
     const validIds = new Set(CHECKLIST.flatMap((section) => section.items.map((item) => item.id)));
@@ -344,17 +354,6 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     router.push(href);
   }
 
-  function navigateSmooth(href: string) {
-    setIsRouteSwitching(true);
-    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-      (document as Document & { startViewTransition?: (cb: () => void) => void }).startViewTransition?.(() => {
-        router.push(href);
-      });
-      return;
-    }
-    router.push(href);
-  }
-
   function buildSectionUrl(updates: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(updates).forEach(([key, value]) => {
@@ -376,15 +375,6 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
     const qs = searchParams.toString();
     setIsLangOpen(false);
     router.push(`${nextPath}${qs ? `?${qs}` : ''}`);
-  }
-
-  function scrollDesktopCities(direction: 'left' | 'right') {
-    const nav = desktopCitiesNavRef.current;
-    if (!nav) return;
-    nav.scrollBy({
-      left: direction === 'right' ? 260 : -260,
-      behavior: 'smooth',
-    });
   }
 
   const displayName =
@@ -416,52 +406,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               <Image src="/wervice-logo-black.png" alt="Wervice" width={210} height={64} priority className="h-12 w-auto" />
             </Link>
 
-            <div className="ml-2 flex min-w-0 flex-1 items-center gap-2">
-              {desktopCitiesOverflow && (
-                <button
-                  type="button"
-                  onClick={() => scrollDesktopCities('left')}
-                  disabled={!desktopCitiesCanScrollLeft}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#d8dee8] bg-white text-[#4d5f78] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Scroll cities left"
-                >
-                  <span className="text-base leading-none">‹</span>
-                </button>
-              )}
-
-              <nav
-                ref={desktopCitiesNavRef}
-                className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => (
-                  <Link
-                    key={city.value}
-                    href={buildSectionUrl({ city: city.value })}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      navigateSmooth(buildSectionUrl({ city: city.value }));
-                    }}
-                    className="rounded-full border border-[#d7dde7] bg-white px-3 py-1.5 text-sm font-medium text-[#4d5f78] transition hover:bg-[#f1f4f9]"
-                  >
-                    {localizeCityLabel(city.label, locale)}
-                  </Link>
-                ))}
-              </nav>
-
-              {desktopCitiesOverflow && (
-                <button
-                  type="button"
-                  onClick={() => scrollDesktopCities('right')}
-                  disabled={!desktopCitiesCanScrollRight}
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#d8dee8] bg-white text-[#4d5f78] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Scroll cities right"
-                >
-                  <span className="text-base leading-none">›</span>
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-3">
               <div className="relative hidden min-w-0 lg:block lg:w-72 xl:w-80 2xl:w-96">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#8b95a7]" />
                 <input
@@ -524,7 +469,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               </button>
 
               <div className="flex items-center rounded-2xl border border-[#d7dde8] bg-[#edf2f8] px-2 py-1.5">
-                <div ref={langWrapRef} className="relative">
+                <div ref={desktopLangWrapRef} className="relative">
                   <button
                     type="button"
                     onClick={() => setIsLangOpen((prev) => !prev)}
@@ -694,7 +639,7 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               <Heart className="h-5 w-5" />
             </button>
 
-            <div ref={langWrapRef} className="relative lg:hidden">
+            <div ref={mobileLangWrapRef} className="relative lg:hidden">
               <button
                 type="button"
                 onClick={() => setIsLangOpen((prev) => !prev)}
@@ -724,21 +669,6 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
             </div>
           </div>
 
-          <nav className="mt-3 flex items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden">
-            {MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => (
-              <Link
-                key={city.value}
-                href={buildSectionUrl({ city: city.value })}
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigateSmooth(buildSectionUrl({ city: city.value }));
-                }}
-                className="rounded-full border border-[#d7dde7] bg-white px-3 py-1.5 text-sm font-medium text-[#4d5f78] transition hover:bg-[#f1f4f9]"
-              >
-                {localizeCityLabel(city.label, locale)}
-              </Link>
-            ))}
-          </nav>
         </header>
 
         {mobileNavOpen && (
@@ -759,9 +689,11 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
               </div>
 
               <div className="space-y-0.5">
-                {dashboardNav.map((item) => {
+              {dashboardNav.map((item) => {
                   const Icon = item.icon;
                   const active = activeItem === item.id;
+                  const showUnreadBadge = item.id === 'messages' && unreadMessagesCount > 0;
+                  const unreadLabel = unreadMessagesCount > 99 ? '99+' : String(unreadMessagesCount);
                   return (
                     <Link
                       key={item.labelKey}
@@ -774,7 +706,12 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                       aria-current={active ? 'page' : undefined}
                     >
                       <Icon className="h-5 w-5 shrink-0 stroke-[1.9]" />
-                      {copy.nav[item.labelKey as keyof typeof copy.nav]}
+                      <span className="line-clamp-1">{copy.nav[item.labelKey as keyof typeof copy.nav]}</span>
+                      {showUnreadBadge && (
+                        <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-[#D9FF0A] px-1.5 py-0.5 text-[10px] font-bold text-[#11190C]">
+                          {unreadLabel}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}
@@ -807,12 +744,14 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
           </div>
         )}
 
-        <div className={`grid min-h-0 flex-1 transition-opacity duration-300 ${isRouteSwitching ? 'opacity-70' : 'opacity-100'} ${user ? 'xl:grid-cols-[290px_1fr_330px]' : 'xl:grid-cols-[290px_1fr]'}`}>
+        <div className={`grid min-h-0 flex-1 transition-opacity duration-300 ${isRouteSwitching ? 'opacity-70' : 'opacity-100'} ${user ? 'xl:grid-cols-[290px_1fr_264px]' : 'xl:grid-cols-[290px_1fr]'}`}>
           <aside className="hidden h-full overflow-y-auto border-r border-[#dde2ea] bg-[#f3f5f8] px-5 py-6 xl:block">
             <div className="space-y-0.5">
               {dashboardNav.map((item) => {
                 const Icon = item.icon;
                 const active = activeItem === item.id;
+                const showUnreadBadge = item.id === 'messages' && unreadMessagesCount > 0;
+                const unreadLabel = unreadMessagesCount > 99 ? '99+' : String(unreadMessagesCount);
                 return (
                   <Link
                     key={item.labelKey}
@@ -825,7 +764,12 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
                     aria-current={active ? 'page' : undefined}
                   >
                     <Icon className="h-5 w-5 shrink-0 stroke-[1.9]" />
-                    {copy.nav[item.labelKey as keyof typeof copy.nav]}
+                    <span className="line-clamp-1">{copy.nav[item.labelKey as keyof typeof copy.nav]}</span>
+                    {showUnreadBadge && (
+                      <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-[#D9FF0A] px-1.5 py-0.5 text-[10px] font-bold text-[#11190C]">
+                        {unreadLabel}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -859,82 +803,82 @@ export default function DashboardShell({ locale, children, savedCards = [], acti
           <main className="space-y-9 overflow-y-auto bg-[#f7f8fa] px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:pb-6">{children}</main>
 
           {user && (
-            <aside className="hidden space-y-4 overflow-y-auto border-l border-[#dde2ea] bg-[#f3f5f8] px-4 py-6 lg:block sm:px-5">
-              <section className="grid grid-cols-1 gap-3">
-                <div className="rounded-2xl border border-[#dde2ea] bg-white p-4">
+            <aside className="hidden space-y-3 overflow-y-auto border-l border-[#dde2ea] bg-[#f3f5f8] px-3 py-5 lg:block sm:px-4">
+              <section className="grid grid-cols-1 gap-2.5">
+                <div className="rounded-2xl border border-[#dde2ea] bg-white p-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-[#1f2937]">{copy.rightSidebar.weddingDateTitle}</h3>
+                    <h3 className="text-sm font-semibold text-[#1f2937]">{copy.rightSidebar.weddingDateTitle}</h3>
                     <Calendar className="h-4 w-4 text-[#8a96ab]" />
                   </div>
-                  <p className="text-lg font-semibold text-[#243244]">{weddingDateDisplay || copy.rightSidebar.noWeddingDate}</p>
+                  <p className="text-base font-semibold text-[#243244]">{weddingDateDisplay || copy.rightSidebar.noWeddingDate}</p>
                   <Link
                     href={`/${locale}/wedding-date`}
-                    className="mt-2 inline-flex text-xs font-semibold text-[#5a6f90] hover:text-[#2f4668]"
+                    className="mt-1.5 inline-flex text-[11px] font-semibold text-[#5a6f90] hover:text-[#2f4668]"
                   >
                     {copy.rightSidebar.openWeddingDate}
                   </Link>
                 </div>
 
-                <div className="rounded-2xl border border-[#dde2ea] bg-white p-4">
+                <div className="rounded-2xl border border-[#dde2ea] bg-white p-3">
                   <div className="mb-2 flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-[#1f2937]">{copy.rightSidebar.planningProgressTitle}</h3>
-                    <span className="text-sm font-semibold text-[#3a4f70]">{checklistStats.percent}%</span>
+                    <h3 className="text-sm font-semibold text-[#1f2937]">{copy.rightSidebar.planningProgressTitle}</h3>
+                    <span className="text-xs font-semibold text-[#3a4f70]">{checklistStats.percent}%</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-[#e5ebf3]">
                     <div className="h-full rounded-full bg-[#8fb6ff]" style={{ width: `${checklistStats.percent}%` }} />
                   </div>
-                  <p className="mt-2 text-xs font-medium text-[#8a96ab]">{checklistTasksDoneLabel}</p>
+                  <p className="mt-1.5 text-[11px] font-medium text-[#8a96ab]">{checklistTasksDoneLabel}</p>
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-[#dde2ea] bg-white p-4">
-                <h3 className="mb-3 text-2xl font-semibold tracking-[-0.01em] text-[#1f2937]">{copy.rightSidebar.checklistTitle}</h3>
-                <div className="space-y-2.5">
+              <section className="rounded-2xl border border-[#dde2ea] bg-white p-3">
+                <h3 className="mb-2.5 text-xl font-semibold tracking-[-0.01em] text-[#1f2937]">{copy.rightSidebar.checklistTitle}</h3>
+                <div className="space-y-2">
                   {checklistCards.map((task) => (
                     <div
                       key={task.id}
-                      className={`rounded-xl border p-3 ${task.completed ? 'border-[#cfe7d6] bg-[#f2fcf5]' : 'border-[#e2e7ef] bg-[#fbfcfe]'}`}
+                      className={`rounded-xl border p-2.5 ${task.completed ? 'border-[#cfe7d6] bg-[#f2fcf5]' : 'border-[#e2e7ef] bg-[#fbfcfe]'}`}
                     >
-                      <p className="line-clamp-2 text-[15px] font-semibold leading-[1.28] text-[#243244]">{task.label}</p>
-                      <p className="mt-1 text-xs font-medium text-[#8a96ab]">{task.completed ? copy.rightSidebar.completed : copy.rightSidebar.pending}</p>
+                      <p className="line-clamp-2 text-[12px] font-semibold leading-[1.25] text-[#243244]">{task.label}</p>
+                      <p className="mt-1 text-[11px] font-medium text-[#8a96ab]">{task.completed ? copy.rightSidebar.completed : copy.rightSidebar.pending}</p>
                     </div>
                   ))}
                   <Link
                     href={`/${locale}/wedding-checklist`}
-                    className="block rounded-xl border border-[#dde2ea] bg-[#edf2f8] p-2.5 text-center text-sm font-semibold text-[#3f4f67]"
+                    className="block rounded-xl border border-[#dde2ea] bg-[#edf2f8] p-2 text-center text-xs font-semibold text-[#3f4f67]"
                   >
                     {copy.rightSidebar.viewAllTasks}
                   </Link>
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-[#dde2ea] bg-white p-4">
-                <h3 className="mb-3 text-2xl font-semibold tracking-[-0.01em] text-[#1f2937]">{copy.rightSidebar.savedVendors}</h3>
-                <div className="space-y-3">
+              <section className="rounded-2xl border border-[#dde2ea] bg-white p-3">
+                <h3 className="mb-2.5 text-xl font-semibold tracking-[-0.01em] text-[#1f2937]">{copy.rightSidebar.savedVendors}</h3>
+                <div className="space-y-2.5">
                   {sidebarFavorites.slice(0, 3).map((card) => (
                     <Link
                       key={card.id}
                       href={toShellVendorHref(locale, card.href)}
-                      className="block overflow-hidden rounded-2xl border border-[#e2e7ef] bg-[#f9fbfe] p-2.5 transition hover:border-[#cfd8e5] hover:bg-white"
+                      className="block overflow-hidden rounded-2xl border border-[#e2e7ef] bg-[#f9fbfe] p-2 transition hover:border-[#cfd8e5] hover:bg-white"
                     >
-                      <div className="relative h-36 overflow-hidden rounded-xl bg-zinc-200">
+                      <div className="relative h-28 overflow-hidden rounded-xl bg-zinc-200">
                         <Image src={card.image} alt={card.title} fill sizes="280px" className="object-cover" />
                       </div>
-                      <p className="mt-2.5 line-clamp-2 text-[15px] font-semibold leading-[1.25] text-[#1f2937]">{card.title}</p>
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <span className="rounded-full border border-[#d8dfea] bg-white px-2 py-0.5 text-[11px] font-medium text-[#6f7f96]">
-                          {card.categoryLabel || 'Vendor'}
+                      <p className="mt-2 line-clamp-2 text-[12px] font-semibold leading-[1.25] text-[#1f2937]">{card.title}</p>
+                      <div className="mt-1.5 flex items-center justify-between gap-2">
+                        <span className="rounded-full border border-[#d8dfea] bg-white px-2 py-0.5 text-[10px] font-medium text-[#6f7f96]">
+                          {card.categoryLabel || copy.favorites.defaultCategory}
                         </span>
-                        <span className="inline-flex min-w-0 items-center gap-1 text-[11px] font-medium text-[#8a96ab]">
-                          <MapPin className="h-3.5 w-3.5 shrink-0" />
-                          <span className="truncate">{card.location || 'Morocco'}</span>
+                        <span className="inline-flex min-w-0 items-center gap-1 text-[10px] font-medium text-[#8a96ab]">
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{card.location || copy.favorites.defaultLocation}</span>
                         </span>
                       </div>
                     </Link>
                   ))}
                   <Link
                     href={`/${locale}/favorites`}
-                    className="grid h-14 place-items-center rounded-xl border-2 border-dashed border-[#cfd6e1] bg-[#f4f7fc] text-3xl font-light text-[#7f8da3]"
+                    className="grid h-11 place-items-center rounded-xl border-2 border-dashed border-[#cfd6e1] bg-[#f4f7fc] text-2xl font-light text-[#7f8da3]"
                   >
                     +
                   </Link>

@@ -4,8 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ChevronLeft,
-  ChevronRight,
   Building2,
   Camera,
   Grid3X3,
@@ -23,7 +21,7 @@ import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { cityToSlug } from '@/lib/vendor-url';
 import DashboardShell, { type ShellCard } from '@/components/home/DashboardShell';
 import VendorBrowseCard from '@/components/home/VendorBrowseCard';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 type HomeCard = {
   id: string;
@@ -52,46 +50,24 @@ function CarouselHeader({
   title,
   actionLabel,
   actionHref,
-  onPrev,
-  onNext,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   actionLabel?: string;
   actionHref?: string;
-  onPrev: () => void;
-  onNext: () => void;
 }) {
   const Icon = icon;
   return (
-    <div className="mb-4 flex items-center justify-between gap-3 sm:mb-5">
-      <h2 className="flex items-center gap-2.5 text-2xl font-black leading-tight tracking-tight text-[#11190C] sm:text-[1.9rem]">
-        <Icon className="h-6 w-6 text-[#11190C]" />
+    <div className="mb-3 flex items-center justify-between gap-2.5 sm:mb-4">
+      <h2 className="type-title-medium-2 sm:type-headline-small flex items-center gap-2 tracking-tight text-[#11190C]">
+        <Icon className="h-5 w-5 text-[#11190C] sm:h-6 sm:w-6" />
         {title}
       </h2>
-      <div className="flex items-center gap-2">
-        {actionLabel && actionHref && (
-          <Link href={actionHref} className="mr-1 text-sm font-semibold leading-none text-[#11190C] sm:mr-2 sm:text-base">
-            {actionLabel}
-          </Link>
-        )}
-        <button
-          type="button"
-          onClick={onPrev}
-          className="grid h-9 w-9 place-items-center rounded-full border border-[#d8dee8] bg-[#f8fafc] text-[#33475f] hover:bg-[#eef2f7]"
-          aria-label="Scroll left"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          className="grid h-9 w-9 place-items-center rounded-full border border-[#d8dee8] bg-[#f8fafc] text-[#33475f] hover:bg-[#eef2f7]"
-          aria-label="Scroll right"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
+      {actionLabel && actionHref ? (
+        <Link href={actionHref} className="type-label-medium leading-none text-[#11190C] sm:text-sm">
+          {actionLabel}
+        </Link>
+      ) : null}
     </div>
   );
 }
@@ -126,19 +102,30 @@ function SmallCategoryCard({
         event.preventDefault();
         onNavigate(card.href);
       }}
-      className="group relative block h-44 w-[260px] shrink-0 overflow-hidden rounded-3xl ring-1 ring-black/10"
+      className="group relative block shrink-0"
     >
-      <Image
-        src={card.image}
-        alt={card.title}
-        fill
-        sizes="(max-width: 1024px) 100vw, 25vw"
-        className="object-cover transition duration-500 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0f172fcc] via-[#0f172f66] to-[#0f172f22]" />
-      <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white">
-        <Icon className="mb-1.5 h-7 w-7" />
-        <p className="text-[1.9rem] font-extrabold leading-none sm:text-3xl">{card.title}</p>
+      <div className="flex h-[86px] w-[82px] flex-col items-center justify-center rounded-2xl border border-[#d7deea] bg-white sm:hidden">
+        <div className="mb-1.5 grid h-8 w-8 place-items-center rounded-xl bg-[#eef3f9] text-[#33475f]">
+          <Icon className="h-4.5 w-4.5" />
+        </div>
+        <p className="type-label-small line-clamp-2 px-1 text-center text-[#33475f]">
+          {card.title}
+        </p>
+      </div>
+
+      <div className="relative hidden h-44 w-[260px] overflow-hidden rounded-3xl ring-1 ring-black/10 sm:block">
+        <Image
+          src={card.image}
+          alt={card.title}
+          fill
+          sizes="(max-width: 1024px) 100vw, 25vw"
+          className="object-cover transition duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172fcc] via-[#0f172f66] to-[#0f172f22]" />
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white">
+          <Icon className="mb-1.5 h-7 w-7" />
+          <p className="text-[1.9rem] font-extrabold leading-none sm:text-3xl">{card.title}</p>
+        </div>
       </div>
     </Link>
   );
@@ -164,20 +151,27 @@ function CityCard({
         event.preventDefault();
         onNavigate(href);
       }}
-      className="group block w-[260px] shrink-0 rounded-3xl font-[var(--font-inter)]"
+      className="group block shrink-0 rounded-3xl font-[var(--font-inter)]"
     >
-      <div className="relative h-44 overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-black/10">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          sizes="(max-width: 768px) 100vw, 25vw"
-          className="object-cover transition duration-500 group-hover:scale-105"
-        />
+      <div className="type-label-medium inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d7deea] bg-white px-3 text-[#33475f] sm:hidden">
+        <MapPin className="h-3.5 w-3.5 text-[#7f8fa6]" />
+        <span className="line-clamp-1">{title}</span>
       </div>
-      <div className="px-2 pb-1 pt-4 text-center">
-        <h4 className="line-clamp-1 text-[1.08rem] font-semibold leading-[1.2] tracking-[-0.01em] text-[#1f2937]">{title}</h4>
-        <p className="mt-1 text-[0.95rem] font-medium text-[#6b7280]">{vendors}</p>
+
+      <div className="hidden w-[260px] sm:block">
+        <div className="relative h-44 overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-black/10">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, 25vw"
+            className="object-cover transition duration-500 group-hover:scale-105"
+          />
+        </div>
+        <div className="px-2 pb-1 pt-4 text-center">
+          <h4 className="type-title-medium line-clamp-1 tracking-[-0.01em] text-[#1f2937]">{title}</h4>
+          <p className="type-body-small mt-1 text-[#6b7280]">{vendors}</p>
+        </div>
       </div>
     </Link>
   );
@@ -189,12 +183,15 @@ export default function ExplorerHome({
   recommendedVendors,
 }: ExplorerHomeProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const categoriesRowRef = useRef<HTMLDivElement | null>(null);
   const citiesRowRef = useRef<HTMLDivElement | null>(null);
   const recommendedSentinelRef = useRef<HTMLDivElement | null>(null);
   const [gpsCity, setGpsCity] = useState<string | null>(null);
+  const [savedCity, setSavedCity] = useState<string | null>(null);
   const [visibleRecommendedCount, setVisibleRecommendedCount] = useState(6);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [mobileCategoryFilter, setMobileCategoryFilter] = useState<'all' | string>('all');
 
   function smoothNavigate(href: string) {
     setIsNavigating(true);
@@ -205,16 +202,6 @@ export default function ExplorerHome({
       return;
     }
     router.push(href);
-  }
-
-  function scrollRow(ref: React.RefObject<HTMLDivElement | null>, direction: 'left' | 'right') {
-    const node = ref.current;
-    if (!node) return;
-    const amount = 320;
-    node.scrollBy({
-      left: direction === 'right' ? amount : -amount,
-      behavior: 'smooth',
-    });
   }
 
   useEffect(() => {
@@ -247,17 +234,17 @@ export default function ExplorerHome({
   }, []);
 
   const categoryImageBySlug: Record<string, string> = {
-    venues: '/categories/venues.png',
-    dresses: '/categories/Dresses.png',
-    beauty: '/categories/beauty.png',
-    'photo-film': '/categories/photo.png',
-    caterer: '/categories/Catering.png',
-    decor: '/categories/decor.png',
-    artist: '/categories/music.png',
-    'event-planner': '/categories/event-planner.png',
-    florist: '/categories/decor.png',
-    negafa: '/categories/beauty.png',
-    cakes: '/categories/Catering.png',
+    venues: '/images/categories/venues.jpg',
+    dresses: '/images/categories/dresses.jpg',
+    beauty: '/images/categories/beauty.jpg',
+    'photo-film': '/images/categories/photo-film.jpg',
+    caterer: '/images/categories/caterer.jpg',
+    decor: '/images/categories/decor.jpg',
+    artist: '/images/categories/artist.jpg',
+    'event-planner': '/images/categories/event-planner.jpg',
+    florist: '/images/categories/florist.jpg',
+    negafa: '/images/categories/negafa.jpg',
+    cakes: '/images/categories/cakes.jpg',
   };
 
   const categoryCards = WERVICE_CATEGORIES.map((category) => ({
@@ -301,23 +288,93 @@ export default function ExplorerHome({
 
   const savedCards: ShellCard[] = forYouCards;
 
-  const cityKey = (value: string | null | undefined) => (value || '').toLowerCase().trim();
-  const fallbackCity = recommendedVendors[0]?.city || 'Morocco';
+  const cityKey = (value: string | null | undefined) =>
+    (value || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  const knownCityValues = useMemo(
+    () => MOROCCAN_CITIES.filter((city) => city.value !== 'all').map((city) => city.value),
+    []
+  );
+  const selectedCityFromQuery = useMemo(() => {
+    const cityQuery = (searchParams.get('city') || '').trim().toLowerCase();
+    if (!cityQuery) return null;
+    const match = knownCityValues.find((city) => {
+      const value = city.toLowerCase();
+      return value === cityQuery || cityToSlug(city) === cityQuery;
+    });
+    return match || null;
+  }, [knownCityValues, searchParams]);
+  const selectedSavedCity = useMemo(() => {
+    if (!savedCity) return null;
+    const normalized = savedCity.trim().toLowerCase();
+    const match = knownCityValues.find((city) => city.toLowerCase() === normalized || cityToSlug(city) === normalized);
+    return match || null;
+  }, [knownCityValues, savedCity]);
   const selectedCity = useMemo(() => {
-    if (!gpsCity) return fallbackCity;
-    const normalized = cityKey(gpsCity);
-    const hasCity = recommendedVendors.some((vendor) => cityKey(vendor.city) === normalized);
-    return hasCity ? gpsCity : fallbackCity;
-  }, [gpsCity, recommendedVendors, fallbackCity]);
+    if (selectedCityFromQuery) return selectedCityFromQuery;
+    if (selectedSavedCity) return selectedSavedCity;
+    if (!gpsCity) return null;
+    const normalizedGps = cityKey(gpsCity);
+    if (!normalizedGps) return null;
 
+    const directKnown = knownCityValues.find((city) => {
+      const normalizedKnown = cityKey(city);
+      return (
+        normalizedGps === normalizedKnown ||
+        normalizedGps.includes(normalizedKnown) ||
+        normalizedKnown.includes(normalizedGps)
+      );
+    });
+    if (directKnown) return directKnown;
+
+    const vendorMatched = recommendedVendors.find((vendor) => {
+      const tokens = vendor.city.split(/[\/,]/).map((token) => cityKey(token));
+      return tokens.some(
+        (token) =>
+          token === normalizedGps ||
+          token.includes(normalizedGps) ||
+          normalizedGps.includes(token)
+      );
+    });
+    return vendorMatched ? vendorMatched.city.split(/[\/,]/)[0].trim().toLowerCase() : null;
+  }, [gpsCity, knownCityValues, recommendedVendors, selectedCityFromQuery, selectedSavedCity]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = window.localStorage.getItem('wervice_selected_city');
+    if (!raw) return;
+    setSavedCity(raw);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const cityToPersist = selectedCityFromQuery || selectedCity || 'Marrakech';
+    window.localStorage.setItem('wervice_selected_city', cityToPersist);
+    setSavedCity(cityToPersist);
+  }, [selectedCity, selectedCityFromQuery]);
+
+  const effectiveCity = selectedCity || 'Marrakech';
   const recommendedForCity = useMemo(() => {
-    const normalized = cityKey(selectedCity);
-    return recommendedVendors.filter((vendor) => cityKey(vendor.city) === normalized).slice(0, 16);
-  }, [recommendedVendors, selectedCity]);
+    const normalized = cityKey(effectiveCity);
+    const inCity = recommendedVendors.filter((vendor) =>
+      vendor.city
+        .split(/[\/,]/)
+        .map((token) => cityKey(token))
+        .some((token) => token === normalized)
+    );
+    return (inCity.length > 0 ? inCity : recommendedVendors).slice(0, 16);
+  }, [effectiveCity, recommendedVendors]);
+  const recommendedFiltered = useMemo(() => {
+    if (mobileCategoryFilter === 'all') return recommendedForCity;
+    return recommendedForCity.filter((vendor) => vendor.category === mobileCategoryFilter);
+  }, [mobileCategoryFilter, recommendedForCity]);
 
   useEffect(() => {
     setVisibleRecommendedCount(6);
-  }, [selectedCity]);
+  }, [selectedCity, mobileCategoryFilter]);
 
   useEffect(() => {
     const node = recommendedSentinelRef.current;
@@ -327,8 +384,8 @@ export default function ExplorerHome({
       (entries) => {
         if (!entries[0]?.isIntersecting) return;
         setVisibleRecommendedCount((prev) => {
-          if (prev >= recommendedForCity.length) return prev;
-          return Math.min(16, prev + 6, recommendedForCity.length);
+          if (prev >= recommendedFiltered.length) return prev;
+          return Math.min(16, prev + 6, recommendedFiltered.length);
         });
       },
       { rootMargin: '260px 0px', threshold: 0 }
@@ -336,9 +393,9 @@ export default function ExplorerHome({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [recommendedForCity.length]);
+  }, [recommendedFiltered.length]);
 
-  const visibleRecommended = recommendedForCity.slice(0, visibleRecommendedCount);
+  const visibleRecommended = recommendedFiltered.slice(0, visibleRecommendedCount);
 
   return (
     <DashboardShell locale={locale} savedCards={savedCards}>
@@ -361,14 +418,12 @@ export default function ExplorerHome({
         </section>
 
         <div className="space-y-6">
-          <section className="rounded-[28px] border border-[#dbe2ec] bg-white/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] sm:p-6">
+          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[28px] sm:border sm:border-[#dbe2ec] sm:bg-white/70 sm:p-6 sm:shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
             <CarouselHeader
               icon={Grid3X3}
               title="Explore Categories"
               actionLabel="View All"
               actionHref={`/${locale}/vendors`}
-              onPrev={() => scrollRow(categoriesRowRef, 'left')}
-              onNext={() => scrollRow(categoriesRowRef, 'right')}
             />
             <div
               ref={categoriesRowRef}
@@ -385,12 +440,12 @@ export default function ExplorerHome({
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-[#dbe2ec] bg-white/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] sm:p-6">
+          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[28px] sm:border sm:border-[#dbe2ec] sm:bg-white/70 sm:p-6 sm:shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
             <CarouselHeader
               icon={MapPin}
               title="Popular Cities"
-              onPrev={() => scrollRow(citiesRowRef, 'left')}
-              onNext={() => scrollRow(citiesRowRef, 'right')}
+              actionLabel="View All"
+              actionHref={`/${locale}/vendors`}
             />
             <div
               ref={citiesRowRef}
@@ -409,10 +464,37 @@ export default function ExplorerHome({
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-[#dbe2ec] bg-white/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] sm:p-6">
+          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[28px] sm:border sm:border-[#dbe2ec] sm:bg-white/70 sm:p-6 sm:shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
             <h2 className="mb-4 text-2xl font-black tracking-tight text-[#11190C] sm:text-[1.9rem]">
-              Recommended for you in {localizeCityLabel(selectedCity, locale)}
+              Recommended for you in {localizeCityLabel(effectiveCity, locale)}
             </h2>
+            <div className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <button
+                type="button"
+                onClick={() => setMobileCategoryFilter('all')}
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  mobileCategoryFilter === 'all'
+                    ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'
+                    : 'border-[#d7deea] bg-white text-[#4c5e78]'
+                }`}
+              >
+                {locale === 'fr' ? 'Tout' : locale === 'ar' ? 'الكل' : 'All'}
+              </button>
+              {WERVICE_CATEGORIES.map((category) => (
+                <button
+                  key={category.slug}
+                  type="button"
+                  onClick={() => setMobileCategoryFilter(category.slug)}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                    mobileCategoryFilter === category.slug
+                      ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'
+                      : 'border-[#d7deea] bg-white text-[#4c5e78]'
+                  }`}
+                >
+                  {labelForCategory(category.slug, locale)}
+                </button>
+              ))}
+            </div>
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {visibleRecommended.map((vendor) => (
                 <VendorBrowseCard
@@ -424,15 +506,16 @@ export default function ExplorerHome({
                   categoryLabel={labelForCategory(vendor.category, locale)}
                   logoUrl={vendor.logoUrl}
                   galleryImages={vendor.galleryImages}
+                  mobileVariant="list"
                 />
               ))}
             </div>
-            {recommendedForCity.length === 0 && (
+            {recommendedFiltered.length === 0 && (
               <div className="mt-4 rounded-2xl border border-[#d7deea] bg-white p-5 text-sm text-[#5f6f84]">
                 No recommended vendors found in this city yet.
               </div>
             )}
-            {recommendedForCity.length > visibleRecommended.length && (
+            {recommendedFiltered.length > visibleRecommended.length && (
               <div ref={recommendedSentinelRef} className="h-8" />
             )}
           </section>

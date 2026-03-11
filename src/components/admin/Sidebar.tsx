@@ -2,9 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
-import Image from 'next/image';
 import {
   LayoutDashboard,
   Users,
@@ -20,7 +19,6 @@ import {
   Menu,
   X,
   ChevronDown,
-  Sparkles
 } from 'lucide-react';
 
 const navigation = [
@@ -40,8 +38,9 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user, signOut } = useUser();
+  const { user } = useUser();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   const isActive = (href: string) => {
     if (href === '/admin') {
@@ -49,6 +48,44 @@ export default function Sidebar() {
     }
     return pathname.startsWith(href);
   };
+
+  useEffect(() => {
+    let canceled = false;
+
+    const loadUnreadMessages = async () => {
+      try {
+        const response = await fetch('/api/admin/messages', { cache: 'no-store' });
+        if (!response.ok) return;
+
+        const json = (await response.json()) as {
+          success?: boolean;
+          messages?: Array<{ isRead?: boolean }>;
+        };
+
+        if (!json.success || !Array.isArray(json.messages)) return;
+
+        const unread = json.messages.reduce((count, message) => {
+          return message.isRead ? count : count + 1;
+        }, 0);
+
+        if (!canceled) {
+          setUnreadMessages(unread);
+        }
+      } catch {
+        // Ignore unread count fetch errors in navigation.
+      }
+    };
+
+    void loadUnreadMessages();
+    const interval = window.setInterval(() => {
+      void loadUnreadMessages();
+    }, 30000);
+
+    return () => {
+      canceled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   return (
     <>
@@ -115,6 +152,9 @@ export default function Sidebar() {
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            const isMessagesItem = item.href === '/admin/messages';
+            const showUnreadBadge = isMessagesItem && unreadMessages > 0;
+            const unreadLabel = unreadMessages > 99 ? '99+' : String(unreadMessages);
 
             return (
               <Link
@@ -132,6 +172,11 @@ export default function Sidebar() {
               >
                 <Icon size={20} strokeWidth={2} />
                 <span>{item.name}</span>
+                {showUnreadBadge && (
+                  <span className="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-[#D9FF0A] px-2 py-0.5 text-xs font-bold text-[#11190C]">
+                    {unreadLabel}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -109,6 +109,7 @@
 @layer base {
   html {
     font-family: Rubik, system-ui, sans-serif;
+    font-size: 80%;
   }
 
   html[dir="rtl"] {
@@ -224,6 +225,33 @@
 }
 
 @layer utilities {
+  /* Type scale tokens */
+  .type-display-large { font-size: 57px; line-height: 1.1; font-weight: 700; }
+  .type-display-medium { font-size: 45px; line-height: 1.1; font-weight: 700; }
+  .type-display-small { font-size: 36px; line-height: 1.15; font-weight: 700; }
+  .type-headline-large { font-size: 32px; line-height: 1.2; font-weight: 700; }
+  .type-headline-medium { font-size: 28px; line-height: 1.2; font-weight: 700; }
+  .type-headline-small { font-size: 24px; line-height: 1.2; font-weight: 700; }
+  .type-title-large { font-size: 22px; line-height: 1.25; font-weight: 700; }
+  .type-title-medium-2 { font-size: 18px; line-height: 1.3; font-weight: 700; }
+  .type-title-medium { font-size: 16px; line-height: 1.3; font-weight: 700; }
+  .type-body-large { font-size: 16px; line-height: 1.5; font-weight: 500; }
+  .type-title-small { font-size: 14px; line-height: 1.35; font-weight: 700; }
+  .type-body-medium { font-size: 14px; line-height: 1.45; font-weight: 500; }
+  .type-label-large { font-size: 14px; line-height: 1.3; font-weight: 600; }
+  .type-body-small { font-size: 12px; line-height: 1.35; font-weight: 500; }
+  .type-label-medium { font-size: 12px; line-height: 1.3; font-weight: 600; }
+  .type-label-small { font-size: 10px; line-height: 1.2; font-weight: 600; }
+
+  @media (max-width: 640px) {
+    .type-headline-large { font-size: 24px; }
+    .type-headline-medium { font-size: 21px; }
+    .type-headline-small { font-size: 18px; }
+    .type-title-large { font-size: 18px; }
+    .type-title-medium-2 { font-size: 16px; }
+    .type-title-medium { font-size: 14px; }
+  }
+
   /* Typography Utility Classes */
 
   /* Main Headings */

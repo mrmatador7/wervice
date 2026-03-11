@@ -4,6 +4,7 @@ type DashboardCopy = {
   nav: {
     home: string;
     favorites: string;
+    messages: string;
     weddingDate: string;
     checklist: string;
     guestList: string;
@@ -154,6 +155,7 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
     nav: {
       home: 'Home',
       favorites: 'Favorites',
+      messages: 'Messages',
       weddingDate: 'Wedding Date',
       checklist: 'Wedding Checklist',
       guestList: 'Guest List',
@@ -302,6 +304,7 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
     nav: {
       home: 'Accueil',
       favorites: 'Favoris',
+      messages: 'Messages',
       weddingDate: 'Date du mariage',
       checklist: 'Checklist mariage',
       guestList: 'Liste des invités',
@@ -450,6 +453,7 @@ const copy: Record<DashboardLocale, DashboardCopy> = {
     nav: {
       home: 'الرئيسية',
       favorites: 'المفضلة',
+      messages: 'الرسائل',
       weddingDate: 'تاريخ الزفاف',
       checklist: 'قائمة مهام الزفاف',
       guestList: 'قائمة الضيوف',

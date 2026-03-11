@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { FiCheckCircle, FiCircle, FiSearch } from 'react-icons/fi';
-import { CHECKLIST, getCategories } from '@/data/checklist';
+import { CHECKLIST, getCategories, getChecklistItemLabel } from '@/data/checklist';
 import { useUser } from '@/contexts/UserContext';
 import { getDashboardCopy } from '@/components/home/dashboard-i18n';
 
@@ -160,7 +160,7 @@ export default function WeddingChecklistView({ locale }: WeddingChecklistViewPro
 
                       <div className="min-w-0 flex-1">
                         <p className={`text-sm ${completed[item.id] ? 'text-[#5f6f84] line-through' : 'text-[#11190C]'}`}>
-                          {item.label}
+                          {getChecklistItemLabel(item, locale as 'en' | 'fr' | 'ar')}
                         </p>
 
                         <div className="mt-1.5 flex flex-wrap items-center gap-2">

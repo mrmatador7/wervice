@@ -14,8 +14,8 @@ import DashboardRecommendations from './DashboardRecommendations';
 
 interface DashboardClientProps {
   user: User;
-  profile: any;
-  favorites: any[];
+  profile: Record<string, unknown> | null;
+  favorites: unknown[];
   locale: string;
 }
 
@@ -59,10 +59,10 @@ export default function DashboardClient({ user, profile, favorites, locale }: Da
             <DashboardVendors profile={profile} locale={locale} />
           )}
           {activeTab === 'planner' && (
-            <DashboardPlanner profile={profile} />
+            <DashboardPlanner profile={profile} locale={locale} />
           )}
           {activeTab === 'budget' && (
-            <DashboardBudget profile={profile} />
+            <DashboardBudget profile={profile} locale={locale} />
           )}
           {activeTab === 'recommendations' && (
             <DashboardRecommendations profile={profile} locale={locale} />
@@ -75,4 +75,3 @@ export default function DashboardClient({ user, profile, favorites, locale }: Da
     </div>
   );
 }
-

@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { FiChevronRight, FiMapPin, FiInstagram, FiShare2, FiChevronLeft } from 'react-icons/fi';
 import { BsPlayCircle } from 'react-icons/bs';
 import type { SimilarVendor } from '@/lib/db/vendors';
+import { useUser } from '@/contexts/UserContext';
 import SimilarVendors from './SimilarVendors';
 
 interface VendorDetailPageProps {
@@ -79,6 +80,30 @@ function getEmbeddableVideoUrl(url: string | undefined): string | null {
   }
 }
 
+function normalizeWhatsappNumber(rawPhone: string | null | undefined): string | null {
+  if (!rawPhone) return null;
+
+  // Pick the first phone-like segment when multiple numbers are present.
+  const firstCandidate = rawPhone.match(/\+?\d[\d\s()./-]{6,}\d/)?.[0] || rawPhone;
+  let normalized = firstCandidate.trim();
+
+  if (normalized.startsWith('+')) normalized = normalized.slice(1);
+  normalized = normalized.replace(/[^\d]/g, '');
+  if (!normalized) return null;
+
+  // Convert leading international prefix.
+  if (normalized.startsWith('00')) normalized = normalized.slice(2);
+
+  // Morocco normalization:
+  // 06XXXXXXXX or 07XXXXXXXX -> 2126XXXXXXXX / 2127XXXXXXXX
+  // 6XXXXXXXX or 7XXXXXXXX (missing leading 0) -> 2126XXXXXXXX / 2127XXXXXXXX
+  if (normalized.startsWith('212')) return normalized;
+  if (normalized.length === 10 && normalized.startsWith('0')) return `212${normalized.slice(1)}`;
+  if (normalized.length === 9 && /^[67]/.test(normalized)) return `212${normalized}`;
+
+  return normalized;
+}
+
 export default function VendorDetailPage({
   name,
   city,
@@ -97,6 +122,7 @@ export default function VendorDetailPage({
   similarVendors = [],
 }: VendorDetailPageProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [videoIndex, setVideoIndex] = useState(0);
@@ -105,7 +131,13 @@ export default function VendorDetailPage({
   const [phoneRevealed, setPhoneRevealed] = useState(false);
   const [phoneCopied, setPhoneCopied] = useState(false);
   const [showBackButton, setShowBackButton] = useState(false);
+  const [senderName, setSenderName] = useState('');
+  const [senderPhone, setSenderPhone] = useState('');
+  const [senderMessage, setSenderMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [sendMessageStatus, setSendMessageStatus] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const previewRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const { user, profile } = useUser();
 
   const copyPhone = () => {
     if (!phone) return;
@@ -164,6 +196,20 @@ export default function VendorDetailPage({
   const mapsHref = googleMaps
     ? (googleMaps.startsWith('http') ? googleMaps : `https://www.google.com/maps/search/${encodeURIComponent(googleMaps + ', ' + city + ', Morocco')}`)
     : `https://www.google.com/maps/search/${encodeURIComponent(name + ', ' + city + ', Morocco')}`;
+  const publicSiteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://wervice.com').replace(/\/+$/, '');
+  const vendorPageUrl = `${publicSiteUrl}${pathname || ''}`;
+  const whatsappNumber = normalizeWhatsappNumber(phone);
+  const whatsappMessageByLocale = {
+    en: `Hi, I found your profile here: ${vendorPageUrl} while searching for ${categoryLabel} vendors in ${city}, and I'm interested in your services.`,
+    fr: `Bonjour, j'ai trouvé votre profil ici : ${vendorPageUrl} en recherchant des prestataires ${categoryLabel} à ${city}, et je suis intéressé(e) par vos services.`,
+    ar: `مرحبا، لقد وجدت ملفكم هنا: ${vendorPageUrl} أثناء البحث عن مزودي ${categoryLabel} في ${city}، وأنا مهتم بخدماتكم.`,
+  } as const;
+  const whatsappMessage =
+    whatsappMessageByLocale[(locale as keyof typeof whatsappMessageByLocale) || 'en'] ||
+    whatsappMessageByLocale.en;
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
+    : null;
 
   const contentCopy = {
     en: {
@@ -178,6 +224,19 @@ export default function VendorDetailPage({
       back: 'Back',
       location: 'Location',
       getDirections: 'Get Directions',
+      primaryContact: 'Primary Contact',
+      clickToReveal: 'Click to reveal',
+      sendWhatsappMessage: 'Send WhatsApp Message',
+      sendVendorMessage: 'Send Message',
+      yourName: 'Your name',
+      yourPhone: 'Your phone number',
+      yourMessage: 'Your message',
+      messagePlaceholder: 'Hi, I am interested in your services for my wedding.',
+      messageSent: 'Your message was sent successfully.',
+      messageFailed: 'Failed to send your message. Please try again.',
+      sending: 'Sending...',
+      follow: 'Follow',
+      contactForInfo: 'Contact for info',
       fallbackOverview: `${name} is one of the featured ${categoryLabel.toLowerCase()} vendors in ${city}.`,
     },
     fr: {
@@ -192,6 +251,19 @@ export default function VendorDetailPage({
       back: 'Retour',
       location: 'Localisation',
       getDirections: 'Obtenir l’itinéraire',
+      primaryContact: 'Contact principal',
+      clickToReveal: 'Cliquez pour afficher',
+      sendWhatsappMessage: 'Envoyer un message WhatsApp',
+      sendVendorMessage: 'Envoyer un message',
+      yourName: 'Votre nom',
+      yourPhone: 'Votre numéro de téléphone',
+      yourMessage: 'Votre message',
+      messagePlaceholder: "Bonjour, je suis intéressé(e) par vos services pour mon mariage.",
+      messageSent: 'Votre message a été envoyé avec succès.',
+      messageFailed: "Échec de l'envoi du message. Veuillez réessayer.",
+      sending: 'Envoi...',
+      follow: 'Suivre',
+      contactForInfo: 'Contactez pour plus d’infos',
       fallbackOverview: `${name} fait partie des prestataires ${categoryLabel.toLowerCase()} recommandés à ${city}.`,
     },
     ar: {
@@ -206,6 +278,19 @@ export default function VendorDetailPage({
       back: 'رجوع',
       location: 'الموقع',
       getDirections: 'الحصول على الاتجاهات',
+      primaryContact: 'جهة الاتصال الرئيسية',
+      clickToReveal: 'اضغط لإظهار الرقم',
+      sendWhatsappMessage: 'إرسال رسالة واتساب',
+      sendVendorMessage: 'إرسال رسالة',
+      yourName: 'اسمك',
+      yourPhone: 'رقم هاتفك',
+      yourMessage: 'رسالتك',
+      messagePlaceholder: 'مرحبًا، أنا مهتم/ة بخدماتكم لحفل زفافي.',
+      messageSent: 'تم إرسال رسالتك بنجاح.',
+      messageFailed: 'فشل إرسال الرسالة. حاول/ي مرة أخرى.',
+      sending: 'جارٍ الإرسال...',
+      follow: 'متابعة',
+      contactForInfo: 'تواصل لمعرفة التفاصيل',
       fallbackOverview: `${name} من مزوّدي ${categoryLabel.toLowerCase()} المميزين في ${city}.`,
     },
   } as const;
@@ -237,6 +322,54 @@ export default function VendorDetailPage({
     const prevPath = window.sessionStorage.getItem('wervice_prev_path');
     setShowBackButton(Boolean(prevPath && prevPath !== currentPath));
   }, []);
+
+  useEffect(() => {
+    const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ').trim();
+    const fallbackName = user?.email ? user.email.split('@')[0] : '';
+    const nextName = fullName || fallbackName;
+    if (nextName) setSenderName(nextName);
+    if (profile?.phone) setSenderPhone(String(profile.phone));
+  }, [profile?.first_name, profile?.last_name, profile?.phone, user?.email]);
+
+  const sendVendorMessage = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSendMessageStatus(null);
+
+    const nameValue = senderName.trim();
+    const phoneValue = senderPhone.trim();
+    const messageValue = senderMessage.trim();
+    if (!nameValue || !phoneValue || !messageValue) return;
+
+    setSendingMessage(true);
+    try {
+      const response = await fetch('/api/vendor-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vendorName: name,
+          vendorCategory: categoryLabel,
+          vendorCity: city,
+          vendorUrl: vendorPageUrl,
+          locale,
+          senderName: nameValue,
+          senderPhone: phoneValue,
+          senderAccountEmail: user?.email || profile?.email || '',
+          message: messageValue,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('send_failed');
+      }
+
+      setSendMessageStatus({ type: 'success', text: c.messageSent });
+      setSenderMessage('');
+    } catch {
+      setSendMessageStatus({ type: 'error', text: c.messageFailed });
+    } finally {
+      setSendingMessage(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -448,43 +581,56 @@ export default function VendorDetailPage({
 
             {/* Primary Contact — lime green card, number blurred until click */}
             <div className="bg-[#D9FF0A] rounded-2xl p-6">
-              <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#11190C]/50 mb-1">Primary Contact</p>
+              <p className="text-[11px] font-bold tracking-[0.15em] uppercase text-[#11190C]/50 mb-1">{c.primaryContact}</p>
               {phone ? (
-                phoneRevealed ? (
-                  <div className="flex items-center justify-between gap-2 mt-1">
-                    <a href={`tel:${phone}`} className="text-2xl font-bold text-[#11190C] hover:underline leading-tight break-all">
-                      {phone}
-                    </a>
+                <>
+                  {phoneRevealed ? (
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <a href={`tel:${phone}`} className="text-2xl font-bold text-[#11190C] hover:underline leading-tight break-all">
+                        {phone}
+                      </a>
+                      <button
+                        type="button"
+                        onClick={copyPhone}
+                        title="Copy number"
+                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#11190C]/10 hover:bg-[#11190C]/20 flex items-center justify-center transition-colors"
+                      >
+                        {phoneCopied ? (
+                          <svg className="w-4 h-4 text-[#11190C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4 text-[#11190C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <rect x="9" y="9" width="13" height="13" rx="2" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       type="button"
-                      onClick={copyPhone}
-                      title="Copy number"
-                      className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#11190C]/10 hover:bg-[#11190C]/20 flex items-center justify-center transition-colors"
+                      onClick={() => setPhoneRevealed(true)}
+                      className="text-2xl font-bold text-[#11190C] block leading-tight text-left w-full cursor-pointer mt-1"
                     >
-                      {phoneCopied ? (
-                        <svg className="w-4 h-4 text-[#11190C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4 text-[#11190C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <rect x="9" y="9" width="13" height="13" rx="2" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                        </svg>
-                      )}
+                      <span className="select-none blur-md pointer-events-none" aria-hidden>{phone}</span>
+                      <span className="block mt-1 text-xs font-normal text-[#11190C]/70">{c.clickToReveal}</span>
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setPhoneRevealed(true)}
-                    className="text-2xl font-bold text-[#11190C] block leading-tight text-left w-full cursor-pointer mt-1"
-                  >
-                    <span className="select-none blur-md pointer-events-none" aria-hidden>{phone}</span>
-                    <span className="block mt-1 text-xs font-normal text-[#11190C]/70">Click to reveal</span>
-                  </button>
-                )
+                  )}
+
+                  {whatsappHref && (
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-[#11190C] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0a1008]"
+                    >
+                      {c.sendWhatsappMessage}
+                    </a>
+                  )}
+                </>
               ) : (
-                <p className="text-xl font-bold text-[#11190C] mt-1">Contact for info</p>
+                <p className="text-xl font-bold text-[#11190C] mt-1">{c.contactForInfo}</p>
               )}
             </div>
 
@@ -504,10 +650,57 @@ export default function VendorDetailPage({
                     <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Instagram</p>
                     <p className="text-sm font-semibold text-gray-900">{igInfo.handle}</p>
                   </div>
-                  <span className="ml-auto text-xs font-semibold text-blue-600 hover:underline whitespace-nowrap">Follow →</span>
+                  <span className="ml-auto text-xs font-semibold text-blue-600 hover:underline whitespace-nowrap">{c.follow} →</span>
                 </a>
               </div>
             )}
+
+            <div className="bg-white rounded-2xl p-5 shadow-sm">
+              <h4 className="mb-3 text-base font-bold text-[#11190C]">{c.sendVendorMessage}</h4>
+              <form onSubmit={sendVendorMessage} className="space-y-2.5">
+                <input
+                  type="text"
+                  value={senderName}
+                  onChange={(event) => setSenderName(event.target.value)}
+                  placeholder={c.yourName}
+                  required
+                  readOnly={Boolean(user)}
+                  className="w-full rounded-xl border border-[#d8dee8] bg-white px-3 py-2.5 text-sm text-[#11190C] focus:outline-none focus:ring-2 focus:ring-[#D9FF0A]"
+                />
+                <input
+                  type="tel"
+                  value={senderPhone}
+                  onChange={(event) => setSenderPhone(event.target.value)}
+                  placeholder={c.yourPhone}
+                  required
+                  className="w-full rounded-xl border border-[#d8dee8] bg-white px-3 py-2.5 text-sm text-[#11190C] focus:outline-none focus:ring-2 focus:ring-[#D9FF0A]"
+                />
+                <textarea
+                  value={senderMessage}
+                  onChange={(event) => setSenderMessage(event.target.value)}
+                  placeholder={c.messagePlaceholder}
+                  required
+                  rows={4}
+                  className="w-full resize-none rounded-xl border border-[#d8dee8] bg-white px-3 py-2.5 text-sm text-[#11190C] focus:outline-none focus:ring-2 focus:ring-[#D9FF0A]"
+                />
+                <button
+                  type="submit"
+                  disabled={sendingMessage}
+                  className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-[#11190C] px-4 text-sm font-semibold text-white hover:bg-[#0a1008] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {sendingMessage ? c.sending : c.sendVendorMessage}
+                </button>
+              </form>
+              {sendMessageStatus && (
+                <p
+                  className={`mt-2 text-xs font-semibold ${
+                    sendMessageStatus.type === 'success' ? 'text-green-700' : 'text-red-700'
+                  }`}
+                >
+                  {sendMessageStatus.text}
+                </p>
+              )}
+            </div>
 
             {/* Price (if available) */}
             {priceFrom > 0 && (

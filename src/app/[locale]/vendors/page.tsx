@@ -12,13 +12,14 @@ import AccountSettingsView from '@/components/home/AccountSettingsView';
 import AuthAccessView from '@/components/home/AuthAccessView';
 import VideoExperienceGrid from '@/components/home/VideoExperienceGrid';
 import VendorExploreFilters from '@/components/home/VendorExploreFilters';
+import UserMessagesView from '@/components/home/UserMessagesView';
 import {
   WERVICE_CATEGORIES,
   labelForCategory,
   normalizeCategory,
   slugToDbCategory,
 } from '@/lib/categories';
-import { vendorUrl } from '@/lib/vendor-url';
+import { cityToSlug, vendorUrl } from '@/lib/vendor-url';
 import { fetchVendors } from '@/lib/supabase/vendors';
 import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { getAll } from '@/data/articles';
@@ -148,7 +149,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
   const resolvedSearchParams = await searchParams;
   const view = firstParam(resolvedSearchParams.view) || 'overview';
   const chapterParam = firstParam(resolvedSearchParams.chapter);
-  const allowedViews = new Set(['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools', 'settings', 'auth', 'inspiration', 'videos']);
+  const allowedViews = new Set(['overview', 'favorites', 'messages', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools', 'settings', 'auth', 'inspiration', 'videos']);
   const safeView = allowedViews.has(view) ? view : 'overview';
 
   const cityParam = firstParam(resolvedSearchParams.city);
@@ -161,7 +162,25 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
 
   const shouldLoadVendorGrid = safeView === 'overview';
   const shouldLoadVideos = safeView === 'videos';
-
+  const citySlug = selectedCity ? cityToSlug(selectedCity) : null;
+  const cityCoverBySlug: Record<string, string> = {
+    marrakech: '/cities/Marrakech.jpg',
+    casablanca: '/cities/Casablanca.jpg',
+    fes: '/cities/Fez.jpg',
+    rabat: '/cities/Rabat.jpg',
+    tanger: '/cities/tanger.jpg',
+    agadir: '/cities/Agadir.jpg',
+    meknes: '/cities/meknes.jpg',
+    tetouan: '/cities/Tetouan.jpg',
+    kenitra: '/cities/Kenitra.webp',
+    'el-jadida': '/cities/El Jadida.jpg',
+    safi: '/cities/Safi.jpg',
+    oujda: '/cities/Oujda.jpg',
+    laayoune: '/cities/Laayoune.jpg',
+    'el-hoceima': '/cities/El Hoceima.jpg',
+    'beni-mellal': '/cities/Beni Mellal.jpg',
+  };
+  const cityCoverImage = citySlug ? cityCoverBySlug[citySlug] || '/images/sample/venues-1.jpg' : null;
   const { vendors, hasMore } = await fetchVendors({
     city: selectedCity,
     category: dbCategory || undefined,
@@ -235,7 +254,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
     : safeView === 'videos'
       ? 'videos'
       : (categorySlug === 'venues' ? 'venues' : 'all-vendors');
-  const activeItem = ['overview', 'favorites', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools'].includes(safeView)
+  const activeItem = ['overview', 'favorites', 'messages', 'wedding-date', 'checklist', 'guest-list', 'budget-planner', 'planning-tools'].includes(safeView)
     ? safeView
     : activeMarketplace;
   const planningChapters = getAllChapters();
@@ -260,6 +279,10 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
     <DashboardShell locale={locale} savedCards={savedCards} activeItem={activeItem}>
       {safeView === 'favorites' && (
         <FavoritesView locale={locale} />
+      )}
+
+      {safeView === 'messages' && (
+        <UserMessagesView locale={locale} />
       )}
 
       {safeView === 'checklist' && (
@@ -438,7 +461,53 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
 
       {safeView === 'overview' && (
       <section className="mx-auto max-w-7xl">
-        <form className="mt-3 max-w-3xl">
+        {selectedCity && cityCoverImage && (
+          <div className="mb-4 lg:hidden">
+            <div className="relative h-44 overflow-hidden rounded-[24px] border border-[#d7deea]">
+              <Image
+                src={cityCoverImage}
+                alt={localizeCityLabel(selectedCity, locale)}
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#11190Ccc] via-[#11190c55] to-transparent" />
+              <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-transparent p-3">
+                <h1 className="mt-1 text-[1.75rem] font-black leading-none text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]">
+                  {localizeCityLabel(selectedCity, locale)}
+                </h1>
+              </div>
+            </div>
+
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <Link
+                href={`/${locale}/vendors?city=${encodeURIComponent(selectedCity)}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                  !categorySlug
+                    ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'
+                    : 'border-[#d7deea] bg-white text-[#4d5f78]'
+                }`}
+              >
+                {copy.vendors.allCategories}
+              </Link>
+              {WERVICE_CATEGORIES.map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/${locale}/vendors?city=${encodeURIComponent(selectedCity)}&category=${encodeURIComponent(category.slug)}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                    categorySlug === category.slug
+                      ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'
+                      : 'border-[#d7deea] bg-white text-[#4d5f78]'
+                  }`}
+                >
+                  {labelForCategory(category.slug, locale)}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <form className={`mt-3 max-w-3xl ${selectedCity ? 'hidden lg:block' : ''}`}>
           <div className="relative">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8a99ad]" />
             <input
@@ -453,22 +522,24 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
           </div>
         </form>
 
-        <VendorExploreFilters
-          locale={locale}
-          q={q}
-          selectedCity={selectedCity}
-          categorySlug={categorySlug}
-          allCitiesLabel={copy.vendors.allCities}
-          allCategoriesLabel={copy.vendors.allCategories}
-          cityItems={MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => ({
-            value: c.value,
-            label: localizeCityLabel(c.label, locale),
-          }))}
-          categoryItems={WERVICE_CATEGORIES.map((category) => ({
-            slug: category.slug,
-            label: labelForCategory(category.slug, locale),
-          }))}
-        />
+        <div className={selectedCity ? 'hidden lg:block' : ''}>
+          <VendorExploreFilters
+            locale={locale}
+            q={q}
+            selectedCity={selectedCity}
+            categorySlug={categorySlug}
+            allCitiesLabel={copy.vendors.allCities}
+            allCategoriesLabel={copy.vendors.allCategories}
+            cityItems={MOROCCAN_CITIES.filter((c) => c.value !== 'all').map((c) => ({
+              value: c.value,
+              label: localizeCityLabel(c.label, locale),
+            }))}
+            categoryItems={WERVICE_CATEGORIES.map((category) => ({
+              slug: category.slug,
+              label: labelForCategory(category.slug, locale),
+            }))}
+          />
+        </div>
 
         {vendors.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-[#d7deea] bg-white p-6 text-[#5f6f84]">

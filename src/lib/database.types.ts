@@ -226,6 +226,60 @@ export interface Database {
                     }
                 ]
             }
+            vendor_contact_messages: {
+                Row: {
+                    id: string
+                    vendor_name: string
+                    vendor_category: string | null
+                    vendor_city: string | null
+                    vendor_url: string | null
+                    locale: string
+                    sender_name: string
+                    sender_phone: string
+                    sender_account_email: string | null
+                    message: string
+                    is_read: boolean
+                    is_flagged: boolean
+                    is_archived: boolean
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    vendor_name: string
+                    vendor_category?: string | null
+                    vendor_city?: string | null
+                    vendor_url?: string | null
+                    locale?: string
+                    sender_name: string
+                    sender_phone: string
+                    sender_account_email?: string | null
+                    message: string
+                    is_read?: boolean
+                    is_flagged?: boolean
+                    is_archived?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    vendor_name?: string
+                    vendor_category?: string | null
+                    vendor_city?: string | null
+                    vendor_url?: string | null
+                    locale?: string
+                    sender_name?: string
+                    sender_phone?: string
+                    sender_account_email?: string | null
+                    message?: string
+                    is_read?: boolean
+                    is_flagged?: boolean
+                    is_archived?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: []
+            }
             vendor_leads: {
                 Row: {
                     id: string

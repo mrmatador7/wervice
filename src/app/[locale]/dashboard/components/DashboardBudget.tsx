@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiDownload, FiPrinter } from 'react-icons/fi';
+import { useMemo, useState } from 'react';
+import { FiPlus, FiTrash2, FiDownload, FiPrinter } from 'react-icons/fi';
 
 interface BudgetCategory {
   id: string;
@@ -37,10 +37,176 @@ const defaultCategories: BudgetCategory[] = [
 ];
 
 interface DashboardBudgetProps {
-  profile: any;
+  profile: unknown;
+  locale?: string;
 }
 
-export default function DashboardBudget({ profile }: DashboardBudgetProps) {
+type BudgetLocale = 'en' | 'fr' | 'ar';
+
+const budgetCopy = {
+  en: {
+    title: 'Budget',
+    subtitle: 'Track and manage your wedding expenses',
+    download: 'Download',
+    print: 'Print',
+    budgetTab: 'Budget',
+    paymentsTab: 'Payments',
+    newCategory: 'New category',
+    expenseSingle: 'expense',
+    expensePlural: 'expenses',
+    totalBudget: 'Total Budget',
+    allocated: 'Allocated',
+    remaining: 'Remaining',
+    editableAnytime: 'You can edit this at any time.',
+    overBudget: 'Over Budget!',
+    overBudgetDetail: 'You have allocated {amount} MAD more than your budget.',
+    saving: 'Saving...',
+    saveBudget: 'Save budget',
+    saveSuccess: 'Saved successfully!',
+    saveFailed: 'Failed to save budget. Please try again.',
+    deleteExpenseConfirm: 'Are you sure you want to delete this expense?',
+    expenses: 'Expenses',
+    estimatedCost: 'Estimated cost:',
+    finalCost: 'Final cost:',
+    expenseCol: 'Expense',
+    estimatedCol: 'Estimated',
+    finalCol: 'Final',
+    paidCol: 'Paid',
+    expenseNamePlaceholder: 'Expense name...',
+    save: 'Save',
+    cancel: 'Cancel',
+    total: 'Total:',
+    noExpensesYet: 'No expenses added yet',
+    addNewExpense: 'Add new expense',
+    paymentTracking: 'Payment Tracking',
+    paymentTrackingSubtitle: 'Track your payments and remaining balances here.',
+    categories: {
+      Venue: 'Venue',
+      Catering: 'Catering',
+      Photography: 'Photography',
+      Flowers: 'Flowers',
+      Cake: 'Cake',
+      'Dress and Attire': 'Dress and Attire',
+      Band: 'Band',
+      DJ: 'DJ',
+      Videography: 'Videography',
+      Invitations: 'Invitations',
+      'Favors and Gifts': 'Favors and Gifts',
+      Transportation: 'Transportation',
+    },
+  },
+  fr: {
+    title: 'Budget',
+    subtitle: 'Suivez et gérez les dépenses de votre mariage',
+    download: 'Télécharger',
+    print: 'Imprimer',
+    budgetTab: 'Budget',
+    paymentsTab: 'Paiements',
+    newCategory: 'Nouvelle catégorie',
+    expenseSingle: 'dépense',
+    expensePlural: 'dépenses',
+    totalBudget: 'Budget total',
+    allocated: 'Alloué',
+    remaining: 'Restant',
+    editableAnytime: 'Vous pouvez modifier ceci à tout moment.',
+    overBudget: 'Dépassement du budget !',
+    overBudgetDetail: 'Vous avez alloué {amount} MAD de plus que votre budget.',
+    saving: 'Enregistrement...',
+    saveBudget: 'Enregistrer le budget',
+    saveSuccess: 'Enregistré avec succès !',
+    saveFailed: "Échec de l'enregistrement du budget. Veuillez réessayer.",
+    deleteExpenseConfirm: 'Êtes-vous sûr de vouloir supprimer cette dépense ?',
+    expenses: 'Dépenses',
+    estimatedCost: 'Coût estimé :',
+    finalCost: 'Coût final :',
+    expenseCol: 'Dépense',
+    estimatedCol: 'Estimé',
+    finalCol: 'Final',
+    paidCol: 'Payé',
+    expenseNamePlaceholder: 'Nom de la dépense...',
+    save: 'Enregistrer',
+    cancel: 'Annuler',
+    total: 'Total :',
+    noExpensesYet: 'Aucune dépense ajoutée pour le moment',
+    addNewExpense: 'Ajouter une dépense',
+    paymentTracking: 'Suivi des paiements',
+    paymentTrackingSubtitle: 'Suivez ici vos paiements et soldes restants.',
+    categories: {
+      Venue: 'Lieu',
+      Catering: 'Traiteur',
+      Photography: 'Photographie',
+      Flowers: 'Fleurs',
+      Cake: 'Gâteau',
+      'Dress and Attire': 'Robe et tenue',
+      Band: 'Groupe',
+      DJ: 'DJ',
+      Videography: 'Vidéographie',
+      Invitations: 'Invitations',
+      'Favors and Gifts': 'Cadeaux et faveurs',
+      Transportation: 'Transport',
+    },
+  },
+  ar: {
+    title: 'الميزانية',
+    subtitle: 'تتبّعي واديري مصاريف الزفاف',
+    download: 'تنزيل',
+    print: 'طباعة',
+    budgetTab: 'الميزانية',
+    paymentsTab: 'المدفوعات',
+    newCategory: 'فئة جديدة',
+    expenseSingle: 'مصروف',
+    expensePlural: 'مصاريف',
+    totalBudget: 'إجمالي الميزانية',
+    allocated: 'المخصّص',
+    remaining: 'المتبقي',
+    editableAnytime: 'يمكنك تعديل هذا في أي وقت.',
+    overBudget: 'تجاوزتِ الميزانية!',
+    overBudgetDetail: 'لقد خصصتِ {amount} MAD أكثر من الميزانية.',
+    saving: 'جارٍ الحفظ...',
+    saveBudget: 'حفظ الميزانية',
+    saveSuccess: 'تم الحفظ بنجاح!',
+    saveFailed: 'فشل حفظ الميزانية. حاولي مرة أخرى.',
+    deleteExpenseConfirm: 'هل أنتِ متأكدة من حذف هذا المصروف؟',
+    expenses: 'المصاريف',
+    estimatedCost: 'التكلفة التقديرية:',
+    finalCost: 'التكلفة النهائية:',
+    expenseCol: 'المصروف',
+    estimatedCol: 'تقديري',
+    finalCol: 'نهائي',
+    paidCol: 'مدفوع',
+    expenseNamePlaceholder: 'اسم المصروف...',
+    save: 'حفظ',
+    cancel: 'إلغاء',
+    total: 'الإجمالي:',
+    noExpensesYet: 'لا توجد مصاريف بعد',
+    addNewExpense: 'إضافة مصروف جديد',
+    paymentTracking: 'تتبع المدفوعات',
+    paymentTrackingSubtitle: 'تتبّعي المدفوعات والأرصدة المتبقية هنا.',
+    categories: {
+      Venue: 'المكان',
+      Catering: 'التموين',
+      Photography: 'التصوير',
+      Flowers: 'الورود',
+      Cake: 'الكعكة',
+      'Dress and Attire': 'الفستان واللباس',
+      Band: 'الفرقة',
+      DJ: 'دي جي',
+      Videography: 'تصوير الفيديو',
+      Invitations: 'الدعوات',
+      'Favors and Gifts': 'الهدايا والتذكارات',
+      Transportation: 'النقل',
+    },
+  },
+} as const;
+
+function interpolate(template: string, values: Record<string, string | number>) {
+  return template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
+}
+
+export default function DashboardBudget({ profile, locale = 'en' }: DashboardBudgetProps) {
+  void profile;
+  const safeLocale: BudgetLocale = locale === 'fr' || locale === 'ar' ? locale : 'en';
+  const t = budgetCopy[safeLocale];
   const [categories, setCategories] = useState<BudgetCategory[]>(defaultCategories);
   const [totalBudget, setTotalBudget] = useState(150000);
   const [selectedCategory, setSelectedCategory] = useState<BudgetCategory | null>(null);
@@ -54,9 +220,16 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
   });
 
   const totalEstimated = categories.reduce((sum, cat) => sum + cat.estimatedCost, 0);
-  const totalFinal = categories.reduce((sum, cat) => sum + cat.finalCost, 0);
-  const totalPaid = categories.reduce((sum, cat) => sum + cat.paid, 0);
   const remaining = totalBudget - totalEstimated;
+
+  const localizedCategories = useMemo(
+    () =>
+      categories.map((category) => ({
+        ...category,
+        localizedName: t.categories[category.name as keyof typeof t.categories] || category.name,
+      })),
+    [categories, t]
+  );
 
   const handleCategoryClick = (category: BudgetCategory) => {
     setSelectedCategory(selectedCategory?.id === category.id ? null : category);
@@ -126,7 +299,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
   };
 
   const handleDeleteExpense = (categoryId: string, expenseId: string) => {
-    if (!confirm('Are you sure you want to delete this expense?')) return;
+    if (!confirm(t.deleteExpenseConfirm)) return;
     
     setCategories(prev =>
       prev.map(cat => {
@@ -171,7 +344,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {
       console.error('Error saving budget:', error);
-      alert('Failed to save budget. Please try again.');
+      alert(t.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -189,17 +362,17 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#11190C]">Budget</h1>
-          <p className="text-gray-600 mt-1">Track and manage your wedding expenses</p>
+          <h1 className="text-3xl font-bold text-[#11190C]">{t.title}</h1>
+          <p className="text-gray-600 mt-1">{t.subtitle}</p>
         </div>
         <div className="flex items-center gap-3">
           <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#11190C] border border-gray-200 rounded-lg transition-colors flex items-center gap-2">
             <FiDownload className="w-4 h-4" />
-            Download
+            {t.download}
           </button>
           <button className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-[#11190C] border border-gray-200 rounded-lg transition-colors flex items-center gap-2">
             <FiPrinter className="w-4 h-4" />
-            Print
+            {t.print}
           </button>
         </div>
       </div>
@@ -214,7 +387,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Budget
+          {t.budgetTab}
         </button>
         <button
           onClick={() => setActiveTab('payments')}
@@ -224,7 +397,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Payments
+          {t.paymentsTab}
         </button>
       </div>
 
@@ -235,12 +408,12 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
             {/* Add New Category Button */}
             <button className="w-full flex items-center gap-3 px-4 py-3 bg-white border-2 border-dashed border-gray-300 rounded-2xl hover:border-[#D9FF0A] hover:bg-[#D9FF0A]/5 transition-all text-[#D9FF0A] font-medium">
               <FiPlus className="w-5 h-5" />
-              New category
+              {t.newCategory}
             </button>
 
             {/* Category List */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-              {categories.map((category, index) => (
+              {localizedCategories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleCategoryClick(category)}
@@ -251,9 +424,10 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{category.icon}</span>
                     <div className="text-left">
-                      <div className="font-semibold text-[#11190C]">{category.name}</div>
+                      <div className="font-semibold text-[#11190C]">{category.localizedName}</div>
                       <div className="text-sm text-gray-500">
-                        {category.expenses.length} expense{category.expenses.length !== 1 ? 's' : ''}
+                        {category.expenses.length}{' '}
+                        {category.expenses.length === 1 ? t.expenseSingle : t.expensePlural}
                       </div>
                     </div>
                   </div>
@@ -275,7 +449,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                 <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                   <span className="text-2xl">💰</span>
                 </div>
-                <h2 className="text-2xl font-bold text-[#11190C]">Total Budget</h2>
+                <h2 className="text-2xl font-bold text-[#11190C]">{t.totalBudget}</h2>
               </div>
 
               <div className="flex items-center gap-2 mb-4">
@@ -290,24 +464,24 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                   step="1000"
                 />
               </div>
-              <p className="text-sm text-gray-500 mb-6">You can edit this at any time.</p>
+              <p className="text-sm text-gray-500 mb-6">{t.editableAnytime}</p>
 
               {/* Budget Summary */}
               <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
                 <div>
-                  <div className="text-xs text-gray-500 uppercase mb-1">Total Budget</div>
+                  <div className="text-xs text-gray-500 uppercase mb-1">{t.totalBudget}</div>
                   <div className="text-xl font-bold text-[#11190C]">
                     {totalBudget.toLocaleString()} MAD
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500 uppercase mb-1">Allocated</div>
+                  <div className="text-xs text-gray-500 uppercase mb-1">{t.allocated}</div>
                   <div className="text-xl font-bold text-blue-600">
                     {totalEstimated.toLocaleString()} MAD
                   </div>
                 </div>
                 <div>
-                  <div className="text-xs text-gray-500 uppercase mb-1">Remaining</div>
+                  <div className="text-xs text-gray-500 uppercase mb-1">{t.remaining}</div>
                   <div className={`text-xl font-bold ${remaining >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {remaining.toLocaleString()} MAD
                   </div>
@@ -321,8 +495,10 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   <div>
-                    <div className="font-semibold text-red-900">Over Budget!</div>
-                    <div className="text-sm text-red-700">You've allocated {Math.abs(remaining).toLocaleString()} MAD more than your budget.</div>
+                    <div className="font-semibold text-red-900">{t.overBudget}</div>
+                    <div className="text-sm text-red-700">
+                      {interpolate(t.overBudgetDetail, { amount: Math.abs(remaining).toLocaleString() })}
+                    </div>
                   </div>
                 </div>
               )}
@@ -339,10 +515,10 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Saving...
+                      {t.saving}
                     </>
                   ) : (
-                    'Save budget'
+                    t.saveBudget
                   )}
                 </button>
 
@@ -351,7 +527,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    Saved successfully!
+                    {t.saveSuccess}
                   </div>
                 )}
               </div>
@@ -359,7 +535,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
 
             {/* Expenses Chart */}
             <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold text-[#11190C] mb-6">Expenses</h2>
+              <h2 className="text-2xl font-bold text-[#11190C] mb-6">{t.expenses}</h2>
 
               {/* Donut Chart */}
               <div className="flex flex-col lg:flex-row items-center gap-8">
@@ -406,7 +582,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                         className="w-4 h-4 rounded"
                         style={{ backgroundColor: chartColors[index] }}
                       />
-                      <span className="text-sm text-gray-700">{cat.name}</span>
+                      <span className="text-sm text-gray-700">{t.categories[cat.name as keyof typeof t.categories] || cat.name}</span>
                     </div>
                   ))}
                 </div>
@@ -419,7 +595,9 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <span className="text-3xl">{selectedCategory.icon}</span>
-                    <h2 className="text-2xl font-bold text-[#11190C]">{selectedCategory.name}</h2>
+                    <h2 className="text-2xl font-bold text-[#11190C]">
+                      {t.categories[selectedCategory.name as keyof typeof t.categories] || selectedCategory.name}
+                    </h2>
                   </div>
                   <button
                     onClick={() => handleRemoveCategory(selectedCategory.id)}
@@ -431,13 +609,13 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
 
                 <div className="flex items-center gap-4 mb-6">
                   <div className="flex-1">
-                    <div className="text-sm text-gray-600 mb-1">Estimated cost:</div>
+                    <div className="text-sm text-gray-600 mb-1">{t.estimatedCost}</div>
                     <div className="text-2xl font-bold text-[#11190C]">
                       {selectedCategory.estimatedCost.toLocaleString()} MAD
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm text-gray-600 mb-1">Final cost:</div>
+                    <div className="text-sm text-gray-600 mb-1">{t.finalCost}</div>
                     <div className="text-2xl font-bold text-green-600">
                       {selectedCategory.finalCost.toLocaleString()} MAD
                     </div>
@@ -464,10 +642,10 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                     <table className="w-full">
                       <thead>
                         <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Expense</th>
-                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Estimated</th>
-                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Final</th>
-                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 uppercase">Paid</th>
+                          <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 uppercase">{t.expenseCol}</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 uppercase">{t.estimatedCol}</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 uppercase">{t.finalCol}</th>
+                          <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 uppercase">{t.paidCol}</th>
                           <th className="w-20"></th>
                         </tr>
                       </thead>
@@ -525,7 +703,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                                 type="text"
                                 value={newExpense.name}
                                 onChange={(e) => setNewExpense({ ...newExpense, name: e.target.value })}
-                                placeholder="Expense name..."
+                                placeholder={t.expenseNamePlaceholder}
                                 className="w-full px-3 py-2 border-2 border-[#D9FF0A] rounded focus:outline-none focus:border-[#BEE600]"
                                 autoFocus
                               />
@@ -547,7 +725,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                                   onClick={handleSaveExpense}
                                   disabled={!newExpense.name.trim()}
                                   className="text-green-600 hover:text-green-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
-                                  title="Save"
+                                  title={t.save}
                                 >
                                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -556,7 +734,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                                 <button 
                                   onClick={handleCancelExpense}
                                   className="text-red-500 hover:text-red-700 transition-colors"
-                                  title="Cancel"
+                                  title={t.cancel}
                                 >
                                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -569,7 +747,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                       </tbody>
                       <tfoot>
                         <tr className="font-bold bg-gray-50">
-                          <td className="py-3 px-4">Total:</td>
+                          <td className="py-3 px-4">{t.total}</td>
                           <td className="py-3 px-4 text-right">{selectedCategory.estimatedCost.toLocaleString()} MAD</td>
                           <td className="py-3 px-4 text-right text-green-600">{selectedCategory.finalCost.toLocaleString()} MAD</td>
                           <td className="py-3 px-4 text-right text-blue-600">{selectedCategory.paid.toLocaleString()} MAD</td>
@@ -580,7 +758,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    No expenses added yet
+                    {t.noExpensesYet}
                   </div>
                 )}
 
@@ -590,7 +768,7 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
                     className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#D9FF0A] hover:bg-[#D9FF0A]/5 transition-all text-[#D9FF0A] font-medium"
                   >
                     <FiPlus className="w-5 h-5" />
-                    Add new expense
+                    {t.addNewExpense}
                   </button>
                 )}
               </div>
@@ -601,12 +779,11 @@ export default function DashboardBudget({ profile }: DashboardBudgetProps) {
 
       {activeTab === 'payments' && (
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-2xl font-bold text-[#11190C] mb-4">Payment Tracking</h2>
-          <p className="text-gray-600">Track your payments and remaining balances here.</p>
+          <h2 className="text-2xl font-bold text-[#11190C] mb-4">{t.paymentTracking}</h2>
+          <p className="text-gray-600">{t.paymentTrackingSubtitle}</p>
           {/* Add payment tracking functionality */}
         </div>
       )}
     </div>
   );
 }
-

@@ -44,7 +44,7 @@ export default function AccountToolViews({ locale, view }: AccountToolViewsProps
   if (view === 'wedding-date') {
     return (
       <section className="mx-auto max-w-6xl">
-        <DashboardPlanner profile={profile} />
+        <DashboardPlanner profile={profile} locale={locale} />
       </section>
     );
   }
@@ -52,14 +52,14 @@ export default function AccountToolViews({ locale, view }: AccountToolViewsProps
   if (view === 'guest-list') {
     return (
       <section className="mx-auto max-w-6xl">
-        <DashboardGuestList profile={profile} />
+        <DashboardGuestList profile={profile} locale={locale} />
       </section>
     );
   }
 
   return (
     <section className="mx-auto max-w-6xl">
-      <DashboardBudget profile={profile} />
+      <DashboardBudget profile={profile} locale={locale} />
     </section>
   );
 }

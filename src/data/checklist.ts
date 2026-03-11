@@ -13,6 +13,42 @@ export type ChecklistSection = {
   items: ChecklistItem[];
 };
 
+export type ChecklistLocale = 'en' | 'fr' | 'ar';
+
+const CHECKLIST_ITEM_LABEL_TRANSLATIONS: Record<string, { fr: string; ar: string }> = {
+  'vision-style': {
+    fr: 'Définissez votre style de mariage et le nombre d’invités',
+    ar: 'حددي أسلوب زفافك وعدد الضيوف',
+  },
+  'set-budget': {
+    fr: 'Fixez un budget initial et vos priorités',
+    ar: 'حددي ميزانية أولية وأولوياتك',
+  },
+  'shortlist-cities': {
+    fr: 'Présélectionnez des villes (Casablanca, Marrakech, Rabat…)',
+    ar: 'اختاري المدن المفضلة (الدار البيضاء، مراكش، الرباط...)',
+  },
+  'create-pinterest': {
+    fr: 'Créez un tableau Pinterest pour l’inspiration',
+    ar: 'أنشئي لوحة Pinterest للإلهام',
+  },
+  'set-date': {
+    fr: 'Fixez la date de votre mariage (selon la saison)',
+    ar: 'حددي تاريخ الزفاف (مع مراعاة الموسم)',
+  },
+  'research-permits': {
+    fr: 'Renseignez-vous sur les démarches et autorisations',
+    ar: 'تحققي من متطلبات وإجراءات عقد الزواج',
+  },
+};
+
+export function getChecklistItemLabel(item: ChecklistItem, locale: ChecklistLocale): string {
+  if (locale === 'en') return item.label;
+  const translated = CHECKLIST_ITEM_LABEL_TRANSLATIONS[item.id];
+  if (!translated) return item.label;
+  return locale === 'fr' ? translated.fr : translated.ar;
+}
+
 export const CHECKLIST: ChecklistSection[] = [
   {
     slug: 'month-12',
