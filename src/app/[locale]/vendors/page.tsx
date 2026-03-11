@@ -24,7 +24,7 @@ import { MOROCCAN_CITIES, localizeCityLabel } from '@/lib/types/vendor';
 import { getAll } from '@/data/articles';
 import { getAllChapters, getTimelineSteps } from '@/data/planningChapters';
 import { getDashboardCopy, interpolateCopy } from '@/components/home/dashboard-i18n';
-import { localeAlternates, toAbsoluteUrl } from '@/lib/seo/site-url';
+import { toAbsoluteUrl } from '@/lib/seo/site-url';
 
 interface VendorsPageProps {
   params: Promise<{ locale: string }>;
@@ -61,15 +61,83 @@ function videoPriority(url: string): number {
   return 10;
 }
 
-export async function generateMetadata({ params }: VendorsPageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: VendorsPageProps): Promise<Metadata> {
   const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   const copy = getDashboardCopy(locale);
+
+  const rawCity = firstParam(resolvedSearchParams.city);
+  const rawCategory = firstParam(resolvedSearchParams.category);
+  const categorySlug = normalizeCategory(rawCategory || null);
+  const cityMatch = rawCity
+    ? MOROCCAN_CITIES.find((c) => c.value !== 'all' && c.value.toLowerCase() === rawCity.toLowerCase())
+    : null;
+  const selectedCity = cityMatch?.value;
+
+  const categoryLabel = categorySlug ? labelForCategory(categorySlug, locale) : '';
+  const cityLabel = selectedCity ? localizeCityLabel(selectedCity, locale) : '';
+
+  const seoCopy = {
+    en: {
+      byCategoryAndCity: `Wedding ${categoryLabel} in ${cityLabel} | Wervice`,
+      byCategory: `Wedding ${categoryLabel} in Morocco | Wervice`,
+      byCity: `Wedding Vendors in ${cityLabel} | Wervice`,
+      descByCategoryAndCity: `Discover verified ${categoryLabel.toLowerCase()} vendors in ${cityLabel}. Compare photos, pricing, and contact details on Wervice.`,
+      descByCategory: `Discover verified ${categoryLabel.toLowerCase()} vendors across Morocco. Compare profiles, prices, and contact details on Wervice.`,
+      descByCity: `Discover verified wedding vendors in ${cityLabel}. Compare categories, pricing, and portfolios on Wervice.`,
+    },
+    fr: {
+      byCategoryAndCity: `${categoryLabel} de mariage a ${cityLabel} | Wervice`,
+      byCategory: `${categoryLabel} de mariage au Maroc | Wervice`,
+      byCity: `Prestataires de mariage a ${cityLabel} | Wervice`,
+      descByCategoryAndCity: `Decouvrez des prestataires ${categoryLabel.toLowerCase()} verifies a ${cityLabel}. Comparez photos, tarifs et contacts sur Wervice.`,
+      descByCategory: `Decouvrez des prestataires ${categoryLabel.toLowerCase()} verifies au Maroc. Comparez profils, tarifs et contacts sur Wervice.`,
+      descByCity: `Decouvrez des prestataires de mariage verifies a ${cityLabel}. Comparez categories, tarifs et portfolios sur Wervice.`,
+    },
+    ar: {
+      byCategoryAndCity: `${categoryLabel} لحفلات الزفاف في ${cityLabel} | Wervice`,
+      byCategory: `${categoryLabel} لحفلات الزفاف في المغرب | Wervice`,
+      byCity: `مزودو خدمات الزفاف في ${cityLabel} | Wervice`,
+      descByCategoryAndCity: `اكتشف مزودي خدمات ${categoryLabel.toLowerCase()} الموثقين في ${cityLabel}. قارن الصور والأسعار وطرق التواصل على Wervice.`,
+      descByCategory: `اكتشف مزودي خدمات ${categoryLabel.toLowerCase()} الموثقين في المغرب. قارن الملفات والأسعار وطرق التواصل على Wervice.`,
+      descByCity: `اكتشف مزودي خدمات الزفاف الموثقين في ${cityLabel}. قارن الفئات والأسعار ومعارض الأعمال على Wervice.`,
+    },
+  } as const;
+  const localized = seoCopy[locale as keyof typeof seoCopy] || seoCopy.en;
+
+  const title = categorySlug && selectedCity
+    ? localized.byCategoryAndCity
+    : categorySlug
+      ? localized.byCategory
+      : selectedCity
+        ? localized.byCity
+        : `${copy.vendors.title} | Wervice`;
+
+  const description = categorySlug && selectedCity
+    ? localized.descByCategoryAndCity
+    : categorySlug
+      ? localized.descByCategory
+      : selectedCity
+        ? localized.descByCity
+        : copy.vendors.subtitle;
+
+  const canonicalQuery = new URLSearchParams();
+  if (categorySlug) canonicalQuery.set('category', categorySlug);
+  if (selectedCity) canonicalQuery.set('city', selectedCity);
+  const qs = canonicalQuery.toString();
+  const canonicalPath = `/${locale}/vendors${qs ? `?${qs}` : ''}`;
+
   return {
-    title: `${copy.vendors.title} | Wervice`,
-    description: copy.vendors.subtitle,
+    title,
+    description,
     alternates: {
-      canonical: toAbsoluteUrl(`/${locale}/vendors`),
-      languages: localeAlternates('/vendors'),
+      canonical: toAbsoluteUrl(canonicalPath),
+      languages: {
+        en: toAbsoluteUrl(`/en/vendors${qs ? `?${qs}` : ''}`),
+        fr: toAbsoluteUrl(`/fr/vendors${qs ? `?${qs}` : ''}`),
+        ar: toAbsoluteUrl(`/ar/vendors${qs ? `?${qs}` : ''}`),
+        'x-default': toAbsoluteUrl(`/en/vendors${qs ? `?${qs}` : ''}`),
+      },
     },
   };
 }
