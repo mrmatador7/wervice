@@ -234,14 +234,14 @@ export default function ExplorerHome({
   }, []);
 
   const categoryImageBySlug: Record<string, string> = {
-    venues: '/images/categories/venues.jpg',
-    dresses: '/images/categories/dresses.jpg',
-    beauty: '/images/categories/beauty.jpg',
-    'photo-film': '/images/categories/photo-film.jpg',
-    caterer: '/images/categories/caterer.jpg',
-    decor: '/images/categories/decor.jpg',
-    artist: '/images/categories/artist.jpg',
-    'event-planner': '/images/categories/event-planner.jpg',
+    venues: '/categories/venues.png',
+    dresses: '/categories/Dresses.png',
+    beauty: '/categories/beauty.png',
+    'photo-film': '/categories/photo.png',
+    caterer: '/categories/Catering.png',
+    decor: '/categories/decor.png',
+    artist: '/categories/music.png',
+    'event-planner': '/categories/event-planner.png',
     florist: '/images/categories/florist.jpg',
     negafa: '/images/categories/negafa.jpg',
     cakes: '/images/categories/cakes.jpg',
