@@ -126,7 +126,19 @@ export async function generateMetadata({ params, searchParams }: VendorsPageProp
   if (categorySlug) canonicalQuery.set('category', categorySlug);
   if (selectedCity) canonicalQuery.set('city', selectedCity);
   const qs = canonicalQuery.toString();
-  const canonicalPath = `/${locale}/vendors${qs ? `?${qs}` : ''}`;
+  const citySlug = selectedCity ? cityToSlug(selectedCity) : null;
+  const canonicalPath =
+    citySlug && categorySlug
+      ? `/${locale}/${citySlug}/${categorySlug}`
+      : citySlug
+        ? `/${locale}/${citySlug}`
+        : `/${locale}/vendors${qs ? `?${qs}` : ''}`;
+  const canonicalInLocale = (nextLocale: string) =>
+    citySlug && categorySlug
+      ? `/${nextLocale}/${citySlug}/${categorySlug}`
+      : citySlug
+        ? `/${nextLocale}/${citySlug}`
+        : `/${nextLocale}/vendors${qs ? `?${qs}` : ''}`;
 
   return {
     title,
@@ -134,10 +146,10 @@ export async function generateMetadata({ params, searchParams }: VendorsPageProp
     alternates: {
       canonical: toAbsoluteUrl(canonicalPath),
       languages: {
-        en: toAbsoluteUrl(`/en/vendors${qs ? `?${qs}` : ''}`),
-        fr: toAbsoluteUrl(`/fr/vendors${qs ? `?${qs}` : ''}`),
-        ar: toAbsoluteUrl(`/ar/vendors${qs ? `?${qs}` : ''}`),
-        'x-default': toAbsoluteUrl(`/en/vendors${qs ? `?${qs}` : ''}`),
+        en: toAbsoluteUrl(canonicalInLocale('en')),
+        fr: toAbsoluteUrl(canonicalInLocale('fr')),
+        ar: toAbsoluteUrl(canonicalInLocale('ar')),
+        'x-default': toAbsoluteUrl(canonicalInLocale('en')),
       },
     },
   };
@@ -481,7 +493,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
 
             <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Link
-                href={`/${locale}/vendors?city=${encodeURIComponent(selectedCity)}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                href={`/${locale}/${cityToSlug(selectedCity)}${q ? `?q=${encodeURIComponent(q)}` : ''}`}
                 className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${
                   !categorySlug
                     ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'
@@ -493,7 +505,7 @@ export default async function VendorsPage({ params, searchParams }: VendorsPageP
               {WERVICE_CATEGORIES.map((category) => (
                 <Link
                   key={category.slug}
-                  href={`/${locale}/vendors?city=${encodeURIComponent(selectedCity)}&category=${encodeURIComponent(category.slug)}${q ? `&q=${encodeURIComponent(q)}` : ''}`}
+                  href={`/${locale}/${cityToSlug(selectedCity)}/${encodeURIComponent(category.slug)}${q ? `?q=${encodeURIComponent(q)}` : ''}`}
                   className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${
                     categorySlug === category.slug
                       ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'

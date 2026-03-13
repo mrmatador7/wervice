@@ -4,6 +4,7 @@ import { WERVICE_CATEGORIES } from '@/lib/categories';
 import { cityToSlug } from '@/lib/vendor-url';
 import { getAll } from '@/data/articles';
 import { toAbsoluteUrl } from '@/lib/seo/site-url';
+import { MOROCCAN_CITIES } from '@/lib/types/vendor';
 
 type VendorRow = {
   slug: string | null;
@@ -51,6 +52,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'monthly',
         priority: 0.6,
       });
+    }
+
+    // SEO landing pages for city and city+category vendor discovery.
+    const cities = MOROCCAN_CITIES.filter((city) => city.value !== 'all');
+    for (const city of cities) {
+      const citySlug = cityToSlug(city.value);
+      entries.push({
+        url: toAbsoluteUrl(`/${locale}/${citySlug}`),
+        changeFrequency: 'daily',
+        priority: 0.8,
+      });
+
+      for (const category of WERVICE_CATEGORIES) {
+        entries.push({
+          url: toAbsoluteUrl(`/${locale}/${citySlug}/${category.slug}`),
+          changeFrequency: 'daily',
+          priority: 0.8,
+        });
+      }
     }
 
   }

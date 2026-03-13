@@ -1,4 +1,8 @@
-import { redirect, notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import VendorsPage from '@/app/[locale]/vendors/page';
+import { localizeCityLabel } from '@/lib/types/vendor';
+import { toAbsoluteUrl } from '@/lib/seo/site-url';
 import { slugToCityName } from '@/lib/vendor-url';
 
 interface CityPageProps {
@@ -11,16 +15,54 @@ function firstParam(value: string | string[] | undefined): string | undefined {
   return value;
 }
 
+export async function generateMetadata({ params }: CityPageProps): Promise<Metadata> {
+  const { locale, city: citySlug } = await params;
+  const cityName = slugToCityName(citySlug);
+  if (!cityName) return {};
+
+  const cityLabel = localizeCityLabel(cityName, locale);
+  const titleByLocale: Record<string, string> = {
+    en: `Wedding Vendors in ${cityLabel} | Wervice`,
+    fr: `Prestataires de mariage a ${cityLabel} | Wervice`,
+    ar: `مزودو خدمات الزفاف في ${cityLabel} | Wervice`,
+  };
+  const descriptionByLocale: Record<string, string> = {
+    en: `Discover verified wedding vendors in ${cityLabel}. Compare categories, pricing, and portfolios on Wervice.`,
+    fr: `Decouvrez des prestataires de mariage verifies a ${cityLabel}. Comparez categories, tarifs et portfolios sur Wervice.`,
+    ar: `اكتشف مزودي خدمات الزفاف الموثقين في ${cityLabel}. قارن الفئات والأسعار ومعارض الأعمال على Wervice.`,
+  };
+  const canonicalPath = `/${locale}/${citySlug}`;
+
+  return {
+    title: titleByLocale[locale] || titleByLocale.en,
+    description: descriptionByLocale[locale] || descriptionByLocale.en,
+    alternates: {
+      canonical: toAbsoluteUrl(canonicalPath),
+      languages: {
+        en: toAbsoluteUrl(`/en/${citySlug}`),
+        fr: toAbsoluteUrl(`/fr/${citySlug}`),
+        ar: toAbsoluteUrl(`/ar/${citySlug}`),
+        'x-default': toAbsoluteUrl(`/en/${citySlug}`),
+      },
+    },
+  };
+}
+
 export default async function CityPage({ params, searchParams }: CityPageProps) {
   const { locale, city: citySlug } = await params;
   const resolvedSearchParams = await searchParams;
   const cityName = slugToCityName(citySlug);
   if (!cityName) notFound();
 
-  const q = (firstParam(resolvedSearchParams.q) || '').trim();
-  const qs = new URLSearchParams();
-  qs.set('city', cityName);
-  if (q) qs.set('q', q);
-
-  redirect(`/${locale}/vendors?${qs.toString()}`);
+  const q = firstParam(resolvedSearchParams.q);
+  return (
+    <VendorsPage
+      params={Promise.resolve({ locale })}
+      searchParams={Promise.resolve({
+        ...resolvedSearchParams,
+        city: cityName,
+        q,
+      })}
+    />
+  );
 }

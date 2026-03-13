@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Search } from 'lucide-react';
+import { cityToSlug } from '@/lib/vendor-url';
 
 type Item = {
   value: string;
@@ -54,6 +55,29 @@ export default function VendorExploreFilters({
   const cityRowRef = useRef<HTMLDivElement | null>(null);
   const normalizedBasePath = basePath.replace(/^\/+/, '');
   const baseHref = `/${locale}/${normalizedBasePath}`;
+  const isVendorsPath = normalizedBasePath === 'vendors';
+
+  const withQuery = (path: string, nextQ?: string) =>
+    nextQ ? `${path}?q=${encodeURIComponent(nextQ)}` : path;
+  const vendorsHref = (city?: string, category?: string, nextQ?: string) => {
+    if (!isVendorsPath) {
+      const params = new URLSearchParams();
+      if (category) params.set('category', category);
+      if (city) params.set('city', city);
+      if (nextQ) params.set('q', nextQ);
+      const qs = params.toString();
+      return `${baseHref}${qs ? `?${qs}` : ''}`;
+    }
+
+    if (city && category) return withQuery(`/${locale}/${cityToSlug(city)}/${category}`, nextQ);
+    if (city) return withQuery(`/${locale}/${cityToSlug(city)}`, nextQ);
+
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (nextQ) params.set('q', nextQ);
+    const qs = params.toString();
+    return `${baseHref}${qs ? `?${qs}` : ''}`;
+  };
 
   useEffect(() => {
     setIsSwitching(false);
@@ -119,7 +143,7 @@ export default function VendorExploreFilters({
           className={`flex items-center gap-1 ${categorySliderMode ? 'min-w-max flex-nowrap' : 'w-full flex-wrap'}`}
         >
           {(() => {
-            const href = `${baseHref}${selectedCity ? `?city=${encodeURIComponent(selectedCity)}` : ''}${q ? `${selectedCity ? '&' : '?'}q=${encodeURIComponent(q)}` : ''}`;
+            const href = vendorsHref(selectedCity, undefined, q || undefined);
             return (
               <Link
                 href={href}
@@ -136,7 +160,7 @@ export default function VendorExploreFilters({
           })()}
           {categoryItems.map((category) => {
             const isActive = categorySlug === category.slug;
-            const href = `${baseHref}?category=${category.slug}${selectedCity ? `&city=${encodeURIComponent(selectedCity)}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+            const href = vendorsHref(selectedCity, category.slug, q || undefined);
             return (
               <Link
                 key={category.slug}
@@ -164,7 +188,7 @@ export default function VendorExploreFilters({
           className={`flex gap-2.5 ${citySliderMode ? 'min-w-max flex-nowrap pb-1' : 'flex-wrap'}`}
         >
         {(() => {
-          const href = `${baseHref}${q ? `?q=${encodeURIComponent(q)}` : ''}`;
+          const href = vendorsHref(undefined, categorySlug || undefined, q || undefined);
           return (
             <Link
               href={href}
@@ -179,7 +203,7 @@ export default function VendorExploreFilters({
         })()}
         {cityItems.map((city) => {
           const isActive = selectedCity === city.value;
-          const href = `${baseHref}?city=${encodeURIComponent(city.value)}${categorySlug ? `&category=${categorySlug}` : ''}${q ? `&q=${encodeURIComponent(q)}` : ''}`;
+          const href = vendorsHref(city.value, categorySlug || undefined, q || undefined);
           return (
             <Link
               key={city.value}

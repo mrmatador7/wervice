@@ -37,8 +37,8 @@ const nextConfig: NextConfig = {
   async headers() {
     const isDev = process.env.NODE_ENV === 'development';
     const scriptSrc = isDev
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com"
-      : "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://*.clarity.ms"
+      : "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://*.clarity.ms";
 
     const csp = [
       "default-src 'self'",
@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
       "img-src 'self' data: blob: https:",
       "media-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://www.google-analytics.com https://*.google-analytics.com https://firebaselogging.googleapis.com https://firebaseinstallations.googleapis.com https://*.googleapis.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in https://www.google-analytics.com https://*.google-analytics.com https://firebaselogging.googleapis.com https://firebaseinstallations.googleapis.com https://*.googleapis.com https://www.clarity.ms https://*.clarity.ms",
       'upgrade-insecure-requests',
     ].join('; ');
 
