@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FiClock, FiMapPin, FiUser } from 'react-icons/fi';
 import { RiCompassDiscoverLine } from 'react-icons/ri';
@@ -17,6 +18,28 @@ interface ArticleLayoutProps {
   popularArticles: Article[];
   articleUrl: string;
   locale: string;
+}
+
+function extractText(children: React.ReactNode): string {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children)) {
+    return children.map((child) => extractText(child)).join('').trim();
+  }
+  if (React.isValidElement(children)) {
+    return extractText(children.props?.children);
+  }
+  return '';
+}
+
+function cityFromVendorHref(href: string): string {
+  const clean = href.split('?')[0];
+  const parts = clean.split('/').filter(Boolean);
+  if (parts.length < 4) return 'Morocco';
+  const citySlug = parts[1] || '';
+  return citySlug
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }
 
 function articleMeta(article: Article, locale: string) {
@@ -86,18 +109,66 @@ function ArticleBody({ article }: { article: Article }) {
             h1: ({ children }) => <h1 className="mt-12 mb-4 text-4xl font-black tracking-tight text-zinc-900">{children}</h1>,
             h2: ({ children }) => <h2 className="mt-12 mb-4 text-3xl font-black tracking-tight text-zinc-900">{children}</h2>,
             h3: ({ children }) => <h3 className="mt-8 mb-4 text-2xl font-bold text-zinc-900">{children}</h3>,
-            p: ({ children }) => <p className="mb-5 text-zinc-700">{children}</p>,
+            p: ({ children }) => {
+              const childArray = React.Children.toArray(children);
+              if (
+                childArray.length === 1 &&
+                React.isValidElement(childArray[0]) &&
+                typeof childArray[0].props?.title === 'string' &&
+                childArray[0].props.title.startsWith('card:')
+              ) {
+                return <div className="mb-5">{children}</div>;
+              }
+
+              return <p className="mb-5 text-zinc-700">{children}</p>;
+            },
             ul: ({ children }) => <ul className="mb-6 list-disc pl-6 text-zinc-700">{children}</ul>,
             ol: ({ children }) => <ol className="mb-6 list-decimal pl-6 text-zinc-700">{children}</ol>,
             li: ({ children }) => <li className="mb-2">{children}</li>,
-            a: ({ href, children }) => (
-              <a
-                href={href}
-                className="font-semibold text-zinc-900 underline decoration-zinc-400 underline-offset-4 hover:decoration-zinc-900"
-              >
-                {children}
-              </a>
-            ),
+            a: ({ href, title, children }) => {
+              const isInternal = typeof href === 'string' && href.startsWith('/');
+              const cardImage = typeof title === 'string' && title.startsWith('card:')
+                ? title.slice(5).trim()
+                : null;
+
+              if (isInternal && cardImage) {
+                const vendorName = extractText(children) || 'Venue';
+                const city = cityFromVendorHref(href);
+                return (
+                  <Link
+                    href={href || '#'}
+                    title={typeof title === 'string' ? title : undefined}
+                    className="my-2 inline-block align-top no-underline"
+                  >
+                    <article className="group flex w-[270px] items-center gap-2.5 rounded-xl border border-zinc-200 bg-white p-2 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                      <div className="relative h-14 w-16 shrink-0 overflow-hidden rounded-lg bg-[#eef2f7]">
+                        <Image
+                          src={cardImage}
+                          alt={vendorName}
+                          fill
+                          sizes="64px"
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="line-clamp-1 text-[13px] font-bold text-zinc-900">{vendorName}</p>
+                        <p className="mt-0.5 line-clamp-1 text-[11px] text-zinc-600">{city}</p>
+                        <p className="mt-1 text-[11px] font-semibold text-[#1f5eff]">View venue page</p>
+                      </div>
+                    </article>
+                  </Link>
+                );
+              }
+
+              return (
+                <a
+                  href={href}
+                  className="font-semibold text-zinc-900 underline decoration-zinc-400 underline-offset-4 hover:decoration-zinc-900"
+                >
+                  {children}
+                </a>
+              );
+            },
             strong: ({ children }) => <strong className="font-bold text-zinc-900">{children}</strong>,
           }}
         >

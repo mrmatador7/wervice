@@ -26,6 +26,7 @@ import { getAll } from '@/data/articles';
 import { getAllChapters, getTimelineSteps } from '@/data/planningChapters';
 import { getDashboardCopy, interpolateCopy } from '@/components/home/dashboard-i18n';
 import { toAbsoluteUrl } from '@/lib/seo/site-url';
+import { categoryMetaDescription } from '@/lib/seo/vendors-metadata';
 
 interface VendorsPageProps {
   params: Promise<{ locale: string }>;
@@ -115,9 +116,16 @@ export async function generateMetadata({ params, searchParams }: VendorsPageProp
         : `${copy.vendors.title} | Wervice`;
 
   const description = categorySlug && selectedCity
-    ? localized.descByCategoryAndCity
+    ? (categoryMetaDescription({
+        categorySlug,
+        locale,
+        cityLabel,
+      }) || localized.descByCategoryAndCity)
     : categorySlug
-      ? localized.descByCategory
+      ? (categoryMetaDescription({
+          categorySlug,
+          locale,
+        }) || localized.descByCategory)
       : selectedCity
         ? localized.descByCity
         : copy.vendors.subtitle;

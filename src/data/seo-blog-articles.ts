@@ -6,10 +6,123 @@ import type { Article } from './articles';
  */
 export const SEO_ARTICLES: Article[] = [
   {
+    slug: 'top-10-wedding-venues-marrakech',
+    title: 'Top 10 Wedding Venues in Marrakech (2026 Guide)',
+    excerpt: 'Discover the top 10 wedding venues in Marrakech on Wervice. Compare styles, capacity, and atmosphere to find the perfect place for your wedding.',
+    cover: 'https://media.wervice.com/vendors/Palais%20Soleiman/Pic%201.jpg',
+    author: 'Wervice Editorial',
+    date: '2026-03-13T10:00:00Z',
+    tags: ['venues', 'marrakech', 'wedding', 'morocco', 'top-10'],
+    content: `# Top 10 Wedding Venues in Marrakech (2026 Guide)
+
+Marrakech remains one of the most popular wedding destinations in Morocco thanks to its palaces, gardens, private estates, and boutique event spaces. If you are planning your big day and want the right setting for your ceremony, dinner, and celebration, this guide highlights ten wedding venues currently listed on Wervice in Marrakech.
+
+Below, you can discover each venue and open its internal Wervice page directly.
+
+## 1) Palais Soleiman
+
+Palais Soleiman is known for its refined Moroccan architecture, grand patio, and elegant salons. It is a strong option for couples looking for a classic Marrakech wedding atmosphere with luxurious details.
+
+[Palais Soleiman](/en/marrakech/venues/palais-soleiman "card:https://media.wervice.com/vendors/Palais%20Soleiman/Pic%201.jpg")
+
+## 2) Domaine Bahi
+
+Domaine Bahi offers a green outdoor setting with a relaxed yet upscale style. It is ideal for couples who want an open-air wedding reception under the Marrakech sky.
+
+[Domaine Bahi](/en/marrakech/venues/domaine-bahi "card:https://media.wervice.com/vendors/Domaine%20Bahi/Pic%201.jpg")
+
+## 3) Villa Laarissa
+
+Villa Laarissa is a versatile private event venue suitable for weddings, family celebrations, and intimate receptions. The space is often chosen for custom wedding layouts.
+
+[Villa Laarissa](/en/marrakech/venues/villa-laarissa "card:https://media.wervice.com/vendors/Villa%20Laarissa/Pic%201.jpg")
+
+## 4) Domaine de Tameslohte
+
+Domaine de Tameslohte combines gardens, terrace spaces, and Atlas-facing views, making it a great fit for day-to-night wedding experiences and destination events.
+
+[Domaine de Tameslohte](/en/marrakech/venues/domaine-de-tameslohte "card:https://media.wervice.com/vendors/Domaine%20de%20Tameslohte/Pic%201.jpg")
+
+## 5) la Maison des Oliviers
+
+La Maison des Oliviers is a well-known Marrakech event address with broad outdoor capacity and a practical setup for large wedding operations.
+
+[la Maison des Oliviers](/en/marrakech/venues/la-maison-des-oliviers "card:https://media.wervice.com/vendors/la%20Maison%20des%20Oliviers/Pic%201.jpg")
+
+## 6) Le Domaine du douar
+
+Le Domaine du douar provides a large estate format with accommodation options, pools, and event areas. It works particularly well for multi-day weddings.
+
+[Le Domaine du douar](/en/marrakech/venues/le-domaine-du-douar "card:https://media.wervice.com/vendors/Le%20Domaine%20du%20douar/Pic%201.webp")
+
+## 7) Domaine Yakout
+
+Domaine Yakout is appreciated for its flexible event staging and landscaped outdoor areas. Couples often choose it for personalized ceremony and reception flows.
+
+[Domaine Yakout](/en/marrakech/venues/domaine-yakout "card:https://media.wervice.com/vendors/Domaine%20Yakout/Pic%201.jpg")
+
+## 8) Le Domaine des Remparts
+
+Le Domaine des Remparts is a premium hospitality venue that can host weddings with on-site service quality and strong planning support.
+
+[Le Domaine des Remparts](/en/marrakech/venues/le-domaine-des-remparts "card:https://media.wervice.com/vendors/Le%20Domaine%20des%20Remparts/Pic%201.jpg")
+
+## 9) L’OLIVERAIE | Jnane Zitoune
+
+L’OLIVERAIE | Jnane Zitoune sits within olive groves and is designed for large celebrations with a natural setting and multiple reception configurations.
+
+[L’OLIVERAIE | Jnane Zitoune](/en/marrakech/venues/loliveraie-jnane-zitoune "card:https://media.wervice.com/vendors/L%E2%80%99OLIVERAIE%20_%20Jnane%20Zitoune/Pic%201.jpg")
+
+## 10) Villa Malika Silvana
+
+Villa Malika Silvana is a long-established Marrakech event venue popular for weddings, private celebrations, and personalized guest experiences.
+
+[Villa Malika Silvana](/en/marrakech/venues/villa-malika-silvana "card:https://media.wervice.com/vendors/Villa%20Malika%20Silvana/Pic%201.jpg")
+
+## How to choose the right venue in Marrakech
+
+Before booking, compare these points:
+
+- Guest capacity and seated dinner layout
+- Indoor/outdoor fallback options
+- Venue curfew and music policy
+- Accommodation availability for family and guests
+- Vendor policy (in-house vs external)
+- Total wedding budget impact
+
+You can also browse all Marrakech venue listings here:
+
+[View all wedding venues in Marrakech](/en/marrakech/venues)
+
+## Frequently Asked Questions
+
+**When should I book a wedding venue in Marrakech?**  
+For peak wedding months, book 9-18 months in advance.
+
+**Are Marrakech venues suitable for destination weddings?**  
+Yes. Many venues support multi-day events and guest accommodation.
+
+**Can I contact these venues directly?**  
+Yes. Open each internal Wervice venue page above to view details and contact options.
+
+## Featured vendors on Wervice
+
+[Palais Soleiman](/en/marrakech/venues/palais-soleiman "card:https://media.wervice.com/vendors/Palais%20Soleiman/Pic%201.jpg")
+
+[Domaine Bahi](/en/marrakech/venues/domaine-bahi "card:https://media.wervice.com/vendors/Domaine%20Bahi/Pic%201.jpg")
+
+[Villa Laarissa](/en/marrakech/venues/villa-laarissa "card:https://media.wervice.com/vendors/Villa%20Laarissa/Pic%201.jpg")
+
+[Domaine de Tameslohte](/en/marrakech/venues/domaine-de-tameslohte "card:https://media.wervice.com/vendors/Domaine%20de%20Tameslohte/Pic%201.jpg")
+
+[la Maison des Oliviers](/en/marrakech/venues/la-maison-des-oliviers "card:https://media.wervice.com/vendors/la%20Maison%20des%20Oliviers/Pic%201.jpg")
+`
+  },
+  {
     slug: 'best-wedding-photographers-marrakech-2026',
     title: 'Best Wedding Photographers in Marrakech (2026)',
     excerpt: 'Find trusted wedding photographers in Marrakech. Compare styles, packages, and prices for your Moroccan wedding in 2026.',
-    cover: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Studio%20Majorel/Pic%201.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-15T10:00:00Z',
     tags: ['photography', 'marrakech', 'wedding', 'morocco'],
@@ -35,6 +148,18 @@ With experience in both riad weddings and Atlas Mountain celebrations, this team
 
 [Browse wedding photographers in Marrakech](/en/categories/photo-film?city=Marrakech)
 
+## Featured vendors on Wervice
+
+[Studio Majorel](/en/marrakech/photo-film/studio-majorel "card:https://media.wervice.com/vendors/Studio%20Majorel/Pic%201.jpg")
+
+[Icmail Nouri](/en/marrakech/photo-film/icmail-nouri "card:https://media.wervice.com/vendors/Icmail%20Nouri/Pic%201.jpg")
+
+[Mkfilms](/en/marrakech/photo-film/mkfilms "card:https://media.wervice.com/vendors/Mkfilms/Mkfilms%202.jpg")
+
+[Alami photography](/en/marrakech/photo-film/alami-photography "card:https://media.wervice.com/vendors/Alami%20photography/Alami%20photography%202.jpg")
+
+[Camelias Benyahia](/en/marrakech/photo-film/camelias-benyahia "card:https://media.wervice.com/vendors/Camelias%20Benyahia/Camelias%20Benyahia%202.jpg")
+
 ## Conclusion
 
 Marrakech remains one of Morocco’s most sought-after wedding destinations, and investing in a photographer who knows the city and its light will pay off in images you’ll treasure for life. Compare portfolios, read reviews, and book early for peak season dates. For more inspiration and vendor options, explore Wervice’s wedding planning resources and vendor directory.
@@ -57,7 +182,7 @@ Local Marrakech photographers know the light, venues, and local customs and ofte
     slug: 'top-wedding-dress-designers-casablanca',
     title: 'Top Wedding Dress Designers in Casablanca',
     excerpt: 'Discover the best wedding dress and kaftan designers in Casablanca. From custom gowns to traditional Moroccan bridal wear.',
-    cover: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Dar%20Dmana%20Location/Pic%201.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-14T10:00:00Z',
     tags: ['dresses', 'casablanca', 'bridal', 'kaftan'],
@@ -83,6 +208,18 @@ For brides who want a classic white wedding dress with optional Moroccan accents
 
 [Browse wedding dress designers in Casablanca](/en/categories/dresses?city=Casablanca)
 
+## Featured vendors on Wervice
+
+[Dar Dmana Location](/en/casablanca/dresses/dar-dmana-location "card:https://media.wervice.com/vendors/Dar%20Dmana%20Location/Pic%201.jpg")
+
+[Caftan Chic](/en/casablanca/dresses/caftan-chic "card:https://media.wervice.com/vendors/Caftan%20Chic/Pic%201.jpg")
+
+[Caftin by Alaoui](/en/casablanca/dresses/caftin-by-alaoui "card:https://media.wervice.com/vendors/Caftin%20by%20Alaoui/Pic%201.jpg")
+
+[Dahlia Wedding Dress](/en/casablanca/dresses/dahlia-wedding-dress "card:https://media.wervice.com/vendors/Dahlia%20Wedding%20Dress/Pic%201.jpg")
+
+[La Maison de La Mariee](/en/casablanca/dresses/la-maison-de-la-mariee "card:https://media.wervice.com/vendors/La%20Maison%20de%20La%20Mariee/Pic%201.jpg")
+
 ## Conclusion
 
 Casablanca’s dress designers are accustomed to tight deadlines and diverse requests, from fully traditional to fully Western looks. Start your search early, schedule fittings as soon as your date is set, and keep one or two backup options in mind. For more wedding planning support and vendor comparisons, browse Wervice’s guides and directory.
@@ -105,7 +242,7 @@ Bring inspiration images, your wedding date, venue style, and an idea of how man
     slug: 'affordable-negafa-services-rabat',
     title: 'Affordable Negafa Services in Rabat',
     excerpt: 'Find skilled Negafas in Rabat for traditional Moroccan bridal dressing. Compare prices and styles for your wedding.',
-    cover: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Arousati%20by%20Bahija/Arousati%20by%20Bahija%202.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-13T10:00:00Z',
     tags: ['negafa', 'rabat', 'traditional', 'bridal'],
@@ -131,6 +268,14 @@ Operating from a dedicated space in Rabat, this Negafa offers a full range of se
 
 [Browse Negafas in Rabat](/en/categories/negafa?city=Rabat)
 
+## Featured vendors on Wervice
+
+[Arousati by Bahija](/en/rabat/negafa/arousati-by-bahija "card:https://media.wervice.com/vendors/Arousati%20by%20Bahija/Arousati%20by%20Bahija%202.jpg")
+
+[negafa diamantjad](/en/rabat/negafa/negafa-diamantjad "card:https://media.wervice.com/vendors/negafa%20diamantjad/negafa%20diamantjad%202.jpg")
+
+[Neggafa Majda Benjelloun](/en/rabat/negafa/neggafa-majda-benjelloun "card:https://media.wervice.com/vendors/Neggafa%20Majda%20Benjelloun/Neggafa%20Majda%20Benjelloun%202.jpg")
+
 ## Conclusion
 
 Hiring a Negafa in Rabat is one of the most meaningful ways to incorporate Moroccan wedding traditions into your day. Compare what’s included in each package—outfit count, jewellery, travel—and book someone you feel comfortable with. For more ideas on traditions and vendors across Morocco, explore Wervice’s planning guides and directory.
@@ -153,7 +298,7 @@ Look at photos of past brides, read reviews, and ask what’s included (outfits,
     slug: 'best-wedding-venues-fes',
     title: 'Best Wedding Venues in Fes (2026 Guide)',
     excerpt: 'Explore the best wedding venues in Fes: riads, gardens, and historic spaces for your Moroccan celebration.',
-    cover: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Moltakalossar/Pic%201.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-12T10:00:00Z',
     tags: ['venues', 'fes', 'riad', 'morocco'],
@@ -179,6 +324,18 @@ A historic palace venue that can host both the ceremony and reception with a sen
 
 [Browse wedding venues in Fes](/en/categories/venues?city=Fes)
 
+## Featured vendors on Wervice
+
+[Moltakalossar](/en/fes/venues/moltakalossar "card:https://media.wervice.com/vendors/Moltakalossar/Pic%201.jpg")
+
+[Riad Alya](/en/fes/venues/riad-alya "card:https://media.wervice.com/vendors/Riad%20Alya/Pic%201.webp")
+
+[Riad Arabesque](/en/fes/venues/riad-arabesque "card:https://media.wervice.com/vendors/Riad%20Arabesque/Pic%201.webp")
+
+[Riad Fes Ziyat](/en/fes/venues/riad-fes-ziyat "card:https://media.wervice.com/vendors/Riad%20Fes%20Ziyat/Pic%201.jpg")
+
+[Riad Fes Nass Zmane](/en/fes/venues/riad-fes-nass-zmane "card:https://media.wervice.com/vendors/Riad%20Fes%20Nass%20Zmane/Pic%201.jpg")
+
 ## Conclusion
 
 Fes rewards couples who book early and work with venues that understand local logistics and traditions. Use this list as a starting point, then visit in person or via video call to confirm capacity, catering options, and availability for your date. For more wedding planning resources and vendor options across Morocco, visit Wervice.
@@ -201,7 +358,7 @@ Aim for at least 12–18 months for popular dates and venues. Fes has fewer larg
     slug: 'top-wedding-caterers-marrakech',
     title: 'Top Wedding Caterers in Marrakech',
     excerpt: 'Compare the best wedding caterers in Marrakech. Traditional Moroccan menus, tastings, and packages for your big day.',
-    cover: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Traiteur%20Aflak/Traiteur%20Aflak%202.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-11T10:00:00Z',
     tags: ['catering', 'marrakech', 'wedding', 'morocco'],
@@ -227,6 +384,18 @@ For couples who want an unabashedly traditional spread—multiple salads, pastil
 
 [Browse wedding caterers in Marrakech](/en/categories/caterer?city=Marrakech)
 
+## Featured vendors on Wervice
+
+[Traiteur Aflak](/en/marrakech/caterer/traiteur-aflak "card:https://media.wervice.com/vendors/Traiteur%20Aflak/Traiteur%20Aflak%202.jpg")
+
+[Traiteur Benghanem](/en/marrakech/caterer/traiteur-benghanem "card:https://media.wervice.com/vendors/Traiteur%20Benghanem/Traiteur%20Benghanem%202.jpg")
+
+[CHRIF MON TRAITEUR](/en/marrakech/caterer/chrif-mon-traiteur "card:https://media.wervice.com/vendors/CHRIF%20MON%20TRAITEUR/CHRIF%20MON%20TRAITEUR%202.jpg")
+
+[Amine Kritbi](/en/marrakech/caterer/amine-kritbi "card:https://media.wervice.com/vendors/Amine%20Kritbi/Amine%20Kritbi%202.jpg")
+
+[Bougtaib Traiteur](/en/marrakech/caterer/bougtaib-traiteur "card:https://media.wervice.com/vendors/Bougtaib%20Traiteur/Bougtaib%20Traiteur%202.jpg")
+
 ## Conclusion
 
 Choosing a wedding caterer in Marrakech is one of the most impactful decisions you’ll make. Schedule tastings, confirm what’s included in the per-person price, and book in advance for peak dates. For more wedding planning tips and vendor comparisons across Morocco, explore Wervice’s guides and directory.
@@ -249,7 +418,7 @@ Yes. Discuss vegetarian, vegan, halal, and allergy requirements early so the men
     slug: 'wedding-florists-casablanca',
     title: 'Wedding Florists in Casablanca: Best Picks',
     excerpt: 'Find the best wedding florists in Casablanca. Bouquets, centrepieces, and installations for your Moroccan wedding.',
-    cover: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Coqlicot%20Atelier%20Floral/Coqlicot%20Atelier%20Floral%202.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-10T10:00:00Z',
     tags: ['florist', 'casablanca', 'wedding', 'flowers'],
@@ -275,6 +444,18 @@ A one-stop option for couples who want flowers plus basic décor (vases, candles
 
 [Browse wedding florists in Casablanca](/en/categories/florist?city=Casablanca)
 
+## Featured vendors on Wervice
+
+[Coqlicot Atelier Floral](/en/casablanca/florist/coqlicot-atelier-floral "card:https://media.wervice.com/vendors/Coqlicot%20Atelier%20Floral/Coqlicot%20Atelier%20Floral%202.jpg")
+
+[Déco & Marc](/en/casablanca/florist/dco-marc "card:https://media.wervice.com/vendors/De%CC%81co%20%26%20Marc/De%CC%81co%20%26%20Marc%202.jpg")
+
+[Floravea](/en/casablanca/florist/floravea "card:https://media.wervice.com/vendors/Floravea/Floravea%202.jpg")
+
+[Renaissance Fleurs](/en/casablanca/florist/renaissance-fleurs "card:https://media.wervice.com/vendors/Renaissance%20Fleurs/Renaissance%20Fleurs%202.jpg")
+
+[Nina Artisan Fleuriste](/en/casablanca/florist/nina-artisan-fleuriste "card:https://media.wervice.com/vendors/Nina%20Artisan%20Fleuriste/Nina%20Artisan%20Fleuriste%202.jpg")
+
 ## Conclusion
 
 The right florist will translate your vision into a coherent look that fits your venue and timeline. Book early, share clear references and colour swatches, and confirm delivery and setup details. For more wedding planning inspiration and vendor options across Morocco, visit Wervice.
@@ -297,7 +478,7 @@ Typically yes. Confirm delivery time, setup window, and who handles breakdown so
     slug: 'beauty-makeup-artists-rabat',
     title: 'Beauty & Makeup Artists in Rabat for Weddings',
     excerpt: 'Find skilled bridal makeup and hair artists in Rabat. Trials, on-location service, and traditional looks for your wedding.',
-    cover: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/La%20Loge%20Nour/Pic%201.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-09T10:00:00Z',
     tags: ['beauty', 'rabat', 'makeup', 'bridal'],
@@ -323,6 +504,18 @@ Operating from a studio in Rabat with the option for on-location service, this a
 
 [Browse beauty & makeup artists in Rabat](/en/categories/beauty?city=Rabat)
 
+## Featured vendors on Wervice
+
+[La Loge Nour](/en/rabat/beauty/la-loge-nour "card:https://media.wervice.com/vendors/La%20Loge%20Nour/Pic%201.jpg")
+
+[Piro Samar](/en/rabat/beauty/piro-samar "card:https://media.wervice.com/vendors/Piro%20Samar/Piro%20Samar%202.jpg")
+
+[MAKE ME FABULOUS](/en/rabat/beauty/make-me-fabulous "card:https://media.wervice.com/vendors/MAKE%20ME%20FABULOUS/MAKE%20ME%20FABULOUS%202.jpg")
+
+[Douni Alami](/en/rabat/beauty/douni-alami "card:https://media.wervice.com/vendors/Douni%20Alami/Douni%20Alami%202.jpg")
+
+[Negafa Khmissa Nour](/en/rabat/beauty/negafa-khmissa-nour "card:https://media.wervice.com/vendors/Negafa%20Khmissa%20Nour/Negafa%20Khmissa%20Nour%202.jpg")
+
 ## Conclusion
 
 Booking a skilled makeup and hair artist in Rabat will give you confidence and consistency from the first photo to the last dance. Schedule a trial, share your dress and jewellery photos, and confirm travel and timing. For more wedding planning resources and vendor ideas across Morocco, explore Wervice.
@@ -345,7 +538,7 @@ Several artists offer both, or work with a dedicated hairstylist. Confirm when y
     slug: 'wedding-decor-marrakech',
     title: 'Wedding Decor & Styling in Marrakech',
     excerpt: 'Discover top wedding decor and styling vendors in Marrakech. From riad styling to garden and desert installations.',
-    cover: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/ELGHALI%20BENNA/Pic%201.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-08T10:00:00Z',
     tags: ['decor', 'marrakech', 'wedding', 'styling'],
@@ -371,6 +564,16 @@ If you prefer to lead the creative direction yourself, this company offers renta
 
 [Browse wedding decor in Marrakech](/en/categories/decor?city=Marrakech)
 
+## Featured vendors on Wervice
+
+[ELGHALI BENNA](/en/marrakech/decor/elghali-benna "card:https://media.wervice.com/vendors/ELGHALI%20BENNA/Pic%201.jpg")
+
+[Deco Flamme](/en/marrakech/decor/deco-flamme "card:https://media.wervice.com/vendors/Deco%20Flamme/Pic%201.jpg")
+
+[Fleuriste Marrakech](/en/marrakech/decor/fleuriste-marrakech "card:https://media.wervice.com/vendors/Fleuriste%20Marrakech/Fleuriste%20Marrakech%202.jpg")
+
+[Douceurs Gourmandes](/en/marrakech/decor/douceurs-gourmandes "card:https://media.wervice.com/vendors/douceurs%20gourmandes%20marrakech/douceurs%20gourmandes%20marrakech%202.jpg")
+
 ## Conclusion
 
 The right decor and styling will elevate your venue and make your wedding feel uniquely yours. Share mood boards and venue photos early, confirm what’s included in the quote, and book in advance for peak dates. For more inspiration and vendor options across Morocco, visit Wervice.
@@ -393,7 +596,7 @@ Most do. Confirm who is responsible for setup and teardown and at what times so 
     slug: 'wedding-cakes-casablanca',
     title: 'Wedding Cakes & Patisserie in Casablanca',
     excerpt: 'Find the best wedding cake and patisserie vendors in Casablanca. Custom designs and Moroccan sweets for your big day.',
-    cover: 'https://images.unsplash.com/photo-1555244162-803834f70033?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Mille%20Saveurs/Mille%20Saveurs%202.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-07T10:00:00Z',
     tags: ['cakes', 'casablanca', 'wedding', 'patisserie'],
@@ -419,6 +622,18 @@ For couples who want a show-stopping cake as the main focal point, this studio o
 
 [Browse wedding cakes in Casablanca](/en/categories/cakes?city=Casablanca)
 
+## Featured vendors on Wervice
+
+[Mille Saveurs](/en/marrakech/cakes/mille-saveurs "card:https://media.wervice.com/vendors/Mille%20Saveurs/Mille%20Saveurs%202.jpg")
+
+[Arijs](/en/marrakech/cakes/arijs "card:https://media.wervice.com/vendors/Arijs/Arijs%202.jpg")
+
+[Delice Rais](/en/marrakech/cakes/delice-rais "card:https://media.wervice.com/vendors/Delice%20Rais/Delice%20Rais%202.jpg")
+
+[Piece of Cake](/en/marrakech/cakes/piece-of-cake "card:https://media.wervice.com/vendors/Piece%20of%20Cake/Piece%20of%20Cake%202.jpg")
+
+[Sabrina B. Cake](/en/marrakech/cakes/sabrina-b-cake "card:https://media.wervice.com/vendors/Sabrina%20B.%20Cake/Sabrina%20B.%20Cake%202.jpg")
+
 ## Conclusion
 
 Booking a skilled cake and patisserie vendor in Casablanca will give you a sweet finish that guests remember. Schedule a tasting, confirm delivery and setup, and book in advance for peak dates. For more wedding planning tips and vendor options across Morocco, explore Wervice.
@@ -441,7 +656,7 @@ Vanilla, chocolate, red velvet, and fruit-based flavours are common. Pistachio a
     slug: 'event-planners-marrakech-wedding',
     title: 'Event Planners in Marrakech for Your Wedding',
     excerpt: 'Find experienced wedding and event planners in Marrakech. Full planning, coordination, and destination wedding support.',
-    cover: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/Marrket%20Events/Pic%201.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-06T10:00:00Z',
     tags: ['event-planner', 'marrakech', 'wedding', 'morocco'],
@@ -467,6 +682,18 @@ For couples who have done most of the planning themselves but want professional 
 
 [Browse event planners in Marrakech](/en/categories/event-planner?city=Marrakech)
 
+## Featured vendors on Wervice
+
+[Marrket Events](/en/marrakech/event-planner/marrket-events "card:https://media.wervice.com/vendors/Marrket%20Events/Pic%201.jpg")
+
+[Signature Events](/en/marrakech/event-planner/signature-events "card:https://media.wervice.com/vendors/Signature%20Events/Pic%201.jpg")
+
+[The Studio Events](/en/marrakech/event-planner/the-studio-events "card:https://media.wervice.com/vendors/The%20Studio%20Events/Pic%201.jpg")
+
+[Ceremonia Event](/en/marrakech/event-planner/ceremonia-event "card:https://media.wervice.com/vendors/Ceremonia%20Event/Pic%201.jpg")
+
+[YES WE KECH](/en/marrakech/event-planner/yes-we-kech "card:https://media.wervice.com/vendors/YES%20WE%20KECH/Pic%201.jpg")
+
 ## Conclusion
 
 Hiring a planner in Marrakech will save you time and stress and often help you avoid costly mistakes. Choose full planning if you want hands-on support from the start, or coordination if you’re organised but want a professional to run the day. For more wedding planning resources and vendor options across Morocco, visit Wervice.
@@ -489,7 +716,7 @@ For full planning, 12–18 months before the wedding is ideal. For coordination 
     slug: 'henna-beauty-rabat-wedding',
     title: 'Henna & Beauty Services in Rabat for Weddings',
     excerpt: 'Find henna artists and bridal beauty services in Rabat. Traditional and modern looks for your Moroccan wedding.',
-    cover: 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?w=800&h=400&fit=crop',
+    cover: 'https://media.wervice.com/vendors/La%20Loge%20Nour/Pic%201.jpg',
     author: 'Wervice Editorial',
     date: '2026-02-05T10:00:00Z',
     tags: ['henna', 'beauty', 'rabat', 'traditional'],
@@ -514,6 +741,18 @@ A team that offers both henna and bridal makeup and hair, so you can coordinate 
 For brides who want henna that feels more minimalist or contemporary, this artist offers custom designs that blend traditional motifs with cleaner lines and optional glitter or accents. She’s used to working with brides who wear both Moroccan and Western dress and can advise on placement for photography and comfort.
 
 [Browse henna & beauty in Rabat](/en/categories/beauty?city=Rabat)
+
+## Featured vendors on Wervice
+
+[La Loge Nour](/en/rabat/beauty/la-loge-nour "card:https://media.wervice.com/vendors/La%20Loge%20Nour/Pic%201.jpg")
+
+[Piro Samar](/en/rabat/beauty/piro-samar "card:https://media.wervice.com/vendors/Piro%20Samar/Piro%20Samar%202.jpg")
+
+[MAKE ME FABULOUS](/en/rabat/beauty/make-me-fabulous "card:https://media.wervice.com/vendors/MAKE%20ME%20FABULOUS/MAKE%20ME%20FABULOUS%202.jpg")
+
+[Douni Alami](/en/rabat/beauty/douni-alami "card:https://media.wervice.com/vendors/Douni%20Alami/Douni%20Alami%202.jpg")
+
+[Negafa Khmissa Nour](/en/rabat/beauty/negafa-khmissa-nour "card:https://media.wervice.com/vendors/Negafa%20Khmissa%20Nour/Negafa%20Khmissa%20Nour%202.jpg")
 
 ## Conclusion
 

@@ -4,6 +4,7 @@ import VendorsPage from '@/app/[locale]/vendors/page';
 import { labelForCategory, normalizeCategory } from '@/lib/categories';
 import { localizeCityLabel } from '@/lib/types/vendor';
 import { toAbsoluteUrl } from '@/lib/seo/site-url';
+import { categoryMetaDescription } from '@/lib/seo/vendors-metadata';
 import { slugToCityName } from '@/lib/vendor-url';
 
 interface CityCategoryPageProps {
@@ -38,7 +39,12 @@ export async function generateMetadata({ params }: CityCategoryPageProps): Promi
 
   return {
     title: titleByLocale[locale] || titleByLocale.en,
-    description: descriptionByLocale[locale] || descriptionByLocale.en,
+    description:
+      categoryMetaDescription({
+        categorySlug: normalizedCategory,
+        locale,
+        cityLabel,
+      }) || descriptionByLocale[locale] || descriptionByLocale.en,
     alternates: {
       canonical: toAbsoluteUrl(canonicalPath),
       languages: {
