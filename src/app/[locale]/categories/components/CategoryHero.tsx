@@ -22,7 +22,7 @@ export function CategoryHero({ name, slug, city, count }: CategoryHeroProps) {
               <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-[#11190C] mb-2">
                 {name}
                 {city && city !== 'All Cities' && (
-                  <span className="text-[#11190C]/70"> in {city}</span>
+                  <span className="text-[#11190C]/70"> · {city}</span>
                 )}
               </h1>
               <p className="text-sm text-neutral-600 max-w-md">

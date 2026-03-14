@@ -27,12 +27,12 @@ export async function generateMetadata({ params }: CityCategoryPageProps): Promi
   const categoryLabel = labelForCategory(normalizedCategory, locale);
   const titleByLocale: Record<string, string> = {
     en: `Wedding ${categoryLabel} in ${cityLabel} | Wervice`,
-    fr: `${categoryLabel} de mariage a ${cityLabel} | Wervice`,
+    fr: `${categoryLabel} de mariage à ${cityLabel} | Wervice`,
     ar: `${categoryLabel} لحفلات الزفاف في ${cityLabel} | Wervice`,
   };
   const descriptionByLocale: Record<string, string> = {
     en: `Discover verified ${categoryLabel.toLowerCase()} vendors in ${cityLabel}. Compare photos, pricing, and contact details on Wervice.`,
-    fr: `Decouvrez des prestataires ${categoryLabel.toLowerCase()} verifies a ${cityLabel}. Comparez photos, tarifs et contacts sur Wervice.`,
+    fr: `Decouvrez des prestataires ${categoryLabel.toLowerCase()} verifies à ${cityLabel}. Comparez photos, tarifs et contacts sur Wervice.`,
     ar: `اكتشف مزودي خدمات ${categoryLabel.toLowerCase()} الموثقين في ${cityLabel}. قارن الصور والأسعار وطرق التواصل على Wervice.`,
   };
   const canonicalPath = `/${locale}/${citySlug}/${normalizedCategory}`;

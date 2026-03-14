@@ -89,12 +89,12 @@ export async function generateMetadata({ params, searchParams }: VendorsPageProp
       descByCity: `Discover verified wedding vendors in ${cityLabel}. Compare categories, pricing, and portfolios on Wervice.`,
     },
     fr: {
-      byCategoryAndCity: `${categoryLabel} de mariage a ${cityLabel} | Wervice`,
+      byCategoryAndCity: `${categoryLabel} de mariage à ${cityLabel} | Wervice`,
       byCategory: `${categoryLabel} de mariage au Maroc | Wervice`,
-      byCity: `Prestataires de mariage a ${cityLabel} | Wervice`,
-      descByCategoryAndCity: `Decouvrez des prestataires ${categoryLabel.toLowerCase()} verifies a ${cityLabel}. Comparez photos, tarifs et contacts sur Wervice.`,
+      byCity: `Prestataires de mariage à ${cityLabel} | Wervice`,
+      descByCategoryAndCity: `Decouvrez des prestataires ${categoryLabel.toLowerCase()} verifies à ${cityLabel}. Comparez photos, tarifs et contacts sur Wervice.`,
       descByCategory: `Decouvrez des prestataires ${categoryLabel.toLowerCase()} verifies au Maroc. Comparez profils, tarifs et contacts sur Wervice.`,
-      descByCity: `Decouvrez des prestataires de mariage verifies a ${cityLabel}. Comparez categories, tarifs et portfolios sur Wervice.`,
+      descByCity: `Decouvrez des prestataires de mariage verifies à ${cityLabel}. Comparez categories, tarifs et portfolios sur Wervice.`,
     },
     ar: {
       byCategoryAndCity: `${categoryLabel} لحفلات الزفاف في ${cityLabel} | Wervice`,

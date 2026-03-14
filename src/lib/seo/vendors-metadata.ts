@@ -78,7 +78,7 @@ function resolveLocale(locale?: string): SupportedLocale {
 
 function locationText(locale: SupportedLocale, cityLabel?: string): string {
   if (cityLabel) {
-    if (locale === 'fr') return `a ${cityLabel}`;
+    if (locale === 'fr') return `à ${cityLabel}`;
     if (locale === 'ar') return `في ${cityLabel}`;
     return cityLabel;
   }
@@ -101,4 +101,3 @@ export function categoryMetaDescription(params: {
 
   return template.replace('{location}', locationText(locale, params.cityLabel));
 }
-

@@ -59,12 +59,12 @@ function CarouselHeader({
   const Icon = icon;
   return (
     <div className="mb-3 flex items-center justify-between gap-2.5 sm:mb-4">
-      <h2 className="type-title-medium-2 sm:type-headline-small flex items-center gap-2 tracking-tight text-[#11190C]">
-        <Icon className="h-5 w-5 text-[#11190C] sm:h-6 sm:w-6" />
+      <h2 className="type-title-medium-2 sm:type-headline-small flex items-center gap-2 tracking-tight text-[#1f2937]">
+        <Icon className="h-5 w-5 text-[#4f5b6b] sm:h-6 sm:w-6" />
         {title}
       </h2>
       {actionLabel && actionHref ? (
-        <Link href={actionHref} className="type-label-medium leading-none text-[#11190C] sm:text-sm">
+        <Link href={actionHref} className="type-label-medium leading-none text-[#5f6c7f] hover:text-[#2f3948] sm:text-sm">
           {actionLabel}
         </Link>
       ) : null}
@@ -104,16 +104,16 @@ function SmallCategoryCard({
       }}
       className="group relative block shrink-0"
     >
-      <div className="flex h-[86px] w-[82px] flex-col items-center justify-center rounded-2xl border border-[#d7deea] bg-white sm:hidden">
-        <div className="mb-1.5 grid h-8 w-8 place-items-center rounded-xl bg-[#eef3f9] text-[#33475f]">
+      <div className="flex h-[86px] w-[82px] flex-col items-center justify-center rounded-2xl border border-[#e2e7ef] bg-[#fafbfd] sm:hidden">
+        <div className="mb-1.5 grid h-8 w-8 place-items-center rounded-xl bg-[#eef2f7] text-[#546176]">
           <Icon className="h-4.5 w-4.5" />
         </div>
-        <p className="type-label-small line-clamp-2 px-1 text-center text-[#33475f]">
+        <p className="type-label-small line-clamp-2 px-1 text-center text-[#546176]">
           {card.title}
         </p>
       </div>
 
-      <div className="relative hidden h-44 w-[260px] overflow-hidden rounded-3xl ring-1 ring-black/10 sm:block">
+      <div className="relative hidden h-44 w-[260px] overflow-hidden rounded-3xl border border-[#e3e7ee] bg-white sm:block">
         <Image
           src={card.image}
           alt={card.title}
@@ -121,10 +121,10 @@ function SmallCategoryCard({
           sizes="(max-width: 1024px) 100vw, 25vw"
           className="object-cover transition duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f172fcc] via-[#0f172f66] to-[#0f172f22]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1f2937]/75 via-[#1f2937]/40 to-[#1f2937]/15" />
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white">
-          <Icon className="mb-1.5 h-7 w-7" />
-          <p className="text-[1.9rem] font-extrabold leading-none sm:text-3xl">{card.title}</p>
+          <Icon className="mb-1.5 h-6 w-6" />
+          <p className="text-[1.7rem] font-bold leading-none sm:text-[1.9rem]">{card.title}</p>
         </div>
       </div>
     </Link>
@@ -153,13 +153,13 @@ function CityCard({
       }}
       className="group block shrink-0 rounded-3xl font-[var(--font-inter)]"
     >
-      <div className="type-label-medium inline-flex h-10 items-center gap-1.5 rounded-full border border-[#d7deea] bg-white px-3 text-[#33475f] sm:hidden">
-        <MapPin className="h-3.5 w-3.5 text-[#7f8fa6]" />
+      <div className="type-label-medium inline-flex h-10 items-center gap-1.5 rounded-full border border-[#e2e7ef] bg-[#fafbfd] px-3 text-[#4f5d72] sm:hidden">
+        <MapPin className="h-3.5 w-3.5 text-[#8c98ab]" />
         <span className="line-clamp-1">{title}</span>
       </div>
 
       <div className="hidden w-[260px] sm:block">
-        <div className="relative h-44 overflow-hidden rounded-3xl bg-zinc-200 shadow-sm ring-1 ring-black/10">
+        <div className="relative h-44 overflow-hidden rounded-3xl border border-[#e2e7ef] bg-zinc-200">
           <Image
             src={image}
             alt={title}
@@ -169,8 +169,8 @@ function CityCard({
           />
         </div>
         <div className="px-2 pb-1 pt-4 text-center">
-          <h4 className="type-title-medium line-clamp-1 tracking-[-0.01em] text-[#1f2937]">{title}</h4>
-          <p className="type-body-small mt-1 text-[#6b7280]">{vendors}</p>
+          <h4 className="type-title-medium line-clamp-1 tracking-[-0.01em] text-[#2f3949]">{title}</h4>
+          <p className="type-body-small mt-1 text-[#8591a3]">{vendors}</p>
         </div>
       </div>
     </Link>
@@ -404,21 +404,21 @@ export default function ExplorerHome({
       >
         <section className="overflow-hidden">
           <div className="mx-auto max-w-4xl px-6 py-10 text-center sm:px-10 sm:py-14">
-            <h1 className="text-3xl font-black leading-[0.95] text-[#11190C] sm:text-6xl">
+            <h1 className="text-3xl font-bold leading-[0.98] tracking-[-0.02em] text-[#18202b] sm:text-[3.7rem]">
               Plan your Moroccan{' '}
-              <span className="inline-block rounded-xl bg-[#11190C] px-3 py-1 text-[#D9FF0A] shadow-[0_8px_24px_rgba(0,0,0,0.25)] sm:rounded-2xl sm:px-4 sm:py-1.5">
+              <span className="inline-block rounded-xl bg-[#11190C] px-3 py-1 text-[#D9FF0A] shadow-[0_6px_20px_rgba(15,23,42,0.18)] sm:rounded-2xl sm:px-4 sm:py-1.5">
                 wedding
               </span>
               , your way.
             </h1>
-            <p className="mt-4 text-[0.92rem] leading-snug text-[#4a5c74] sm:mt-5 sm:text-2xl">
+            <p className="mt-4 text-[0.92rem] leading-snug text-[#707b8f] sm:mt-5 sm:text-[1.7rem]">
               Find the best venues, planners, and standout vendors across Morocco to make your day unforgettable.
             </p>
           </div>
         </section>
 
         <div className="space-y-6">
-          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[28px] sm:border sm:border-[#dbe2ec] sm:bg-white/70 sm:p-6 sm:shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[24px] sm:border sm:border-[#e2e7ef] sm:bg-[#f6f8fb] sm:p-6">
             <CarouselHeader
               icon={Grid3X3}
               title="Explore Categories"
@@ -440,7 +440,7 @@ export default function ExplorerHome({
             </div>
           </section>
 
-          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[28px] sm:border sm:border-[#dbe2ec] sm:bg-white/70 sm:p-6 sm:shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
+          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[24px] sm:border sm:border-[#e2e7ef] sm:bg-[#f6f8fb] sm:p-6">
             <CarouselHeader
               icon={MapPin}
               title="Popular Cities"
@@ -464,8 +464,8 @@ export default function ExplorerHome({
             </div>
           </section>
 
-          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[28px] sm:border sm:border-[#dbe2ec] sm:bg-white/70 sm:p-6 sm:shadow-[0_10px_30px_rgba(15,23,42,0.05)]">
-            <h2 className="mb-4 text-2xl font-black tracking-tight text-[#11190C] sm:text-[1.9rem]">
+          <section className="rounded-none border-0 bg-transparent p-4 shadow-none sm:rounded-[24px] sm:border sm:border-[#e2e7ef] sm:bg-[#f6f8fb] sm:p-6">
+            <h2 className="mb-4 text-2xl font-bold tracking-tight text-[#1f2937] sm:text-[1.9rem]">
               Recommended for you in {localizeCityLabel(effectiveCity, locale)}
             </h2>
             <div className="mb-4 flex gap-2 overflow-x-auto pb-1 sm:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -474,8 +474,8 @@ export default function ExplorerHome({
                 onClick={() => setMobileCategoryFilter('all')}
                 className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                   mobileCategoryFilter === 'all'
-                    ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'
-                    : 'border-[#d7deea] bg-white text-[#4c5e78]'
+                    ? 'border-[#1f2937] bg-[#1f2937] text-white'
+                    : 'border-[#e2e7ef] bg-white text-[#5f6c81]'
                 }`}
               >
                 {locale === 'fr' ? 'Tout' : locale === 'ar' ? 'الكل' : 'All'}
@@ -487,8 +487,8 @@ export default function ExplorerHome({
                   onClick={() => setMobileCategoryFilter(category.slug)}
                   className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                     mobileCategoryFilter === category.slug
-                      ? 'border-[#11190C] bg-[#11190C] text-[#D9FF0A]'
-                      : 'border-[#d7deea] bg-white text-[#4c5e78]'
+                      ? 'border-[#1f2937] bg-[#1f2937] text-white'
+                      : 'border-[#e2e7ef] bg-white text-[#5f6c81]'
                   }`}
                 >
                   {labelForCategory(category.slug, locale)}
@@ -511,7 +511,7 @@ export default function ExplorerHome({
               ))}
             </div>
             {recommendedFiltered.length === 0 && (
-              <div className="mt-4 rounded-2xl border border-[#d7deea] bg-white p-5 text-sm text-[#5f6f84]">
+              <div className="mt-4 rounded-2xl border border-[#e2e7ef] bg-white p-5 text-sm text-[#5f6f84]">
                 No recommended vendors found in this city yet.
               </div>
             )}

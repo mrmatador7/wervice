@@ -172,7 +172,7 @@ export default function VendorBrowseCard({
       className="group min-w-0 rounded-[22px] bg-transparent"
     >
       {/* Mobile: list card item (homepage only) */}
-      <div className={`rounded-3xl border border-[#d8dee8] bg-white p-3.5 shadow-sm sm:hidden ${mobileVariant === 'list' ? 'block' : 'hidden'}`}>
+      <div className={`rounded-3xl border border-[#e2e7ef] bg-white p-3.5 shadow-[0_2px_8px_rgba(15,23,42,0.05)] sm:hidden ${mobileVariant === 'list' ? 'block' : 'hidden'}`}>
         <div className="flex items-start gap-3">
           <div className="relative h-[98px] w-[98px] shrink-0 overflow-hidden rounded-2xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -186,10 +186,10 @@ export default function VendorBrowseCard({
           </div>
 
           <div className="min-w-0 flex-1">
-            <h3 className="line-clamp-1 text-[1.35rem] font-semibold leading-tight tracking-[-0.01em] text-[#1f2937]">{title}</h3>
-            <p className="mt-0.5 line-clamp-1 text-[0.95rem] italic text-[#818b9b]">{categoryLabel}</p>
-            <p className="mt-2 text-[0.92rem] font-medium text-[#8b95a7]">City</p>
-            <div className="mt-0.5 flex items-center gap-1.5 text-[1.03rem] font-bold text-[#2d3f56]">
+            <h3 className="line-clamp-1 text-[1.28rem] font-semibold leading-tight tracking-[-0.01em] text-[#2b3546]">{title}</h3>
+            <p className="mt-0.5 line-clamp-1 text-[0.95rem] italic text-[#8892a2]">{categoryLabel}</p>
+            <p className="mt-2 text-[0.92rem] font-medium text-[#9aa3b2]">City</p>
+            <div className="mt-0.5 flex items-center gap-1.5 text-[1.03rem] font-semibold text-[#445269]">
               <MapPin className="h-4 w-4 text-[#8b95a7]" />
               <span className="line-clamp-1">{localizedLocation}</span>
             </div>
@@ -200,7 +200,7 @@ export default function VendorBrowseCard({
               type="button"
               aria-label="Save vendor"
               className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${
-                isFavorite ? 'bg-[#11190C] text-[#D9FF0A]' : 'bg-[#f5f7fb] text-[#11190C]'
+                isFavorite ? 'bg-[#1f2937] text-white' : 'bg-[#f4f6fa] text-[#1f2937]'
               }`}
               onClick={toggleFavorite}
             >
@@ -211,7 +211,7 @@ export default function VendorBrowseCard({
                 type="button"
                 aria-label="Next image"
                 onClick={showNextImage}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f7fb] text-[#11190C]"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#f4f6fa] text-[#1f2937]"
               >
                 <ChevronRight className="h-4.5 w-4.5" />
               </button>
@@ -223,7 +223,7 @@ export default function VendorBrowseCard({
       {/* Card view (default on mobile for non-home pages + tablet/desktop everywhere) */}
       <div className={`transition sm:hover:-translate-y-0.5 ${mobileVariant === 'list' ? 'hidden sm:block' : 'block'}`}>
         <div
-          className="relative aspect-square overflow-hidden rounded-[22px] sm:h-56 sm:aspect-auto"
+          className="relative aspect-square overflow-hidden rounded-[22px] border border-[#e2e7ef] sm:h-56 sm:aspect-auto"
           onTouchStart={(event) => {
             touchStartXRef.current = event.changedTouches[0]?.clientX ?? null;
           }}
@@ -256,7 +256,7 @@ export default function VendorBrowseCard({
             type="button"
             aria-label="Save vendor"
             className={`absolute right-2.5 top-2.5 inline-flex h-9 w-9 items-center justify-center rounded-full shadow-sm ${
-              isFavorite ? 'bg-[#11190C] text-[#D9FF0A]' : 'bg-[#F3EFE7] text-[#11190C]'
+              isFavorite ? 'bg-[#1f2937] text-white' : 'bg-[#f4f6fa] text-[#1f2937]'
             }`}
             onClick={toggleFavorite}
           >
@@ -307,7 +307,7 @@ export default function VendorBrowseCard({
             </button>
           )}
 
-          <div className="absolute left-2.5 bottom-2.5 rounded-full bg-[#11190C] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#D9FF0A]">
+          <div className="absolute left-2.5 bottom-2.5 rounded-full bg-[#1f2937] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white">
             {categoryLabel}
           </div>
         </div>
@@ -324,10 +324,10 @@ export default function VendorBrowseCard({
                 onError={() => setLogoSrc('/images/sample/venues-1.jpg')}
               />
             </div>
-            <h3 className="line-clamp-1 text-[1.12rem] font-semibold leading-[1.2] tracking-[-0.01em] text-[#1f2937]">{title}</h3>
+            <h3 className="line-clamp-1 text-[1.07rem] font-semibold leading-[1.2] tracking-[-0.01em] text-[#2b3546]">{title}</h3>
           </div>
-          <div className="mt-1.5 flex items-center gap-1.5 text-[0.95rem] font-medium text-[#6b7280]">
-            <MapPin className="h-4 w-4 text-[#8b95a7]" />
+          <div className="mt-1.5 flex items-center gap-1.5 text-[0.95rem] font-medium text-[#7a8597]">
+            <MapPin className="h-4 w-4 text-[#97a0b0]" />
             <span className="line-clamp-1">{localizedLocation}</span>
           </div>
         </div>

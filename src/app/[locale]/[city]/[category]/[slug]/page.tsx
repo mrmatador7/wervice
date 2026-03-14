@@ -13,6 +13,12 @@ interface VendorPageProps {
   params: Promise<{ locale: string; city: string; category: string; slug: string }>;
 }
 
+function localizedIn(locale: string): string {
+  if (locale === 'fr') return 'à';
+  if (locale === 'ar') return 'في';
+  return 'in';
+}
+
 export async function generateMetadata({ params }: VendorPageProps): Promise<Metadata> {
   const { slug, locale } = await params;
   const seoCopy = {
@@ -51,9 +57,11 @@ export async function generateMetadata({ params }: VendorPageProps): Promise<Met
     : current.fallbackDescription(vendor.business_name, categoryLabel, cityLabel);
 
   const imageUrl = vendor.profile_photo_url || vendor.gallery_photos?.[0] || '';
+  const inWord = localizedIn(locale);
+  const metaTitle = `${vendor.business_name} — ${categoryLabel} ${inWord} ${cityLabel}`;
 
   return {
-    title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel} | Wervice`,
+    title: `${metaTitle} | Wervice`,
     description: metaDesc,
     keywords: [vendor.business_name, categoryLabel, cityLabel, ...current.keywordsTail],
     alternates: {
@@ -66,14 +74,14 @@ export async function generateMetadata({ params }: VendorPageProps): Promise<Met
       },
     },
     openGraph: {
-      title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel}`,
+      title: metaTitle,
       description: metaDesc,
       images: imageUrl ? [{ url: imageUrl }] : [],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${vendor.business_name} — ${categoryLabel} in ${cityLabel}`,
+      title: metaTitle,
       description: metaDesc,
       images: imageUrl ? [imageUrl] : [],
     },

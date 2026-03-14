@@ -23,12 +23,12 @@ export async function generateMetadata({ params }: CityPageProps): Promise<Metad
   const cityLabel = localizeCityLabel(cityName, locale);
   const titleByLocale: Record<string, string> = {
     en: `Wedding Vendors in ${cityLabel} | Wervice`,
-    fr: `Prestataires de mariage a ${cityLabel} | Wervice`,
+    fr: `Prestataires de mariage à ${cityLabel} | Wervice`,
     ar: `مزودو خدمات الزفاف في ${cityLabel} | Wervice`,
   };
   const descriptionByLocale: Record<string, string> = {
     en: `Discover verified wedding vendors in ${cityLabel}. Compare categories, pricing, and portfolios on Wervice.`,
-    fr: `Decouvrez des prestataires de mariage verifies a ${cityLabel}. Comparez categories, tarifs et portfolios sur Wervice.`,
+    fr: `Decouvrez des prestataires de mariage verifies à ${cityLabel}. Comparez categories, tarifs et portfolios sur Wervice.`,
     ar: `اكتشف مزودي خدمات الزفاف الموثقين في ${cityLabel}. قارن الفئات والأسعار ومعارض الأعمال على Wervice.`,
   };
   const canonicalPath = `/${locale}/${citySlug}`;
